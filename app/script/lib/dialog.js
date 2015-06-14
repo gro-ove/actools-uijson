@@ -5,8 +5,9 @@ var Dialog = function(title, content, callback, closeCallback) {
         document = window.document;
 
     this.el = $('<dialog>').html('<div>\
-        <h1>' + title + '</h1><div>'  + content.join('') + '</div><button id="dialog-ok">ОК</button>\
-    </div>').appendTo('body').click(function (e){
+        <h1>' + title + '</h1><div>'  + content.join('') + '</div>' + 
+        (callback === false ? '' : '<button id="dialog-ok">ОК</button>') + 
+    '</div>').appendTo('body').click(function (e){
         if (e.target.tagName == 'DIALOG' && (!closeCallback || closeCallback() !== false)){
             this.close();
         }
