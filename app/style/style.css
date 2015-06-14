@@ -6,6 +6,11 @@
     html, body {
         margin: 0;
         padding: 0;
+        cursor: default;
+    }
+
+    [contenteditable] {
+        cursor: text;
     }
 
     .error {
@@ -74,6 +79,13 @@
         display: inline-block;
     }
 
+/* modules */
+    iframe {
+        width: calc(100vw - 100px);
+        height: calc(100vh - 200px);
+        border: 1px solid #eee;
+    }
+
 /* detailed information */
     main {
         position: absolute;
@@ -85,6 +97,10 @@
 
     main > h4 {
         margin-top: 0;
+    }
+
+    #selected-car {
+        white-space: nowrap;
     }
 
     #selected-car-logo {

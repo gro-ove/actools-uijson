@@ -27,3 +27,14 @@ dialog input, dialog select, dialog button, dialog table {
     margin-bottom: 10px;
     box-sizing: border-box;
 }
+
+dialog > div > div:first-child {
+    float: right;
+    display: inline-block;
+    margin-top: 30px;
+}
+
+dialog > div > div:first-child button {
+    width: auto;
+    margin: 0;
+}

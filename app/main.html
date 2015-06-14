@@ -24,7 +24,7 @@
             <div id="cars-list"></div>
         </aside>
         <main>
-            <h4><img id="selected-car-logo"><output id="selected-car"></output></h4>
+            <h4><img id="selected-car-logo"><span id="selected-car" contenteditable="true"></span></h4>
             <div style="display:none">
                 <article id="selected-car-skins-article">
                     <img id="selected-car-preview"></img>
@@ -40,8 +40,15 @@
                 <button id="selected-car-open-directory">Open Directory</button>
                 <button id="selected-car-update-description">Update Description</button>
                 <button id="selected-car-save">Save</button>
+                <button onclick="nwWindow.showDevTools();">…</button>
             </footer>
         </main>
+
+        <script src="script/uses.js"></script>
+        <script src="script/helpers.js"></script>
+
+        <script src="script/modules/update_description.js"></script>
+
         <script src="script/main.js"></script>
     </body>
 </html>

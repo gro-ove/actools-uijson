@@ -1,17 +1,3 @@
-/* uses */
-    var fs = require('fs'),
-        path = require('path'),
-        spawn = require('child_process').spawn,
-        gui = require('nw.gui'),
-        nwWindow = gui.Window.get();
-
-    var Dialog = require('./script/lib/dialog').Dialog;
-
-/* helpers */
-    String.prototype.cssUrl = function (){
-        return 'file://' + this.replace(/\\/g, '/');
-    }
-
 /* state */
     var acDir, carsList, tagsList = [], tagitSkip;
 
@@ -146,6 +132,8 @@
                 u = u + '.disabled';
             }
 
+            if (!fs.existsSync(u)) return;
+
             carsList.push({
                 name: e,
                 path: p,
@@ -156,16 +144,24 @@
                 error: null,
                 changed: false
             });
+        });
 
-            $('<span></span>').text(e).toggleClass('disabled', d).attr({
-                'title': u,
-                'data-path': u,
-                'data-name': e,
+        carsList = carsList.filter(function (e){
+            return !e.disabled;
+        }).concat(carsList.filter(function (e){
+            return e.disabled;
+        }));
+
+        carsList.forEach(function (e){
+            $('<span></span>').text(e.name).toggleClass('disabled', e.disabled).attr({
+                'title': e.path,
+                'data-path': e.path,
+                'data-name': e.name,
             }).appendTo('#cars-list');
         });
 
-        selected = sub[0];
-        $('#total-cars').val(sub.length);
+        selected = carsList[0].name;
+        $('#total-cars').val(carsList.length);
 
         asyncCarsLoad();
     }
@@ -230,39 +226,53 @@
         step();
     }
 
-    function changed(v){
-        selected.changed = v === undefined ? true : !!v;
-        $('[data-name="' + selected.name + '"]').toggleClass('changed', selected.changed);
-    }
-
-    function getTags(){
-        return [].map.call($('ul .tagit-label'), function (a){ return a.textContent });
-    }
-
     function initCarsInformation(){
         $(window).on('contextmenu', function (){
             $('footer').toggleClass('active'); 
+        });
+
+        /* inputs */
+        $('#selected-car').on('change paste keypress keyup', function (e){
+            if (e.keyCode == 13){
+                this.blur();
+                return false;
+            }
+
+            if (selected.data){
+                selected.data.name = getInputName();
+                changed();
+                $('[data-name="' + selected.name + '"]').text(selected.data.name);
+            }
         });
 
         $('#selected-car-tags').tagit({
             availableTags: tagsList,
             autocomplete: { delay: 0, minLength: 1, allowSpaces: true },
             removeConfirmation: true,
+            caseSensitive: false,
 
             afterTagAdded: function (){
                 if (!tagitSkip){
-                    selected.data.tags = getTags();
+                    selected.data.tags = getInputTags();
                     changed();
                 }
             },
             afterTagRemoved: function (){
                 if (!tagitSkip){
-                    selected.data.tags = getTags();
+                    selected.data.tags = getInputTags();
                     changed();
                 }
             }, 
         });
 
+        $('#selected-car-desc').on('change paste keypress keyup', function (){
+            if (selected.data){
+                selected.data.description = getInputDescription();
+                changed();
+            }
+        });
+
+        /* buttons */
         $('#selected-car-disable').click(function (){
             selected.disabled = !selected.disabled;
             var j = selected.disabled ? selected.json + '.disabled' :
@@ -282,17 +292,13 @@
             save();
         });
 
-        $('#selected-car-desc').on('change paste keypress keyup', function (){
-            if (selected.data){
-                selected.data.description = this.innerHTML;
-                changed(true);
-            }
+        $('#selected-car-update-description').click(function (){
+            modules.updateDescription(selected);
         });
 
+        /* global hotkeys */
         $(window).keydown(function (e){
-            if (/INPUT|TEXTAREA|SELECT/.test(e.target.tagName) || e.target.contentEditable == 'true'){
-                return;
-            }
+            if (/INPUT|TEXTAREA|SELECT/.test(e.target.tagName) || e.target.contentEditable == 'true') return;
 
             if (e.keyCode == 83 && e.ctrlKey){
                 /* Ctrl+S */
@@ -307,6 +313,23 @@
     }
 
 /* secondary functions */
+    function changed(v){
+        selected.changed = v === undefined ? true : !!v;
+        $('[data-name="' + selected.name + '"]').toggleClass('changed', selected.changed);
+    }
+
+    function getInputName(){
+        return $('#selected-car').text();
+    }
+
+    function getInputTags(){
+        return [].map.call($('ul .tagit-label'), function (a){ return a.textContent });
+    }
+
+    function getInputDescription(){
+        return $('#selected-car-desc').html().replace(/<\/?div>/g, '');
+    }
+
     function display(n){
         if (typeof n === 'string') n = byName(n);
 
@@ -324,10 +347,10 @@
         $('#selected-car-logo').attr('src', path.join(n.path, 'ui', 'badge.png').cssUrl());
 
         if (n.error != null){
-            h.val(n.name);
+            h.removeAttr('contenteditable').text(n.name);
             d.html(n.error);
         } else if (n.data != null){
-            h.val(n.data.name);
+            h.attr('contenteditable', true).text(n.data.name);
             d.html(n.data.description);
 
             tagitSkip = true;
@@ -338,7 +361,7 @@
 
             tagitSkip = false;
         } else {
-            h.val(n.name);
+            h.removeAttr('contenteditable').text(n.name);
             d.html('Loading...');
         }
 
@@ -370,7 +393,7 @@
                 .toggleClass('error', n.error != null)
                 .text(n.data ? n.data.name : n.name);
 
-        if ($('#selected-car').val() == n.name){
+        if ($('#selected-car').text() == n.name){
             display(n);
         }
     }
