@@ -1,7 +1,18 @@
 modules.showroom = function (){
-    function opn(c, s){
+    function start(c, s){
+        if (c.path.indexOf(acCarsDir)) return;
+
         
     }
 
-    return opn;
+    console.time('CLR');
+    console.warn(modules.clr.get(function (){/*
+        AcTools.FileUtils.GetDocumentsFolder()
+    */}));
+
+    console.timeEnd('CLR');
+
+    return {
+        start: start
+    };
 }();

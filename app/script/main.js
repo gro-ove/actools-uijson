@@ -134,7 +134,7 @@
         $('#selected-car-skins-article').dblclick(function (e){
             var skin = $(e.target).data('skin');
             if (skin){
-                modules.showroom(selected, skin);
+                modules.showroom.start(selected, skin);
             }
         });
 

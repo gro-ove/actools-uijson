@@ -1,7 +1,8 @@
 /* uses */
     var fs = require('fs'),
         path = require('path'),
-        spawn = require('child_process').spawn,
+        cp = require('child_process'),
+        spawn = cp.spawn,
         gui = require('nw.gui'),
         nwWindow = gui.Window.get();
 
