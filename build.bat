@@ -24,3 +24,6 @@ del output\tmp.exe
 
 build\verpatch output\uijson.exe /fn /high /vft2 -1 /langid 1033 /va %FILE_VERSION% /pv %PRODUCT_VERSION% /s AssemblyVersion %NW_VERSION% /s OriginalFilename nw.exe /s InternalName actools-uijson-app /s ProductName AcTools /s FileDescription "%DESCRIPTION%" /s CompanyName "%COMPANY_NAME%" /s Comments "%COMMENTS%"
 build\upx.exe -9 output\uijson.exe
+
+cd output
+..\build\7z a -tzip -mx9 uijson.zip icudtl.dat nw.pak uijson.exe
