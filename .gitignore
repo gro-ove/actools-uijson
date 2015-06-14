@@ -1,3 +1,10 @@
+# Build
+build/*
+*.sublime-*
+output/*.exe
+output/*.nw
+output/locales
+
 # Windows image file caches
 Thumbs.db
 ehthumbs.db

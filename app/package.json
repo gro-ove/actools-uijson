@@ -1,0 +1,21 @@
+{
+    "main": "main.html",
+    "name": "AcTools Ui Json Fixer",
+    "description": "Fixes ui_car.json",
+    "version": "0.2.0",
+
+    "window": {
+        "title": "AcTools Ui Json Fixer",
+        "icon": "icon.png",
+        "width": 800,
+        "height": 600,
+        "min_width": 720,
+        "min_height": 560,
+        "position": "center",
+        "resizable": true,
+        "toolbar": true,
+        "frame": true
+    },
+
+    "chromium-args": "--ignore-gpu-blacklist --disable-one-copy --canvas-msaa-sample-count=0" 
+}
