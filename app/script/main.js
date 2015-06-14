@@ -7,8 +7,13 @@
 
     var Dialog = require('./script/lib/dialog').Dialog;
 
+/* helpers */
+    String.prototype.cssUrl = function (){
+        return 'file://' + this.replace(/\\/g, '/');
+    }
+
 /* state */
-    var acDir, carsList, tagsList = [];
+    var acDir, carsList, tagsList = [], tagitSkip;
 
     function byName(n){
         for (var i = 0; i < carsList.length; i++){
@@ -225,10 +230,37 @@
         step();
     }
 
+    function changed(v){
+        selected.changed = v === undefined ? true : !!v;
+        $('[data-name="' + selected.name + '"]').toggleClass('changed', selected.changed);
+    }
+
+    function getTags(){
+        return [].map.call($('ul .tagit-label'), function (a){ return a.textContent });
+    }
+
     function initCarsInformation(){
+        $(window).on('contextmenu', function (){
+            $('footer').toggleClass('active'); 
+        });
+
         $('#selected-car-tags').tagit({
             availableTags: tagsList,
-            removeConfirmation: true
+            autocomplete: { delay: 0, minLength: 1, allowSpaces: true },
+            removeConfirmation: true,
+
+            afterTagAdded: function (){
+                if (!tagitSkip){
+                    selected.data.tags = getTags();
+                    changed();
+                }
+            },
+            afterTagRemoved: function (){
+                if (!tagitSkip){
+                    selected.data.tags = getTags();
+                    changed();
+                }
+            }, 
         });
 
         $('#selected-car-disable').click(function (){
@@ -237,11 +269,41 @@
                     selected.json.slice(0, -9);
             fs.renameSync(selected.json, j);
             selected.json = j;
+
+            display(selected);
+            $('[data-name="' + selected.name + '"]').toggleClass('disabled', selected.disabled);
         });
 
         $('#selected-car-open-directory').click(function (){
             gui.Shell.openItem(selected.path);
         });
+
+        $('#selected-car-save').click(function (){
+            save();
+        });
+
+        $('#selected-car-desc').on('change paste keypress keyup', function (){
+            if (selected.data){
+                selected.data.description = this.innerHTML;
+                changed(true);
+            }
+        });
+
+        $(window).keydown(function (e){
+            if (/INPUT|TEXTAREA|SELECT/.test(e.target.tagName) || e.target.contentEditable == 'true'){
+                return;
+            }
+
+            if (e.keyCode == 83 && e.ctrlKey){
+                /* Ctrl+S */
+                save();
+            } else {
+                return;
+            }
+
+            e.preventDefault();
+            e.stopPropagation();
+        })
     }
 
 /* secondary functions */
@@ -259,6 +321,7 @@
             s = $('#selected-car-skins');
 
         $('#selected-car-disable').text(n.disabled ? 'Enable' : 'Disable');
+        $('#selected-car-logo').attr('src', path.join(n.path, 'ui', 'badge.png').cssUrl());
 
         if (n.error != null){
             h.val(n.name);
@@ -266,10 +329,14 @@
         } else if (n.data != null){
             h.val(n.data.name);
             d.html(n.data.description);
+
+            tagitSkip = true;
             t.tagit('removeAll');
             n.data.tags.forEach(function (e){
                 t.tagit('createTag', e);
-            })
+            });
+
+            tagitSkip = false;
         } else {
             h.val(n.name);
             d.html('Loading...');
@@ -290,6 +357,13 @@
         }
     }
 
+    function save(){
+        if (selected && selected.data){
+            fs.writeFileSync(selected.json, JSON.stringify(selected.data, null, 4));
+            changed(false);
+        }
+    }
+
     function loaded(n){
         if (typeof n === 'string') n = byName(n);
         $('#cars-list > span[data-name="' + n.name + '"]')
@@ -299,9 +373,4 @@
         if ($('#selected-car').val() == n.name){
             display(n);
         }
-    }
-
-/* helpers */
-    String.prototype.cssUrl = function (){
-        return 'file://' + this.replace(/\\/g, '/');
     }

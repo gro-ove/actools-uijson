@@ -59,11 +59,11 @@
 
 /* special */
     #cars-list > span.disabled, main > h4.disabled {
-        color: #888;
+        color: #aaa !important;
         font-weight: normal;
     }
 
-    #cars-list > span.error:after, main > h4.error:after {
+    #cars-list > span.error:before, main > h4.error:before {
         content: "";
         font-family: Segoe UI Symbol;
         float: right;
@@ -81,13 +81,20 @@
         left: 200px;
         right: 0;
         padding: 10px;
-        bottom: 0;
-        overflow-y: auto;
-        overflow-x: hidden;
     }
 
     main > h4 {
         margin-top: 0;
+    }
+
+    #selected-car-logo {
+        float: left;
+        max-height: 24px;
+        margin-right: 10px;
+    }
+
+    #selected-car-desc {
+        font-size: 11px;
     }
 
     #selected-car-skins-article {
@@ -97,7 +104,7 @@
 
     #selected-car-skins {
         position: absolute;
-        width: 80px;
+        width: 120px;
         top: 0;
         height: 100%;
         right: 0;
@@ -107,19 +114,46 @@
     #selected-car-skins > img {
         width: 100%;
         display: block;
-        margin-bottom: 2px;
+    }
+
+    #selected-car-skins > img + img {
+        margin-top: 2px;
     }
 
     #selected-car-preview {
         display: block;
-        max-width: calc(100% - 84px);
+        max-width: calc(100% - 124px);
+        min-height: 200px;
+    }
+
+/* footer */
+    main footer {
+        position: fixed;
+        height: 50px;
+        left: 200px;
+        right: 0;
+        bottom: -100px;
+        transition: bottom .2s;
+        background: #59f;
+        box-sizing: border-box;
+        padding: 10px;
+    }
+
+    main footer.active {
+        bottom: 0;
+    }
+
+    main footer button {
+        height: 100%;
+        display: inline-block;
+        font-size: 11px;
     }
 
 /* cars list */
     aside {
         background: #eee;
         width: 200px;
-        position: absolute;
+        position: fixed;
         top: 0;
         left: 0;
         height: 100%;
@@ -156,6 +190,10 @@
     #cars-list > span.selected {
         color: #fff;
         background: #59f;
+    }
+
+    #cars-list > span.changed:after {
+        content: "*";
     }
 
     #cars-list-filter {
