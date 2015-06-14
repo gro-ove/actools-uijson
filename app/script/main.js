@@ -59,7 +59,7 @@
         function prompt(e){
             var dialog = new Dialog('Cars Directory', [
                 e && '<p class="error">' + e + '</p>',
-                '<button style="float:right;width:30px">…</button>',
+                '<button id="select-dir" style="float:right;width:30px">…</button>',
                 '<input placeholder="…/Assetto Corsa/content/cars" style="width:calc(100% - 35px)"></input>',
             ], function (){
                 ready(this.find('input').val());
@@ -71,7 +71,7 @@
                 dialog.find('input').val(localStorage.acDir);
             }
 
-            dialog.find('p + button').click(function (){
+            dialog.find('#select-dir').click(function (){
                 $('<input type="file" nwdirectory />').attr({
                     nwworkingdir: dialog.find('input').val()
                 }).change(function (){
