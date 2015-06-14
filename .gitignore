@@ -3,6 +3,7 @@ build/*
 *.sublime-*
 output/*.exe
 output/*.nw
+output/*.zip
 output/locales
 
 # Windows image file caches
