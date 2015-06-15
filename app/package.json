@@ -2,8 +2,7 @@
     "main": "main.html",
     "name": "AcTools Ui Json Fixer",
     "description": "Fixes ui_car.json",
-    "version": "0.2.0",
-
+    "version": "0.2.3",
     "window": {
         "title": "AcTools Ui Json Fixer",
         "icon": "icon.png",
@@ -16,6 +15,5 @@
         "toolbar": false,
         "frame": true
     },
-
-    "chromium-args": "" 
+    "chromium-args": ""
 }

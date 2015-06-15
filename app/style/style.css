@@ -86,6 +86,8 @@
 
 /* modules */
     iframe {
+        width: 90vw;
+        height: 75vh;
         width: calc(100vw - 100px);
         height: calc(100vh - 200px);
         border: 1px solid #eee;

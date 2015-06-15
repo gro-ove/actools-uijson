@@ -2,17 +2,12 @@ modules.showroom = function (){
     function start(c, s){
         if (c.path.indexOf(acCarsDir)) return;
 
-        
+        clr.AcTools.Showroom.ShowroomStarter.StartShot(acDir, c.name, s, 'ibl');
     }
-
-    console.time('CLR');
-    console.warn(modules.clr.get(function (){/*
-        AcTools.FileUtils.GetDocumentsFolder()
-    */}));
-
-    console.timeEnd('CLR');
 
     return {
         start: start
     };
 }();
+
+// 0A086478

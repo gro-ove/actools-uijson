@@ -1,7 +1,12 @@
 @echo off
 
-set FILE_VERSION=0.2
-set PRODUCT_VERSION=0.2
+
+node -e "f=require('fs');s=JSON.parse(f.readFileSync(p='app/package.json'));console.log(s.version=s.version.replace(/\d+$/,function(_){return+_+1;}));f.writeFile(p,JSON.stringify(s,null,4))"> __version.tmp
+set /p VERSION=<__version.tmp
+del __version.tmp
+
+set FILE_VERSION=%VERSION%
+set PRODUCT_VERSION=%VERSION%
 set NW_VERSION=0.12.1
 set DESCRIPTION=AcTools Ui Json Fixer
 set COMMENTS=AcTools Ui Json Fixer
@@ -12,7 +17,7 @@ mkdir tmp
 xcopy /E /Y app\* tmp
 
 cd tmp
-..\build\7z a -tzip -mx0 ..\output\uijson.nw *
+..\build\7z a -tzip -mx9 ..\output\uijson.nw *
 cd ..
 rd /S /Q tmp
 
