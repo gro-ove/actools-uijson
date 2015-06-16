@@ -149,14 +149,21 @@ modules.viewDetails = function (){
             $('footer').toggleClass('active'); 
         });
 
-    $('#selected-car-disable').click(function (){
-        if (!_selected) return;
-        modules.cars.toggle(_selected);
-    });
-
+    /* first row */
     $('#selected-car-open-directory').click(function (){
         if (!_selected) return;
         gui.Shell.openItem(_selected.path);
+    });
+
+    $('#selected-car-showroom').click(function (){
+        if (!_selected) return;
+        modules.showroom.start(selected);
+    });
+
+    /* second row */
+    $('#selected-car-disable').click(function (){
+        if (!_selected) return;
+        modules.cars.toggle(_selected);
     });
 
     $('#selected-car-update-description').click(function (){

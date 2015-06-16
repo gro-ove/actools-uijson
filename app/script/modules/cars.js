@@ -100,7 +100,7 @@ modules.cars = function (){
                 var p;
                 try {
                     eval('p=' + d.toString().replace(/"(?:[^"\\]*(?:\\.)?)+"/g, function (_){
-                        return _.replace(/\r?\n/g, '\\n');
+                        return _.replace(/\r?\n|<\/?br\/?>/g, '\\n');
                     }));
                 } catch (er){
                     err = er;

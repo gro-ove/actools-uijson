@@ -2,6 +2,10 @@ modules.showroom = function (){
     function start(c, s){
         if (c.path.indexOf(acCarsDir)) return;
 
+        if (s == null){
+            s = c.skins.selected.id;
+        }
+
         acTools.Processes.Showroom.Start(acDir, c.name, s, 'showroom');
     }
 

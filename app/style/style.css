@@ -1,6 +1,10 @@
 /* global */
     body, input, button, select {
-        font-family: PT Sans;
+        font-family: Roboto;
+    }
+
+    button, h1, h2, h3, h4, h5, h6 {
+        font-family: Roboto Condensed;
     }
 
     html, body {
@@ -133,7 +137,8 @@
     }
 
     #selected-car-desc {
-        font-size: 11px;
+        font-size: 12px;
+        white-space: pre-line;
     }
 
     #selected-car-skins-article {
@@ -171,26 +176,42 @@
     }
 
 /* footer */
-    main footer {
+    footer {
         position: fixed;
-        height: 50px;
         left: 200px;
         right: 0;
         bottom: -100px;
-        transition: bottom .2s;
         background: #59f;
         box-sizing: border-box;
-        padding: 10px;
+        padding: 2px;
     }
 
-    main footer.active {
+    footer.active {
         bottom: 0;
     }
 
-    main footer button {
+    footer button {
         height: 100%;
         display: inline-block;
-        font-size: 11px;
+        font-size: 13px;
+        text-transform: uppercase;
+        background: transparent;
+        border: none;
+        outline: none;
+        padding: 10px;
+        color: white;
+        cursor: pointer;
+        font-family: Roboto Condensed;
+        font-weight: 700;
+    }
+
+    footer button:hover {
+        background: rgba(255,255,255,.3);
+    }
+
+    footer hr {
+        border: none;
+        border-top: 1px solid rgba(255,255,255,.5);
     }
 
 /* cars list */

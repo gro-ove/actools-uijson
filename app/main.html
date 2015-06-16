@@ -7,6 +7,7 @@
         <link href="style/jquery.ui.css" rel="stylesheet" type="text/css">
         <link href="style/jquery.tagit.css" rel="stylesheet" type="text/css">
 
+        <link href='http://fonts.googleapis.com/css?family=Roboto:400italic,700italic,300,700,300italic,400&subset=latin,cyrillic' rel='stylesheet' type='text/css'>
         <link href="style/ptsans.css" rel="stylesheet" type="text/css">
         <link href="style/dialog.css" rel="stylesheet" type="text/css">
         <link href="style/table.css" rel="stylesheet" type="text/css">
@@ -41,12 +42,14 @@
                 </article>
             </div>
             <footer>
+                <button id="selected-car-open-directory">Directory</button>
+                <button id="selected-car-showroom">Showroom</button>
+                <button onclick="nwWindow.showDevTools();">Debug</button>
+                <br>
                 <button id="selected-car-disable">Disable</button>
-                <button id="selected-car-open-directory">Open Directory</button>
-                <button id="selected-car-update-description">Update Description</button>
+                <button id="selected-car-update-description">Find Description</button>
                 <button id="selected-car-save">Save</button>
-                <button id="selected-car-update-previews">Update previews</button>
-                <button onclick="nwWindow.showDevTools();">…</button>
+                <button id="selected-car-update-previews">Update Previews</button>
             </footer>
         </main>
 
