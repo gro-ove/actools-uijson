@@ -138,11 +138,16 @@
 
     #selected-car-desc {
         font-size: 12px;
-        white-space: pre-line;
         background: transparent;
         border: none;
         width: 100%;
         resize: none;
+        outline: none;
+    }
+
+    #selected-car-desc:not([readonly]):focus {
+        box-shadow: 0 0 0 2px #59f;
+        color: black;
     }
 
     #selected-car-skins-article {

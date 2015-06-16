@@ -142,8 +142,8 @@ modules.viewDetails = function (){
         });
 
     /* inputs */
-    $('#selected-car-desc').elastic().on('change blur', function (){
-        if (!_selected) return;
+    $('#selected-car-desc').elastic().change(function (){
+        if (!_selected || this.readonly) return;
         modules.cars.changeData(_selected, 'description', this.value);
     });
 
