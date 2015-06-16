@@ -2,7 +2,7 @@
 <html>
     <head>
         <meta charset="utf-8">
-        <title>AcTools Ui Json</title>
+        <title id="window-title"></title>
 
         <link href="style/jquery.ui.css" rel="stylesheet" type="text/css">
         <link href="style/jquery.tagit.css" rel="stylesheet" type="text/css">
@@ -21,6 +21,13 @@
         <script src="lib/string.format.js"></script>
     </head>
     <body>
+        <div id="window-border"></div>
+        <span id="window-drag"></span>
+        <div id="window-buttons">
+            <button id="window-minimize">_</button>
+            <button id="window-maximize">□</button>
+            <button id="window-close">✖</button>
+        </div>
         <aside>
             <h4>Total cars: <output id="total-cars"></output></h4>
             <input id="cars-list-filter" type="search">
