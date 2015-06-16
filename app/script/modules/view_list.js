@@ -64,12 +64,15 @@ modules.viewList = function (){
         });
 
     $('#cars-list-filter')
-        .on('change paste keyup keypress search', function (){
-            var v = $('#cars-list-filter').val();
-            if (v){
+        .on('change paste keyup keypress search', function (e){
+            if (e.keyCode == 27){
+                this.value = '';
+            }
+
+            if (this.value){
                 $('#cars-list > span').hide();
-                $('#cars-list > [data-id*="' + v + '"],\
-                    #cars-list > [data-name*="' + v.toLowerCase() + '"]').show();
+                $('#cars-list > [data-id*="' + this.value + '"],\
+                    #cars-list > [data-name*="' + this.value.toLowerCase() + '"]').show();
             } else {
                 $('#cars-list > span').show();
             }

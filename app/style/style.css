@@ -1,5 +1,5 @@
 /* global */
-    body, input, button, select {
+    body, input, button, select, textarea {
         font-family: Roboto;
     }
 
@@ -139,6 +139,10 @@
     #selected-car-desc {
         font-size: 12px;
         white-space: pre-line;
+        background: transparent;
+        border: none;
+        width: 100%;
+        resize: none;
     }
 
     #selected-car-skins-article {

@@ -169,9 +169,9 @@ modules.cars = function (){
     }
 
     function changeData(car, key, value){
-        if (car[key] == value) return;
+        if (car.data[key] == value) return;
 
-        car[key] = value;
+        car.data[key] = value;
         car.changed = true;
 
         mediator.dispatch('update:car:data', car);
@@ -193,20 +193,18 @@ modules.cars = function (){
         mediator.dispatch('update:car:skins', car);
     }
 
-    function save(c){
-        c = c || selected;
-        if (selected && selected.data){
-            fs.writeFileSync(selected.json, JSON.stringify(selected.data, null, 4));
-            changed(false);
+    function save(car){
+        if (car.data){
+            fs.writeFileSync(car.json, JSON.stringify(car.data, null, 4));
+            car.changed = false;
+            mediator.dispatch('update:car:changed', car);
         }
     }
 
     function saveChanged(){
-        carsList.forEach(function (e){
-            if (e.changed){
-                fs.writeFileSync(e.json, JSON.stringify(e.data, null, 4));
-                $('[data-id="' + e.id + '"]').removeClass('changed');
-                e.changed = false;
+        carsList.forEach(function (car){
+            if (car.changed){
+                save(car);
             }
         });
     }

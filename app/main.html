@@ -17,6 +17,7 @@
         <script src="lib/jquery.ui.js"></script>
         <script src="lib/jquery.tablesorter.js"></script>
         <script src="lib/jquery.tag-it.js"></script>
+        <script src="lib/jquery.elastic.js"></script>
         <script src="lib/string.format.js"></script>
     </head>
     <body>
@@ -38,7 +39,7 @@
                 </article>
                 <article>
                     <ul id="selected-car-tags"></ul>
-                    <p id="selected-car-desc" contenteditable="true"></p>
+                    <textarea id="selected-car-desc"></textarea>
                 </article>
             </div>
             <footer>
@@ -47,9 +48,9 @@
                 <button onclick="nwWindow.showDevTools();">Debug</button>
                 <br>
                 <button id="selected-car-disable">Disable</button>
+                <button id="selected-car-update-previews">Update Previews</button>
                 <button id="selected-car-update-description">Find Description</button>
                 <button id="selected-car-save">Save</button>
-                <button id="selected-car-update-previews">Update Previews</button>
             </footer>
         </main>
 

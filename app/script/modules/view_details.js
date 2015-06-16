@@ -42,12 +42,20 @@ modules.viewDetails = function (){
             de = $('#selected-car-desc'),
             ta = $('#selected-car-tags');
         if (car.data){
-            he.attr('contenteditable', true).text(car.data.name);
-            de.attr('contenteditable', true).text(car.data.description);
+            he.attr('contenteditable', true);
+            de.removeAttr('readonly');
             ta.show();
+
+            if (car.data.name != he.text()){
+                he.text(car.data.name);
+            }
+
+            if (car.data.description != de.text()){
+                de.val(car.data.description).elastic();
+            }
         } else {
             he.removeAttr('contenteditable').text(car.id);
-            de.removeAttr('contenteditable').text(car.data == null ? 'Loading...' : '');
+            de.attr('readonly', true).val(car.data == null ? 'Loading...' : '').elastic();
             ta.hide();
         }
     }
@@ -133,6 +141,12 @@ modules.viewDetails = function (){
             outSkins(car);
         });
 
+    /* inputs */
+    $('#selected-car-desc').elastic().on('change blur', function (){
+        if (!_selected) return;
+        modules.cars.changeData(_selected, 'description', this.value);
+    });
+
     /* previews */
     $('#selected-car-skins-article').dblclick(function (e){
         if (!_selected) return;
@@ -172,14 +186,18 @@ modules.viewDetails = function (){
         modules.cars.toggle(_selected);
     });
 
+    $('#selected-car-update-previews').click(function (){
+        if (!_selected) return;
+        modules.showroom.shot(_selected);
+    });
+
     $('#selected-car-update-description').click(function (){
         if (!_selected) return;
         modules.updateDescription(_selected);
     });
 
-    $('#selected-car-update-previews').click(function (){
-        if (!_selected) return;
-        modules.showroom.shot(_selected);
+    $('#selected-car-save').click(function (){
+        modules.cars.save(_selected);
     });
 
     /* tips */
