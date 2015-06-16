@@ -23,22 +23,23 @@ modules.cars = function (){
             return { id: e, path: path.join(modules.acDir.cars, e), disabled: false };
         }).concat(fs.readdirSync(modules.acDir.carsOff).map(function (e){
             return { id: e, path: path.join(modules.acDir.carsOff, e), disabled: true };
-        })).filter(function (e){
-            if (names[e.id]) return;
+        })).filter(function (car){
+            if (names[car.id]) return;
             
-            e.json = path.join(e.path, 'ui', 'ui_car.json');
-            e.error = [];
+            car.json = path.join(car.path, 'ui', 'ui_car.json');
+            car.error = [];
+            car.changed = false;
 
             /* TEMPORARY FIX */
-            if (!fs.existsSync(e.json) && fs.existsSync(e.json + '.disabled')){
-                fs.renameSync(e.json + '.disabled', e.json);
+            if (!fs.existsSync(car.json) && fs.existsSync(car.json + '.disabled')){
+                fs.renameSync(car.json + '.disabled', car.json);
             }
 
-            if (!fs.existsSync(e.json)) return;
+            if (!fs.existsSync(car.json)) return;
 
-            mediator.dispatch('new:car', e);
-            names[e.id] = true;
-            return e;
+            mediator.dispatch('new:car', car);
+            names[car.id] = true;
+            return car;
         });
 
         mediator.dispatch('scan:list', _list);
@@ -165,6 +166,16 @@ modules.cars = function (){
         mediator.dispatch('update:car:skins', car);
     }
 
+    function changeData(car, key, value){
+        if (car[key] == value) return;
+
+        car[key] = value;
+        car.changed = true;
+
+        mediator.dispatch('update:car:data', car);
+        mediator.dispatch('update:car:changed', car);
+    }
+
     function save(c){
         c = c || selected;
         if (selected && selected.data){
@@ -187,6 +198,7 @@ modules.cars = function (){
         byName: byName,
         scan: scan,
         toggle: toggle,
+        changeData: changeData,
         save: save,
         saveChanged: saveChanged,
     });

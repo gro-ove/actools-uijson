@@ -53,7 +53,11 @@ modules.viewList = function (){
         })
         .on('update:car:disabled', function (car){
             $('#cars-list > [data-id="' + car.id + '"]')
-                .toggleClass('disabled');
+                .toggleClass('disabled', car.disabled);
+        })
+        .on('update:car:changed', function (car){
+            $('#cars-list > [data-id="' + car.id + '"]')
+                .toggleClass('changed', car.changed);
         })
         .on('error', function (car){
             $('#cars-list > [data-id="' + car.id + '"]').addClass('error');

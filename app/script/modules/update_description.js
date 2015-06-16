@@ -24,8 +24,7 @@ modules.updateDescription = function (){
             '<iframe nwdisable nwfaketop nwUserAgent="' + p.userAgent + '" src=' + p.url + '></iframe>',
         ], function (){
             if (s){
-                c.data.description = p.prepare(s);
-                display(c);
+                modules.cars.changeData(c, 'description', p.prepare(s));
             }
         });
 

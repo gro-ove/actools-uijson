@@ -114,6 +114,10 @@
         white-space: nowrap;
     }
 
+    #selected-car.changed:after {
+        content: "*";
+    }
+
     #selected-car-logo {
         float: left;
         max-height: 24px;

@@ -57,6 +57,10 @@ modules.viewDetails = function (){
         $('#selected-car-header').toggleClass('disabled', car.disabled)
     }
 
+    function outChanged(car){
+        $('#selected-car').toggleClass('changed', car.changed)
+    }
+
     function outSkins(car){
         var sa = $('#selected-car-skins-article'),
             sp = $('#selected-car-preview'),
@@ -102,6 +106,10 @@ modules.viewDetails = function (){
         .on('update:car:disabled', function (car){
             if (_selected != car) return;
             outDisabled(car);
+        })
+        .on('update:car:changed', function (car){
+            if (_selected != car) return;
+            outChanged(car);
         });
 
     modules.viewList
@@ -118,6 +126,7 @@ modules.viewDetails = function (){
             outData(car);
             outBadge(car);
             outDisabled(car);
+            outChanged(car);
             outErrors(car);
             outSkins(car);
         });
@@ -134,6 +143,10 @@ modules.viewDetails = function (){
 
     $('#selected-car-open-directory').click(function (){
         gui.Shell.openItem(_selected.path);
+    });
+
+    $('#selected-car-update-description').click(function (){
+        modules.updateDescription(_selected);
     });
 
     /* tips */
