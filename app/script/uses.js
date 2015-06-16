@@ -12,7 +12,16 @@
     var Dialog = require('./script/lib/dialog').Dialog;
 
 /* uses node.js libs */
-    var clr = require('clr').init({
-        assemblies: [ 'native/AcTools.dll' ],
-        global: false
-    });
+    (function (){
+        var a;
+        __defineGetter__('acTools', function (){
+            if (!a){
+                a = require('clr').init({
+                    assemblies: [ 'native/AcTools.dll' ],
+                    global: false
+                }).AcTools;
+            }
+
+            return a;
+        });
+    })();

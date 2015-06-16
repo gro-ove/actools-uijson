@@ -37,7 +37,7 @@
     process.on('uncaughtException', function (err) {
         new Dialog('Oops!', [
             '<p>Uncaught exception, sorry.</p>',
-            '<pre>' + err + '</pre>'
+            '<pre>' + err.stack + '</pre>'
         ], function (){
             nwWindow.reloadDev();
         }, function (){
@@ -197,6 +197,10 @@
 
         $('#selected-car-update-description').click(function (){
             modules.updateDescription(selected);
+        });
+
+        $('#selected-car-update-previews').click(function (){
+            modules.showroom.shot(selected);
         });
 
         /* global hotkeys */
