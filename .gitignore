@@ -4,6 +4,7 @@ build/*
 output/*.exe
 output/*.nw
 output/*.zip
+output/*.tmp
 output/locales
 
 # Windows image file caches
