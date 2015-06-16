@@ -189,6 +189,10 @@ modules.cars = function (){
         mediator.dispatch('update:car:skins', car);
     }
 
+    function updateSkins(car){
+        mediator.dispatch('update:car:skins', car);
+    }
+
     function save(c){
         c = c || selected;
         if (selected && selected.data){
@@ -213,6 +217,7 @@ modules.cars = function (){
         toggle: toggle,
         changeData: changeData,
         selectSkin: selectSkin,
+        updateSkins: updateSkins,
         save: save,
         saveChanged: saveChanged,
     });

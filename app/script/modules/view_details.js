@@ -177,6 +177,11 @@ modules.viewDetails = function (){
         modules.updateDescription(_selected);
     });
 
+    $('#selected-car-update-previews').click(function (){
+        if (!_selected) return;
+        modules.showroom.shot(_selected);
+    });
+
     /* tips */
     outMsgTip();
     $('#details-message')

@@ -6,7 +6,7 @@ modules.showroom = function (){
             s = c.skins.selected.id;
         }
 
-        acTools.Processes.Showroom.Start(modules.acDir.root, c.id, s, 'showroom');
+        modules.acTools.Processes.Showroom.Start(modules.acDir.root, c.id, s, 'showroom');
     }
 
     function shot(c){
@@ -14,13 +14,9 @@ modules.showroom = function (){
 
         var output;
         try {
-            output = acTools.Processes.Showroom.Shot(modules.acDir.root, c.id, 200, -20);
+            output = modules.acTools.Processes.Showroom.Shot(modules.acDir.root, c.id, 200, -20);
         } catch (err){
-            new Dialog('Oops!', [
-                '<p>Cannot get previews, sorry.</p>',
-                '<pre>' + err + '</pre>'
-            ]);
-
+            modules.errorHandler.handled('Cannot get previews, sorry.', err);
             return;
         }
         
@@ -28,8 +24,8 @@ modules.showroom = function (){
         new Dialog('Update Previews', [
             '<p>New previews ready. Apply?</p>'
         ], function (){
-            acTools.FileUtils.ApplyPreviews(modules.acDir.root, c.id, output);
-            display(selected);
+            modules.acTools.FileUtils.ApplyPreviews(modules.acDir.root, c.id, output);
+            modules.cars.updateSkins(c);
         }).find('button').text('Apply');;
     }
 

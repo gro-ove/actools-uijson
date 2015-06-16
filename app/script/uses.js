@@ -11,11 +11,3 @@
 /* custom node.js modules */
     var Dialog = require('./script/lib/dialog').Dialog,
         Mediator = require('./script/lib/mediator').Mediator;
-
-/* acTools.dll */
-    __defineGetter__('acTools', function (){
-        return window.acTools = require('clr').init({
-            assemblies: [ 'native/AcTools.dll' ],
-            global: false
-        }).AcTools;
-    });
