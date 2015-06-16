@@ -50,7 +50,7 @@ modules.viewDetails = function (){
                 he.text(car.data.name);
             }
 
-            if (car.data.description != de.text()){
+            if (car.data.description != de.val()){
                 de.val(car.data.description).elastic();
             }
         } else {
@@ -147,6 +147,8 @@ modules.viewDetails = function (){
             this.blur();
             return false;
         }
+
+        this.textContent = this.textContent.slice(0, 64);
 
         if (!_selected || this.contentEditable != 'true') return;
         modules.cars.changeData(_selected, 'name', this.textContent);
