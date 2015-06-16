@@ -62,27 +62,29 @@ modules.viewDetails = function (){
     }
 
     function outSkins(car){
-        var sa = $('#selected-car-skins-article'),
-            sp = $('#selected-car-preview'),
-            ss = $('#selected-car-skins');
-        if (car.skins){
-            sa.show();
-            ss.empty();
+        setTimeout(function (){
+            var sa = $('#selected-car-skins-article'),
+                sp = $('#selected-car-preview'),
+                ss = $('#selected-car-skins');
+            if (car.skins){
+                sa.show();
+                ss.empty();
 
-            sp.attr({
-                'data-skin': car.skins[0].name,
-                'src': car.skins[0].preview.cssUrl()
-            });
+                sp.attr({
+                    'data-skin': car.skins[0].name,
+                    'src': car.skins[0].preview.cssUrl()
+                });
 
-            car.skins.slice(1).forEach(function (e){
-                $('<img>').attr({
-                    'data-skin': e.name,
-                    'src': e.preview.cssUrl()
-                }).appendTo(ss);
-            });
-        } else {
-            sa.hide();
-        }
+                car.skins.slice(1).forEach(function (e){
+                    $('<img>').attr({
+                        'data-skin': e.name,
+                        'src': e.preview.cssUrl()
+                    }).appendTo(ss);
+                });
+            } else {
+                sa.hide();
+            }
+        }, 50);
     }
 
     modules.cars
