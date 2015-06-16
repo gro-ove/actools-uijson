@@ -9,19 +9,13 @@
         nwWindow = gui.Window.get();
 
 /* custom node.js modules */
-    var Dialog = require('./script/lib/dialog').Dialog;
+    var Dialog = require('./script/lib/dialog').Dialog,
+        Mediator = require('./script/lib/mediator').Mediator;
 
-/* uses node.js libs */
-    (function (){
-        var a;
-        __defineGetter__('acTools', function (){
-            if (!a){
-                a = require('clr').init({
-                    assemblies: [ 'native/AcTools.dll' ],
-                    global: false
-                }).AcTools;
-            }
-
-            return a;
-        });
-    })();
+/* acTools.dll */
+    __defineGetter__('acTools', function (){
+        return window.acTools = require('clr').init({
+            assemblies: [ 'native/AcTools.dll' ],
+            global: false
+        }).AcTools;
+    });

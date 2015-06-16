@@ -2,9 +2,10 @@
 Small utility for easy editing *ui_car.json* files. Written using [NW.js](http://nwjs.io/).
 
 #### TODO
+* Update achitecture
 * View/edit brand, class, spec & stuff
 * Options
-* Update achitecture
+* Groups
 * Showroom selection
 * Batch tags processing
 * Manage skins (?)

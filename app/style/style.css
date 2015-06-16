@@ -68,12 +68,11 @@
     }
 
 /* special */
-    #cars-list > span.disabled, main > h4.disabled {
+    #cars-list > span.disabled, #selected-car-header.disabled {
         color: #aaa !important;
-        font-weight: normal;
     }
 
-    #cars-list > span.error:before, main > h4.error:before {
+    #cars-list > span.error:before, #selected-car-header.error:before {
         content: "";
         font-family: Segoe UI Symbol;
         float: right;
@@ -88,9 +87,9 @@
     iframe {
         width: 90vw;
         height: 75vh;
+        border: 1px solid #eee;
         width: calc(100vw - 100px);
         height: calc(100vh - 200px);
-        border: 1px solid #eee;
     }
 
 /* detailed information */
@@ -102,8 +101,13 @@
         padding: 10px;
     }
 
-    main > h4 {
+    main > div > h4 {
         margin-top: 0;
+    }
+
+    #selected-car-error ul {
+        margin-top: 0;
+        font-size: 12px;
     }
 
     #selected-car {
@@ -114,6 +118,14 @@
         float: left;
         max-height: 24px;
         margin-right: 10px;
+    }
+
+    #details-message {
+        font-size: 12px;
+    }
+
+    #details-message button {
+        margin-top: 10px;
     }
 
     #selected-car-desc {

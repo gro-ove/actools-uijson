@@ -8,8 +8,8 @@ del __version.tmp
 set FILE_VERSION=%VERSION%
 set PRODUCT_VERSION=%VERSION%
 set NW_VERSION=0.12.1
-set DESCRIPTION=AcTools Ui Json Fixer
-set COMMENTS=AcTools Ui Json Fixer
+set DESCRIPTION=AcTools Ui Json
+set COMMENTS=AcTools Ui Json
 
 cd %~dp0
 

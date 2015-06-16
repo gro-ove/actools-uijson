@@ -1,10 +1,14 @@
 modules.cars = function (){
-    var carsList;
+    var mediator = new Mediator();
+
+    var _list,
+        _tags = [],
+        _tagsLower = [];
 
     function byName(n){
-        for (var i = 0; i < carsList.length; i++){
-            if (carsList[i].name === n){
-                return carsList[i];
+        for (var i = 0; i < _list.length; i++){
+            if (_list[i].id === n){
+                return _list[i];
             }
         }
 
@@ -12,19 +16,18 @@ modules.cars = function (){
     }
 
     function scan(){
-        $('#cars-list').empty();
+        mediator.dispatch('scan:start');
 
         var names = {};
-
-        carsList = fs.readdirSync(acCarsDir).map(function (e){
-            return { name: e, path: path.join(acCarsDir, e), disabled: false };
-        }).concat(fs.readdirSync(acCarsOffDir).map(function (e){
-            return { name: e, path: path.join(acCarsOffDir, e), disabled: true };
+        _list = fs.readdirSync(modules.acDir.cars).map(function (e){
+            return { id: e, path: path.join(modules.acDir.cars, e), disabled: false };
+        }).concat(fs.readdirSync(modules.acDir.carsOff).map(function (e){
+            return { id: e, path: path.join(modules.acDir.carsOff, e), disabled: true };
         })).filter(function (e){
-            if (names[e.name]) return;
-            names[e.name] = true;
+            if (names[e.id]) return;
             
             e.json = path.join(e.path, 'ui', 'ui_car.json');
+            e.error = [];
 
             /* TEMPORARY FIX */
             if (!fs.existsSync(e.json) && fs.existsSync(e.json + '.disabled')){
@@ -33,47 +36,62 @@ modules.cars = function (){
 
             if (!fs.existsSync(e.json)) return;
 
-            $('<span></span>').text(e.name).toggleClass('disabled', e.disabled).attr({
-                'title': e.path,
-                'data-path': e.path,
-                'data-name': e.name,
-            }).appendTo('#cars-list');
-
+            mediator.dispatch('new:car', e);
+            names[e.id] = true;
             return e;
         });
 
-        selected = carsList[0].name;
-        $('#total-cars').val(carsList.length);
-
+        mediator.dispatch('scan:list', _list);
         asyncLoad();
     }
 
     function asyncLoad(){
-        var a = carsList;
+        var a = _list;
+        step();
 
         function step(){
-            if (a != carsList) return;
+            if (a != _list) return;
 
-            var n = a.filter(function (n){
-                return n.data == null && n.error == null;
+            var car = a.filter(function (car){
+                return car.data == null && car.error.length == 0;
             })[0];
 
-            if (!n) return;
+            if (!car) return;
 
-            fs.readdir(path.join(n.path, 'skins'), function (e, d){
-                n.skins = d.filter(function (e){
+            fs.readdir(path.join(car.path, 'skins'), function (err, skins){
+                car.skins = false;
+
+                if (err){
+                    car.error.push({ id: 'skins-not-readable', msg: 'Cannot read skins' });
+                    mediator.dispatch('error', car);
+                    return;
+                }
+
+                skins = skins.filter(function (e){
                     return !/\.\w{3,4}$/.test(e);
-                }).map(function (e){
-                    var p = path.join(n.path, 'skins', e);
-                    return {
-                        name: e,
+                });
+
+                if (skins.length == 0){
+                    car.error.push({ id: 'skins-empty', msg: 'Skins folder is empty' });
+                    mediator.dispatch('error', car);
+                    return;
+                }
+
+                car.skins = skins.map(function (e){
+                    var p = path.join(car.path, 'skins', e);
+                    var e = {
+                        id: e,
                         path: p,
                         preview: path.join(p, 'preview.jpg')
                     }
+
+                    return e;
                 });
+
+                mediator.dispatch('update:car:skins', car);
             });
 
-            fs.readFile(n.json, function (e, d){
+            fs.readFile(car.json, function (err, d){
                 step();
 
                 var p;
@@ -82,35 +100,40 @@ modules.cars = function (){
                         return _.replace(/\r?\n/g, '\\n');
                     }));
                 } catch (er){
-                    e = er;
+                    err = er;
                 }
 
-                if (e){
-                    n.data = null;
-                    n.error = e;
+                if (err){
+                    car.data = false;
+                    car.error.push({ id: 'json', msg: 'Damaged ui_car.json', details: err });
+                    mediator.dispatch('error', car);
                 } else {
-                    n.data = p;
-                    if (!n.data.tags){
-                        n.data.tags = [];
+                    if (!p.name){
+                        car.error.push({ id: 'data-name', msg: 'Name is missing' });
+                        mediator.dispatch('error', car);
+                        return;
                     }
 
-                    n.data.tags.forEach(function (e){
-                        if (tagsList.indexOf(e) < 0){
-                            tagsList.push(e);
+                    if (!p.description) p.description = '';
+                    if (!p.tags) p.tags = [];
+
+                    car.data = p;
+
+                    car.data.tags.forEach(function (e){
+                        var l = e.toLowerCase();
+                        if (_tagsLower.indexOf(l) < 0){
+                            _tags.push(e);
+                            _tagsLower.push(l);
                         }
                     });
                 }
 
-                loaded(n);
+                mediator.dispatch('update:car:data', car);
             });
         }
-
-        step();
     }
 
-    function toggle(c){
-        c = c || selected;
-
+    function toggle(car){
         function dumb(o, a, b){
             for (var n in o){
                 if (typeof o[n] === 'string') o[n] = o[n].replace(a, b);
@@ -119,26 +142,27 @@ modules.cars = function (){
         }
 
         var a, b;
-        if (c.disabled){
-            a = acCarsOffDir, b = acCarsDir;
+        if (car.disabled){
+            a = modules.acDir.carsOff, b = modules.acDir.cars;
         } else {
-            a = acCarsDir, b = acCarsOffDir;
+            a = modules.acDir.cars, b = modules.acDir.carsOff;
         }
 
+        var newPath = car.path.replace(a, b);
         try {
-            fs.renameSync(c.path, c.path.replace(a, b));
+            fs.renameSync(car.path, newPath);
         } catch (err){
-            new Dialog('Oops!', [ 
-                '<p>Cannot disable car, sorry.</p>',
-                '<pre>' + err + '</pre>'
-            ]);
-
-            return false;
+            errorHandler.handled(err);
+            return;
         }
 
-        c.disabled = !c.disabled;
-        dumb(c, a, b);
-        return true;
+        car.disabled = !car.disabled;
+        car.path = newPath;
+        dumb(car.skins, a, b);
+
+        mediator.dispatch('update:car:disabled', car);
+        mediator.dispatch('update:car:path', car);
+        mediator.dispatch('update:car:skins', car);
     }
 
     function save(c){
@@ -153,17 +177,17 @@ modules.cars = function (){
         carsList.forEach(function (e){
             if (e.changed){
                 fs.writeFileSync(e.json, JSON.stringify(e.data, null, 4));
-                $('[data-name="' + e.name + '"]').removeClass('changed');
+                $('[data-id="' + e.id + '"]').removeClass('changed');
                 e.changed = false;
             }
         });
     }
 
-    return {
+    return mediator.extend({
         byName: byName,
         scan: scan,
         toggle: toggle,
         save: save,
         saveChanged: saveChanged,
-    };
+    });
 }();
