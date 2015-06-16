@@ -34,9 +34,9 @@ Small utility for easy editing *ui_car.json* files. Written using [NW.js](http:/
 
 #### Known bugs
 * Update skins previews
-* * Kinda random angle
-* * Don't press “Update Previews” two times in a row
-* * Previews in app don't update properly
+    * Kinda random angle
+    * Don't press “Update Previews” two times in a row
+    * Previews in app don't update properly
 
     *Warning!* This feature still could be pretty buggy, so use it on your own risk! And, please, don't press anything in process!
 
