@@ -72,7 +72,7 @@ modules.viewDetails = function (){
 
                 sp.attr({
                     'data-id': car.skins.selected.id,
-                    'src': car.skins.selected.preview.cssUrl()
+                    'src': (car.skins.selected.preview + '?' + Math.random()).cssUrl()
                 });
 
                 car.skins.forEach(function (e){

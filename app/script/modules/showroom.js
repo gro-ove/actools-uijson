@@ -14,7 +14,7 @@ modules.showroom = function (){
 
         var output;
         try {
-            output = modules.acTools.Processes.Showroom.Shot(modules.acDir.root, c.id, 200, -20);
+            output = modules.acTools.Processes.Showroom.Shot(modules.acDir.root, c.id, 150, -45);
         } catch (err){
             modules.errorHandler.handled('Cannot get previews, sorry.', err);
             return;
