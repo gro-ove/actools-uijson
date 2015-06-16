@@ -83,12 +83,14 @@ modules.cars = function (){
                     var e = {
                         id: e,
                         path: p,
-                        preview: path.join(p, 'preview.jpg')
+                        livery: path.join(p, 'livery.png'),
+                        preview: path.join(p, 'preview.jpg'),
                     }
 
                     return e;
                 });
 
+                car.skins.selected = car.skins[0];
                 mediator.dispatch('update:car:skins', car);
             });
 
@@ -176,6 +178,17 @@ modules.cars = function (){
         mediator.dispatch('update:car:changed', car);
     }
 
+    function selectSkin(car, skinId){
+        var n = car.skins.filter(function (e){
+            return e.id == skinId;
+        })[0];
+
+        if (n == car.skins.selected) return;
+
+        car.skins.selected = n;
+        mediator.dispatch('update:car:skins', car);
+    }
+
     function save(c){
         c = c || selected;
         if (selected && selected.data){
@@ -199,6 +212,7 @@ modules.cars = function (){
         scan: scan,
         toggle: toggle,
         changeData: changeData,
+        selectSkin: selectSkin,
         save: save,
         saveChanged: saveChanged,
     });

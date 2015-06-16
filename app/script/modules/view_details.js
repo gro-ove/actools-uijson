@@ -71,14 +71,14 @@ modules.viewDetails = function (){
                 ss.empty();
 
                 sp.attr({
-                    'data-skin': car.skins[0].name,
-                    'src': car.skins[0].preview.cssUrl()
+                    'data-id': car.skins.selected.id,
+                    'src': car.skins.selected.preview.cssUrl()
                 });
 
-                car.skins.slice(1).forEach(function (e){
+                car.skins.forEach(function (e){
                     $('<img>').attr({
-                        'data-skin': e.name,
-                        'src': e.preview.cssUrl()
+                        'data-id': e.id,
+                        'src': e.livery.cssUrl()
                     }).appendTo(ss);
                 });
             } else {
@@ -133,6 +133,16 @@ modules.viewDetails = function (){
             outSkins(car);
         });
 
+    /* skins changer */
+    $('#selected-car-skins').click(function (e){
+        if (!_selected) return;
+
+        var id = e.target.getAttribute('data-id');
+        if (!id) return;
+
+        modules.cars.selectSkin(_selected, id);
+    })
+
     /* bottom toolbar */
     $(window)
         .on('contextmenu', function (){
@@ -140,14 +150,17 @@ modules.viewDetails = function (){
         });
 
     $('#selected-car-disable').click(function (){
+        if (!_selected) return;
         modules.cars.toggle(_selected);
     });
 
     $('#selected-car-open-directory').click(function (){
+        if (!_selected) return;
         gui.Shell.openItem(_selected.path);
     });
 
     $('#selected-car-update-description').click(function (){
+        if (!_selected) return;
         modules.updateDescription(_selected);
     });
 

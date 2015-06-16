@@ -148,15 +148,20 @@
         height: 100%;
         right: 0;
         overflow: auto;
+        margin: -2px -2px 0 0;
+        bottom: 0;
+        line-height: 0;
     }
 
     #selected-car-skins > img {
-        width: 100%;
-        display: block;
+        width: 30px;
+        margin: 2px;
+        cursor: pointer;
     }
 
-    #selected-car-skins > img + img {
-        margin-top: 2px;
+    #selected-car-skins > img:hover {
+        margin: 0;
+        border: 2px solid #59f;
     }
 
     #selected-car-preview {
