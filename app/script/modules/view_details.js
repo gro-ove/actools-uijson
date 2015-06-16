@@ -142,6 +142,16 @@ modules.viewDetails = function (){
         });
 
     /* inputs */
+    $('#selected-car').on('keydown input', function (e){
+        if (e.keyCode == 13){
+            this.blur();
+            return false;
+        }
+
+        if (!_selected || this.contentEditable != 'true') return;
+        modules.cars.changeData(_selected, 'name', this.textContent);
+    });
+
     $('#selected-car-desc').elastic().change(function (){
         if (!_selected || this.readonly) return;
         modules.cars.changeData(_selected, 'description', this.value);
