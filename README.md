@@ -1,5 +1,5 @@
 # actools-uijson
-Small utility for easy editing ui_car.json files. Written using [NW.js](http://nwjs.io/).
+Small utility for easy editing *ui_car.json* files. Written using [NW.js](http://nwjs.io/).
 
 #### TODO:
 * View/edit brand, class, spec & stuff
@@ -38,7 +38,7 @@ Small utility for easy editing ui_car.json files. Written using [NW.js](http://n
 ** Don't press “Update Previews” two times in a row
 ** Previews in app don't update properly
 
-*Warning!* This feature still could be pretty buggy, so use it on your own risk! And, please, don't press anything in process!
+    *Warning!* This feature still could be pretty buggy, so use it on your own risk! And, please, don't press anything in process!
 
 #### Screenshots:
 ![Screenshot](http://i.imgur.com/AiPMrXT.png)
