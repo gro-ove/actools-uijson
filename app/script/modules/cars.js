@@ -218,5 +218,9 @@ modules.cars = function (){
         updateSkins: updateSkins,
         save: save,
         saveChanged: saveChanged,
+
+        get tags (){
+            return _tags;
+        },
     });
 }();

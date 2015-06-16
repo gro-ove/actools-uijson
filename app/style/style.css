@@ -102,7 +102,9 @@
         top: 0;
         left: 200px;
         right: 0;
+        min-height: 100%;
         padding: 10px;
+        box-sizing: border-box;
     }
 
     main > div > h4 {
@@ -116,6 +118,7 @@
 
     #selected-car {
         white-space: nowrap;
+        outline: none;
     }
 
     #selected-car.changed:after {
@@ -145,7 +148,7 @@
         outline: none;
     }
 
-    #selected-car-desc:not([readonly]):focus {
+    #selected-car-desc:not([readonly]):focus, #selected-car[contenteditable]:focus {
         box-shadow: 0 0 0 2px #59f;
         color: black;
     }

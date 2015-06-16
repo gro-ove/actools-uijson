@@ -1,7 +1,7 @@
 modules.viewDetails = function (){
     var mediator = new Mediator();
 
-    var _selected;
+    var _selected, _tagSkip;
 
     function outMsg(title, msg){
         var dm = $('#details-message'),
@@ -44,7 +44,13 @@ modules.viewDetails = function (){
         if (car.data){
             he.attr('contenteditable', true);
             de.removeAttr('readonly');
-            ta.show();
+
+            _tagSkip = true;
+            ta.show().tagit('removeAll');
+            car.data.tags.forEach(function (e){
+                ta.tagit('createTag', e);
+            });
+            _tagSkip = false;
 
             if (car.data.name != he.text()){
                 he.text(car.data.name);
@@ -159,6 +165,28 @@ modules.viewDetails = function (){
         modules.cars.changeData(_selected, 'description', this.value);
     });
 
+    function getInputTags(){
+        return [].map.call($('ul .tagit-label'), function (a){ return a.textContent });
+    }
+
+    $('#selected-car-tags').tagit({
+        availableTags: modules.cars.tags,
+        autocomplete: { delay: 0, minLength: 1, allowSpaces: true },
+        removeConfirmation: true,
+        caseSensitive: false,
+
+        afterTagAdded: function (){
+            if (!_tagSkip){
+                modules.cars.changeData(_selected, 'tags', getInputTags());
+            }
+        },
+        afterTagRemoved: function (){
+            if (!_tagSkip){
+                modules.cars.changeData(_selected, 'tags', getInputTags());
+            }
+        }, 
+    });
+
     /* previews */
     $('#selected-car-skins-article').dblclick(function (e){
         if (!_selected) return;
@@ -176,9 +204,10 @@ modules.viewDetails = function (){
     })
 
     /* bottom toolbar */
-    $(window)
+    $('main')
         .on('contextmenu', function (){
             $('footer').toggleClass('active'); 
+            return false;
         });
 
     /* first row */

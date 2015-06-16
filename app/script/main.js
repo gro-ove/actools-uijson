@@ -1,11 +1,6 @@
-    modules.acDir
-        .on('change', function (){
-            modules.cars.scan();
-        });
+modules.acDir
+    .on('change', function (){
+        modules.cars.scan();
+    });
 
-    modules.acDir.init();
-
-   // initUiCarsList();
-   // initUiCarsInformation();
-
-/* main functions */
+modules.acDir.init();
