@@ -133,6 +133,12 @@ modules.viewDetails = function (){
             outSkins(car);
         });
 
+    /* previews */
+    $('#selected-car-skins-article').dblclick(function (e){
+        if (!_selected) return;
+        modules.showroom.start(_selected);
+    });
+
     /* skins changer */
     $('#selected-car-skins').click(function (e){
         if (!_selected) return;
@@ -157,7 +163,7 @@ modules.viewDetails = function (){
 
     $('#selected-car-showroom').click(function (){
         if (!_selected) return;
-        modules.showroom.start(selected);
+        modules.showroom.start(_selected);
     });
 
     /* second row */

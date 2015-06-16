@@ -179,13 +179,13 @@ modules.cars = function (){
     }
 
     function selectSkin(car, skinId){
-        var n = car.skins.filter(function (e){
+        var newSkin = car.skins.filter(function (e){
             return e.id == skinId;
         })[0];
 
-        if (n == car.skins.selected) return;
+        if (newSkin == car.skins.selected) return;
 
-        car.skins.selected = n;
+        car.skins.selected = newSkin;
         mediator.dispatch('update:car:skins', car);
     }
 

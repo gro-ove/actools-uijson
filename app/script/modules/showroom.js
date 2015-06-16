@@ -1,20 +1,20 @@
 modules.showroom = function (){
     function start(c, s){
-        if (c.path.indexOf(acCarsDir)) return;
+        if (c.path.indexOf(modules.acDir.cars)) return;
 
         if (s == null){
             s = c.skins.selected.id;
         }
 
-        acTools.Processes.Showroom.Start(acDir, c.name, s, 'showroom');
+        acTools.Processes.Showroom.Start(modules.acDir.root, c.id, s, 'showroom');
     }
 
     function shot(c){
-        if (c.path.indexOf(acCarsDir)) return;
+        if (c.path.indexOf(modules.acDir.cars)) return;
 
         var output;
         try {
-            output = acTools.Processes.Showroom.Shot(acDir, c.name, 200, -20);
+            output = acTools.Processes.Showroom.Shot(modules.acDir.root, c.id, 200, -20);
         } catch (err){
             new Dialog('Oops!', [
                 '<p>Cannot get previews, sorry.</p>',
@@ -28,7 +28,7 @@ modules.showroom = function (){
         new Dialog('Update Previews', [
             '<p>New previews ready. Apply?</p>'
         ], function (){
-            acTools.FileUtils.ApplyPreviews(acDir, c.name, output);
+            acTools.FileUtils.ApplyPreviews(modules.acDir.root, c.id, output);
             display(selected);
         }).find('button').text('Apply');;
     }
