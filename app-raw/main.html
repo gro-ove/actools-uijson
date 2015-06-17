@@ -11,6 +11,7 @@
         <div id="window-border"></div>
         <span id="window-drag"></span>
         <div id="window-buttons">
+            <button onclick="nwWindow.showDevTools();">…</button>
             <button id="window-minimize">_</button>
             <button id="window-maximize">□</button>
             <button id="window-close">✖</button>
@@ -40,7 +41,7 @@
             <footer>
                 <button id="selected-car-open-directory">Directory</button>
                 <button id="selected-car-showroom">Showroom</button>
-                <button onclick="nwWindow.showDevTools();">…</button>
+                <button id="selected-car-reload">Reload</button>
                 <br>
                 <button id="selected-car-disable">Disable</button>
                 <span>
@@ -50,7 +51,6 @@
                     </div>
                 </span>
                 <button id="selected-car-update-description">Find Description</button>
-                <button id="selected-car-reload">Reload</button>
                 <button id="selected-car-save">Save</button>
             </footer>
         </main>
@@ -58,6 +58,7 @@
         <script src="script/uses.js"></script>
         <script src="script/helpers.js"></script>
         <!-- MODULES -->
+        <script src="script/winstate.js"></script>
         <script src="script/main.js"></script>
     </body>
 </html>

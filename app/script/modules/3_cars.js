@@ -137,13 +137,6 @@ modules.cars = function (){
     }
 
     function toggle(car){
-        function dumb(o, a, b){
-            for (var n in o){
-                if (typeof o[n] === 'string') o[n] = o[n].replace(a, b);
-                else if (typeof o[n] === 'object') dumb(o[n], a, b);
-            }
-        }
-
         var a, b;
         if (car.disabled){
             a = modules.acDir.carsOff, b = modules.acDir.cars;
@@ -161,7 +154,13 @@ modules.cars = function (){
 
         car.disabled = !car.disabled;
         car.path = newPath;
-        dumb(car.skins, a, b);
+        car.skins.forEach(function (e){
+            for (var n in e){
+                if (typeof e[n] === 'string'){
+                    e[n] = e[n].replace(a, b);
+                }
+            }
+        });
 
         mediator.dispatch('update:car:disabled', car);
         mediator.dispatch('update:car:path', car);

@@ -21,7 +21,7 @@ modules.updateDescription = function (){
         p = prov(c);
 
         var dialog = new Dialog('Update Description', [
-            '<iframe nwdisable nwfaketop nwUserAgent="' + p.userAgent + '" src=' + p.url + '></iframe>',
+            '<iframe nwdisable nwfaketop nwUserAgent="{0}" src="{1}"></iframe>'.format(p.userAgent, p.url),
         ], function (){
             if (s){
                 modules.cars.changeData(c, 'description', p.prepare(s));

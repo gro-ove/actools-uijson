@@ -25,6 +25,7 @@ rd /S /Q tmp
 copy /B /Y build\nw.exe+output\uijson.nw output\tmp.exe 
 
 taskkill /f /im uijson.exe
+rm output\uijson.exe
 build\reshacker -modify output\tmp.exe, output\uijson.exe, app\icon.ico, icon, IDR_MAINFRAME,
 del output\tmp.exe
 
