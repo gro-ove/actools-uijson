@@ -6,9 +6,8 @@ Small utility for easy editing *ui_car.json* files. Written using [NW.js](http:/
 * Options
 * Groups
 * Restoration Wizard
-* Showroom selection
 * Brand logo select
-* New custom fields: year.
+* New custom fields: year
 * DB with names, years and stuff
 * Batch name processing (add/remove brand, add/remove year)
 * Batch tags processing
@@ -30,7 +29,7 @@ Small utility for easy editing *ui_car.json* files. Written using [NW.js](http:/
 
 #### Download
 * [Stable (0.2.4)](https://ascobash.wordpress.com/2015/06/14/actools-uijson/)
-* [Last (0.2.10)](https://yadi.sk/d/J4l0dpsrhJrBK)
+* [Last (0.2.11)](https://yadi.sk/d/J4l0dpsrhJrBK)
 
 #### Features
 * Enable/disable vehicles

@@ -34,7 +34,7 @@ modules.checkUpdate = function (){
                     var v = RegExp.$1.split('.'),
                         c = gui.App.manifest.version.split('.');
                     if (v.some(function (e, i){
-                        return v[i] > c[i];
+                        return +v[i] > +c[i];
                     })){
                         mediator.dispatch('update', RegExp.$1, _details, RegExp.$2);
                     }
