@@ -2,24 +2,32 @@
 Small utility for easy editing *ui_car.json* files. Written using [NW.js](http://nwjs.io/).
 
 #### TODO
-* Update achitecture
 * View/edit brand, class, spec & stuff
 * Options
 * Groups
+* Restoration Wizard
 * Showroom selection
 * Batch tags processing
+* Edit mode for livery.png (?)
 * Manage skins (?)
 
+#### Changelog:
+* 0.2.7
+    * Updated UI
+    * Improved skins view (livery.png & stuff)
+    * Auto-update skins previews fixed and improved
+    * Added manual mode
+
 #### Download
-* [Stable](https://ascobash.wordpress.com/2015/06/14/actools-uijson/)
-* [Last](https://yadi.sk/d/J4l0dpsrhJrBK)
+* [Stable (0.2.4)](https://ascobash.wordpress.com/2015/06/14/actools-uijson/)
+* [Last (0.2.7)](https://yadi.sk/d/J4l0dpsrhJrBK)
 
 #### Features
 * Enable/disable vehicles
 * Edit name, tags and description
 * Search for description online
 * Preview cars
-* Update skins previews
+* Auto-update skins previews
 
 #### Tips
 * Double click on preview to launch acShowroom.
