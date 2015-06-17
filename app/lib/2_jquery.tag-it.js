@@ -357,7 +357,8 @@
         },
 
         _lastTag: function() {
-            return this.tagList.find('.tagit-choice:last:not(.removed)');
+            var r = this.tagList.find('.tagit-choice:not(.removed)');
+            return $(r[r.length - 1]);
         },
 
         _tags: function() {
@@ -399,9 +400,9 @@
         tagLabel: function(tag) {
             // Returns the tag's string label.
             if (this.options.singleField) {
-                return $(tag).find('.tagit-label:first').text();
+                return ($(tag).find('.tagit-label')[0] || '').textContent || '';
             } else {
-                return $(tag).find('input:first').val();
+                return ($(tag).find('input')[0] || '').value || '';
             }
         },
 

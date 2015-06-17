@@ -9,7 +9,7 @@ var Dialog = function(title, content, callback, closeCallback) {
     }
 
     this.el = $('<dialog>').html('<div><h4>' + title + '</h4><div>'  + content.map(function (e){
-            return e[0] == '<' ? e : '<p>' + e + '</p>';
+            return e ? e[0] == '<' ? e : '<p>' + e + '</p>' : '';
         }).join('') + '</div>' + (callback === false ? '' 
             : '<div class="dialog-buttons"><button data-id="dialog-ok">ОК</button></div>') + 
     '</div>').appendTo('body').click(function (e){

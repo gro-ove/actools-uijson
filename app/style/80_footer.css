@@ -1,6 +1,6 @@
 footer {
     position: fixed;
-    left: 200px;
+    left: 250px;
     right: 0;
     bottom: -100px;
     background: #59f;
@@ -8,6 +8,8 @@ footer {
     padding: 0;
     z-index: 2;
     transition: .1s bottom;
+
+        transform: translate3d(0, 0, 0);
 }
 
 footer.active {

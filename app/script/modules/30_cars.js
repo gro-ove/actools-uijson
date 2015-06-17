@@ -28,6 +28,9 @@ modules.cars = function (){
             json: json,
             error: [],
             changed: false,
+
+            parent: null,
+            children: [],
         };
     }
 
@@ -122,6 +125,19 @@ modules.cars = function (){
                     if (!p.tags) p.tags = [];
 
                     car.data = p;
+
+                    if (car.data.parent != null){
+                        var parent = byName(car.data.parent);
+                        if (parent == null){
+                            car.error.push({ id: 'parent-missing', msg: 'Parent is missing' });
+                        } else {
+                            car.parent = parent;
+                            parent.children.push(car);
+
+                            mediator.dispatch('update:car:parent', car);
+                            mediator.dispatch('update:car:children', parent);
+                        }
+                    }
 
                     car.data.tags.forEach(function (e){
                         var l = e.toLowerCase();

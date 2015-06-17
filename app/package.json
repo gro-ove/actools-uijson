@@ -16,5 +16,5 @@
         "frame": false,
         "show": false
     },
-    "chromium-args": ""
+    "chromium-args": "--ignore-gpu-blacklist --show-fps-counter"
 }

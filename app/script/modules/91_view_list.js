@@ -5,10 +5,14 @@ modules.viewList = function (){
 
     function select(car){
         _selected = car;
-        $('#cars-list > span.selected').removeClass('selected');
+        $('#cars-list span.expand').removeClass('selected expand');
 
         if (car){
-            $('#cars-list > [data-id="' + car.id + '"]').addClass('selected');
+            $('#cars-list [data-id="' + car.id + '"]').addClass('selected expand');
+
+            if (car.parent){
+                $('#cars-list [data-id="' + car.parent.id + '"]').addClass('expand');
+            }
         }
 
         mediator.dispatch('select', car);
@@ -40,27 +44,34 @@ modules.viewList = function (){
             s.setAttribute('data-name', car.id);
             s.setAttribute('data-path', car.path);
 
-            document.getElementById('cars-list').appendChild(s);
+            var d = document.createElement('div');
+            d.appendChild(s);
+
+            document.getElementById('cars-list').appendChild(d);
         })
         .on('update:car:data', function (car){
             var n = car.data && car.data.name || car.id;
-            $('#cars-list > [data-id="' + car.id + '"]')
+            $('#cars-list [data-id="' + car.id + '"]')
                 .text(n).attr('data-name', n.toLowerCase());
         })
+        .on('update:car:parent', function (car){
+            $('#cars-list [data-id="' + car.id + '"]').parent().appendTo(
+                $('#cars-list [data-id="' + car.parent.id + '"]').parent());
+        })
         .on('update:car:path', function (car){
-            $('#cars-list > [data-id="' + car.id + '"]')
+            $('#cars-list [data-id="' + car.id + '"]')
                 .attr('data-path', car.path);
         })
         .on('update:car:disabled', function (car){
-            $('#cars-list > [data-id="' + car.id + '"]')
+            $('#cars-list [data-id="' + car.id + '"]')
                 .toggleClass('disabled', car.disabled);
         })
         .on('update:car:changed', function (car){
-            $('#cars-list > [data-id="' + car.id + '"]')
+            $('#cars-list [data-id="' + car.id + '"]')
                 .toggleClass('changed', car.changed);
         })
         .on('error', function (car){
-            $('#cars-list > [data-id="' + car.id + '"]').addClass('error');
+            $('#cars-list [data-id="' + car.id + '"]').addClass('error');
         });
 
     $('#cars-list-filter')
@@ -70,11 +81,11 @@ modules.viewList = function (){
             }
 
             if (this.value){
-                $('#cars-list > span').hide();
-                $('#cars-list > [data-id*="' + this.value + '"],\
-                    #cars-list > [data-name*="' + this.value.toLowerCase() + '"]').show();
+                $('#cars-list span').hide();
+                $('#cars-list [data-id*="' + this.value + '"],\
+                    #cars-list [data-name*="' + this.value.toLowerCase() + '"]').show();
             } else {
-                $('#cars-list > span').show();
+                $('#cars-list span').show();
             }
         })
         .on('blur', function (){ 

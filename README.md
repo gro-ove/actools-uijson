@@ -4,7 +4,6 @@ Small utility for easy editing *ui_car.json* files. Written using [NW.js](http:/
 #### TODO
 * View/edit brand, class, spec & stuff
 * Options
-* Groups
 * Restoration Wizard
 * Brand logo select
 * New custom fields: year
@@ -16,6 +15,8 @@ Small utility for easy editing *ui_car.json* files. Written using [NW.js](http:/
 * Manage skins (?)
 
 #### Changelog:
+* 0.2.12
+    * Groups
 * 0.2.10
     * Reload button
     * Select showroom

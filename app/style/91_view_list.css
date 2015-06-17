@@ -1,6 +1,6 @@
     aside {
         background: #eee;
-        width: 200px;
+        width: 250px;
         position: fixed;
         top: 0;
         left: 0;
@@ -23,23 +23,37 @@
         overflow-x: hidden;
     }
 
-    #cars-list > span {
+    #cars-list span {
         display: block;
         font-size: 11px;
         padding: 3px 15px;
         box-sizing: border-box;
     }
 
-    #cars-list > span:hover {
+    #cars-list div div span {
+        padding-left: 30px;
+    }
+
+    #cars-list div div {
+        overflow: hidden;
+        height: 0;
+        transition: height .1s;
+    }
+
+    #cars-list span.expand ~ div {
+        height: 21px;
+    }
+
+    #cars-list span:hover {
         background: #fff;
     }
 
-    #cars-list > span.selected {
+    #cars-list span.selected {
         color: #fff;
         background: #59f;
     }
 
-    #cars-list > span.changed:after {
+    #cars-list span.changed:after {
         content: "*";
     }
 
