@@ -1,5 +1,6 @@
 @echo off
 
+call prepare
 
 node -e "f=require('fs');s=JSON.parse(f.readFileSync(p='app/package.json'));console.log(s.version=s.version.replace(/\d+$/,function(_){return+_+1;}));f.writeFile(p,JSON.stringify(s,null,4))"> __version.tmp
 set /p VERSION=<__version.tmp

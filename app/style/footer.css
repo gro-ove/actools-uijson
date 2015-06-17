@@ -1,0 +1,56 @@
+    footer {
+        position: fixed;
+        left: 200px;
+        right: 0;
+        bottom: -100px;
+        background: #59f;
+        box-sizing: border-box;
+        padding: 0;
+        z-index: 2;
+        transition: .1s bottom;
+    }
+
+    footer.active {
+        bottom: 0;
+    }
+
+    footer button {
+        height: 100%;
+        display: inline-block;
+        font-size: 13px;
+        text-transform: uppercase;
+        background: transparent;
+        border: none;
+        outline: none;
+        padding: 10px;
+        color: white;
+        font-family: Roboto Condensed;
+        font-weight: 700;
+    }
+
+    footer button:hover, footer span:hover > button:first-child {
+        background: rgba(255,255,255,.3);
+    }
+
+    footer div {
+        display: inline-flex;
+        white-space: nowrap;
+        width: 0;
+        overflow: hidden;
+        transition: .1s width;
+        transition-delay: .3s;
+    }
+
+    footer div button {
+        width: 100%;
+    }
+
+    footer button:hover + div, footer div:hover {
+        width: 70px;
+        transition-delay: .1s;
+    }
+
+    footer hr {
+        border: none;
+        border-top: 1px solid rgba(255,255,255,.5);
+    }

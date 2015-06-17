@@ -1,0 +1,71 @@
+    body, input, button, select, textarea {
+        font-family: Roboto;
+    }
+
+    button, h1, h2, h3, h4, h5, h6 {
+        font-family: Roboto Condensed;
+    }
+
+    html, body {
+        margin: 0;
+        padding: 0;
+        cursor: default;
+    }
+
+    [contenteditable] {
+        cursor: text;
+    }
+
+    .error {
+        color: brown;
+        font-weight: 700;
+    }
+
+    pre {
+        white-space: pre-wrap;
+        font-size: 12px;
+    }
+
+    ul.tagit, ul.tagit li {
+        list-style: disc;
+    }
+
+    ul.tagit input[type="text"] {
+        width: 120px;
+    }
+
+    ul.tagit li {
+        display: inline-block;
+    }
+
+    .ui-widget {
+        font-size: 12px;
+    }
+
+    .ui-widget-content {
+        border: none;
+    }
+
+    .ui-corner-all {
+        border-radius: 0;
+    }
+
+    .tagit-label {
+        margin: 1px;
+    }
+
+    .ui-state-default, .ui-widget-content .ui-state-default, .ui-widget-header .ui-state-default {
+        border: none;
+    }
+
+    .ui-menu {
+        border: 1px solid #aaa;
+    }
+
+    .ui-state-default .ui-icon {
+        display: none;
+    }
+
+    ul.tagit li.tagit-choice .tagit-close .text-icon {
+        display: inline-block;
+    }

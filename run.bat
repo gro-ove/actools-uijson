@@ -1,5 +1,7 @@
 @echo off
 
+call prepare
+
 taskkill /f /im uijson.exe
 
 rm app\native\AcTools.dll

@@ -1,0 +1,71 @@
+    #window-border {
+        border: 1px solid #aaa;
+        position: fixed;
+        top: 0;
+        left: 0;
+        z-index: 20;
+        right: 0;
+        bottom: 0;
+        overflow: hidden;
+        pointer-events: none;
+    }
+
+    .maximized #window-border {
+        display: none;
+    }
+
+    aside > h4, #window-drag {
+        -webkit-app-region: drag;
+    }
+
+    #window-drag {
+        position: absolute;
+        height: 20px;
+        top: -20px;
+        left: 0;
+        background: rgba(255,255,255,.5);
+        right: 82px;
+        z-index: -1;
+    }
+
+    #window-drag.active {
+        top: 0;
+    }
+
+    #window-buttons {
+        position: fixed;
+        line-height: 0;
+        top: 1px;
+        right: 0;
+        height: 18px;
+        z-index: 21;
+    }
+
+    #window-buttons button {
+        height: 19px;
+        width: 19px;
+        margin-right: 1px;
+        background: #fff;
+        border: none;
+        outline: none;
+        color: #888;
+        font-family: Segoe UI Symbol;
+        font-size: 10px;
+        line-height: 19px;
+        padding: 0;
+    }
+
+    #window-buttons button:hover {
+        color: #fff;
+        background: #59f;
+    }
+
+    #window-buttons #window-close {
+        width: 36px;
+        margin-right: 4px;
+    }
+
+    #window-buttons #window-close:hover {
+        background: #E04343;
+        color: white;
+    }

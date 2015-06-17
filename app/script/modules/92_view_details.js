@@ -210,6 +210,13 @@ modules.viewDetails = function (){
             return false;
         });
 
+    $('main footer')
+        .click(function (e){
+            if (e.target.tagName === 'BUTTON'){
+                $('footer').removeClass('active');
+            }
+        });
+
     /* first row */
     $('#selected-car-open-directory').click(function (){
         if (!_selected) return;
@@ -237,7 +244,24 @@ modules.viewDetails = function (){
         modules.updateDescription(_selected);
     });
 
+    $('#selected-car-reload').click(function (){
+        if (!_selected) return;
+
+        if (_selected.changed){
+            new Dialog('Reload', [
+                '<p>{0}</p>'.format('Your changes will be lost. Are you sure?')
+            ], reload);
+        } else {
+            reload();
+        }
+
+        function reload(){
+            modules.cars.reload(_selected);
+        }
+    });
+
     $('#selected-car-save').click(function (){
+        if (!_selected) return;
         modules.cars.save(_selected);
     });
 

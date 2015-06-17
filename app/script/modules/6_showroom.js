@@ -22,11 +22,12 @@ modules.showroom = function (){
         
         gui.Shell.openItem(output);
         new Dialog('Update Previews', [
-            '<p>New previews ready. Apply?</p>'
+            'New previews ready. Apply?'
         ], function (){
             modules.acTools.FileUtils.ApplyPreviews(modules.acDir.root, c.id, output);
             modules.cars.updateSkins(c);
-        }).find('button').text('Apply');;
+            fs.rmdirSync(output);
+        }, false).setButton('Yes').addButton('No');
     }
 
     return {

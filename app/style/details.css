@@ -1,0 +1,89 @@
+    main {
+        position: absolute;
+        top: 0;
+        left: 200px;
+        right: 0;
+        bottom: 0;
+        overflow-y: auto;
+        padding: 10px;
+        box-sizing: border-box;
+    }
+
+    main > div > h4 {
+        margin-top: 0;
+    }
+
+    #selected-car-error ul {
+        margin-top: 0;
+        font-size: 12px;
+    }
+
+    #selected-car {
+        white-space: nowrap;
+        outline: none;
+    }
+
+    #selected-car.changed:after {
+        content: "*";
+    }
+
+    #selected-car-logo {
+        float: left;
+        max-height: 24px;
+        margin-right: 10px;
+    }
+
+    #details-message {
+        font-size: 12px;
+    }
+
+    #details-message button {
+        margin-top: 10px;
+    }
+
+    #selected-car-desc {
+        font-size: 12px;
+        background: transparent;
+        border: none;
+        width: 100%;
+        resize: none;
+        outline: none;
+    }
+
+    #selected-car-desc:not([readonly]):focus, #selected-car[contenteditable]:focus {
+        box-shadow: 0 0 0 2px #59f;
+        color: black;
+    }
+
+    #selected-car-skins-article {
+        position: relative;
+        padding: 0;
+    }
+
+    #selected-car-skins {
+        position: absolute;
+        width: 120px;
+        top: 0;
+        height: 100%;
+        right: 0;
+        overflow: auto;
+        margin: -2px -2px 0 0;
+        bottom: 0;
+        line-height: 0;
+    }
+
+    #selected-car-skins > img {
+        width: 30px;
+        margin: 2px;
+    }
+
+    #selected-car-skins > img:hover {
+        margin: 0;
+        border: 2px solid #59f;
+    }
+
+    #selected-car-preview {
+        display: block;
+        max-width: calc(100% - 124px);
+        min-height: 200px;
+    }

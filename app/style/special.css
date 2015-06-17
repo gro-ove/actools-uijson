@@ -1,0 +1,14 @@
+    #cars-list > span.disabled, #selected-car-header.disabled {
+        color: #aaa !important;
+    }
+
+    #cars-list > span.error:before, #selected-car-header.error:before {
+        content: "";
+        font-family: Segoe UI Symbol;
+        float: right;
+        background: no-repeat url(img/warn.png) center;
+        background-size: contain;
+        width: 14px;
+        height: 14px;
+        display: inline-block;
+    }

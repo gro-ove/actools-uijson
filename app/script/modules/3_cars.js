@@ -193,6 +193,19 @@ modules.cars = function (){
         mediator.dispatch('update:car:skins', car);
     }
 
+    function reload(car){
+        throw new Error('Not implemented'); // TODO
+
+        if (car.data){
+            fs.writeFileSync(car.json, JSON.stringify(car.data, null, 4));
+            car.changed = false;
+            mediator.dispatch('update:car:changed', car);
+        }
+
+        mediator.dispatch('update:car:data', car);
+        mediator.dispatch('update:car:changed', car);
+    }
+
     function save(car){
         if (car.data){
             fs.writeFileSync(car.json, JSON.stringify(car.data, null, 4));
@@ -216,6 +229,7 @@ modules.cars = function (){
         changeData: changeData,
         selectSkin: selectSkin,
         updateSkins: updateSkins,
+        reload: reload,
         save: save,
         saveChanged: saveChanged,
 

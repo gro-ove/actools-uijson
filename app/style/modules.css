@@ -1,0 +1,7 @@
+    iframe {
+        width: 90vw;
+        height: 75vh;
+        border: 1px solid #eee;
+        width: calc(100vw - 100px);
+        height: calc(100vh - 200px);
+    }

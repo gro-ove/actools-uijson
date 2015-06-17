@@ -6,7 +6,7 @@ modules.updateDescription = function (){
                 $('a[target="_blank"]', w.document).removeAttr('target');
             },
             prepare: function (s){
-                return s.replace(/\[\d+\]/g, '');
+                return s.replace(/\[(?:\d+|citation needed)\]/g, '');
             },
             get url (){
                 return 'https://www.google.ru/search?q=' + encodeURIComponent(c.data.name);

@@ -16,7 +16,7 @@ modules.viewList = function (){
 
     modules.acDir
         .on('change', function (){
-            $('#window-title').text('{0} - AcTools Ui Json'.format(modules.acDir.root));
+            modules.appWindow.title = modules.acDir.root;
         });
 
     modules.cars
