@@ -5,6 +5,8 @@ output/*.exe
 output/*.nw
 output/*.zip
 output/*.tmp
+output/*.upx
+output/download.txt
 output/locales
 
 # Windows image file caches

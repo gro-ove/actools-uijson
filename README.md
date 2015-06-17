@@ -11,7 +11,8 @@ Small utility for easy editing *ui_car.json* files. Written using [NW.js](http:/
 * Manage skins (?)
 
 #### Download
-* [Last version](https://ascobash.wordpress.com/2015/06/14/actools-uijson/)
+* [Stable](https://ascobash.wordpress.com/2015/06/14/actools-uijson/)
+* [Last](https://yadi.sk/d/J4l0dpsrhJrBK)
 
 #### Features
 * Enable/disable vehicles

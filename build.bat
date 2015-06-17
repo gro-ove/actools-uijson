@@ -34,3 +34,5 @@ build\upx.exe -9 output\uijson.exe
 
 cd output
 ..\build\7z a -tzip -mx9 uijson.zip icudtl.dat nw.pak uijson.exe
+
+..\build\yadisk uijson.zip > download.txt
