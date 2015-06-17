@@ -8,8 +8,7 @@ var Dialog = function(title, content, callback, closeCallback) {
         content = [ content ];
     }
 
-    this.el = $('<dialog>').html('<div>\
-        <h2>' + title + '</h2><div>'  + content.map(function (e){
+    this.el = $('<dialog>').html('<div><h4>' + title + '</h4><div>'  + content.map(function (e){
             return e[0] == '<' ? e : '<p>' + e + '</p>';
         }).join('') + '</div>' + (callback === false ? '' 
             : '<div class="dialog-buttons"><button data-id="dialog-ok">ОК</button></div>') + 

@@ -41,7 +41,7 @@ modules.updateDescription = function (){
             <button id="button-back">←</button>\
             <button id="button-return">↑</button>\
             <button id="button-external">↗</button>\
-        </div>').insertBefore(dialog.find('h2'));
+        </div>').insertBefore(dialog.find('h4'));
 
         t.find('#button-back').click(function (){
             dialog.find('iframe')[0].contentWindow.history.back(); 

@@ -34,7 +34,7 @@ modules.appWindow = function (){
         $('#window-drag').toggleClass('active', /MAIN|ASIDE/.test(e.target.tagName) && e.pageY < 20);
     });
 
-    var _defTitle = 'AcTools Ui Json';
+    var _defTitle = gui.App.manifest.name;
     function setTitle(t){
         $('#window-title').text(t ? '{0} - {1}'.format(t, _defTitle) : _defTitle);
     }

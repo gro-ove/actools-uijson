@@ -20,20 +20,20 @@ dialog > div {
     border-radius: 0;
     border: 1px solid #aaa;
     box-shadow: 0 1px 0 rgba(0,0,0,.17);
-    padding: 0 20px 20px;
+    padding: 0 20px 40px;
     box-sizing: border-box;
+    position: relative;
 }
 
 dialog input, dialog select, dialog button, dialog table {
     width: 100%;
-    margin-bottom: 10px;
     box-sizing: border-box;
 }
 
 dialog > div > div:first-child {
     float: right;
     display: inline-block;
-    margin-top: 30px;
+    margin-top: 18px;
 }
 
 dialog > div > div:first-child button {
@@ -43,4 +43,15 @@ dialog > div > div:first-child button {
 
 dialog .dialog-buttons {
     display: flex;
+    
+    position: absolute;
+    background: #59f;
+    left: 0;
+    right: 0;
+    bottom: 0;
+}
+
+dialog .dialog-buttons button {
+    height: 100%;
+    padding: 10px;
 }

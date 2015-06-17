@@ -1,8 +1,6 @@
 /* default modules */
     var fs = require('fs'),
-        path = require('path'),
-        cp = require('child_process'),
-        spawn = cp.spawn;
+        path = require('path');
 
 /* nw.js modules */
     var gui = require('nw.gui'),

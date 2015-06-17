@@ -16,6 +16,8 @@ Small utility for easy editing *ui_car.json* files. Written using [NW.js](http:/
 * Manage skins (?)
 
 #### Changelog:
+* 0.2.9
+    * Auto-disable watermark for skin shots
 * 0.2.7
     * Updated UI
     * Improved skins view (livery.png & stuff)
@@ -24,7 +26,7 @@ Small utility for easy editing *ui_car.json* files. Written using [NW.js](http:/
 
 #### Download
 * [Stable (0.2.4)](https://ascobash.wordpress.com/2015/06/14/actools-uijson/)
-* [Last (0.2.8)](https://yadi.sk/d/J4l0dpsrhJrBK)
+* [Last (0.2.9)](https://yadi.sk/d/J4l0dpsrhJrBK)
 
 #### Features
 * Enable/disable vehicles
