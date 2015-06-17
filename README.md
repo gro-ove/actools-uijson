@@ -16,7 +16,7 @@ Small utility for easy editing *ui_car.json* files. Written using [NW.js](http:/
 
 #### Changelog:
 * 0.2.12
-    * Groups
+    * Groups (incomplete)
 * 0.2.10
     * Reload button
     * Select showroom
@@ -30,7 +30,7 @@ Small utility for easy editing *ui_car.json* files. Written using [NW.js](http:/
 
 #### Download
 * [Stable (0.2.4)](https://ascobash.wordpress.com/2015/06/14/actools-uijson/)
-* [Last (0.2.11)](https://yadi.sk/d/J4l0dpsrhJrBK)
+* [Last (0.2.12)](https://yadi.sk/d/J4l0dpsrhJrBK)
 
 #### Features
 * Enable/disable vehicles

@@ -2,7 +2,7 @@
     "main": "main.html",
     "name": "AcTools Ui Json",
     "description": "Fixes ui_car.json",
-    "version": "0.2.11",
+    "version": "0.2.12",
     "window": {
         "title": "AcTools Ui Json",
         "icon": "icon.png",
