@@ -239,6 +239,11 @@ modules.viewDetails = function (){
         modules.showroom.shot(_selected);
     });
 
+    $('#selected-car-update-previews-manual').click(function (){
+        if (!_selected) return;
+        modules.showroom.shot(_selected, true);
+    });
+
     $('#selected-car-update-description').click(function (){
         if (!_selected) return;
         modules.updateDescription(_selected);

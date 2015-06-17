@@ -38,7 +38,7 @@
         width: 0;
         overflow: hidden;
         transition: .1s width;
-        transition-delay: .3s;
+        transition-delay: .5s;
     }
 
     footer div button {
@@ -47,7 +47,7 @@
 
     footer button:hover + div, footer div:hover {
         width: 70px;
-        transition-delay: .1s;
+        transition-delay: .3s;
     }
 
     footer hr {

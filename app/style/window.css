@@ -14,12 +14,27 @@
         display: none;
     }
 
-    aside > h4, #window-drag {
+    #window-drag, #window-drag-left {
         -webkit-app-region: drag;
     }
 
+    #window-drag-left {
+        position: fixed;
+        height: 30px;
+        top: 0;
+        left: 0;
+        width: 100px;
+        z-index: -1;
+    }
+
+    #cars-list-filter {
+        width: 60px;
+        outline: none;
+        height: 25px;
+    }
+
     #window-drag {
-        position: absolute;
+        position: fixed;
         height: 20px;
         top: -20px;
         left: 0;
