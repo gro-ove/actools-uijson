@@ -18,6 +18,9 @@ Small utility for easy editing *ui_car.json* files. Written using [NW.js](http:/
 
 #### Changelog:
 * 0.2.9
+    * Reload button
+    * Select showroom
+* 0.2.9
     * Auto-disable watermark for skin shots
 * 0.2.7
     * Updated UI

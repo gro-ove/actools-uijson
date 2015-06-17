@@ -1,12 +1,60 @@
 modules.showroom = function (){
-    function start(c, s){
+    var _showrooms = null;
+
+    function loadShowrooms(){
+        _showrooms = fs.readdirSync(modules.acDir.showrooms).map(function (e){
+            var p = path.join(modules.acDir.showrooms, e);
+            var d = null;
+            var j = path.join(p, 'ui', 'ui_showroom.json');
+
+            if (fs.existsSync(j)){
+                try {
+                    d = JSON.parse(fs.readFileSync(j));
+                } catch (e){}
+            }
+
+            return {
+                id: e,
+                data: d,
+                path: p,
+                json: j,
+            }
+        }).filter(function (e){
+            return e;
+        });
+    }
+
+    function start(c, s, r){
         if (c.path.indexOf(modules.acDir.cars)) return;
 
         if (s == null){
             s = c.skins.selected.id;
         }
 
-        modules.acTools.Processes.Showroom.Start(modules.acDir.root, c.id, s, 'showroom');
+        r = r || localStorage.lastShowroom || 'showroom';
+        modules.acTools.Processes.Showroom.Start(modules.acDir.root, c.id, s, r);
+        localStorage.lastShowroom = r;
+    }
+
+    function select(c, s){
+        if (!_showrooms){
+            loadShowrooms();
+        }
+
+        new Dialog('Showroom', [
+            '<select>{0}</select>'.format(_showrooms.map(function (e){
+                return '<option value="{0}">{1}</option>'.format(e.id, e.data ? e.data.name : e.id);
+            }).join(''))
+        ], function (){
+            start(c, s, this.find('select').val());
+        }).addButton('Reload List', function (){
+            setTimeout(function (){
+                loadShowrooms();
+                select(c, s);
+            });
+        }).find('select').val(localStorage.lastShowroom || 'showroom').change(function (){
+            localStorage.lastShowroom = this.value;
+        });
     }
 
     function shot(c, m){
@@ -32,6 +80,7 @@ modules.showroom = function (){
 
     return {
         start: start,
+        select: select,
         shot: shot
     };
 }();

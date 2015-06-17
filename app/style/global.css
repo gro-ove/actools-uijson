@@ -22,7 +22,7 @@
         font-weight: 700;
     }
 
-    button:hover {
+    button:hover, footer span:hover > button:first-child {
         background: #87B6FE;
     }
 

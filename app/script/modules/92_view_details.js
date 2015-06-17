@@ -228,6 +228,11 @@ modules.viewDetails = function (){
         modules.showroom.start(_selected);
     });
 
+    $('#selected-car-showroom-select').click(function (){
+        if (!_selected) return;
+        modules.showroom.select(_selected);
+    });
+
     /* second row */
     $('#selected-car-disable').click(function (){
         if (!_selected) return;

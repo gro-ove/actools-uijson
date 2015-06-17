@@ -15,7 +15,7 @@ var Dialog = function(title, content, callback, closeCallback) {
     '</div>').appendTo('body').click(function (e){
         if (e.target.tagName == 'DIALOG' && (
                 closeCallback == null || 
-                closeCallback !== false && closeCallback() !== false)){
+                closeCallback !== false && closeCallback.call(this) !== false)){
             this.close();
         }
     }.bind(this));
@@ -44,7 +44,7 @@ Dialog.prototype.addButton = function (text, fn){
         document = window.document;
 
     $('<button>' + text + '</button>').appendTo(this.find('.dialog-buttons')).click(function (e){
-        if (!fn || fn() !== false){
+        if (!fn || fn.call(this) !== false){
             this.close();
         }
     }.bind(this));
