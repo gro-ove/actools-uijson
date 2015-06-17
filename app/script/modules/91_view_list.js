@@ -1,17 +1,18 @@
 modules.viewList = function (){
     var mediator = new Mediator();
 
-    var _selected;
+    var _selected, _node = $(document.getElementById('cars-list'));
 
     function select(car){
         _selected = car;
-        $('#cars-list span.expand').removeClass('selected expand');
+        _node.find('.expand').removeClass('expand');
+        _node.find('.selected').removeClass('selected');
 
         if (car){
-            $('#cars-list [data-id="' + car.id + '"]').addClass('selected expand');
+            _node.find('[data-id="' + car.id + '"]').addClass('expand').parent().addClass('selected');
 
             if (car.parent){
-                $('#cars-list [data-id="' + car.parent.id + '"]').addClass('expand');
+                _node.find('[data-id="' + car.parent.id + '"]').addClass('expand');
             }
         }
 
@@ -47,45 +48,72 @@ modules.viewList = function (){
             var d = document.createElement('div');
             d.appendChild(s);
 
-            document.getElementById('cars-list').appendChild(d);
+            if (car.children.length > 0){
+                d.setAttribute('data-children', car.children.length + 1);
+            }
+
+            _node[0].appendChild(d);
         })
         .on('update:car:data', function (car){
             var n = car.data && car.data.name || car.id;
-            $('#cars-list [data-id="' + car.id + '"]')
+            _node.find('[data-id="' + car.id + '"]')
                 .text(n).attr('data-name', n.toLowerCase());
         })
         .on('update:car:parent', function (car){
-            $('#cars-list [data-id="' + car.id + '"]').parent().appendTo(
-                $('#cars-list [data-id="' + car.parent.id + '"]').parent());
+            var d = _node.find('[data-id="' + car.id + '"]').parent();
+            if (car.error.length > 0){
+                var c = d.parent();
+                if (c[0].tagName === 'DIV' && c.find('.error').length == 1){
+                    c.removeClass('error');
+                }
+            }
+
+            if (car.parent){
+                var p = _node.find('[data-id="' + car.parent.id + '"]').parent();
+                d.appendTo(p);
+                if (d.hasClass('error')){
+                    d.removeClass('error');
+                    p.addClass('error');
+                }
+            } else {
+                // TODO: Sort?
+                d.appendTo(_node);
+            }
+        })
+        .on('update:car:children', function (car){
+            _node.find('[data-id="' + car.id + '"]').parent()
+                .attr('data-children', car.children.length ? car.children.length + 1 : null);
         })
         .on('update:car:path', function (car){
-            $('#cars-list [data-id="' + car.id + '"]')
+            _node.find('[data-id="' + car.id + '"]')
                 .attr('data-path', car.path);
         })
         .on('update:car:disabled', function (car){
-            $('#cars-list [data-id="' + car.id + '"]')
+            _node.find('[data-id="' + car.id + '"]')
                 .toggleClass('disabled', car.disabled);
         })
         .on('update:car:changed', function (car){
-            $('#cars-list [data-id="' + car.id + '"]')
+            _node.find('[data-id="' + car.id + '"]')
                 .toggleClass('changed', car.changed);
         })
         .on('error', function (car){
-            $('#cars-list [data-id="' + car.id + '"]').addClass('error');
+            _node.find('[data-id="' + car.id + '"]').toggleClass('error', car.error.length > 0)
+                .closest('#cars-list > div').toggleClass('error', car.error.length > 0);
         });
 
     $('#cars-list-filter')
         .on('change paste keyup keypress search', function (e){
             if (e.keyCode == 27){
                 this.value = '';
+                this.blur();
             }
 
             if (this.value){
-                $('#cars-list span').hide();
-                $('#cars-list [data-id*="' + this.value + '"],\
-                    #cars-list [data-name*="' + this.value.toLowerCase() + '"]').show();
+                $('#cars-list > div').hide();
+                $('#cars-list > div > [data-id*="' + this.value + '"],\
+                    #cars-list > div > [data-name*="' + this.value.toLowerCase() + '"]').parent().show();
             } else {
-                $('#cars-list span').show();
+                $('#cars-list > div').show();
             }
         })
         .on('blur', function (){ 

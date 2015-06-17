@@ -1,8 +1,8 @@
-    #cars-list > span.disabled, #selected-car-header.disabled {
+    #cars-list span.disabled, #selected-car-header.disabled {
         color: #aaa !important;
     }
 
-    #cars-list > span.error:before, #selected-car-header.error:before {
+    #selected-car-error:before {
         content: "";
         font-family: Segoe UI Symbol;
         float: right;

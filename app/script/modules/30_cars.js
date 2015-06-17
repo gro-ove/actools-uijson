@@ -17,7 +17,7 @@ modules.cars = function (){
 
     function initCar(carPath){
         var id = carPath.slice(Math.max(carPath.lastIndexOf('/'), carPath.lastIndexOf('\\')) + 1);
-        var disabled = carPath.indexOf(modules.acDir.cars) < 0;
+        var disabled = carPath.indexOf(modules.acDir.carsOff) != -1;
         var json = path.join(carPath, 'ui', 'ui_car.json');
 
         return {
@@ -220,6 +220,8 @@ modules.cars = function (){
         mediator.dispatch('update:car:disabled', car);
         mediator.dispatch('update:car:path', car);
         mediator.dispatch('update:car:skins', car);
+
+        car.children.forEach(toggle);
     }
 
     function changeData(car, key, value){
