@@ -6,6 +6,10 @@ node -e "f=require('fs');s=JSON.parse(f.readFileSync(p='app/package.json'));cons
 set /p VERSION=<__version.tmp
 del __version.tmp
 
+perl -0pe "s{Last \(\K\d\.\d+\.\d+(?=\))}{%VERSION%}" < README.md > README.md~
+del README.md
+ren README.md~ README.md
+
 set FILE_VERSION=%VERSION%
 set PRODUCT_VERSION=%VERSION%
 set NW_VERSION=0.12.1

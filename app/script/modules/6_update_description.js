@@ -32,17 +32,27 @@ modules.updateDescription = function (){
         dialog.find('iframe').on('load popstate', function (){
             var w = this.contentWindow;
             p.clearUp(w);
-            $('body', w.document).on('mouseup', function (e){
+            $('body', w.document).on('mouseup keydown keyup mousemove', function (e){
                 s = w.getSelection().toString();
             });
         });
 
         var t = $('<div>\
-            <button>←</button>\
-        </div>').insertBefore(dialog.find('h1'));
+            <button id="button-back">←</button>\
+            <button id="button-return">↑</button>\
+            <button id="button-external">↗</button>\
+        </div>').insertBefore(dialog.find('h2'));
 
-        t.find('button').click(function (){
+        t.find('#button-back').click(function (){
             dialog.find('iframe')[0].contentWindow.history.back(); 
+        });
+
+        t.find('#button-return').click(function (){
+            dialog.find('iframe')[0].src = p.url;
+        });
+
+        t.find('#button-external').click(function (){
+            gui.Shell.openItem(dialog.find('iframe')[0].contentWindow.location.href);
         });
     }
 
