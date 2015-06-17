@@ -71,17 +71,27 @@ modules.cars = function (){
             if (fs.existsSync(car.json + '.disabled')){
                 fs.renameSync(car.json + '.disabled', car.json);
             } else {
+                if (car.changed){
+                    car.changed = false;
+                    mediator.dispatch('update:car:changed', car);
+                }
+
                 car.data = false;
                 car.error.push({ id: 'json-missing', msg: 'Missing ui_car.json', details: null });
                 mediator.dispatch('error', car);
                 mediator.dispatch('update:car:data', car);
-                callback();
+                if (typeof callback === 'function') callback();
                 return;
             }
         }
 
         fs.readFile(car.json, function (err, d){
-            callback();
+            if (typeof callback === 'function') callback();
+
+            if (car.changed){
+                car.changed = false;
+                mediator.dispatch('update:car:changed', car);
+            }
 
             if (err){
                 car.data = false;
@@ -222,16 +232,7 @@ modules.cars = function (){
     }
 
     function reload(car){
-        throw new Error('Not implemented'); // TODO
-
-        if (car.data){
-            fs.writeFileSync(car.json, JSON.stringify(car.data, null, 4));
-            car.changed = false;
-            mediator.dispatch('update:car:changed', car);
-        }
-
-        mediator.dispatch('update:car:data', car);
-        mediator.dispatch('update:car:changed', car);
+        loadCar(car);
     }
 
     function save(car){
