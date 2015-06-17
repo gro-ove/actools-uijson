@@ -15,88 +15,79 @@ modules.cars = function (){
         return null;
     }
 
-    function scan(){
-        mediator.dispatch('scan:start');
+    function initCar(carPath){
+        var id = carPath.slice(Math.max(carPath.lastIndexOf('/'), carPath.lastIndexOf('\\')) + 1);
+        var disabled = carPath.indexOf(modules.acDir.cars) < 0;
+        var json = path.join(carPath, 'ui', 'ui_car.json');
 
-        var names = {};
-        _list = fs.readdirSync(modules.acDir.cars).map(function (e){
-            return { id: e, path: path.join(modules.acDir.cars, e), disabled: false };
-        }).concat(fs.readdirSync(modules.acDir.carsOff).map(function (e){
-            return { id: e, path: path.join(modules.acDir.carsOff, e), disabled: true };
-        })).filter(function (car){
-            if (names[car.id]) return;
-            
-            car.json = path.join(car.path, 'ui', 'ui_car.json');
-            car.error = [];
-            car.changed = false;
+        return {
+            id: id,
+            path: carPath,
+            disabled: disabled,
 
-            /* TEMPORARY FIX */
-            if (!fs.existsSync(car.json) && fs.existsSync(car.json + '.disabled')){
-                fs.renameSync(car.json + '.disabled', car.json);
-            }
-
-            if (!fs.existsSync(car.json)) return;
-
-            mediator.dispatch('new:car', car);
-            names[car.id] = true;
-            return car;
-        });
-
-        mediator.dispatch('scan:list', _list);
-        asyncLoad();
+            json: json,
+            error: [],
+            changed: false,
+        };
     }
 
-    function asyncLoad(){
-        var a = _list;
-        step();
+    function loadCar(car, callback){
+        fs.readdir(path.join(car.path, 'skins'), function (err, skins){
+            car.skins = false;
 
-        function step(){
-            if (a != _list) return;
+            if (err){
+                car.error.push({ id: 'skins-not-readable', msg: 'Cannot read skins' });
+                mediator.dispatch('error', car);
+                return;
+            }
 
-            var car = a.filter(function (car){
-                return car.data == null && car.error.length == 0;
-            })[0];
-
-            if (!car) return;
-
-            fs.readdir(path.join(car.path, 'skins'), function (err, skins){
-                car.skins = false;
-
-                if (err){
-                    car.error.push({ id: 'skins-not-readable', msg: 'Cannot read skins' });
-                    mediator.dispatch('error', car);
-                    return;
-                }
-
-                skins = skins.filter(function (e){
-                    return !/\.\w{3,4}$/.test(e);
-                });
-
-                if (skins.length == 0){
-                    car.error.push({ id: 'skins-empty', msg: 'Skins folder is empty' });
-                    mediator.dispatch('error', car);
-                    return;
-                }
-
-                car.skins = skins.map(function (e){
-                    var p = path.join(car.path, 'skins', e);
-                    var e = {
-                        id: e,
-                        path: p,
-                        livery: path.join(p, 'livery.png'),
-                        preview: path.join(p, 'preview.jpg'),
-                    }
-
-                    return e;
-                });
-
-                car.skins.selected = car.skins[0];
-                mediator.dispatch('update:car:skins', car);
+            skins = skins.filter(function (e){
+                return !/\.\w{3,4}$/.test(e);
             });
 
-            fs.readFile(car.json, function (err, d){
-                step();
+            if (skins.length == 0){
+                car.error.push({ id: 'skins-empty', msg: 'Skins folder is empty' });
+                mediator.dispatch('error', car);
+                return;
+            }
 
+            car.skins = skins.map(function (e){
+                var p = path.join(car.path, 'skins', e);
+                var e = {
+                    id: e,
+                    path: p,
+                    livery: path.join(p, 'livery.png'),
+                    preview: path.join(p, 'preview.jpg'),
+                }
+
+                return e;
+            });
+
+            car.skins.selected = car.skins[0];
+            mediator.dispatch('update:car:skins', car);
+        });
+
+        if (!fs.existsSync(car.json)){
+            if (fs.existsSync(car.json + '.disabled')){
+                fs.renameSync(car.json + '.disabled', car.json);
+            } else {
+                car.data = false;
+                car.error.push({ id: 'json-missing', msg: 'Missing ui_car.json', details: null });
+                mediator.dispatch('error', car);
+                mediator.dispatch('update:car:data', car);
+                callback();
+                return;
+            }
+        }
+
+        fs.readFile(car.json, function (err, d){
+            callback();
+
+            if (err){
+                car.data = false;
+                car.error.push({ id: 'json-read', msg: 'Unavailable ui_car.json', details: err });
+                mediator.dispatch('error', car);
+            } else {
                 var p;
                 try {
                     eval('p=' + d.toString().replace(/"(?:[^"\\]*(?:\\.)?)+"/g, function (_){
@@ -108,7 +99,7 @@ modules.cars = function (){
 
                 if (err){
                     car.data = false;
-                    car.error.push({ id: 'json', msg: 'Damaged ui_car.json', details: err });
+                    car.error.push({ id: 'json-parse', msg: 'Damaged ui_car.json', details: err });
                     mediator.dispatch('error', car);
                 } else {
                     if (!p.name){
@@ -130,9 +121,46 @@ modules.cars = function (){
                         }
                     });
                 }
+            }
 
-                mediator.dispatch('update:car:data', car);
-            });
+            mediator.dispatch('update:car:data', car);
+        });
+    }
+
+    function scan(){
+        mediator.dispatch('scan:start');
+
+        var names = {};
+        _list = fs.readdirSync(modules.acDir.cars).map(function (e){
+            return path.join(modules.acDir.cars, e);
+        }).concat(fs.readdirSync(modules.acDir.carsOff).map(function (e){
+            return path.join(modules.acDir.carsOff, e);
+        })).map(function (carPath){
+            car = initCar(carPath);
+
+            if (names[car.id]) return;
+            mediator.dispatch('new:car', car);
+            names[car.id] = true;
+            return car;
+        }).filter(function (e){
+            return e;
+        });
+
+        mediator.dispatch('scan:list', _list);
+        asyncLoad();
+    }
+
+    function asyncLoad(){
+        var a = _list, i = 0;
+        step();
+
+        function step(){
+            if (a != _list) return;
+
+            var car = a[i++];
+            if (car){
+                loadCar(car, step);
+            }
         }
     }
 
@@ -154,6 +182,7 @@ modules.cars = function (){
 
         car.disabled = !car.disabled;
         car.path = newPath;
+        car.json = car.json.replace(a, b)
         car.skins.forEach(function (e){
             for (var n in e){
                 if (typeof e[n] === 'string'){

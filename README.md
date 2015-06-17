@@ -12,6 +12,7 @@ Small utility for easy editing *ui_car.json* files. Written using [NW.js](http:/
 * DB with names, years and stuff
 * Batch name processing (add/remove brand, add/remove year)
 * Batch tags processing
+* Upgrade icons generator
 * Edit mode for livery.png (?)
 * Manage skins (?)
 
