@@ -37,7 +37,7 @@
     #cars-list div div {
         overflow: hidden;
         height: 0;
-        transition: height .1s;
+        transition: height .1s linear;
     }
 
     #cars-list span.expand ~ div {

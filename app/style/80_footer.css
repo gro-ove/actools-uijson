@@ -7,9 +7,9 @@ footer {
     box-sizing: border-box;
     padding: 0;
     z-index: 2;
-    transition: .1s bottom;
+    transition: .1s bottom linear;
 
-        transform: translate3d(0, 0, 0);
+    transform: translate3d(0, 0, 0);
 }
 
 footer.active {

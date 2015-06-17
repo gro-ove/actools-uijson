@@ -2,7 +2,7 @@
     "main": "main.html",
     "name": "AcTools Ui Json",
     "description": "Fixes ui_car.json",
-    "version": "0.2.12",
+    "version": "0.2.13",
     "window": {
         "title": "AcTools Ui Json",
         "icon": "icon.png",
@@ -16,5 +16,5 @@
         "frame": false,
         "show": false
     },
-    "chromium-args": "--ignore-gpu-blacklist --show-fps-counter"
+    "chromium-args": "--ignore-gpu-blacklist"
 }
