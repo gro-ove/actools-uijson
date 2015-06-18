@@ -35,7 +35,7 @@ footer div button {
 
 footer button:hover + div, footer div:hover {
     width: 70px;
-    transition-delay: .2s;
+    transition-delay: .3s;
 }
 
 footer hr {

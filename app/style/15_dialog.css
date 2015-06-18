@@ -25,6 +25,10 @@ dialog > div {
     position: relative;
 }
 
+dialog > div > div > p {
+    font-size: 12px;
+}
+
 dialog input, dialog select, dialog button, dialog table {
     width: 100%;
     box-sizing: border-box;

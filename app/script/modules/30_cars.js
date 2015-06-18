@@ -208,47 +208,59 @@ modules.cars = function (){
         step();
 
         function step(){
-            if (a != _list) return;
-
-            var car = a[i++];
-            if (car){
-                loadCar(car, step);
+            if (a != _list){
+                mediator.dispatch('scan:interrupt', a);
+            } else if (i >= a.length){
+                mediator.dispatch('scan:ready', a);
+            } else {
+                loadCar(a[i++], step);
             }
         }
     }
 
-    function toggle(car){
-        var a, b;
-        if (car.disabled){
-            a = modules.acDir.carsOff, b = modules.acDir.cars;
-        } else {
-            a = modules.acDir.cars, b = modules.acDir.carsOff;
-        }
-
-        var newPath = car.path.replace(a, b);
-        try {
-            fs.renameSync(car.path, newPath);
-        } catch (err){
-            errorHandler.handled(err);
-            return;
-        }
-
-        car.disabled = !car.disabled;
-        car.path = newPath;
-        car.json = car.json.replace(a, b)
-        car.skins.forEach(function (e){
-            for (var n in e){
-                if (typeof e[n] === 'string'){
-                    e[n] = e[n].replace(a, b);
-                }
+    function toggle(car, state){
+        var d = state == null ? !car.disabled : !state;
+        if (car.disabled != d){
+            var a, b;
+            if (d){
+                a = modules.acDir.cars, b = modules.acDir.carsOff;
+            } else {
+                a = modules.acDir.carsOff, b = modules.acDir.cars;
             }
-        });
 
-        mediator.dispatch('update:car:disabled', car);
-        mediator.dispatch('update:car:path', car);
-        mediator.dispatch('update:car:skins', car);
+            var newPath = car.path.replace(a, b);
+            try {
+                fs.renameSync(car.path, newPath);
+            } catch (err){
+                modules.errorHandler.handled(err);
+                return;
+            }
 
-        car.children.forEach(toggle);
+            car.disabled = d;
+            car.path = newPath;
+            car.json = car.json.replace(a, b);
+            if (car.skins){
+                car.skins.forEach(function (e){
+                    for (var n in e){
+                        if (typeof e[n] === 'string'){
+                            e[n] = e[n].replace(a, b);
+                        }
+                    }
+                });
+            }
+
+            mediator.dispatch('update:car:disabled', car);
+            mediator.dispatch('update:car:path', car);
+            mediator.dispatch('update:car:skins', car);
+
+            if (car.parent && !car.disabled && car.parent.disabled){
+                toggle(car.parent, true);
+            }
+
+            car.children.forEach(function (e){
+                toggle(e, !car.disabled);
+            });
+        }
     }
 
     function changeData(car, key, value){

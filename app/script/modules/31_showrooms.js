@@ -60,6 +60,8 @@ modules.showroom = function (){
     function shot(c, m){
         if (c.path.indexOf(modules.acDir.cars)) return;
 
+        // http://www.racedepartment.com/downloads/studio-black-showroom.4353/download?version=6612
+
         var output;
         try {
             output = modules.acTools.Processes.Showroom.Shot(modules.acDir.root, c.id, 150, -36, !!m);

@@ -1,0 +1,15 @@
+#settings-open {
+    background: center url(img/settings.png) no-repeat;
+    background-size: cover;
+    height: 19px;
+    width: 24px;
+    float: right;
+}
+
+#settings-open:hover {
+    background-color: rgba(0,0,0,.1);
+}
+
+#settings-open:active {
+    opacity: .7;
+}

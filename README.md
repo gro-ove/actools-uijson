@@ -2,9 +2,8 @@
 Small utility for easy editing *ui_car.json* files. Written using [NW.js](http://nwjs.io/).
 
 #### TODO
-* More shortcuts
-* Options
 * Restoration Wizard
+* More shortcuts
 * Detect broken cars
 * Brand logo select
 * New custom fields: year
@@ -18,6 +17,16 @@ Small utility for easy editing *ui_car.json* files. Written using [NW.js](http:/
 * Manage skins (?)
 
 #### Changelog:
+* 0.2.19
+    * Settings
+    * Icon
+    * Bugfixes
+* 0.2.18
+    * Massive optimization
+    * Normal disableable tips
+    * App renamed to AcTools Cars Manager
+* 0.2.17
+    * Group enabling/disabling fixed
 * 0.2.16
     * Fixed description load/save line breaks 
     * View/edit brand, class and specs
@@ -41,12 +50,12 @@ Small utility for easy editing *ui_car.json* files. Written using [NW.js](http:/
     * Added manual mode
 
 #### Download
-* [Last (0.2.16)](https://yadi.sk/d/J4l0dpsrhJrBK)
+* [Last (0.2.18)](https://yadi.sk/d/J4l0dpsrhJrBK)
 * [Stable (0.2.4)](https://ascobash.wordpress.com/2015/06/14/actools-uijson/)
 
 #### Features
 * Enable/disable vehicles
-* Edit name, tags and description
+* Edit name, brand, tags, description, class & specs
 * Search for description online
 * Preview cars
 * Auto-update Previews
@@ -59,19 +68,12 @@ Small utility for easy editing *ui_car.json* files. Written using [NW.js](http:/
 * Don't forget to save changes (Ctrl+S)
 
 #### How to update previews
-* Install [Studio Black Showroom](http://www.racedepartment.com/downloads/studio-black-showroom.4353/)
-* Lauch acShowroom (for example, with double click on existing previews) and switch Post Process Filter to default
 * Press RMB and click “Update Previews”
+* Manual mode: set the right camera position and press F8
 * Wait until all skins will be screenshoted
 * Check result and press “Apply” if everything is OK
 
-#### Known bugs
-* Update skins previews
-    * Kinda random angle
-    * Don't press “Update Previews” two times in a row
-    * Previews in app don't update properly
-
-    *Warning!* This feature still could be pretty buggy, so use it on your own risk! And, please, don't press anything in process!
+    *Warning!* This thing could be pretty buggy. Sometimes you'll have to terminate updating (by press Esc) and try again.
 
 #### Screenshots
 ![Screenshot](http://i.imgur.com/AiPMrXT.png)

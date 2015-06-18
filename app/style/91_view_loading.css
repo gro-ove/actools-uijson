@@ -1,0 +1,84 @@
+#loading {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: #fff;
+    z-index: 10;
+}
+
+#loading-grab {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 200px;
+    height: 50px;
+    -webkit-app-region: drag;
+}
+
+#loading > div:first-child {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    margin-top: -160px;
+    margin-left: -60px;
+    width: 120px;
+}
+
+.loader {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    margin-top: 200px;
+    width: 40px;
+    margin: auto;
+}
+
+.loader .circle {
+    position: absolute;
+    width: 38px;
+    height: 38px;
+    opacity: 0;
+    transform: rotate(225deg);
+    -webkit-animation-iteration-count: infinite;
+    -webkit-animation-name: orbit;
+    -webkit-animation-duration: 5.5s;
+}
+    
+.loader .circle:after {
+    content: '';
+    position: absolute;
+    width: 5px;
+    height: 5px;
+    border-radius: 5px;
+    background: #59f; /* Pick a color */
+}
+        
+.loader .circle:nth-child(2) {  -webkit-animation-delay: 240ms; }
+.loader .circle:nth-child(3) {  -webkit-animation-delay: 480ms; }
+.loader .circle:nth-child(4) {  -webkit-animation-delay: 720ms; }
+.loader .circle:nth-child(5) {  -webkit-animation-delay: 960ms; }
+
+@-webkit-keyframes orbit { 
+    0%   { transform:rotate(225deg); opacity: 1;
+                 -webkit-animation-timing-function: ease-out; } 
+        
+    7%   { transform:rotate(345deg);
+                 -webkit-animation-timing-function: linear; }
+        
+    30%   { transform:rotate(455deg);
+                    -webkit-animation-timing-function: ease-in-out; }
+        
+    39%   { transform:rotate(690deg);
+                    -webkit-animation-timing-function: linear; }
+        
+    70%   { transform:rotate(815deg); opacity: 1;
+                 -webkit-animation-timing-function: ease-out; }
+        
+    75%   { transform:rotate(945deg); 
+                 -webkit-animation-timing-function: ease-out; }
+        
+    76% { transform:rotate(945deg); opacity: 0; }
+    100% { transform:rotate(945deg); opacity: 0; } 
+}
