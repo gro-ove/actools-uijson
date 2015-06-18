@@ -233,6 +233,16 @@ modules.viewDetails = function (){
         modules.showroom.select(_selected);
     });
 
+    $('#selected-car-practice').click(function (){
+        if (!_selected) return;
+        modules.practice.start(_selected);
+    });
+
+    $('#selected-car-practice-select').click(function (){
+        if (!_selected) return;
+        modules.practice.select(_selected);
+    });
+
     /* second row */
     $('#selected-car-disable').click(function (){
         if (!_selected) return;

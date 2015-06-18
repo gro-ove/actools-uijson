@@ -3,8 +3,10 @@ Small utility for easy editing *ui_car.json* files. Written using [NW.js](http:/
 
 #### TODO
 * View/edit brand, class, spec & stuff
+* Shortcuts
 * Options
 * Restoration Wizard
+* Detect broken cars
 * Brand logo select
 * New custom fields: year
 * DB with names, years and stuff
@@ -12,9 +14,14 @@ Small utility for easy editing *ui_car.json* files. Written using [NW.js](http:/
 * Batch tags processing
 * Upgrade icons generator
 * Edit mode for livery.png (?)
+* Fix body_shadow.png (?)
 * Manage skins (?)
 
 #### Changelog:
+* 0.2.15
+    * Added Quick Practive Feature
+    * Tips on launch
+    * Error handling improved
 * 0.2.14
     * Groups
     * Bugfixes
@@ -30,7 +37,7 @@ Small utility for easy editing *ui_car.json* files. Written using [NW.js](http:/
     * Added manual mode
 
 #### Download
-* [Last (0.2.14)](https://yadi.sk/d/J4l0dpsrhJrBK)
+* [Last (0.2.15)](https://yadi.sk/d/J4l0dpsrhJrBK)
 * [Stable (0.2.4)](https://ascobash.wordpress.com/2015/06/14/actools-uijson/)
 
 #### Features
@@ -38,7 +45,8 @@ Small utility for easy editing *ui_car.json* files. Written using [NW.js](http:/
 * Edit name, tags and description
 * Search for description online
 * Preview cars
-* Auto-update skins previews
+* Auto-update Previews
+* Quick Practive
 
 #### Tips
 * Double click on preview to launch acShowroom.
