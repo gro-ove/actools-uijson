@@ -6,6 +6,7 @@ modules.tips = function (){
         'Don\'t forget to save changes (Ctrl+S). Use “Reload” button if you want to discard them.',
         'If you want practice, <b>AcTools Ui Json</b> helps you much faster than original Launcher. Weird.\
             Maybe later I\'ll create custom launcher.',
+        'Make double click on PW-ratio to recalculate it using BHP and Weight.',
         '<b>Auto-update Preview Feature</b> could produce super-native looking previews, but sadly sometimes not from the first time.',
         'Before using <b>Auto-update Preview Feature</b> please disable all graphics mods (such as SweetFX).\
             We want original-looking screenshots, don\'t we?',

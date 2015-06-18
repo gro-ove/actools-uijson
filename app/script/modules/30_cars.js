@@ -135,7 +135,7 @@ modules.cars = function (){
                     if (!p.tags) p.tags = [];
                     if (!p.specs) p.specs = {};
 
-                    p.class = p.class ? p.class[0].toUpperCase() + p.class.slice(1) : '';
+                    p.class = p.class || '';
                     p.description = p.description.replace(/\n/g, ' ')
                         .replace(/<\/?br\/?>[ \t]*|\n[ \t]+/g, '\n').replace(/<\s*\/?\s*\w+\s*>/g, '').replace(/[\t ]+/g, ' ');
 
@@ -261,10 +261,10 @@ modules.cars = function (){
         mediator.dispatch('update:car:changed', car);
     }
 
-    function changeDataSpec(car, key, value){
-        if (!car.data || car.data.spec[key] == value) return;
+    function changeDataSpecs(car, key, value){
+        if (!car.data || car.data.specs[key] == value) return;
 
-        car.spec.data[key] = value;
+        car.data.specs[key] = value;
         car.changed = true;
 
         mediator.dispatch('update:car:data', car);
@@ -314,7 +314,7 @@ modules.cars = function (){
         scan: scan,
         toggle: toggle,
         changeData: changeData,
-        changeDataSpec: changeDataSpec,
+        changeDataSpecs: changeDataSpecs,
         selectSkin: selectSkin,
         updateSkins: updateSkins,
         reload: reload,

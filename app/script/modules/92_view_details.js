@@ -70,7 +70,7 @@ modules.viewDetails = function (){
             $('#selected-car-weight').val(car.data.specs.weight || '');
             $('#selected-car-topspeed').val(car.data.specs.topspeed || '');
             $('#selected-car-acceleration').val(car.data.specs.acceleration || '');
-            $('#selected-car-pwratio').val(car.data.pwratio || '');
+            $('#selected-car-pwratio').val(car.data.specs.pwratio || '');
         } else {
             he.attr('readonly', true).val(car.id);
             de.attr('readonly', true).val(car.data == null ? 'Loading...' : '').elastic();
@@ -166,7 +166,7 @@ modules.viewDetails = function (){
             this.blur();
             return false;
         }
-    }).on('input', function (){
+    }).change(function (){
         if (!_selected || this.readonly || !this.value) return;
         this.value = this.value.slice(0, 64);
         modules.cars.changeData(_selected, 'name', this.value);
@@ -182,9 +182,18 @@ modules.viewDetails = function (){
             this.blur();
             return false;
         }
-    }).on('input', function (e){
+    }).change(function (e){
         if (!_selected || this.readonly || !this.value) return;
         modules.cars.changeData(_selected, 'brand', this.value);
+    }).autocomplete({
+        delay: 0,
+        minLength: 0,
+        source: function(search, showChoices) {
+            var f = search.term.toLowerCase();
+            showChoices(modules.cars.brands.filter(function (e){
+                return e.toLowerCase().indexOf(f) === 0;
+            }));
+        }
     });
 
     $('#selected-car-class').keydown(function (e){
@@ -192,9 +201,18 @@ modules.viewDetails = function (){
             this.blur();
             return false;
         }
-    }).on('input', function (){
+    }).change(function (){
         if (!_selected || this.readonly) return;
         modules.cars.changeData(_selected, 'class', this.value);
+    }).autocomplete({
+        delay: 0,
+        minLength: 0,
+        source: function(search, showChoices) {
+            var f = search.term.toLowerCase();
+            showChoices(modules.cars.classes.filter(function (e){
+                return e.toLowerCase().indexOf(f) === 0;
+            }));
+        }
     });
 
     [ 'bhp', 'torque', 'weight', 'topspeed', 'acceleration', 'pwratio' ].forEach(function (e){
@@ -203,10 +221,19 @@ modules.viewDetails = function (){
                 this.blur();
                 return false;
             }
-        }).on('input', function (){
+        }).change(function (){
             if (!_selected || this.readonly) return;
-            modules.cars.changeDataSpec(_selected, e, this.value);
+            modules.cars.changeDataSpecs(_selected, e, this.value);
         });
+    });
+
+    $('#selected-car-pwratio').dblclick(function (){
+        if (!_selected || !_selected.data || this.readonly) return;
+        var w = (_selected.data.specs.weight || '').match(/\d+/),
+            p = (_selected.data.specs.bhp || '').match(/\d+/);
+        if (w && p){
+            modules.cars.changeDataSpecs(_selected, 'pwratio', (+w / +p).toFixed(2) + 'kg/cv');
+        }
     });
 
     function getInputTags(){
@@ -214,10 +241,11 @@ modules.viewDetails = function (){
     }
 
     $('#selected-car-tags').tagit({
+        allowSpaces: true,
+        autocomplete: { delay: 0, minLength: 1 },
         availableTags: modules.cars.tags,
-        autocomplete: { delay: 0, minLength: 1, allowSpaces: true },
-        removeConfirmation: true,
         caseSensitive: false,
+        removeConfirmation: true,
 
         afterTagAdded: function (){
             if (!_tagSkip){
