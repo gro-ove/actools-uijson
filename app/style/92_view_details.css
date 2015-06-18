@@ -18,13 +18,12 @@
         font-size: 12px;
     }
 
-    #selected-car {
-        white-space: nowrap;
-        outline: none;
+    #selected-car-header.changed:after {
+        content: "*";
     }
 
-    #selected-car.changed:after {
-        content: "*";
+    #selected-car {
+        width: calc(100vw - 350px);
     }
 
     #selected-car-logo {
@@ -87,4 +86,44 @@
         display: block;
         max-width: calc(100% - 124px);
         min-height: 200px;
+    }
+
+/* properties */
+    #selected-car-properties {
+        margin: 0 0 10px;
+        font-size: 12px;
+        list-style-type: none;
+    }
+
+    #selected-car-properties .property {
+        text-transform: uppercase;
+        font-family: Roboto Condensed;
+        font-weight: 700;
+        display: inline-block;
+        width: 120px;
+    }
+
+    #selected-car-properties .property:after {
+        content: ":";
+    }
+
+    #selected-car, #selected-car-properties input {
+        background: transparent;
+        border: none;
+        outline: none;
+        padding: 0;
+        font: inherit;
+    }
+
+    #selected-car:focus, #selected-car-properties input:focus {
+        box-shadow: 0 0 0 2px #59f;
+        color: black;
+    }
+
+    summary {
+        margin-left: -13px;
+    }
+
+    summary li {
+        display: inline-block;
     }

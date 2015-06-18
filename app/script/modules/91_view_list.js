@@ -125,6 +125,7 @@ modules.viewList = function (){
     $(window)
         .keypress(function (e){
             if (/INPUT|SELECT|TEXTAREA/.test(e.target.tagName) || e.target.contentEditable === 'true') return;
+            if (e.ctrlKey || e.altKey || e.shiftKey) return;
 
             var f = $('#cars-list-filter').show();
             f[0].focus();

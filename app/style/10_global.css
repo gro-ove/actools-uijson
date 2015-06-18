@@ -42,6 +42,10 @@
         font-weight: 700;
     }
 
+    input:invalid {
+        box-shadow: 0 0 0 2px red;
+    }
+
     pre {
         white-space: pre-wrap;
         font-size: 12px;
@@ -52,6 +56,10 @@
     }
 
     ul.tagit input[type="text"] {
+        width: 0;
+    }
+
+    ul.tagit input[type="text"]:focus {
         width: 120px;
     }
 

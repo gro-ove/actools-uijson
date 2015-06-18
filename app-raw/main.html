@@ -26,7 +26,7 @@
             <div id="details-message">Loading...</div>
             <div id="selected-car-details" style="display:none">
                 <h4 id="selected-car-header">
-                    <img id="selected-car-logo"><span id="selected-car" contenteditable="true"></span>
+                    <img id="selected-car-logo"><input id="selected-car" required></input>
                 </h4>
                 <p id="selected-car-error" class="error" contenteditable="true"></p>
                 <article id="selected-car-skins-article">
@@ -35,6 +35,44 @@
                 </article>
                 <article>
                     <ul id="selected-car-tags"></ul>
+                    <ul id="selected-car-properties">
+                        <li>
+                            <span class="property">Brand</span>
+                            <input id="selected-car-brand" class="property-value" required></input>    
+                        </li>
+                        <li>
+                            <span class="property">Class</span>
+                            <input id="selected-car-class" class="property-value" placeholder="?"></input>    
+                        </li>
+                        <details>
+                            <summary>
+                                <li>
+                                    <span class="property">Bhp</span>
+                                    <input id="selected-car-bhp" class="property-value" placeholder="?"></input>    
+                                </li>
+                            </summary>
+                            <li>
+                                <span class="property">Torque</span>
+                                <input id="selected-car-torque" class="property-value" placeholder="?"></input>    
+                            </li>
+                            <li>
+                                <span class="property">Weight</span>
+                                <input id="selected-car-weight" class="property-value" placeholder="?"></input>    
+                            </li>
+                            <li>
+                                <span class="property">Top Speed</span>
+                                <input id="selected-car-topspeed" class="property-value" placeholder="?"></input>    
+                            </li>
+                            <li>
+                                <span class="property">Acceleration</span>
+                                <input id="selected-car-acceleration" class="property-value" placeholder="?"></input>    
+                            </li>
+                            <li>
+                                <span class="property">P/W Ratio</span>
+                                <input id="selected-car-pwratio" class="property-value" placeholder="?"></input>    
+                            </li>
+                        </details>
+                    </ul>
                     <textarea id="selected-car-desc"></textarea>
                 </article>
             </div>

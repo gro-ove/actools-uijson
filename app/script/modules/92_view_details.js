@@ -40,9 +40,10 @@ modules.viewDetails = function (){
     function outData(car){
         var he = $('#selected-car'),
             de = $('#selected-car-desc'),
-            ta = $('#selected-car-tags');
+            ta = $('#selected-car-tags'),
+            pr = $('#selected-car-properties');
         if (car.data){
-            he.attr('contenteditable', true);
+            he.removeAttr('readonly');
             de.removeAttr('readonly');
 
             _tagSkip = true;
@@ -52,17 +53,29 @@ modules.viewDetails = function (){
             });
             _tagSkip = false;
 
-            if (car.data.name != he.text()){
-                he.text(car.data.name);
+            if (car.data.name != he.val()){
+                he.val(car.data.name);
             }
 
             if (car.data.description != de.val()){
                 de.val(car.data.description).elastic();
             }
+
+            pr.show();
+            $('#selected-car-brand').val(car.data.brand);
+            $('#selected-car-class').val(car.data.class || '');
+
+            $('#selected-car-bhp').val(car.data.specs.bhp || '');
+            $('#selected-car-torque').val(car.data.specs.torque || '');
+            $('#selected-car-weight').val(car.data.specs.weight || '');
+            $('#selected-car-topspeed').val(car.data.specs.topspeed || '');
+            $('#selected-car-acceleration').val(car.data.specs.acceleration || '');
+            $('#selected-car-pwratio').val(car.data.pwratio || '');
         } else {
-            he.removeAttr('contenteditable').text(car.id);
+            he.attr('readonly', true).val(car.id);
             de.attr('readonly', true).val(car.data == null ? 'Loading...' : '').elastic();
             ta.hide();
+            pr.hide();
         }
     }
 
@@ -72,7 +85,7 @@ modules.viewDetails = function (){
     }
 
     function outChanged(car){
-        $('#selected-car').toggleClass('changed', car.changed)
+        $('#selected-car-header').toggleClass('changed', car.changed)
     }
 
     function outSkins(car){
@@ -148,21 +161,52 @@ modules.viewDetails = function (){
         });
 
     /* inputs */
-    $('#selected-car').on('keydown input', function (e){
+    $('#selected-car').keydown(function (e){
         if (e.keyCode == 13){
             this.blur();
             return false;
         }
-
-        this.textContent = this.textContent.slice(0, 64);
-
-        if (!_selected || this.contentEditable != 'true') return;
-        modules.cars.changeData(_selected, 'name', this.textContent);
+    }).on('input', function (){
+        if (!_selected || this.readonly || !this.value) return;
+        this.value = this.value.slice(0, 64);
+        modules.cars.changeData(_selected, 'name', this.value);
     });
 
-    $('#selected-car-desc').elastic().change(function (){
+    $('#selected-car-desc').elastic().on('input', function (){
         if (!_selected || this.readonly) return;
         modules.cars.changeData(_selected, 'description', this.value);
+    });
+
+    $('#selected-car-brand').keydown(function (e){
+        if (e.keyCode == 13){
+            this.blur();
+            return false;
+        }
+    }).on('input', function (e){
+        if (!_selected || this.readonly || !this.value) return;
+        modules.cars.changeData(_selected, 'brand', this.value);
+    });
+
+    $('#selected-car-class').keydown(function (e){
+        if (e.keyCode == 13){
+            this.blur();
+            return false;
+        }
+    }).on('input', function (){
+        if (!_selected || this.readonly) return;
+        modules.cars.changeData(_selected, 'class', this.value);
+    });
+
+    [ 'bhp', 'torque', 'weight', 'topspeed', 'acceleration', 'pwratio' ].forEach(function (e){
+        $('#selected-car-' + e).keydown(function (e){
+            if (e.keyCode == 13){
+                this.blur();
+                return false;
+            }
+        }).on('input', function (){
+            if (!_selected || this.readonly) return;
+            modules.cars.changeDataSpec(_selected, e, this.value);
+        });
     });
 
     function getInputTags(){
@@ -214,6 +258,18 @@ modules.viewDetails = function (){
         .click(function (e){
             if (e.target.tagName === 'BUTTON'){
                 $('footer').removeClass('active');
+            }
+        });
+
+    /* global hotkeys */
+    $(window)
+        .keydown(function (e){
+            if (!_selected) return;
+
+            if (e.keyCode == 83 && e.ctrlKey){
+                /* Ctrl+S */
+                modules.cars.save(_selected);
+                return false;
             }
         });
 

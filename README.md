@@ -18,6 +18,8 @@ Small utility for easy editing *ui_car.json* files. Written using [NW.js](http:/
 * Manage skins (?)
 
 #### Changelog:
+* 0.2.16
+    * Fixed description load/save line breaks 
 * 0.2.15
     * Added Quick Practive Feature
     * Tips on launch

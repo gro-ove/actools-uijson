@@ -2,6 +2,10 @@ modules.cars = function (){
     var mediator = new Mediator();
 
     var _list,
+        _brands = [],
+        _brandsLower = [],
+        _classes = [],
+        _classesLower = [],
         _tags = [],
         _tagsLower = [];
 
@@ -104,7 +108,7 @@ modules.cars = function (){
                 var p;
                 try {
                     eval('p=' + d.toString().replace(/"(?:[^"\\]*(?:\\.)?)+"/g, function (_){
-                        return _.replace(/\r?\n[ \t]*|<\/?br\/?>/g, '\\n');
+                        return _.replace(/\r?\n/g, '\\n');
                     }));
                 } catch (er){
                     err = er;
@@ -121,8 +125,19 @@ modules.cars = function (){
                         return;
                     }
 
+                    if (!p.brand){
+                        car.error.push({ id: 'data-brand', msg: 'Brand is missing' });
+                        mediator.dispatch('error', car);
+                        return;
+                    }
+
                     if (!p.description) p.description = '';
                     if (!p.tags) p.tags = [];
+                    if (!p.specs) p.specs = {};
+
+                    p.class = p.class ? p.class[0].toUpperCase() + p.class.slice(1) : '';
+                    p.description = p.description.replace(/\n/g, ' ')
+                        .replace(/<\/?br\/?>[ \t]*|\n[ \t]+/g, '\n').replace(/<\s*\/?\s*\w+\s*>/g, '').replace(/[\t ]+/g, ' ');
 
                     car.data = p;
 
@@ -146,6 +161,18 @@ modules.cars = function (){
                             _tagsLower.push(l);
                         }
                     });
+
+                    var l = car.data.class.toLowerCase();
+                    if (_classesLower.indexOf(l) < 0){
+                        _classes.push(car.data.class);
+                        _classesLower.push(l);
+                    }
+
+                    var l = car.data.brand.toLowerCase();
+                    if (_brandsLower.indexOf(l) < 0){
+                        _brands.push(car.data.brand);
+                        _brandsLower.push(l);
+                    }
                 }
             }
 
@@ -234,6 +261,16 @@ modules.cars = function (){
         mediator.dispatch('update:car:changed', car);
     }
 
+    function changeDataSpec(car, key, value){
+        if (!car.data || car.data.spec[key] == value) return;
+
+        car.spec.data[key] = value;
+        car.changed = true;
+
+        mediator.dispatch('update:car:data', car);
+        mediator.dispatch('update:car:changed', car);
+    }
+
     function selectSkin(car, skinId){
         var newSkin = car.skins.filter(function (e){
             return e.id == skinId;
@@ -255,7 +292,10 @@ modules.cars = function (){
 
     function save(car){
         if (car.data){
-            fs.writeFileSync(car.json, JSON.stringify(car.data, null, 4));
+            var p = Object.clone(car.data);
+            p.description = p.description.replace(/\n/g, '<br>');
+            p.class = p.class.toLowerCase();
+            fs.writeFileSync(car.json, JSON.stringify(p, null, 4));
             car.changed = false;
             mediator.dispatch('update:car:changed', car);
         }
@@ -274,14 +314,15 @@ modules.cars = function (){
         scan: scan,
         toggle: toggle,
         changeData: changeData,
+        changeDataSpec: changeDataSpec,
         selectSkin: selectSkin,
         updateSkins: updateSkins,
         reload: reload,
         save: save,
         saveChanged: saveChanged,
 
-        get tags (){
-            return _tags;
-        },
+        get brands (){ return _brands; },
+        get classes (){ return _classes; },
+        get tags (){ return _tags; },
     });
 }();
