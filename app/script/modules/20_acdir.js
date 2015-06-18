@@ -1,7 +1,7 @@
 modules.acDir = function (){
     var mediator = new Mediator();
 
-    var _root, _cars, _carsOff, _showrooms;
+    var _root, _cars, _carsOff, _tracks, _showrooms;
 
     function init(c){
         function ready(d){
@@ -15,6 +15,7 @@ modules.acDir = function (){
                 fs.mkdirSync(_carsOff);
             }
 
+            _tracks = path.join(d, 'content', 'tracks');
             _showrooms = path.join(d, 'content', 'showroom');
 
             localStorage.acRootDir = d;
@@ -59,6 +60,7 @@ modules.acDir = function (){
         get root(){ return _root },
         get cars(){ return _cars },
         get carsOff(){ return _carsOff },
+        get tracks(){ return _tracks },
         get showrooms(){ return _showrooms },
     });
 }();

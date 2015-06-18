@@ -64,7 +64,7 @@ modules.showroom = function (){
         try {
             output = modules.acTools.Processes.Showroom.Shot(modules.acDir.root, c.id, 150, -36, !!m);
         } catch (err){
-            modules.errorHandler.handled('Cannot get previews, sorry.', err);
+            modules.errorHandler.handled('Cannot get previews. Maybe process was terminated, there is not enough rights or the car is broken.');
             return;
         }
         

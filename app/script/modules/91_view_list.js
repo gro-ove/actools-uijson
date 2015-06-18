@@ -32,7 +32,7 @@ modules.viewList = function (){
             $('#total-cars').val(list.length);
 
             if (list.length > 0){
-                select(list[0])
+                // select(list[0])
             }
         })
         .on('new:car', function (car){

@@ -13,7 +13,7 @@ modules.errorHandler = function (){
     function handled(msg, err){
         new Dialog('Oops!', [
             '<p>' + msg + '</p>',
-            '<pre>' + err.stack + '</pre>'
+            err ? '<pre>' + err.stack + '</pre>' : null
         ]);
     }
 
