@@ -219,6 +219,7 @@ modules.cars = function (){
             } else if (i >= a.length){
                 mediator.dispatch('scan:ready', a);
             } else {
+                mediator.dispatch('scan:progress', i, a.length);
                 loadCar(a[i++], step);
             }
         }
@@ -308,6 +309,10 @@ modules.cars = function (){
         loadCar(car);
     }
 
+    function reloadAll(){
+        scan();
+    }
+
     function save(car){
         if (car.data){
             var p = Object.clone(car.data);
@@ -319,7 +324,7 @@ modules.cars = function (){
         }
     }
 
-    function saveChanged(){
+    function saveAll(){
         carsList.forEach(function (car){
             if (car.changed){
                 save(car);
@@ -336,11 +341,13 @@ modules.cars = function (){
         selectSkin: selectSkin,
         updateSkins: updateSkins,
         reload: reload,
+        reloadAll: reloadAll,
         save: save,
-        saveChanged: saveChanged,
+        saveAll: saveAll,
 
-        get brands (){ return _brands; },
-        get classes (){ return _classes; },
-        get tags (){ return _tags; },
+        get list(){ return _list; },
+        get brands(){ return _brands; },
+        get classes(){ return _classes; },
+        get tags(){ return _tags; },
     });
 }();

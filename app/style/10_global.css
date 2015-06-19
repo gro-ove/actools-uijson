@@ -22,6 +22,19 @@
         font-weight: 700;
     }
 
+    progress {
+        height: 3px;
+        background: #eee;
+    }
+
+    progress::-webkit-progress-bar {
+        background: #eee;
+    }
+    
+    progress::-webkit-progress-value {
+        background: #59f;
+    }
+
     button:hover, footer span:hover > button:first-child {
         background: #87B6FE;
     }

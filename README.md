@@ -2,9 +2,12 @@
 Small utility for easy editing *ui_car.json* files. Written using [NW.js](http://nwjs.io/).
 
 #### TODO
-* Smart filters
+* Auto-download black showroom
+* Auto-disable SweetFX and stuff
+* New mods installation
+* Changable parent, upgrade icons generator
 * Restoration Wizard
-* More shortcuts
+* More hotkeys
 * Detect broken cars
 * Brand logo select
 * New custom fields: year
@@ -12,12 +15,22 @@ Small utility for easy editing *ui_car.json* files. Written using [NW.js](http:/
 * Batch name processing (add/remove brand, add/remove year)
 * View/edit torque & powes curves, load from data/power.lut
 * Batch JS-based processing
-* Upgrade icons generator
 * Edit mode for livery.png (?)
 * Fix body_shadow.png (?)
 * Manage skins (?)
+* Clone cars, modify in-game specs (?)
+
+#### Download
+* [Last (0.2.21)](https://yadi.sk/d/J4l0dpsrhJrBK)
+* [Stable (0.2.4)](https://ascobash.wordpress.com/2015/06/14/actools-uijson/)
 
 #### Changelog:
+* 0.2.21
+    * Fancy progressbar
+    * Perfomance improvements
+* 0.2.20
+    * Smart filters
+    * New tools menu for list
 * 0.2.19
     * Settings
     * Icon
@@ -51,10 +64,6 @@ Small utility for easy editing *ui_car.json* files. Written using [NW.js](http:/
     * Auto-update skins previews fixed and improved
     * Added manual mode
 
-#### Download
-* [Last (0.2.19)](https://yadi.sk/d/J4l0dpsrhJrBK)
-* [Stable (0.2.4)](https://ascobash.wordpress.com/2015/06/14/actools-uijson/)
-
 #### Features
 * Enable/disable vehicles
 * Edit name, brand, tags, description, class & specs
@@ -78,4 +87,10 @@ Small utility for easy editing *ui_car.json* files. Written using [NW.js](http:/
     *Warning!* This thing could be pretty buggy. Sometimes you'll have to terminate updating (by press Esc) and try again.
 
 #### Screenshots
-![Screenshot](http://i.imgur.com/AiPMrXT.png)
+![Screenshot](http://i.imgur.com/eDJs1wu.png)
+
+#### Auto-updated Previews
+![Porsche 944 Turbo S](https://pp.vk.me/c621730/v621730892/2e1e7/LO25pCMqvpg.jpg)
+![Aston Martin Vanquish V12](https://pp.vk.me/c621730/v621730048/29d84/Yzk1DN_rUI0.jpg)
+![Volvo S60R](https://pp.vk.me/c621730/v621730107/33687/j-n4apx1GA8.jpg)
+

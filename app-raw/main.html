@@ -20,21 +20,21 @@
             <div>
                 <h4>Please wait...</h4>
                 <h6>0 cars found</h6>
+                <progress indeterminate></progress>
             </div>
             <div id="loading-grab"></div>
-            <div class="loader">
-                <div class="circle"></div>
-                <div class="circle"></div>
-                <div class="circle"></div>
-                <div class="circle"></div>
-                <div class="circle"></div>
-            </div>
         </div>
-        <aside style="display:none">
+        <aside>
             <h4>Total cars: <output id="total-cars"></output><button id="settings-open"></button></h4>
             <input id="cars-list-filter" type="search">
             <span id="window-drag-left"></span>
             <div id="cars-list"></div>
+
+            <footer>
+                <button id="cars-list-reload">Reload</button>
+                <br>
+                <button id="cars-list-open-directory">Save all</button>
+            </footer>
         </aside>
         <main style="display:none">
             <div id="details-message"></div>

@@ -2,6 +2,7 @@ modules.viewList = function (){
     var mediator = new Mediator();
 
     var _selected,
+        _aside = $(document.getElementsByTagName('aside')[0]),
         _node = $(document.getElementById('cars-list'));
 
     function select(car){
@@ -21,7 +22,7 @@ modules.viewList = function (){
     }
 
     function filter(v){
-        var i = $('#cars-list-filter')[0];
+        var i = _aside.find('#cars-list-filter')[0];
         if (i.value != v){
             i.value = v;
         }
@@ -47,18 +48,19 @@ modules.viewList = function (){
                 return r.test(c.id) || c.data && r.test(c.data.name);
             };
 
-            $('#cars-list > div > [data-id]').each(function (){
+            _aside.find('#cars-list > div > [data-id]').each(function (){
                 this.parentNode.style.display = f(modules.cars.byName(this.getAttribute('data-id'))) ? null : 'none';
             });
         } else {
-            $('#cars-list > div').show();
+            _aside.find('#cars-list > div').show();
         }
     }
 
     function init(){
         modules.cars
             .on('scan:start', function (){
-                $('#cars-list').empty();
+                _aside.find('#cars-list').empty();
+                document.body.removeChild(_aside[0]);
             })
             .on('scan:ready', function (list){
                 $('#total-cars').val(list.filter(function (e){
@@ -69,7 +71,7 @@ modules.viewList = function (){
                     select(list[0])
                 }
 
-                $('aside').show();
+                document.body.appendChild(_aside[0]);
             })
             .on('new.car', function (car){
                 var s = document.createElement('span');
@@ -95,7 +97,7 @@ modules.viewList = function (){
                 _node.find('[data-id="' + car.id + '"]')
                     .text(n).attr('data-name', n.toLowerCase());
 
-                filter($('#cars-list-filter').val());
+                filter(_aside.find('#cars-list-filter').val());
             })
             .on('update:car:parent', function (car){
                 var d = _node.find('[data-id="' + car.id + '"]').parent();
@@ -119,27 +121,54 @@ modules.viewList = function (){
                 }
             })
             .on('update:car:children', function (car){
-                _node.find('[data-id="' + car.id + '"]').parent()
-                    .attr('data-children', car.children.length ? car.children.length + 1 : null);
+                var e = _node[0].querySelector('[data-id="' + car.id + '"]');
+                if (!e) return;
+                e.parentNode.setAttribute('data-children', car.children.length ? car.children.length + 1 : null);
             })
             .on('update:car:path', function (car){
-                _node.find('[data-id="' + car.id + '"]')
-                    .attr('data-path', car.path);
+                var e = _node[0].querySelector('[data-id="' + car.id + '"]');
+                if (!e) return;
+                e.setAttribute('data-path', car.path);
             })
             .on('update:car:disabled', function (car){
-                _node.find('[data-id="' + car.id + '"]')
-                    .toggleClass('disabled', car.disabled);
+                var e = _node[0].querySelector('[data-id="' + car.id + '"]');
+                if (!e) return;
+                if (car.disabled){
+                    e.classList.add('disabled');
+                } else {
+                    e.classList.remove('disabled');
+                }
             })
             .on('update:car:changed', function (car){
-                _node.find('[data-id="' + car.id + '"]')
-                    .toggleClass('changed', car.changed);
+                var e = _node[0].querySelector('[data-id="' + car.id + '"]');
+                if (!e) return;
+                if (car.changed){
+                    e.classList.add('changed');
+                } else {
+                    e.classList.remove('changed');
+                }
             })
             .on('error', function (car){
-                _node.find('[data-id="' + car.id + '"]').toggleClass('error', car.error.length > 0)
-                    .closest('#cars-list > div').toggleClass('error', car.error.length > 0);
+                var e = _node[0].querySelector('[data-id="' + car.id + '"]');
+                if (!e) return;
+                if (car.error.length > 0){
+                    e.classList.add('error');
+                } else {
+                    e.classList.remove('error');
+                }
+
+                while (e.parentNode.id !== 'cars-list'){
+                    e = e.parentNode;
+                }
+
+                if (car.error.length > 0){
+                    e.classList.add('error');
+                } else {
+                    e.classList.remove('error');
+                }
             });
 
-        $('#cars-list-filter')
+        _aside.find('#cars-list-filter')
             .on('change paste keyup keypress search', function (e){
                 if (e.keyCode == 27){
                     this.value = '';
@@ -154,19 +183,60 @@ modules.viewList = function (){
                 }
             });
 
+        /* global hotkeys */
         $(window)
             .keypress(function (e){
                 if (/INPUT|SELECT|TEXTAREA/.test(e.target.tagName) || e.target.contentEditable === 'true') return;
                 if (e.ctrlKey || e.altKey || e.shiftKey) return;
 
-                var f = $('#cars-list-filter').show();
+                var f = _aside.find('#cars-list-filter').show();
                 f[0].focus();
             });
 
-        $('#cars-list').click(function (e){
+        /* select car */
+        _aside.find('#cars-list').click(function (e){
             var car = modules.cars.byName(e.target.getAttribute('data-id'));
             if (!car) return;
             select(car);
+        });
+
+        /* bottom toolbar */
+        var cmIgnore = false;
+        _aside
+            .on('contextmenu', function (){
+                this.querySelector('footer').classList.toggle('active');
+                cmIgnore = true;
+            });
+
+        $(window)
+            .on('click contextmenu', function (e){
+                if (cmIgnore){
+                    cmIgnore = false;
+                } else if (e.target !== this){
+                    this.classList.remove('active');
+                }
+            }.bind(_aside.find('footer')[0]));
+
+        /* first row */
+        _aside.find('#cars-list-reload').click(function (){
+            if (modules.cars.list.some(function (e){
+                return e.changed;
+            })){
+                new Dialog('Reload', [
+                    '<p>{0}</p>'.format('Your changes will be lost. Are you sure?')
+                ], reload);
+            } else {
+                reload();
+            }
+
+            function reload(){
+                modules.cars.reloadAll();
+            }
+        });
+
+        /* second row */
+        _aside.find('#cars-list-save').click(function (){
+            modules.cars.saveAll();
         });
     }
 

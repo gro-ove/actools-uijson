@@ -9,6 +9,11 @@
         box-sizing: border-box;
     }
 
+    main footer {
+        left: 250px;
+        right: 0;
+    }
+
     main > div > h4 {
         margin-top: 0;
     }
