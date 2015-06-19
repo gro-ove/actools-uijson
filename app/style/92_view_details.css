@@ -61,7 +61,7 @@
 
     #selected-car-skins {
         position: absolute;
-        width: 120px;
+        width: 110px;
         top: 0;
         height: 100%;
         right: 0;
@@ -84,7 +84,7 @@
 
     #selected-car-preview {
         display: block;
-        max-width: calc(100% - 124px);
+        max-width: calc(100% - 114px);
         min-height: 200px;
     }
 

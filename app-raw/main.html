@@ -48,15 +48,15 @@
                     <div id="selected-car-skins"></div>
                 </article>
                 <article>
-                    <ul id="selected-car-tags"></ul>
+                    <ul id="selected-car-tags" class="tags"><input autocomplete list="tags-filtered"></ul>
                     <ul id="selected-car-properties">
                         <li>
                             <span class="property">Brand</span>
-                            <input id="selected-car-brand" class="property-value" required></input>    
+                            <input id="selected-car-brand" class="property-value" autocomplete list="brands" required></input>    
                         </li>
                         <li>
                             <span class="property">Class</span>
-                            <input id="selected-car-class" class="property-value" placeholder="?"></input>    
+                            <input id="selected-car-class" class="property-value" autocomplete list="classes" placeholder="?"></input>    
                         </li>
                         <details>
                             <summary>

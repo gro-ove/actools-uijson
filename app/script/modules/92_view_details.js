@@ -16,10 +16,6 @@ modules.viewDetails = function (){
         }
     }
 
-    function outMsgTip(){
-        outMsg('Tip', modules.tips.next + '<br><button id="next-tip">Next</button>');
-    }
-
     function outErrors(car){
         var er = $('#selected-car-error');
         if (car.error.length > 0){
@@ -46,12 +42,11 @@ modules.viewDetails = function (){
             he.removeAttr('readonly');
             de.removeAttr('readonly');
 
-            _tagSkip = true;
-            ta.show().tagit('removeAll');
+            ta.find('li').remove();
             car.data.tags.forEach(function (e){
-                ta.tagit('createTag', e);
-            });
-            _tagSkip = false;
+                $('<li>').text(e).insertBefore(this);
+            }.bind(ta.find('input')));
+            updateTags(car.data.tags);
 
             if (car.data.name != he.val()){
                 he.val(car.data.name);
@@ -114,6 +109,32 @@ modules.viewDetails = function (){
         }, 50);
     }
 
+    function updateTags(l){
+        var t = document.getElementById('tags-filtered');
+        if (t){
+            document.body.removeChild(t);
+        }
+
+        t = document.body.appendChild(document.createElement('datalist'));
+        t.id = 'tags-filtered';
+
+        var n = l.map(function (e){
+            return e.toLowerCase();
+        });
+        modules.cars.tags.forEach(function (v){
+            if (n.indexOf(v.toLowerCase()) < 0){
+                t.appendChild(document.createElement('option')).setAttribute('value', v);
+            }
+        });
+    }
+
+    function applyTags(){
+        if (!_selected || !_selected.data) return;
+        modules.cars.changeData(_selected, 'tags', [].map.call(
+            document.querySelectorAll('#selected-car-tags li'), function (a){ return a.textContent }));
+        updateTags(_selected.data.tags);
+    }
+
     function init(){
         modules.cars
             .on('scan:ready', function (list){
@@ -153,7 +174,6 @@ modules.viewDetails = function (){
                 if (car){
                     outMsg(null);
                 } else {
-                    outMsgTip();
                     return;
                 }
 
@@ -171,10 +191,32 @@ modules.viewDetails = function (){
                 this.blur();
                 return false;
             }
-        }).change(function (){
+        }).on('change', function (){
             if (!_selected || this.readonly || !this.value) return;
             this.value = this.value.slice(0, 64);
             modules.cars.changeData(_selected, 'name', this.value);
+        });
+
+        $('#selected-car-tags').click(function (e){
+            if (e.target.tagName === 'LI' && e.target.offsetWidth - e.offsetX < 20){
+                e.target.parentNode.removeChild(e.target);
+                applyTags();
+            } else {
+                this.querySelector('input').focus();
+            }
+        });
+
+        $('#selected-car-tags input').on('change', function (){
+            if (this.value){
+                this.parentNode.insertBefore(document.createElement('li'), this).textContent = this.value;
+                this.value = '';
+                applyTags();
+            }
+        }).on('keydown', function (e){
+            if (e.keyCode == 8 && this.value == ''){
+                this.parentNode.removeChild(this.parentNode.querySelector('li:last-of-type'));
+                applyTags();
+            }
         });
 
         $('#selected-car-desc').elastic().on('input', function (){
@@ -190,15 +232,6 @@ modules.viewDetails = function (){
         }).change(function (e){
             if (!_selected || this.readonly || !this.value) return;
             modules.cars.changeData(_selected, 'brand', this.value);
-        }).autocomplete({
-            delay: 0,
-            minLength: 0,
-            source: function(search, showChoices) {
-                var f = search.term.toLowerCase();
-                showChoices(modules.cars.brands.filter(function (e){
-                    return e.toLowerCase().indexOf(f) === 0;
-                }));
-            }
         });
 
         $('#selected-car-class').keydown(function (e){
@@ -209,15 +242,6 @@ modules.viewDetails = function (){
         }).change(function (){
             if (!_selected || this.readonly) return;
             modules.cars.changeData(_selected, 'class', this.value);
-        }).autocomplete({
-            delay: 0,
-            minLength: 0,
-            source: function(search, showChoices) {
-                var f = search.term.toLowerCase();
-                showChoices(modules.cars.classes.filter(function (e){
-                    return e.toLowerCase().indexOf(f) === 0;
-                }));
-            }
         });
 
         [ 'bhp', 'torque', 'weight', 'topspeed', 'acceleration', 'pwratio' ].forEach(function (e){
@@ -233,7 +257,7 @@ modules.viewDetails = function (){
                         return false;
                     }
                 }
-            }).change(function (){
+            }).on('change input', function (){
                 if (!_selected || this.readonly) return;
                 modules.cars.changeDataSpecs(_selected, e, this.value);
             });
@@ -246,29 +270,6 @@ modules.viewDetails = function (){
             if (w && p){
                 modules.cars.changeDataSpecs(_selected, 'pwratio', (+w / +p).toFixed(2) + 'kg/cv');
             }
-        });
-
-        function getInputTags(){
-            return [].map.call($('ul .tagit-label'), function (a){ return a.textContent });
-        }
-
-        $('#selected-car-tags').tagit({
-            allowSpaces: true,
-            autocomplete: { delay: 0, minLength: 1 },
-            availableTags: modules.cars.tags,
-            caseSensitive: false,
-            removeConfirmation: true,
-
-            afterTagAdded: function (){
-                if (!_tagSkip){
-                    modules.cars.changeData(_selected, 'tags', getInputTags());
-                }
-            },
-            afterTagRemoved: function (){
-                if (!_tagSkip){
-                    modules.cars.changeData(_selected, 'tags', getInputTags());
-                }
-            }, 
         });
 
         /* previews */
@@ -380,15 +381,6 @@ modules.viewDetails = function (){
             if (!_selected) return;
             modules.cars.save(_selected);
         });
-
-        /* tips */
-        /*outMsgTip();
-        $('#details-message')
-            .click(function (e){
-                if (e.target.id == 'next-tip'){
-                    outMsgTip();
-                }
-            });*/
     }
 
     init();

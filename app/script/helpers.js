@@ -14,8 +14,13 @@
         } else {
             return o;
         }
-    }
+    };
+
+    RegExp.fromQuery = function (q, w){
+        var r = q.replace(/(?=[\$^.+(){}[\]])/g, '\\').replace(/\?|(\*)/g, '.$1');
+        return new RegExp(w ? '^(?:' + r + ')$' : r, 'i');
+    };
 
     String.prototype.cssUrl = function (){
         return 'file://' + this.replace(/\\/g, '/');
-    }
+    };

@@ -2,6 +2,7 @@
 Small utility for easy editing *ui_car.json* files. Written using [NW.js](http://nwjs.io/).
 
 #### TODO
+* Smart filters
 * Restoration Wizard
 * More shortcuts
 * Detect broken cars
@@ -10,7 +11,7 @@ Small utility for easy editing *ui_car.json* files. Written using [NW.js](http:/
 * DB with names, years and stuff
 * Batch name processing (add/remove brand, add/remove year)
 * View/edit torque & powes curves, load from data/power.lut
-* Batch tags processing
+* Batch JS-based processing
 * Upgrade icons generator
 * Edit mode for livery.png (?)
 * Fix body_shadow.png (?)
@@ -21,6 +22,7 @@ Small utility for easy editing *ui_car.json* files. Written using [NW.js](http:/
     * Settings
     * Icon
     * Bugfixes
+    * Now without laggy JQuery UI
 * 0.2.18
     * Massive optimization
     * Normal disableable tips
@@ -50,7 +52,7 @@ Small utility for easy editing *ui_car.json* files. Written using [NW.js](http:/
     * Added manual mode
 
 #### Download
-* [Last (0.2.18)](https://yadi.sk/d/J4l0dpsrhJrBK)
+* [Last (0.2.19)](https://yadi.sk/d/J4l0dpsrhJrBK)
 * [Stable (0.2.4)](https://ascobash.wordpress.com/2015/06/14/actools-uijson/)
 
 #### Features

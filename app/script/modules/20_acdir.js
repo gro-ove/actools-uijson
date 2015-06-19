@@ -3,32 +3,50 @@ modules.acDir = function (){
 
     var _root, _cars, _carsOff, _tracks, _showrooms;
 
+    function check(d){
+        if (!fs.existsSync(d)){
+            return 'Directory not found';
+        }
+
+        if (!fs.existsSync(path.join(d, 'content', 'cars'))){
+            return 'Directory content/cars not found';
+        }
+    }
+
+    function set(d){
+        if (_root == d) return;
+
+        _root = d;
+
+        _cars = path.join(d, 'content', 'cars');
+        _carsOff = path.join(d, 'content', 'cars-off');
+        if (!fs.existsSync(_carsOff)){
+            fs.mkdirSync(_carsOff);
+        }
+
+        _tracks = path.join(d, 'content', 'tracks');
+        _showrooms = path.join(d, 'content', 'showroom');
+
+        localStorage.acRootDir = d;
+
+        mediator.dispatch('change', _root);
+    }
+
     function init(c){
         function ready(d){
-            if (!fs.existsSync(d)) return prompt('Directory not found');
-
-            _cars = path.join(d, 'content', 'cars');
-            if (!fs.existsSync(_cars)) return prompt('Directory content/cars not found');
-
-            _carsOff = path.join(d, 'content', 'cars-off');
-            if (!fs.existsSync(_carsOff)){
-                fs.mkdirSync(_carsOff);
+            var err = check(d);
+            if (err){
+                return prompt(err);
+            } else {
+                set(d);
             }
-
-            _tracks = path.join(d, 'content', 'tracks');
-            _showrooms = path.join(d, 'content', 'showroom');
-
-            localStorage.acRootDir = d;
-            _root = d;
-
-            mediator.dispatch('change', _root)
         }
 
         function prompt(e){
             var dialog = new Dialog('Cars Directory', [
                 e && '<p class="error">' + e + '</p>',
                 '<button id="select-dir" style="float:right;width:30px">…</button>',
-                '<input placeholder="…/Assetto Corsa" style="width:calc(100% - 35px)"></input>',
+                '<input placeholder="…/Assetto Corsa" style="width:calc(100% - 35px)">',
             ], function (){
                 ready(this.find('input').val());
             }, function (){
@@ -57,6 +75,9 @@ modules.acDir = function (){
 
     return mediator.extend({
         init: init,
+        check: check,
+        set: set,
+
         get root(){ return _root },
         get cars(){ return _cars },
         get carsOff(){ return _carsOff },

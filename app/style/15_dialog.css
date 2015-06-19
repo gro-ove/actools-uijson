@@ -14,6 +14,14 @@ dialog {
     z-index: 10;
 }
 
+dialog h6 {
+    margin: 10px 0 4px;
+}
+
+dialog input {
+    margin-bottom: 10px;
+}
+
 dialog > div {
     min-width: 400px;
     background: #fff;
@@ -25,13 +33,17 @@ dialog > div {
     position: relative;
 }
 
-dialog > div > div > p {
+dialog p, dialog label {
     font-size: 12px;
 }
 
-dialog input, dialog select, dialog button, dialog table {
+dialog input:not([type="checkbox"]), dialog select, dialog button, dialog table {
     width: 100%;
     box-sizing: border-box;
+}
+
+dialog input[type="checkbox"] {
+    vertical-align: -webkit-baseline-middle;
 }
 
 dialog > div > div:first-child {

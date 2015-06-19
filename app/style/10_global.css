@@ -26,6 +26,17 @@
         background: #87B6FE;
     }
 
+    input {
+        outline: none;
+        border: 1px solid #aaa;
+        padding: 2px;
+        font-size: 13px;
+    }
+
+    input:focus {
+        box-shadow: 0 0 0 2px #59f;
+    }
+
     html, body {
         margin: 0;
         padding: 0;
@@ -43,7 +54,7 @@
         font-weight: 700;
     }
 
-    input:invalid {
+    input:invalid, input.invalid {
         box-shadow: 0 0 0 2px red;
     }
 
@@ -52,50 +63,60 @@
         font-size: 12px;
     }
 
-    ul.tagit, ul.tagit li {
-        list-style: disc;
-    }
-
-    ul.tagit input[type="text"] {
-        width: 0;
-    }
-
-    ul.tagit input[type="text"]:focus {
-        width: 120px;
-    }
-
-    ul.tagit li {
-        display: inline-block;
-    }
-
-    .ui-widget {
+    ul.tags {
         font-size: 12px;
+        list-style-type: none;
+        padding: 0;
+        margin: 5px 0;
+        line-height: 25px;
     }
 
-    .ui-widget-content {
-        border: none;
+    ul.tags:focus {
+        box-shadow: 0 0 0 2px #59f;
     }
 
-    .ui-corner-all {
-        border-radius: 0;
-    }
-
-    .tagit-label {
-        margin: 1px;
-    }
-
-    .ui-state-default, .ui-widget-content .ui-state-default, .ui-widget-header .ui-state-default {
-        border: none;
-    }
-
-    .ui-menu {
-        border: 1px solid #aaa;
-    }
-
-    .ui-state-default .ui-icon {
-        display: none;
-    }
-
-    ul.tagit li.tagit-choice .tagit-close .text-icon {
+    ul.tags li {
         display: inline-block;
+        background: #eee;
+        padding: 3px;
+        margin-right: 10px;
+        line-height: 15px;
+    }
+
+    ul.tags li:after {
+        content: "×";
+        font-size: 16px;
+        cursor: pointer;
+        margin-left: 5px;
+        line-height: 0;
+        position: relative;
+        top: 1px;
+    }
+
+    ul.tags input {
+        width: 0;
+        border: none;
+        background: transparent;
+        font: inherit;
+    }
+
+    ul.tags input:focus {
+        width: 120px;
+        box-shadow: none;
+    }
+
+    ::-webkit-scrollbar {
+        width: 6px;
+    }
+     
+    ::-webkit-scrollbar-track {
+        background: transparent;
+    }
+     
+    ::-webkit-scrollbar-thumb {
+      background-color: #aaa;
+    }
+     
+    ::-webkit-scrollbar-thumb:active {
+      background-color: #999;
     }

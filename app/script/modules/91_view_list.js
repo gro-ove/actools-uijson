@@ -20,22 +20,58 @@ modules.viewList = function (){
         mediator.dispatch('select', car);
     }
 
+    function filter(v){
+        var i = $('#cars-list-filter')[0];
+        if (i.value != v){
+            i.value = v;
+        }
+
+        if (v){
+            var s = v.trim().split(/\s+/);
+            var bb = '';
+
+            var vv = s.filter(function (e){
+                if (/^brand:(.*)/.test(e)){
+                    bb = (bb && bb + '|') + RegExp.$1;
+                    return false;
+                }
+
+                return true;
+            });
+
+            var r = RegExp.fromQuery(vv.join(' '));
+            var b = bb && RegExp.fromQuery(bb, true); 
+
+            var f = function (c){
+                if (b && (!c.data || !b.test(c.data.brand))) return false;
+                return r.test(c.id) || c.data && r.test(c.data.name);
+            };
+
+            $('#cars-list > div > [data-id]').each(function (){
+                this.parentNode.style.display = f(modules.cars.byName(this.getAttribute('data-id'))) ? null : 'none';
+            });
+        } else {
+            $('#cars-list > div').show();
+        }
+    }
+
     function init(){
         modules.cars
             .on('scan:start', function (){
                 $('#cars-list').empty();
             })
-            .on('scan:list', function (list){
-                $('#total-cars').val(list.length);
-            })
             .on('scan:ready', function (list){
+                $('#total-cars').val(list.filter(function (e){
+                    return e.parent == null;
+                }).length).attr('title', 'Including modded versions: {0}'.format(list.length));
+
                 if (list.length > 0){
                     select(list[0])
                 }
 
                 $('aside').show();
             })
-            .on('new:car', function (car){
+            .on('new.car', function (car){
                 var s = document.createElement('span');
                 s.textContent = car.id;
                 if (car.disabled) s.classList.add('disabled');
@@ -58,6 +94,8 @@ modules.viewList = function (){
                 var n = car.data && car.data.name || car.id;
                 _node.find('[data-id="' + car.id + '"]')
                     .text(n).attr('data-name', n.toLowerCase());
+
+                filter($('#cars-list-filter').val());
             })
             .on('update:car:parent', function (car){
                 var d = _node.find('[data-id="' + car.id + '"]').parent();
@@ -108,13 +146,7 @@ modules.viewList = function (){
                     this.blur();
                 }
 
-                if (this.value){
-                    $('#cars-list > div').hide();
-                    $('#cars-list > div > [data-id*="' + this.value + '"],\
-                        #cars-list > div > [data-name*="' + this.value.toLowerCase() + '"]').parent().show();
-                } else {
-                    $('#cars-list > div').show();
-                }
+                filter(this.value);
             })
             .on('blur', function (){ 
                 if (!this.value){

@@ -159,6 +159,8 @@ modules.cars = function (){
                         if (_tagsLower.indexOf(l) < 0){
                             _tags.push(e);
                             _tagsLower.push(l);
+
+                            mediator.dispatch('new.tag', e);
                         }
                     });
 
@@ -166,12 +168,16 @@ modules.cars = function (){
                     if (_classesLower.indexOf(l) < 0){
                         _classes.push(car.data.class);
                         _classesLower.push(l);
+
+                        mediator.dispatch('new.class', car.data.class);
                     }
 
                     var l = car.data.brand.toLowerCase();
                     if (_brandsLower.indexOf(l) < 0){
                         _brands.push(car.data.brand);
                         _brandsLower.push(l);
+
+                        mediator.dispatch('new.brand', car.data.brand);
                     }
                 }
             }
@@ -192,7 +198,7 @@ modules.cars = function (){
             car = initCar(carPath);
 
             if (names[car.id]) return;
-            mediator.dispatch('new:car', car);
+            mediator.dispatch('new.car', car);
             names[car.id] = true;
             return car;
         }).filter(function (e){
