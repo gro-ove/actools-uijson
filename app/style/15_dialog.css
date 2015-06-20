@@ -65,6 +65,7 @@ dialog input[type="checkbox"] {
     float: right;
     display: inline-block;
     margin-top: 18px;
+    margin-right: 20px;
 }
 
 .dialog-header > div:first-child button {
