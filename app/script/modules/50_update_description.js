@@ -9,7 +9,7 @@ modules.updateDescription = function (){
                 return s.replace(/\[(?:\d+|citation needed)\]/g, '');
             },
             get url (){
-                return 'https://www.google.ru/search?q=' + encodeURIComponent(c.data.name);
+                return 'https://www.google.com/search?q=' + encodeURIComponent(c.data.name);
             },
             get userAgent (){
                 return 'Mozilla/5.0 (Linux; Android 2.3) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/30.0.0.0 Mobile Safari/537.36';
