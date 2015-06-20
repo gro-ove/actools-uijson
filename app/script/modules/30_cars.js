@@ -23,6 +23,8 @@ modules.cars = function (){
         var id = carPath.slice(Math.max(carPath.lastIndexOf('/'), carPath.lastIndexOf('\\')) + 1);
         var disabled = carPath.indexOf(modules.acDir.carsOff) != -1;
         var json = path.join(carPath, 'ui', 'ui_car.json');
+        var badge = path.join(carPath, 'ui', 'badge.png');
+        var upgrade = path.join(carPath, 'ui', 'upgrade.png');
 
         return {
             id: id,
@@ -30,6 +32,9 @@ modules.cars = function (){
             disabled: disabled,
 
             json: json,
+            badge: badge,
+            upgrade: upgrade,
+
             error: [],
             changed: false,
 
@@ -73,6 +78,11 @@ modules.cars = function (){
             car.skins.selected = car.skins[0];
             mediator.dispatch('update:car:skins', car);
         });
+
+        if (!fs.existsSync(car.badge)){
+            car.error.push({ id: 'badge-missing', msg: 'Missing badge.png', details: null });
+            mediator.dispatch('error', car);
+        }
 
         if (!fs.existsSync(car.json)){
             if (fs.existsSync(car.json + '.disabled')){
@@ -151,6 +161,11 @@ modules.cars = function (){
 
                             mediator.dispatch('update:car:parent', car);
                             mediator.dispatch('update:car:children', parent);
+                        }
+
+                        if (!fs.existsSync(car.upgrade)){
+                            car.error.push({ id: 'upgrade-missing', msg: 'Missing upgrade.png', details: null });
+                            mediator.dispatch('error', car);
                         }
                     }
 
@@ -246,6 +261,8 @@ modules.cars = function (){
             car.disabled = d;
             car.path = newPath;
             car.json = car.json.replace(a, b);
+            car.badge = car.badge.replace(a, b);
+            car.upgrade = car.upgrade.replace(a, b);
             if (car.skins){
                 car.skins.forEach(function (e){
                     for (var n in e){
@@ -337,6 +354,13 @@ modules.cars = function (){
         loadCar(car);
     }
 
+    function reloadUpgrade(car){
+        gui.App.clearCache();
+        setTimeout(function (){
+            mediator.dispatch('update:car:data', car);
+        }, 100);
+    }
+
     function reloadAll(){
         scan();
     }
@@ -370,6 +394,7 @@ modules.cars = function (){
         selectSkin: selectSkin,
         updateSkins: updateSkins,
         reload: reload,
+        reloadUpgrade: reloadUpgrade,
         reloadAll: reloadAll,
         save: save,
         saveAll: saveAll,

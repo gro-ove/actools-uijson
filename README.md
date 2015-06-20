@@ -1,8 +1,45 @@
 # actools-uijson
 Small utility for easy editing *ui_car.json* files. Written using [NW.js](http://nwjs.io/).
 
+#### Requirements
+* [.NET Framework 4.5](https://www.microsoft.com/en-US/Download/details.aspx?id=30653)
+* [Visual C++ Redistributable 2013 (x86)](https://www.microsoft.com/en-us/download/details.aspx?id=40784)
+
+#### Download
+* [Last (0.2.23)](https://yadi.sk/d/Sq4hOs6PhMweN)
+* [Stable (0.2.23)](http://www.racedepartment.com/downloads/actools-cars-manager.6518/)
+
+#### Features
+* Enable/disable vehicles
+* Edit name, brand, tags, description, class & specs
+* Search for description online
+* Preview cars
+* Auto-update Previews
+* Quick Practive
+* Upgrade Icon Editor
+
+#### Tips
+* Double click on preview to launch acShowroom.
+* Press RMB to open controls bar
+* Select found text in built-in browser and press “OK”
+* Don't forget to save changes (Ctrl+S)
+
+#### How to update previews
+* Install [Black Showroom](http://www.racedepartment.com/downloads/studio-black-showroom.4353/)
+* Press RMB and click “Update Previews”
+* Manual mode: set the right camera position and press F8
+* Wait until all skins will be screenshoted
+* Check result and press “Apply” if everything is OK
+
+    *Warning!* This thing could be pretty buggy. Sometimes you'll have to terminate updating (by press Esc) and try again.
+
+#### Known bugs
+* Dialog “Unsaved changes will be lost. Are you sure?” shows only when app closing by “X” button at the top. Looks like NW.js bug or something. I'll try to fix it later.
+* Sometimes Auto-updated Previews aren't able to detect new screenshot.
+* Auto-update wasn't tested.
+
 #### TODO
-* Changable parent, upgrade icons view & generate
+* Changable parent
 * Auto-download black showroom
 * Auto-disable SweetFX and stuff
 * New mods installation
@@ -21,17 +58,16 @@ Small utility for easy editing *ui_car.json* files. Written using [NW.js](http:/
 * Manage skins (?)
 * Clone cars, modify in-game specs (?)
 
-#### Download
-* [Last (0.2.22)](https://yadi.sk/d/Sq4hOs6PhMweN)
-* [Stable (0.2.21)](http://www.racedepartment.com/downloads/actools-cars-manager.6518/download?version=10480)
-
 #### Changelog
+* 0.2.23
+    * Two branches (Last/Stable) in options
+    * Added Upgrade Icon Editor Feature
 * 0.2.22
-    * Autoupdate feature (still could be buggy though)
+    * Auto-update feature (still could be pretty buggy though)
     * Binary module rebuilded properly
     * Renaming to Cars Manager in process
     * Disappearing tags fixed
-    * Parent view (changing temporary disabled)
+    * Parent car view (changing temporary disabled)
 * 0.2.21
     * Fancy progressbar
     * Perfomance improvements
@@ -71,31 +107,9 @@ Small utility for easy editing *ui_car.json* files. Written using [NW.js](http:/
     * Auto-update skins previews fixed and improved
     * Added manual mode
 
-#### Features
-* Enable/disable vehicles
-* Edit name, brand, tags, description, class & specs
-* Search for description online
-* Preview cars
-* Auto-update Previews
-* Quick Practive
-
-#### Tips
-* Double click on preview to launch acShowroom.
-* Press RMB to open controls bar
-* Select found text in built-in browser and press “OK”
-* Don't forget to save changes (Ctrl+S)
-
-#### How to update previews
-* Install [Black Showroom](http://www.racedepartment.com/downloads/studio-black-showroom.4353/)
-* Press RMB and click “Update Previews”
-* Manual mode: set the right camera position and press F8
-* Wait until all skins will be screenshoted
-* Check result and press “Apply” if everything is OK
-
-    *Warning!* This thing could be pretty buggy. Sometimes you'll have to terminate updating (by press Esc) and try again.
-
 #### Screenshots
 ![Screenshot](http://i.imgur.com/eDJs1wu.png)
+![Upgrade Icon Editor](http://i.imgur.com/riLu2iB.png)
 
 #### Auto-updated Previews
 ![Porsche 944 Turbo S](https://pp.vk.me/c621730/v621730892/2e1e7/LO25pCMqvpg.jpg)

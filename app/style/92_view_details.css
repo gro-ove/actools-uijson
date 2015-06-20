@@ -141,3 +141,13 @@
     summary li {
         display: inline-block;
     }
+
+    #selected-car-properties {
+        position: relative;
+    }
+
+    #selected-car-upgrade {
+        position: absolute;
+        top: 0;
+        right: 0;
+    }

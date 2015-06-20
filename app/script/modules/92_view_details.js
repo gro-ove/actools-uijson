@@ -30,7 +30,7 @@ modules.viewDetails = function (){
 
     function outBadge(car){
         var lo = $('#selected-car-logo');
-        lo.attr('src', path.join(car.path, 'ui', 'badge.png').cssUrl());
+        lo.attr('src', car.badge.cssUrl());
     }
 
     function updateParents(car){
@@ -87,6 +87,12 @@ modules.viewDetails = function (){
             $('#selected-car-pwratio').val(car.data.specs.pwratio || '');
 
             updateParents(car);
+
+            if (car.parent){
+                $('#selected-car-upgrade').show().attr('src', car.upgrade);
+            } else {
+                $('#selected-car-upgrade').hide();
+            }
         } else {
             he.attr('readonly', true).val(car.id);
             de.attr('readonly', true).val('');
@@ -208,67 +214,78 @@ modules.viewDetails = function (){
             });
 
         /* inputs */
-        $('#selected-car').keydown(function (e){
-            if (e.keyCode == 13){
-                this.blur();
-                return false;
-            }
-        }).on('change', function (){
-            if (!_selected || this.readonly || !this.value) return;
-            this.value = this.value.slice(0, 64);
-            modules.cars.changeData(_selected, 'name', this.value);
-        });
+        $('#selected-car')
+            .keydown(function (e){
+                if (e.keyCode == 13){
+                    this.blur();
+                    return false;
+                }
+            })
+            .on('change', function (){
+                if (!_selected || this.readonly || !this.value) return;
+                this.value = this.value.slice(0, 64);
+                modules.cars.changeData(_selected, 'name', this.value);
+            });
 
-        $('#selected-car-tags').click(function (e){
-            if (e.target.tagName === 'LI' && e.target.offsetWidth - e.offsetX < 20){
-                e.target.parentNode.removeChild(e.target);
-                applyTags();
-            } else {
-                this.querySelector('input').focus();
-            }
-        });
+        $('#selected-car-tags')
+            .click(function (e){
+                if (e.target.tagName === 'LI' && e.target.offsetWidth - e.offsetX < 20){
+                    e.target.parentNode.removeChild(e.target);
+                    applyTags();
+                } else {
+                    this.querySelector('input').focus();
+                }
+            });
 
-        $('#selected-car-tags input').on('change', function (){
-            if (this.value){
-                this.parentNode.insertBefore(document.createElement('li'), this).textContent = this.value;
-                this.value = '';
-                applyTags();
-            }
-        }).on('keydown', function (e){
-            if (e.keyCode == 8 && this.value == ''){
-                this.parentNode.removeChild(this.parentNode.querySelector('li:last-of-type'));
-                applyTags();
-            }
-        });
+        $('#selected-car-tags input')
+            .on('change', function (){
+                if (this.value){
+                    this.parentNode.insertBefore(document.createElement('li'), this).textContent = this.value;
+                    this.value = '';
+                    applyTags();
+                }
+            })
+            .on('keydown', function (e){
+                if (e.keyCode == 8 && this.value == ''){
+                    this.parentNode.removeChild(this.parentNode.querySelector('li:last-of-type'));
+                    applyTags();
+                }
+            });
 
-        $('#selected-car-desc').elastic().on('input', function (){
-            if (!_selected || this.readonly) return;
-            modules.cars.changeData(_selected, 'description', this.value);
-        });
+        $('#selected-car-desc').elastic()
+            .on('input', function (){
+                if (!_selected || this.readonly) return;
+                modules.cars.changeData(_selected, 'description', this.value);
+            });
 
-        $('#selected-car-brand').keydown(function (e){
-            if (e.keyCode == 13){
-                this.blur();
-                return false;
-            }
-        }).change(function (e){
-            if (!_selected || this.readonly || !this.value) return;
-            modules.cars.changeData(_selected, 'brand', this.value);
-        });
+        $('#selected-car-brand')
+            .keydown(function (e){
+                if (e.keyCode == 13){
+                    this.blur();
+                    return false;
+                }
+            })
+            .change(function (e){
+                if (!_selected || this.readonly || !this.value) return;
+                modules.cars.changeData(_selected, 'brand', this.value);
+            });
 
-        $('#selected-car-parent').change(function (e){
-            modules.cars.changeParent(_selected, this.value || null);
-        });
+        $('#selected-car-parent')
+            .change(function (e){
+                modules.cars.changeParent(_selected, this.value || null);
+            });
 
-        $('#selected-car-class').keydown(function (e){
-            if (e.keyCode == 13){
-                this.blur();
-                return false;
-            }
-        }).change(function (){
-            if (!_selected || this.readonly) return;
-            modules.cars.changeData(_selected, 'class', this.value);
-        });
+        $('#selected-car-class')
+            .keydown(function (e){
+                if (e.keyCode == 13){
+                    this.blur();
+                    return false;
+                }
+            })
+            .change(function (){
+                if (!_selected || this.readonly) return;
+                modules.cars.changeData(_selected, 'class', this.value);
+            });
 
         [ 'bhp', 'torque', 'weight', 'topspeed', 'acceleration', 'pwratio' ].forEach(function (e){
             $('#selected-car-' + e).keydown(function (e){
@@ -289,30 +306,61 @@ modules.viewDetails = function (){
             });
         });
 
-        $('#selected-car-pwratio').dblclick(function (){
-            if (!_selected || !_selected.data || this.readonly) return;
-            var w = (_selected.data.specs.weight || '').match(/\d+/),
-                p = (_selected.data.specs.bhp || '').match(/\d+/);
-            if (w && p){
-                modules.cars.changeDataSpecs(_selected, 'pwratio', (+w / +p).toFixed(2) + 'kg/cv');
-            }
-        });
+        $('#selected-car-pwratio')
+            .dblclick(function (){
+                if (!_selected || !_selected.data || this.readonly) return;
+                var w = (_selected.data.specs.weight || '').match(/\d+/),
+                    p = (_selected.data.specs.bhp || '').match(/\d+/);
+                if (w && p){
+                    modules.cars.changeDataSpecs(_selected, 'pwratio', (+w / +p).toFixed(2) + 'kg/cv');
+                }
+            });
+
+        $('#selected-car-upgrade')
+            .on('click', function (){
+                if (!_selected) return;
+                modules.upgradeEditor.start(_selected);
+            });
 
         /* previews */
-        $('#selected-car-skins-article').dblclick(function (e){
-            if (!_selected) return;
-            modules.showroom.start(_selected);
-        });
+        $('#selected-car-skins-article')
+            .dblclick(function (e){
+                if (!_selected) return;
+                modules.showroom.start(_selected);
+            })
+            .on('contextmenu', function (e){
+                if (!_selected) return;
+
+                var id = e.target.getAttribute('data-id');
+                if (!id) return;
+
+                var menu = new gui.Menu();
+                menu.append(new gui.MenuItem({ label: 'Open in Showroom', key: 'S', click: function (){
+                    if (!_selected) return;
+                    modules.showroom.start(_selected, id);
+                } }));
+                menu.append(new gui.MenuItem({ label: 'Start Practice', key: 'P', click: function (){
+                    if (!_selected) return;
+                    modules.practice.start(_selected, id);
+                } }));
+                menu.append(new gui.MenuItem({ type: 'separator' }));
+                menu.append(new gui.MenuItem({ label: 'Edit', enabled: false }));
+                menu.append(new gui.MenuItem({ label: 'Remove', enabled: false }));
+
+                menu.popup(e.clientX, e.clientY);
+                return false;
+            });
 
         /* skins changer */
-        $('#selected-car-skins').click(function (e){
-            if (!_selected) return;
+        $('#selected-car-skins')
+            .click(function (e){
+                if (!_selected) return;
 
-            var id = e.target.getAttribute('data-id');
-            if (!id) return;
+                var id = e.target.getAttribute('data-id');
+                if (!id) return;
 
-            modules.cars.selectSkin(_selected, id);
-        });
+                modules.cars.selectSkin(_selected, id);
+            });
 
         /* global hotkeys */
         $(window)
@@ -374,7 +422,7 @@ modules.viewDetails = function (){
 
             if (_selected.changed){
                 new Dialog('Reload', [
-                    '<p>{0}</p>'.format('Your changes will be lost. Are you sure?')
+                    'Your changes will be lost. Are you sure?'
                 ], reload);
             } else {
                 reload();

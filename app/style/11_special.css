@@ -16,3 +16,9 @@
     h1, h2, h3, h4, h5, h6, aside, #selected-car-tags li {
         -webkit-user-select: none;
     }
+
+    .car-upgrade {
+        width: 64px;
+        height: 64px;
+        -webkit-filter: drop-shadow(0 0 1px #000);
+    }

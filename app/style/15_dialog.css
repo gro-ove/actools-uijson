@@ -18,7 +18,7 @@ dialog h6 {
     margin: 10px 0 4px;
 }
 
-dialog input {
+dialog input, dialog select {
     margin-bottom: 10px;
 }
 
@@ -88,6 +88,20 @@ dialog input[type="checkbox"] {
     margin-top: 0;
 }
 
+.dialog-content .left, .dialog-content .right {
+    display: inline-block;
+    width: 50%;
+    box-sizing: border-box;
+}
+
+.dialog-content .left {
+    padding-right: 5px;
+}
+
+.dialog-content .right {
+    padding-left: 5px;
+}
+
 .dialog-buttons {
     display: flex;
     
@@ -101,4 +115,17 @@ dialog input[type="checkbox"] {
 .dialog-buttons button {
     height: 100%;
     padding: 10px;
+}
+
+dialog.dark article {
+    background: #000;
+    color: #fff;
+}
+
+dialog.dark .dialog-header.tabs {
+    background: #333;
+}
+
+dialog.dark .dialog-header.tabs h4.active {
+    background: #000;
 }

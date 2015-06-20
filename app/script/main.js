@@ -4,6 +4,21 @@ if (modules.settings.get('updatesCheck', true)){
     }, 5e1);
 }
 
+modules.appWindow
+    .on('close', function (){
+        if (modules.cars.list.filter(function (e){
+            return e.changed;
+        }).length > 0){
+            new Dialog('Close', [
+                'Unsaved changes will be lost. Are you sure?'
+            ], function (){
+                modules.appWindow.close(true);
+            });
+        } else {
+            modules.appWindow.close(true);
+        }
+    });
+
 modules.viewList
     .on('select', function (car){
         modules.appWindow.title = car.data ? car.data.name : car.id;

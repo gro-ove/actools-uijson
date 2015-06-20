@@ -12,6 +12,7 @@ modules.viewSettings = function (){
 
             '<h6>Updates</h6>',
             '<label><input id="settings-updates-check" type="checkbox">Check for new versions on launch</label>',
+            '<select id="settings-updates-source"><option value="last">Last</option><option value="stable">Stable</option></select>',
 
             /*'<h6>Search Provider</h6>',
             '<label><select id="settings-search-provider"><option value="google"></option></select>',*/
@@ -23,8 +24,9 @@ modules.viewSettings = function (){
             }
 
             modules.settings.update(function (s){
-                if (disableTips != null) s.disableTips = disableTips;
-                if (updatesCheck != null) s.updatesCheck = updatesCheck;
+                s.disableTips = disableTips;
+                s.updatesCheck = updatesCheck;
+                s.updatesSource = updatesSource;
             });
         }, false).setButton('Save').addButton('Cancel');
 
@@ -48,15 +50,20 @@ modules.viewSettings = function (){
             }).click();
         });
 
-        var disableTips;
+        var disableTips = modules.settings.get('disableTips', false);
         d.find('#settings-disable-tips').change(function (){
             disableTips = this.checked;
-        })[0].checked = modules.settings.get('disableTips', false);
+        })[0].checked = disableTips;
 
-        var updatesCheck;
+        var updatesCheck = modules.settings.get('updatesCheck', true);
         d.find('#settings-updates-check').change(function (){
             updatesCheck = this.checked;
-        })[0].checked = modules.settings.get('updatesCheck', true);
+        })[0].checked = updatesCheck;
+
+        var updatesSource = modules.settings.get('updatesSource', 'stable');
+        d.find('#settings-updates-source').change(function (){
+            updatesSource = this.value;
+        })[0].value = updatesSource;
 
         d.addTab('About', [
             '<h6>Version</h6>',

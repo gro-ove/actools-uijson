@@ -9,8 +9,14 @@ modules.checkUpdate = function (){
 
     var _details = 'https://ascobash.wordpress.com/2015/06/14/actools-uijson/';
 
+    function getRe(){
+        return modules.settings.get('updatesSource', 'stable') == 'stable' ?
+            /\[Stable \((\d.\d+.\d+)\)\]\(([^)]+)\)/ :
+            /\[Last \((\d.\d+.\d+)\)\]\(([^)]+)\)/;
+    }
+
     function getVersion(data){
-        if (/\[Last \((\d.\d+.\d+)\)\]\(([^)]+)\)/.test(data)){
+        if (getRe().test(data)){
             return RegExp.$1;
         } else {
             return null;
@@ -26,21 +32,21 @@ modules.checkUpdate = function (){
     }
 
     function getDownloadUrl(data){
-        if (/\[Last \((\d\.\d+\.\d+)\)\]\(([^)]+)\)/.test(data)){
+        if (getRe().test(data)){
             return RegExp.$2;
         } else {
             return null;
         }
     }
 
-    function getChangelog(cv, data){
+    function getChangelog(cv, av, data){
         var b = data.split('#### ').filter(function (e){
             return e.indexOf('Changelog') == 0;
         });
 
         if (b[0]){
             return b[0].split(/\n\* /).slice(1).map(function (e){
-                if (/^(\d\.\d+\.\d+)/.test(e) && compareVersion(cv, RegExp.$1)){
+                if (/^(\d\.\d+\.\d+)/.test(e) && compareVersion(cv, RegExp.$1) && !compareVersion(av, RegExp.$1)){
                     return {
                         version: RegExp.$1,
                         changes: e.split(/\n\s+\* /).slice(1)
@@ -57,7 +63,7 @@ modules.checkUpdate = function (){
     }
 
     function isInstallable(link){
-        return /^https:\/\/yadi.sk\/d\/\w+/.test(link);
+        return /^https:\/\/yadi.sk\/d\/\w+/.test(link) || /^http:\/\/www.racedepartment.com\/downloads\//.test(link);
     }
 
     function check(){
@@ -85,10 +91,10 @@ modules.checkUpdate = function (){
 
                     mediator.dispatch('update', {
                         actualVersion: actualVersion,
-                        changelog: getChangelog(gui.App.manifest.version, output),
+                        changelog: getChangelog(gui.App.manifest.version, actualVersion, output),
                         detailsUrl: _details,
                         downloadUrl: d,
-                        installUrl: s && d,
+                        installUrl: s && d.replace(/\/download\?version=.+$/, ''),
                     });
                 }
             });
@@ -96,41 +102,51 @@ modules.checkUpdate = function (){
     }
 
     var _lr;
-    function httpsDownload(url, file, callback, progressCallback){
-        _lr = require('https').get(url, function(r){
-            if (r.statusCode == 302){
-                httpsDownload(r.headers['location'], file, callback, progressCallback);
-            } else if (r.statusCode == 200){
-                var m = r.headers['content-length'], p = 0;
-                r.pipe(file);
-                r.on('data', function(d) {
-                    progressCallback(p += d.length, m);
-                }).on('end', function() {
-                    if (_lr){
-                        _lr = null;
-                        setTimeout(callback, 50);
-                    }
-                });
-            } else {
-                callback(r.statusCode);
+    function httpDownload(url, file, callback, progressCallback){
+        try {
+            if (typeof file === 'string'){
+                file = fs.createWriteStream(file);
             }
-        }).on('error', function(e) {
-            _lr = null;
-            callback(e);
-        });
+
+            _lr = require(url.match(/^https?/)[0]).get(url, function(r){
+                if (r.statusCode == 302){
+                    httpDownload(r.headers['location'], file, callback, progressCallback);
+                } else if (r.statusCode == 200){
+                    var m = r.headers['content-length'], p = 0;
+                    r.pipe(file);
+                    r.on('data', function(d) {
+                        progressCallback(p += d.length, m);
+                    }).on('end', function() {
+                        if (_lr){
+                            _lr = null;
+                            setTimeout(callback, 50);
+                        }
+                    });
+                } else {
+                    callback(r.statusCode);
+                }
+            }).on('error', function(e) {
+                callback(e);
+            });
+        } catch (e){
+            callback('DOWNLOAD:' + url);
+        }
     }
 
     function yadiskDownload(url, dest, callback, progressCallback){
         _lr = true;
-        $('<iframe nwdisable nwfaketop>').attr('src', url).on('load', function (e){
+        var ifr = $('<iframe nwdisable nwfaketop>').attr('src', url).on('load', function (e){
+            if (!_lr) return;
+
             this.contentWindow._cb = function (e){
                 if (!_lr) return;
                 try {
-                    var f = fs.createWriteStream(dest);
-                    httpsDownload(e.models[0].data.file, f, callback, progressCallback);
+                    clearTimeout(to);
+                    httpDownload(e.models[0].data.file, dest, callback, progressCallback);
                 } catch (e){
                     callback('YADISK');
                 }
+                ifr.remove();
             };
             this.contentWindow.eval(function (){/*
                 _XMLHttpRequest = XMLHttpRequest;
@@ -152,8 +168,49 @@ modules.checkUpdate = function (){
                 };
             */}.toString().slice(14, -3));
 
-            this.contentWindow.document.querySelector('button[data-click-action="resource.download"]').click();
+            try {
+                this.contentWindow.document.querySelector('button[data-click-action="resource.download"]').click();
+            } catch (e){
+                ifr.remove();
+                callback('YADISK:BTN');
+            }
         }).css({ position: 'fixed', top: '200vh', left: '200vw' }).appendTo('body');
+
+        var to = setTimeout(function (){
+            if (!_lr) return;
+            ifr.remove();
+            callback('YADISK:TO');
+        }, 10e3);
+    }
+
+    function rdDownload(url, dest, callback, progressCallback){
+        _lr = true;
+        var ifr = $('<iframe nwdisable nwfaketop>').attr('src', url).on('load', function (e){
+            if (!_lr) return;
+
+            try {
+                clearTimeout(to);
+                httpDownload(this.contentWindow.document.querySelector('.downloadButton a').href, dest, callback, progressCallback);
+            } catch (e){
+                console.warn(e);
+                ifr.remove();
+                callback('RD:BTN');
+            }
+        }).css({ position: 'fixed', top: '200vh', left: '200vw' }).appendTo('body');
+
+        var to = setTimeout(function (){
+            if (!_lr) return;
+            ifr.remove();
+            callback('RD:TO');
+        }, 10e3);
+    }
+
+    function download(url, dest, callback, progressCallback){
+        if (url.indexOf('racedepartment') < 0){
+            return yadiskDownload(url, dest, callback, progressCallback);
+        } else {
+            return rdDownload(url, dest, callback, progressCallback);
+        }
     }
 
     function prepareUpdate(){
@@ -162,8 +219,9 @@ modules.checkUpdate = function (){
 
     function install(l){
         mediator.dispatch('install:start');
-        yadiskDownload(l, _updateFile + '~tmp', function (error){
+        download(l, _updateFile + '~tmp', function (error){
             if (error){
+                _lr = null;
                 mediator.dispatch('install:failed', error);
             } else {
                 prepareUpdate();
@@ -215,30 +273,32 @@ modules.checkUpdate = function (){
 
                 var b = path.join(path.dirname(process.execPath), 'carsmgr_update.bat');
                 fs.writeFileSync(b, function (){/*
-                    @ECHO OFF
+@ECHO OFF
 
-                    REM go to right directory
-                    CD %~dp0
+CD %~dp0
+TASKKILL /F /IM carsmgr.exe
 
-                    REM kill original app
-                    TASKKILL /F /IM carsmgr.exe
+:CHECK_EXECUTABLE
+IF NOT EXIST carsmgr.exe GOTO EXECUTABLE_REMOVED
 
-                    REM remove it
-                    DEL nw.pak icudtl.dat carsmgr.exe
+DEL carsmgr.exe
+TIMEOUT /T 1 >nul
 
-                    REM move unpacked version
-                    for /r %%i in (carsmgr_update~next\*) do MOVE /Y "%%i" %%~nxi
-                    RMDIR /S /Q carsmgr_update~next
+GOTO CHECK_EXECUTABLE
+:EXECUTABLE_REMOVED
 
-                    REM run updated app
-                    if exist carsmgr.exe (
-                        start carsmgr.exe
-                    ) else (
-                        start uijson.exe
-                    )
+DEL nw.pak icudtl.dat carsmgr.exe
 
-                    REM remove bat-file & packed version
-                    DEL %0 carsmgr_update.next
+for /r %%i in (carsmgr_update~next\*) do MOVE /Y "%%i" %%~nxi
+RMDIR /S /Q carsmgr_update~next
+
+if exist carsmgr.exe (
+    start carsmgr.exe
+) else (
+    start uijson.exe
+)
+
+DEL %0 carsmgr_update.next
                 */}.toString().slice(14, -3));
                 gui.Shell.openItem(b);
                 gui.App.quit();

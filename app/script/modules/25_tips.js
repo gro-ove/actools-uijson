@@ -6,6 +6,8 @@ modules.tips = function (){
         'Don\'t forget to save changes (Ctrl+S). Use “Reload” button if you want to discard them.',
         'If you want to practice, AcTools Ui Json will be much faster than original Launcher.',
         'Make double click on PW-ratio to recalculate it using BHP and Weight.',
+        'Native-looking <b>Upgrade Icons</b> requires font “Consolas”, which is included from Windows Vista.\
+            So, if your OS is something like XP, please, install it manually.',
         '<b>Auto-update Preview</b> could produce super-native looking previews, but sadly sometimes not from the first time.',
         'Before using <b>Auto-update Preview</b> please disable all graphics mods (such as SweetFX).\
             We want original-looking screenshots, don\'t we?',

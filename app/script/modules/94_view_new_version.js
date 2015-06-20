@@ -8,7 +8,7 @@ modules.viewNewVersion = function (){
         var d = new Dialog('New Version', [
             'Current version: {0}'.format(gui.App.manifest.version),
             'New version: {0}'.format(inf.actualVersion),
-            inf.changelog && 'Changelog:<br><ul><li>{0}</li></ul>'.format(
+            inf.changelog && 'Changelog:<div style="max-height:400px;overflow-y:auto"><ul><li>{0}</li></ul></div>'.format(
                 inf.changelog.map(function (e){
                     return '<div>' + e.version + '</div><ul><li>' + e.changes.join('</li><li>') + '</li></ul>';
                 }).join('</li><li>')

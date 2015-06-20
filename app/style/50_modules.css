@@ -5,3 +5,11 @@
         width: calc(100vw - 100px);
         height: calc(100vh - 200px);
     }
+
+    .car-upgrade-library-element:hover {
+        background-color: #333;
+    }
+
+    .car-upgrade-library-element.selected {
+        background-color: #59f;
+    }

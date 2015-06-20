@@ -32,7 +32,12 @@ modules.showroom = function (){
         }
 
         r = r || localStorage.lastShowroom || 'showroom';
-        modules.acTools.Processes.Showroom.Start(modules.acDir.root, c.id, s, r);
+        try {
+            modules.acTools.Processes.Showroom.Start(modules.acDir.root, c.id, s, r);
+        } catch (err){
+            modules.errorHandler.handled('Cannot start showroom. Maybe there is not enough rights or the car is broken.');
+            return;
+        }
         localStorage.lastShowroom = r;
     }
 
@@ -74,7 +79,7 @@ modules.showroom = function (){
         new Dialog('Update Previews', [
             'New previews ready. Apply?'
         ], function (){
-            modules.acTools.Utils.FileUtils.ApplyPreviews(modules.acDir.root, c.id, output);
+            modules.acTools.Utils.ImageUtils.ApplyPreviews(modules.acDir.root, c.id, output);
             modules.cars.updateSkins(c);
             fs.rmdirSync(output);
         }, false).setButton('Yes').addButton('No');
