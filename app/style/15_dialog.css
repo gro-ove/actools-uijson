@@ -22,7 +22,7 @@ dialog input {
     margin-bottom: 10px;
 }
 
-dialog > div {
+dialog > article {
     min-width: 400px;
     background: #fff;
     border-radius: 0;
@@ -33,7 +33,12 @@ dialog > div {
     position: relative;
 }
 
-dialog p, dialog label {
+dialog progress {
+    margin: 0 0 10px;
+    width: 100%;
+}
+
+dialog p, dialog label, dialog ul {
     font-size: 12px;
 }
 
@@ -46,18 +51,43 @@ dialog input[type="checkbox"] {
     vertical-align: -webkit-baseline-middle;
 }
 
-dialog > div > div:first-child {
+.dialog-header {
+    margin: 0 -20px;
+}
+
+.dialog-header h4 {
+    padding: 18px 20px;
+    display: inline-block;
+    margin: 0;
+}
+
+.dialog-header > div:first-child {
     float: right;
     display: inline-block;
     margin-top: 18px;
 }
 
-dialog > div > div:first-child button {
+.dialog-header > div:first-child button {
     width: auto;
     margin: 0;
 }
 
-dialog .dialog-buttons {
+.dialog-header.tabs {
+    background: #eee;
+}
+
+.dialog-header.tabs h4 {
+}
+
+.dialog-header.tabs h4.active {
+    background: #fff;
+}
+
+.dialog-content > p:first-child {
+    margin-top: 0;
+}
+
+.dialog-buttons {
     display: flex;
     
     position: absolute;
@@ -67,7 +97,7 @@ dialog .dialog-buttons {
     bottom: 0;
 }
 
-dialog .dialog-buttons button {
+.dialog-buttons button {
     height: 100%;
     padding: 10px;
 }

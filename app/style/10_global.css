@@ -30,7 +30,7 @@
     progress::-webkit-progress-bar {
         background: #eee;
     }
-    
+
     progress::-webkit-progress-value {
         background: #59f;
     }
@@ -46,7 +46,7 @@
         font-size: 13px;
     }
 
-    input:focus {
+    input:not([type="checkbox"]):focus {
         box-shadow: 0 0 0 2px #59f;
     }
 

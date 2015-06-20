@@ -31,9 +31,10 @@
             <div id="cars-list"></div>
 
             <footer>
+                <button id="cars-list-open-directory">Directory</button>
                 <button id="cars-list-reload">Reload</button>
                 <br>
-                <button id="cars-list-open-directory">Save all</button>
+                <button id="cars-list-save">Save all</button>
             </footer>
         </aside>
         <main style="display:none">
@@ -53,6 +54,10 @@
                         <li>
                             <span class="property">Brand</span>
                             <input id="selected-car-brand" class="property-value" autocomplete list="brands" required></input>    
+                        </li>
+                        <li>
+                            <span class="property">Parent</span>
+                            <select id="selected-car-parent" class="property-value" disabled title="Feature temporary unavailable"></select>    
                         </li>
                         <li>
                             <span class="property">Class</span>

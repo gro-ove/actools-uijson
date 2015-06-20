@@ -2,11 +2,12 @@
 Small utility for easy editing *ui_car.json* files. Written using [NW.js](http://nwjs.io/).
 
 #### TODO
+* Changable parent, upgrade icons view & generate
 * Auto-download black showroom
 * Auto-disable SweetFX and stuff
 * New mods installation
-* Changable parent, upgrade icons generator
 * Restoration Wizard
+* Switchable & custom search providers
 * More hotkeys
 * Detect broken cars
 * Brand logo select
@@ -21,10 +22,16 @@ Small utility for easy editing *ui_car.json* files. Written using [NW.js](http:/
 * Clone cars, modify in-game specs (?)
 
 #### Download
-* [Last (0.2.21)](https://yadi.sk/d/J4l0dpsrhJrBK)
-* [Stable (0.2.4)](https://ascobash.wordpress.com/2015/06/14/actools-uijson/)
+* [Last (0.2.22)](https://yadi.sk/d/Sq4hOs6PhMweN)
+* [Stable (0.2.21)](http://www.racedepartment.com/downloads/actools-cars-manager.6518/download?version=10480)
 
-#### Changelog:
+#### Changelog
+* 0.2.22
+    * Autoupdate feature (still could be buggy though)
+    * Binary module rebuilded properly
+    * Renaming to Cars Manager in process
+    * Disappearing tags fixed
+    * Parent view (changing temporary disabled)
 * 0.2.21
     * Fancy progressbar
     * Perfomance improvements
@@ -79,6 +86,7 @@ Small utility for easy editing *ui_car.json* files. Written using [NW.js](http:/
 * Don't forget to save changes (Ctrl+S)
 
 #### How to update previews
+* Install [Black Showroom](http://www.racedepartment.com/downloads/studio-black-showroom.4353/)
 * Press RMB and click “Update Previews”
 * Manual mode: set the right camera position and press F8
 * Wait until all skins will be screenshoted

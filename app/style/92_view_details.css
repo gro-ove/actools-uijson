@@ -112,15 +112,24 @@
         content: ":";
     }
 
-    #selected-car, #selected-car-properties input {
+    #selected-car, #selected-car-properties input, #selected-car-properties select {
         background: transparent;
         border: none;
         outline: none;
-        padding: 0;
         font: inherit;
+        padding: 0;
     }
 
-    #selected-car:focus, #selected-car-properties input:focus {
+    #selected-car-properties input, #selected-car-properties select {
+        width: 240px;
+    }
+
+    #selected-car-properties input {
+        padding: 0 4px;
+        box-sizing: border-box;
+    }
+
+    #selected-car:focus, #selected-car-properties input:focus, #selected-car-properties select:focus {
         box-shadow: 0 0 0 2px #59f;
         color: black;
     }

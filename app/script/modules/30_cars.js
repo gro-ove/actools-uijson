@@ -290,6 +290,34 @@ modules.cars = function (){
         mediator.dispatch('update:car:changed', car);
     }
 
+    function changeParent(car, parentId){
+        if (!car.data || car.parent && car.parent.id == parentId || !car.parent && parentId == null) return;
+
+        if (car.parent){
+            car.parent.children.splice(car.parent.children.indexOf(car), 1);
+            mediator.dispatch('update:car:children', car.parent);
+        }
+
+        if (parentId){
+            var parent = byName(parentId);
+            if (!parent) return;
+
+            car.parent = parent;
+            parent.children.push(car);
+            mediator.dispatch('update:car:parent', car);
+            mediator.dispatch('update:car:children', parent);
+
+            car.data.parent = parent.id;
+            mediator.dispatch('update:car:data', car);
+        } else {
+            car.parent = null;
+            mediator.dispatch('update:car:parent', car);
+
+            delete car.data.parent;
+            mediator.dispatch('update:car:data', car);
+        }
+    }
+
     function selectSkin(car, skinId){
         var newSkin = car.skins.filter(function (e){
             return e.id == skinId;
@@ -325,7 +353,7 @@ modules.cars = function (){
     }
 
     function saveAll(){
-        carsList.forEach(function (car){
+        _list.forEach(function (car){
             if (car.changed){
                 save(car);
             }
@@ -338,6 +366,7 @@ modules.cars = function (){
         toggle: toggle,
         changeData: changeData,
         changeDataSpecs: changeDataSpecs,
+        changeParent: changeParent,
         selectSkin: selectSkin,
         updateSkins: updateSkins,
         reload: reload,

@@ -9,6 +9,12 @@ modules.viewSettings = function (){
 
             '<h6>Tips</h6>',
             '<label><input id="settings-disable-tips" type="checkbox">Disable tips on launch</label>',
+
+            '<h6>Updates</h6>',
+            '<label><input id="settings-updates-check" type="checkbox">Check for new versions on launch</label>',
+
+            /*'<h6>Search Provider</h6>',
+            '<label><select id="settings-search-provider"><option value="google"></option></select>',*/
         ], function (){
             if (acdirVal === false) return false;
 
@@ -17,7 +23,8 @@ modules.viewSettings = function (){
             }
 
             modules.settings.update(function (s){
-                if (disableTips != null) s.disableTips = disableTips; 
+                if (disableTips != null) s.disableTips = disableTips;
+                if (updatesCheck != null) s.updatesCheck = updatesCheck;
             });
         }, false).setButton('Save').addButton('Cancel');
 
@@ -44,7 +51,22 @@ modules.viewSettings = function (){
         var disableTips;
         d.find('#settings-disable-tips').change(function (){
             disableTips = this.checked;
-        })[0].checked = modules.settings.get('disableTips');
+        })[0].checked = modules.settings.get('disableTips', false);
+
+        var updatesCheck;
+        d.find('#settings-updates-check').change(function (){
+            updatesCheck = this.checked;
+        })[0].checked = modules.settings.get('updatesCheck', true);
+
+        d.addTab('About', [
+            '<h6>Version</h6>',
+            gui.App.manifest.version,
+            '<h6>Author</h6>',
+            'x4fab',
+        ]).addButton('Check for update', function (){
+            modules.checkUpdate.check();
+            return false;
+        });
     }
 
     function init(){

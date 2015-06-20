@@ -123,7 +123,11 @@ modules.viewList = function (){
             .on('update:car:children', function (car){
                 var e = _node[0].querySelector('[data-id="' + car.id + '"]');
                 if (!e) return;
-                e.parentNode.setAttribute('data-children', car.children.length ? car.children.length + 1 : null);
+                if (car.children.length){
+                    e.parentNode.setAttribute('data-children', car.children.length + 1);
+                } else {
+                    e.parentNode.removeAttribute('data-children');
+                }
             })
             .on('update:car:path', function (car){
                 var e = _node[0].querySelector('[data-id="' + car.id + '"]');
@@ -218,6 +222,11 @@ modules.viewList = function (){
             }.bind(_aside.find('footer')[0]));
 
         /* first row */
+        _aside.find('#cars-list-open-directory').click(function (){
+            if (!_selected) return;
+            gui.Shell.openItem(modules.acDir.cars);
+        });
+
         _aside.find('#cars-list-reload').click(function (){
             if (modules.cars.list.some(function (e){
                 return e.changed;

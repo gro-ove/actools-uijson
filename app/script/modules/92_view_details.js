@@ -33,6 +33,25 @@ modules.viewDetails = function (){
         lo.attr('src', path.join(car.path, 'ui', 'badge.png').cssUrl());
     }
 
+    function updateParents(car){
+        var s = document.getElementById('selected-car-parent');
+        if (!s) return;
+
+        if (car.children.length > 0){
+            s.parentNode.style.display = 'none';
+        } else {
+            s.parentNode.style.display = null;
+
+            s.innerHTML = '<option value="">None</option>' + modules.cars.list.filter(function (e){
+                return e.data && !e.disabled && e.parent == null && e.id != car.id && (!car.parent || car.parent.id != car.id);
+            }).map(function (e){
+                return '<option value="{0}">{1}</option>'.format(e.id, e.data.name);
+            }).join('');
+
+            s.value = car.parent && car.parent.id || '';
+        }
+    }
+
     function outData(car){
         var he = $('#selected-car'),
             de = $('#selected-car-desc'),
@@ -42,7 +61,7 @@ modules.viewDetails = function (){
             he.removeAttr('readonly');
             de.removeAttr('readonly');
 
-            ta.find('li').remove();
+            ta.show().find('li').remove();
             car.data.tags.forEach(function (e){
                 $('<li>').text(e).insertBefore(this);
             }.bind(ta.find('input')));
@@ -66,6 +85,8 @@ modules.viewDetails = function (){
             $('#selected-car-topspeed').val(car.data.specs.topspeed || '');
             $('#selected-car-acceleration').val(car.data.specs.acceleration || '');
             $('#selected-car-pwratio').val(car.data.specs.pwratio || '');
+
+            updateParents(car);
         } else {
             he.attr('readonly', true).val(car.id);
             de.attr('readonly', true).val('');
@@ -233,6 +254,10 @@ modules.viewDetails = function (){
         }).change(function (e){
             if (!_selected || this.readonly || !this.value) return;
             modules.cars.changeData(_selected, 'brand', this.value);
+        });
+
+        $('#selected-car-parent').change(function (e){
+            modules.cars.changeParent(_selected, this.value || null);
         });
 
         $('#selected-car-class').keydown(function (e){
