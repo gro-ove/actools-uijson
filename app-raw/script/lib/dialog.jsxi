@@ -6,6 +6,7 @@ class Dialog {
     public tabs;
 
     private _callback, _closeCallback;
+    private _closeOnEnter = true;
 
     private _prepareContent(elements){
         if (typeof elements == 'string'){
@@ -45,11 +46,16 @@ class Dialog {
         });
 
         el.find('*').keydown(function (e){
-            if (e.keyCode == 13){
+            if (e.keyCode == 13 && _closeOnEnter){
                 el.find('[data-id="dialog-ok"]')[0].click();
                 return false;
             }
         });
+    }
+
+    public closeOnEnter(v){
+        _closeOnEnter = v;
+        return this;
     }
 
     public setButton(a, c){

@@ -1,4 +1,6 @@
 static class ViewSettings {
+    var _prevFeedback;
+
     function openDialog(){
         var d = new Dialog('Settings', [
             '<h6>AC Root Directory</h6>',
@@ -73,23 +75,49 @@ static class ViewSettings {
             '<h6>Author</h6>',
             'x4fab',
         ]).addButton('Feedback', function (){
-            new Dialog('Feedback', '<textarea style="width:400px;height:300px;resize:none" placeholder="If you have any ideas or suggestions please let me know"></textarea>', function (){
-                
-                alert(this.content.find('textarea').val());
-            }, false).setButton('Send').addButton('Cancel');
+            feedbackForm();
             return false;
         }).addButton('Check for update', function (){
+            var b = this.buttons.find('button:last-child').text('Please wait...').attr('disabled', true);
             CheckUpdate.check();
+            CheckUpdate.one('check', lambda (arg){
+                b.text('Check again').attr('disabled', null);
+                if (arg === 'check:failed'){
+                    new Dialog('Check For Update', 'Cannot check for update.');
+                } else if (arg !== 'check:done:found'){
+                    new Dialog('Check For Update', 'New version not found.');
+                }
+            });
             return false;
         });
     }
 
-    function init(){
-        $('#settings-open')
-            .click(openDialog);
+    private feedbackForm(){
+        function sendFeedback(v){
+            d.buttons.find('button:first-child').text('Please wait...').attr('disabled', true);
+
+            AppServerRequest.sendFeedback(v, lambda {
+                d.close();
+                if (arg){
+                    new Dialog('Cannot Send Feedback', 'Sorry about that.');
+                } else {
+                    _prevFeedback = null;
+                    new Dialog('Feedback Sent', 'Thank you.');
+                }
+            });
+        }
+
+        var d = new Dialog('Feedback', '<textarea style="width:350px;height:200px;resize:none" maxlength="5000"\
+                placeholder="If you have any ideas or suggestions please let me know"></textarea>', function (){
+            var v = this.content.find('textarea').val().trim();
+            if (v) sendFeedback(v);
+            return false;
+        }, false).setButton('Send').addButton('Cancel').closeOnEnter(false);
+        d.find('textarea').val(_prevFeedback || '').change(lambda _prevFeedback = this.value);
     }
     
     {
-        init();
+        $('#settings-open')
+            .click(openDialog);
     }
 }

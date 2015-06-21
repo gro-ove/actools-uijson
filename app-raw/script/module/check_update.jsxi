@@ -24,7 +24,8 @@ static class CheckUpdate {
             Settings.get('updatesSource', 'stable'),
             function (err, data){
                 if (err){
-                    mediator.dispatch('check:failed', err);
+                    console.warn(err);
+                    mediator.dispatch('check:failed');
                     return;
                 }
 
@@ -36,9 +37,11 @@ static class CheckUpdate {
                         downloadUrl: data.url,
                         installUrl: data.download || isInstallable(data.url) && data.url,
                     });
-                }
 
-                mediator.dispatch('check:done', err);
+                    mediator.dispatch('check:done:found');
+                } else {
+                    mediator.dispatch('check:done');
+                }
             });
     }
 

@@ -30,102 +30,107 @@ __defineGetter__('Shell',                                                       
 function Dialog(title, elements, callback, closeCallback){                         // dialog.jsxi:3
 	var __that = this;
 	
+	this.__Dialog__closeOnEnter = true;
 	this.el = $('<dialog>').html('<article><div class="dialog-header"><h4>' + title + '</h4></div><div class="dialog-content">' + this.__Dialog__prepareContent(elements) + '</div><div class="dialog-buttons"><button data-id="dialog-ok">ОК</button></div></article>').click(function (e){
 		if (e.target.tagName == 'DIALOG' && (__that.__Dialog__closeCallback == null || __that.__Dialog__closeCallback !== false && __that.__Dialog__closeCallback() !== false)){
 			__that.close();
 		}
-	}).appendTo('body');                                                           // dialog.jsxi:28
-	this.header = this.el.find('.dialog-header > h4');                             // dialog.jsxi:30
-	this.content = this.el.find('.dialog-content');                                // dialog.jsxi:31
-	this.buttons = this.el.find('.dialog-buttons');                                // dialog.jsxi:32
-	this.__Dialog__callback = callback && callback.bind(this);                     // dialog.jsxi:34
-	this.__Dialog__closeCallback = closeCallback && closeCallback.bind(this);      // dialog.jsxi:35
+	}).appendTo('body');                                                           // dialog.jsxi:29
+	this.header = this.el.find('.dialog-header > h4');                             // dialog.jsxi:31
+	this.content = this.el.find('.dialog-content');                                // dialog.jsxi:32
+	this.buttons = this.el.find('.dialog-buttons');                                // dialog.jsxi:33
+	this.__Dialog__callback = callback && callback.bind(this);                     // dialog.jsxi:35
+	this.__Dialog__closeCallback = closeCallback && closeCallback.bind(this);      // dialog.jsxi:36
 	
 	if (this.__Dialog__callback === false){
-		this.el.find('[data-id="dialog-ok"]').hide();                              // dialog.jsxi:38
+		this.el.find('[data-id="dialog-ok"]').hide();                              // dialog.jsxi:39
 	}
 	
-	this.el.find('[data-id="dialog-ok"]').click(function (e){                      // dialog.jsxi:41
+	this.el.find('[data-id="dialog-ok"]').click(function (e){                      // dialog.jsxi:42
 		if (!__that.__Dialog__callback || __that.__Dialog__callback() !== false){
 			__that.close();
 		}
 	});
-	this.el.find('*').keydown(function (e){                                        // dialog.jsxi:47
-		if (e.keyCode == 13){                                                      // dialog.jsxi:48
-			__that.el.find('[data-id="dialog-ok"]')[0].click();                    // dialog.jsxi:49
+	this.el.find('*').keydown(function (e){                                        // dialog.jsxi:48
+		if (e.keyCode == 13 && __that.__Dialog__closeOnEnter){                     // dialog.jsxi:49
+			__that.el.find('[data-id="dialog-ok"]')[0].click();                    // dialog.jsxi:50
 			return false;
 		}
 	});
 }
-Dialog.prototype.__Dialog__prepareContent = function (elements){                   // dialog.jsxi:10
-	if (typeof elements == 'string'){                                              // dialog.jsxi:11
-		elements = [ elements ];                                                   // dialog.jsxi:12
+Dialog.prototype.__Dialog__prepareContent = function (elements){                   // dialog.jsxi:11
+	if (typeof elements == 'string'){                                              // dialog.jsxi:12
+		elements = [ elements ];                                                   // dialog.jsxi:13
 	}
-	return elements.map(function (e){                                              // dialog.jsxi:15
+	return elements.map(function (e){                                              // dialog.jsxi:16
 		return e ? e[0] == '<' && e[e.length - 1] == '>' ? e : '<p>' + e + '</p>' : '';
-	}).join('');                                                                   // dialog.jsxi:17
+	}).join('');                                                                   // dialog.jsxi:18
 };
-Dialog.prototype.setButton = function (a, c){                                      // dialog.jsxi:55
-	this.buttons.find('[data-id="dialog-ok"]').toggle(a != null).text(a);          // dialog.jsxi:56
-	
-	if (c != null){                                                                // dialog.jsxi:57
-		this.__Dialog__callback = c;                                               // dialog.jsxi:57
-	}
+Dialog.prototype.closeOnEnter = function (v){                                      // dialog.jsxi:56
+	this.__Dialog__closeOnEnter = v;                                               // dialog.jsxi:57
 	return this;                                                                   // dialog.jsxi:58
 };
-Dialog.prototype.setContent = function (content){                                  // dialog.jsxi:61
-	content.html(this.__Dialog__prepareContent(content));                          // dialog.jsxi:62
-	return this;                                                                   // dialog.jsxi:63
+Dialog.prototype.setButton = function (a, c){                                      // dialog.jsxi:61
+	this.buttons.find('[data-id="dialog-ok"]').toggle(a != null).text(a);          // dialog.jsxi:62
+	
+	if (c != null){                                                                // dialog.jsxi:63
+		this.__Dialog__callback = c;                                               // dialog.jsxi:63
+	}
+	return this;                                                                   // dialog.jsxi:64
 };
-Dialog.prototype.addButton = function (text, fn){                                  // dialog.jsxi:66
+Dialog.prototype.setContent = function (content){                                  // dialog.jsxi:67
+	content.html(this.__Dialog__prepareContent(content));                          // dialog.jsxi:68
+	return this;                                                                   // dialog.jsxi:69
+};
+Dialog.prototype.addButton = function (text, fn){                                  // dialog.jsxi:72
 	var __that = this;
 	
-	fn = fn && fn.bind(this);                                                      // dialog.jsxi:67
+	fn = fn && fn.bind(this);                                                      // dialog.jsxi:73
 	$('<button>' + text + '</button>').appendTo(this.buttons).click(function (e){
-		if (!fn || fn() !== false){                                                // dialog.jsxi:69
+		if (!fn || fn() !== false){                                                // dialog.jsxi:75
 			__that.close();
 		}
 	});
-	return this;                                                                   // dialog.jsxi:73
+	return this;                                                                   // dialog.jsxi:79
 };
-Dialog.prototype.find = function (a){                                              // dialog.jsxi:76
-	return this.el.find(a);                                                        // dialog.jsxi:77
+Dialog.prototype.find = function (a){                                              // dialog.jsxi:82
+	return this.el.find(a);                                                        // dialog.jsxi:83
 };
-Dialog.prototype.close = function (){                                              // dialog.jsxi:80
-	this.el.remove();                                                              // dialog.jsxi:81
+Dialog.prototype.close = function (){                                              // dialog.jsxi:86
+	this.el.remove();                                                              // dialog.jsxi:87
 };
-Dialog.prototype.addTab = function (title, content, callback, closeCallback){      // dialog.jsxi:84
+Dialog.prototype.addTab = function (title, content, callback, closeCallback){      // dialog.jsxi:90
 	var __that = this;
 	
 	if (!this.tabs){
 		this.tabs = [ this ];
-		this.header.parent().addClass('tabs').click(function (e){                  // dialog.jsxi:87
+		this.header.parent().addClass('tabs').click(function (e){                  // dialog.jsxi:93
 			if (e.target.tagName === 'H4' && !e.target.classList.contains('active')){
 				__that.el.find('.dialog-header h4.active').removeClass('active');
-				e.target.classList.add('active');                                  // dialog.jsxi:90
+				e.target.classList.add('active');                                  // dialog.jsxi:96
 				
 				var i = Array.prototype.indexOf.call(e.target.parentNode.childNodes, e.target);
 				
 				var l = __that.el.find('.dialog-content')[0];
 				
-				l.parentNode.removeChild(l);                                       // dialog.jsxi:94
+				l.parentNode.removeChild(l);                                       // dialog.jsxi:100
 				
 				var l = __that.el.find('.dialog-buttons')[0];
 				
-				l.parentNode.removeChild(l);                                       // dialog.jsxi:96
-				__that.tabs[i].content.appendTo(__that.el.children());             // dialog.jsxi:97
-				__that.tabs[i].buttons.appendTo(__that.el.children());             // dialog.jsxi:98
+				l.parentNode.removeChild(l);                                       // dialog.jsxi:102
+				__that.tabs[i].content.appendTo(__that.el.children());             // dialog.jsxi:103
+				__that.tabs[i].buttons.appendTo(__that.el.children());             // dialog.jsxi:104
 			}
 		});
 	}
 	
 	var n = new Dialog(title, content, callback, closeCallback);
 	
-	this.tabs.push(n);                                                             // dialog.jsxi:104
-	document.body.removeChild(n.el[0]);                                            // dialog.jsxi:106
-	n.header.appendTo(this.header.addClass('active').parent());                    // dialog.jsxi:107
-	n.close = __bindOnce(this, 'close').bind(this);                                // dialog.jsxi:108
-	return n;                                                                      // dialog.jsxi:110
+	this.tabs.push(n);                                                             // dialog.jsxi:110
+	document.body.removeChild(n.el[0]);                                            // dialog.jsxi:112
+	n.header.appendTo(this.header.addClass('active').parent());                    // dialog.jsxi:113
+	n.close = __bindOnce(this, 'close').bind(this);                                // dialog.jsxi:114
+	return n;                                                                      // dialog.jsxi:116
 };
 
 var Mediator = (function (){                                                       // mediator.jsxi:1
@@ -879,35 +884,30 @@ var AppServerRequest = (function (){                                            
 		_host = 'ascobash.comuf.com';                                              // app_server_request.jsxi:2
 	
 	AppServerRequest.checkUpdate = function (version, source, callback){           // app_server_request.jsxi:6
-		AppServerRequest.__AppServerRequest_http.request({ host: _host, path: 'check?v=' + version + '&b=' + source }, 
-			function (res){                                                        // app_server_request.jsxi:7
-				if (res.statusCode != 200){                                        // app_server_request.jsxi:8
-					callback(res.statusCode == 204 ? null : res.statusCode);       // app_server_request.jsxi:9
-					return;
-				}
-				
-				res.setEncoding('utf8');                                           // app_server_request.jsxi:13
-				
-				var output = '';
-				
-				res.on('data',                                                     // app_server_request.jsxi:16
-					function (arg){                                                // app_server_request.jsxi:16
-						return output += arg;                                      // app_server_request.jsxi:16
-					});
-				res.on('end',                                                      // app_server_request.jsxi:17
-					function (){                                                   // app_server_request.jsxi:17
-						var data;
-						
-						try {
-							data = JSON.parse(output);                             // app_server_request.jsxi:20
-						} catch (e){                                               // app_server_request.jsxi:21
-							callback(e);                                           // app_server_request.jsxi:22
-							return;
-						} 
-						
-						callback(null, data);                                      // app_server_request.jsxi:26
-					});
-			}).end();                                                              // app_server_request.jsxi:28
+		$.ajax({                                                                   // app_server_request.jsxi:7
+			url: 'http://ascobash.comuf.com/api.php?0=check&v=' + version + '&b=' + source
+		}).fail(function (){                                                       // app_server_request.jsxi:9
+			callback('error:request');                                             // app_server_request.jsxi:10
+		}).done(function (data){                                                   // app_server_request.jsxi:11
+			if (data == null || typeof data === 'object'){                         // app_server_request.jsxi:12
+				callback(null, data);                                              // app_server_request.jsxi:13
+			} else {
+				callback('error:' + data);                                         // app_server_request.jsxi:15
+			}
+		});
+	};
+	AppServerRequest.sendFeedback = function (feedback, callback){                 // app_server_request.jsxi:20
+		$.ajax({                                                                   // app_server_request.jsxi:21
+			url: 'http://ascobash.comuf.com/api.php?0=feedback',                   // app_server_request.jsxi:21
+			type: 'POST',                                                          // app_server_request.jsxi:23
+			contentType: 'text/plain',                                             // app_server_request.jsxi:24
+			data: feedback,                                                        // app_server_request.jsxi:25
+			processData: false
+		}).fail(function (){                                                       // app_server_request.jsxi:27
+			callback('error:request');                                             // app_server_request.jsxi:28
+		}).done(function (data){                                                   // app_server_request.jsxi:29
+			callback(null);                                                        // app_server_request.jsxi:30
+		});
 	};
 	Object.defineProperty(AppServerRequest,                                        // app_server_request.jsxi:1
 		'__AppServerRequest_http', 
@@ -1439,7 +1439,7 @@ var CheckUpdate = (function (){                                                 
 		mediator = new Mediator(),                                                 // check_update.jsxi:2
 		_updateFile = path.join(path.dirname(process.execPath), 'carsmgr_update.next'), 
 		_details = 'https://ascobash.wordpress.com/2015/06/14/actools-uijson/',    // check_update.jsxi:5
-		_updateInProcess;                                                          // check_update.jsxi:45
+		_updateInProcess;                                                          // check_update.jsxi:48
 	
 	function isInstallableYadisk(link){                                            // check_update.jsxi:7
 		return /^https:\/\/yadi.sk\/d\/\w+/.test(link);                            // check_update.jsxi:8
@@ -1459,187 +1459,189 @@ var CheckUpdate = (function (){                                                 
 			Settings.get('updatesSource', 'stable'),                               // check_update.jsxi:24
 			function (err, data){                                                  // check_update.jsxi:25
 				if (err){                                                          // check_update.jsxi:26
-					mediator.dispatch('check:failed', err);                        // check_update.jsxi:27
+					console.warn(err);                                             // check_update.jsxi:27
+					mediator.dispatch('check:failed');                             // check_update.jsxi:28
 					return;
 				}
 				
-				if (data){                                                         // check_update.jsxi:31
-					mediator.dispatch('update',                                    // check_update.jsxi:32
+				if (data){                                                         // check_update.jsxi:32
+					mediator.dispatch('update',                                    // check_update.jsxi:33
 						{
-							actualVersion: data.version,                           // check_update.jsxi:33
-							changelog: data.changes,                               // check_update.jsxi:34
-							detailsUrl: _details,                                  // check_update.jsxi:35
-							downloadUrl: data.url,                                 // check_update.jsxi:36
+							actualVersion: data.version,                           // check_update.jsxi:34
+							changelog: data.changes,                               // check_update.jsxi:35
+							detailsUrl: _details,                                  // check_update.jsxi:36
+							downloadUrl: data.url,                                 // check_update.jsxi:37
 							installUrl: data.download || isInstallable(data.url) && data.url
 						});
+					mediator.dispatch('check:done:found');                         // check_update.jsxi:41
+				} else {
+					mediator.dispatch('check:done');                               // check_update.jsxi:43
 				}
-				
-				mediator.dispatch('check:done', err);                              // check_update.jsxi:41
 			});
 	};
 	
-	function httpDownload(url, file, callback, progressCallback){                  // check_update.jsxi:46
+	function httpDownload(url, file, callback, progressCallback){                  // check_update.jsxi:49
 		try {
-			if (typeof file === 'string'){                                         // check_update.jsxi:48
-				file = fs.createWriteStream(file);                                 // check_update.jsxi:49
+			if (typeof file === 'string'){                                         // check_update.jsxi:51
+				file = fs.createWriteStream(file);                                 // check_update.jsxi:52
 			}
 			
-			_updateInProcess = require(url.match(/^https?/)[0]).get(url,           // check_update.jsxi:52
-				function (r){                                                      // check_update.jsxi:52
-					if (r.statusCode == 302){                                      // check_update.jsxi:53
+			_updateInProcess = require(url.match(/^https?/)[0]).get(url,           // check_update.jsxi:55
+				function (r){                                                      // check_update.jsxi:55
+					if (r.statusCode == 302){                                      // check_update.jsxi:56
 						httpDownload(r.headers['location'], file, callback, progressCallback);
-					} else if (r.statusCode == 200){                               // check_update.jsxi:55
+					} else if (r.statusCode == 200){                               // check_update.jsxi:58
 						var m = r.headers['content-length'], p = 0;
 						
-						r.pipe(file);                                              // check_update.jsxi:57
-						r.on('data',                                               // check_update.jsxi:58
-							function (d){                                          // check_update.jsxi:58
-								progressCallback(p += d.length, m);                // check_update.jsxi:59
-							}).on('end',                                           // check_update.jsxi:60
-							function (){                                           // check_update.jsxi:60
-								if (_updateInProcess){                             // check_update.jsxi:61
-									_updateInProcess = null;                       // check_update.jsxi:62
-									setTimeout(callback, 50);                      // check_update.jsxi:63
+						r.pipe(file);                                              // check_update.jsxi:60
+						r.on('data',                                               // check_update.jsxi:61
+							function (d){                                          // check_update.jsxi:61
+								progressCallback(p += d.length, m);                // check_update.jsxi:62
+							}).on('end',                                           // check_update.jsxi:63
+							function (){                                           // check_update.jsxi:63
+								if (_updateInProcess){                             // check_update.jsxi:64
+									_updateInProcess = null;                       // check_update.jsxi:65
+									setTimeout(callback, 50);                      // check_update.jsxi:66
 								}
 							});
 					} else {
-						callback(r.statusCode);                                    // check_update.jsxi:67
+						callback(r.statusCode);                                    // check_update.jsxi:70
 					}
-				}).on('error',                                                     // check_update.jsxi:69
-				function (e){                                                      // check_update.jsxi:69
-					callback(e);                                                   // check_update.jsxi:70
+				}).on('error',                                                     // check_update.jsxi:72
+				function (e){                                                      // check_update.jsxi:72
+					callback(e);                                                   // check_update.jsxi:73
 				});
-		} catch (e){                                                               // check_update.jsxi:72
-			callback('DOWNLOAD:' + url);                                           // check_update.jsxi:73
+		} catch (e){                                                               // check_update.jsxi:75
+			callback('DOWNLOAD:' + url);                                           // check_update.jsxi:76
 		} 
 	}
 	
-	function yadiskDownload(url, dest, callback, progressCallback){                // check_update.jsxi:77
-		_updateInProcess = true;                                                   // check_update.jsxi:78
+	function yadiskDownload(url, dest, callback, progressCallback){                // check_update.jsxi:80
+		_updateInProcess = true;                                                   // check_update.jsxi:81
 		
-		var ifr = $('<iframe nwdisable nwfaketop>').attr('src', url).on('load',    // check_update.jsxi:79
-			function (e){                                                          // check_update.jsxi:79
-				if (!_updateInProcess)                                             // check_update.jsxi:80
+		var ifr = $('<iframe nwdisable nwfaketop>').attr('src', url).on('load',    // check_update.jsxi:82
+			function (e){                                                          // check_update.jsxi:82
+				if (!_updateInProcess)                                             // check_update.jsxi:83
 					return;
 				
-				this.contentWindow._cb = function (e){                             // check_update.jsxi:82
-					if (!_updateInProcess)                                         // check_update.jsxi:83
+				this.contentWindow._cb = function (e){                             // check_update.jsxi:85
+					if (!_updateInProcess)                                         // check_update.jsxi:86
 						return;
 					
 					try {
-						clearTimeout(to);                                          // check_update.jsxi:85
+						clearTimeout(to);                                          // check_update.jsxi:88
 						httpDownload(e.models[0].data.file, dest, callback, progressCallback);
 					} catch (e){
-						callback('YADISK');                                        // check_update.jsxi:87
+						callback('YADISK');                                        // check_update.jsxi:90
 					} 
 					
-					ifr.remove();                                                  // check_update.jsxi:88
+					ifr.remove();                                                  // check_update.jsxi:91
 				};
 				this.contentWindow.eval("\t\t\t\t\t \n_XMLHttpRequest = XMLHttpRequest;\nXMLHttpRequest = function (){\n\tvar r = new _XMLHttpRequest();\n\tr.onreadystatechange = function (e){\n\t\tif (r.status == 200 && r.readyState == 4)\n\t\t\t_cb(JSON.parse(r.responseText));\n\t};\n\treturn {\n\t\topen: function (){ r.open.apply(r, arguments); },\n\t\tsetRequestHeader: function (){ r.setRequestHeader.apply(r, arguments); },\n\t\tgetAllResponseHeaders: function (){ r.getAllResponseHeaders.apply(r, arguments); },\n\t\tgetResponseHeader: function (){ r.getResponseHeader.apply(r, arguments); },\n\t\tabort: function (){ r.abort.apply(r, arguments); },\n\t\tsend: function (){ r.send.apply(r, arguments); },\n\t};\n};");
 				
 				try {
 					this.contentWindow.document.querySelector('button[data-click-action="resource.download"]').click();
 				} catch (e){
-					ifr.remove();                                                  // check_update.jsxi:110
-					callback('YADISK:BTN');                                        // check_update.jsxi:111
+					ifr.remove();                                                  // check_update.jsxi:113
+					callback('YADISK:BTN');                                        // check_update.jsxi:114
 				} 
 			}).css({ position: 'fixed', top: '200vh', left: '200vw' }).appendTo('body');
 		
-		var to = setTimeout(function (){                                           // check_update.jsxi:115
-			if (!_updateInProcess)                                                 // check_update.jsxi:116
+		var to = setTimeout(function (){                                           // check_update.jsxi:118
+			if (!_updateInProcess)                                                 // check_update.jsxi:119
 				return;
 			
-			ifr.remove();                                                          // check_update.jsxi:117
-			callback('YADISK:TO');                                                 // check_update.jsxi:118
+			ifr.remove();                                                          // check_update.jsxi:120
+			callback('YADISK:TO');                                                 // check_update.jsxi:121
 		}, 
 		10e3);
 	}
 	
-	function rdDownload(url, dest, callback, progressCallback){                    // check_update.jsxi:122
-		_updateInProcess = true;                                                   // check_update.jsxi:123
+	function rdDownload(url, dest, callback, progressCallback){                    // check_update.jsxi:125
+		_updateInProcess = true;                                                   // check_update.jsxi:126
 		
-		var ifr = $('<iframe nwdisable nwfaketop>').attr('src', url).on('load',    // check_update.jsxi:124
-			function (e){                                                          // check_update.jsxi:124
-				if (!_updateInProcess)                                             // check_update.jsxi:125
+		var ifr = $('<iframe nwdisable nwfaketop>').attr('src', url).on('load',    // check_update.jsxi:127
+			function (e){                                                          // check_update.jsxi:127
+				if (!_updateInProcess)                                             // check_update.jsxi:128
 					return;
 				
 				try {
-					clearTimeout(to);                                              // check_update.jsxi:128
+					clearTimeout(to);                                              // check_update.jsxi:131
 					httpDownload(this.contentWindow.document.querySelector('.downloadButton a').href, 
-						dest,                                                      // check_update.jsxi:129
-						callback,                                                  // check_update.jsxi:129
-						progressCallback);                                         // check_update.jsxi:129
-				} catch (e){                                                       // check_update.jsxi:130
-					ifr.remove();                                                  // check_update.jsxi:131
-					callback('RD:BTN');                                            // check_update.jsxi:132
+						dest,                                                      // check_update.jsxi:132
+						callback,                                                  // check_update.jsxi:132
+						progressCallback);                                         // check_update.jsxi:132
+				} catch (e){                                                       // check_update.jsxi:133
+					ifr.remove();                                                  // check_update.jsxi:134
+					callback('RD:BTN');                                            // check_update.jsxi:135
 				} 
 			}).css({ position: 'fixed', top: '200vh', left: '200vw' }).appendTo('body');
 		
-		var to = setTimeout(function (){                                           // check_update.jsxi:136
-			if (!_updateInProcess)                                                 // check_update.jsxi:137
+		var to = setTimeout(function (){                                           // check_update.jsxi:139
+			if (!_updateInProcess)                                                 // check_update.jsxi:140
 				return;
 			
-			ifr.remove();                                                          // check_update.jsxi:138
-			callback('RD:TO');                                                     // check_update.jsxi:139
+			ifr.remove();                                                          // check_update.jsxi:141
+			callback('RD:TO');                                                     // check_update.jsxi:142
 		}, 
 		10e3);
 	}
 	
-	function download(url, dest, callback, progressCallback){                      // check_update.jsxi:143
-		if (isInstallableYadisk(url))                                              // check_update.jsxi:144
-			yadiskDownload(url, dest, callback, progressCallback);                 // check_update.jsxi:144
-		else if (isInstallableRd(url))                                             // check_update.jsxi:145
-			rdDownload(url, dest, callback, progressCallback);                     // check_update.jsxi:145
+	function download(url, dest, callback, progressCallback){                      // check_update.jsxi:146
+		if (isInstallableYadisk(url))                                              // check_update.jsxi:147
+			yadiskDownload(url, dest, callback, progressCallback);                 // check_update.jsxi:147
+		else if (isInstallableRd(url))                                             // check_update.jsxi:148
+			rdDownload(url, dest, callback, progressCallback);                     // check_update.jsxi:148
 		else
-			httpDownload(url, dest, callback, progressCallback);                   // check_update.jsxi:146
+			httpDownload(url, dest, callback, progressCallback);                   // check_update.jsxi:149
 	}
 	
-	CheckUpdate.install = function (url){                                          // check_update.jsxi:149
-		mediator.dispatch('install:start');                                        // check_update.jsxi:150
-		download(url,                                                              // check_update.jsxi:151
-			_updateFile + '~tmp',                                                  // check_update.jsxi:151
-			function (error){                                                      // check_update.jsxi:151
-				if (error){                                                        // check_update.jsxi:152
-					_updateInProcess = null;                                       // check_update.jsxi:153
-					mediator.dispatch('install:failed', error);                    // check_update.jsxi:154
+	CheckUpdate.install = function (url){                                          // check_update.jsxi:152
+		mediator.dispatch('install:start');                                        // check_update.jsxi:153
+		download(url,                                                              // check_update.jsxi:154
+			_updateFile + '~tmp',                                                  // check_update.jsxi:154
+			function (error){                                                      // check_update.jsxi:154
+				if (error){                                                        // check_update.jsxi:155
+					_updateInProcess = null;                                       // check_update.jsxi:156
+					mediator.dispatch('install:failed', error);                    // check_update.jsxi:157
 				} else {
-					fs.renameSync(_updateFile + '~tmp', _updateFile);              // check_update.jsxi:156
-					mediator.dispatch('install:ready');                            // check_update.jsxi:157
+					fs.renameSync(_updateFile + '~tmp', _updateFile);              // check_update.jsxi:159
+					mediator.dispatch('install:ready');                            // check_update.jsxi:160
 				}
 			}, 
-			function (p, m){                                                       // check_update.jsxi:159
-				mediator.dispatch('install:progress', p, m);                       // check_update.jsxi:160
+			function (p, m){                                                       // check_update.jsxi:162
+				mediator.dispatch('install:progress', p, m);                       // check_update.jsxi:163
 			});
 	};
-	CheckUpdate.abort = function (){                                               // check_update.jsxi:164
-		if (_updateInProcess.abort)                                                // check_update.jsxi:165
-			_updateInProcess.abort();                                              // check_update.jsxi:165
+	CheckUpdate.abort = function (){                                               // check_update.jsxi:167
+		if (_updateInProcess.abort)                                                // check_update.jsxi:168
+			_updateInProcess.abort();                                              // check_update.jsxi:168
 		
-		_updateInProcess = null;                                                   // check_update.jsxi:166
-		mediator.dispatch('install:interrupt');                                    // check_update.jsxi:167
-		setTimeout(function (arg){                                                 // check_update.jsxi:169
+		_updateInProcess = null;                                                   // check_update.jsxi:169
+		mediator.dispatch('install:interrupt');                                    // check_update.jsxi:170
+		setTimeout(function (arg){                                                 // check_update.jsxi:172
 			try {
-				fs.unlinkSync(_updateFile + '~tmp');                               // check_update.jsxi:170
+				fs.unlinkSync(_updateFile + '~tmp');                               // check_update.jsxi:173
 			} catch (e){} 
 		}, 
 		500);
 	};
-	CheckUpdate.autoupdate = function (){                                          // check_update.jsxi:174
-		function clearDir(dirPath){                                                // check_update.jsxi:175
+	CheckUpdate.autoupdate = function (){                                          // check_update.jsxi:177
+		function clearDir(dirPath){                                                // check_update.jsxi:178
 			try {
 				var files = fs.readdirSync(dirPath);
 			} catch (e){
 				return;
 			} 
 			
-			for (var i = 0; i < files.length; i ++){                               // check_update.jsxi:179
+			for (var i = 0; i < files.length; i ++){                               // check_update.jsxi:182
 				var filePath = dirPath + '/' + files[i];
 				
-				if (fs.statSync(filePath).isFile()){                               // check_update.jsxi:181
-					fs.unlinkSync(filePath);                                       // check_update.jsxi:182
+				if (fs.statSync(filePath).isFile()){                               // check_update.jsxi:184
+					fs.unlinkSync(filePath);                                       // check_update.jsxi:185
 				} else {
-					clearDir(filePath);                                            // check_update.jsxi:184
-					fs.rmdirSync(filePath);                                        // check_update.jsxi:185
+					clearDir(filePath);                                            // check_update.jsxi:187
+					fs.rmdirSync(filePath);                                        // check_update.jsxi:188
 				}
 			}
 		}
@@ -1647,54 +1649,54 @@ var CheckUpdate = (function (){                                                 
 		;
 		
 		try {
-			if (fs.existsSync(_updateFile)){                                       // check_update.jsxi:191
+			if (fs.existsSync(_updateFile)){                                       // check_update.jsxi:194
 				var d = path.join(path.dirname(process.execPath), 'carsmgr_update~next');
 				
-				if (fs.existsSync(d)){                                             // check_update.jsxi:193
-					clearDir(d);                                                   // check_update.jsxi:194
+				if (fs.existsSync(d)){                                             // check_update.jsxi:196
+					clearDir(d);                                                   // check_update.jsxi:197
 				} else {
-					fs.mkdirSync(d);                                               // check_update.jsxi:196
+					fs.mkdirSync(d);                                               // check_update.jsxi:199
 				}
 				
-				AcTools.Utils.FileUtils.Unzip(_updateFile, d);                     // check_update.jsxi:199
+				AcTools.Utils.FileUtils.Unzip(_updateFile, d);                     // check_update.jsxi:202
 				
 				var b = path.join(path.dirname(process.execPath), 'carsmgr_update.bat');
 				
-				fs.writeFileSync(b,                                                // check_update.jsxi:202
+				fs.writeFileSync(b,                                                // check_update.jsxi:205
 					"\t\t\t\t \n@ECHO OFF\n\nCD %~dp0\nTASKKILL /F /IM carsmgr.exe\n\n:CHECK_EXECUTABLE\nIF NOT EXIST carsmgr.exe GOTO EXECUTABLE_REMOVED\n\nDEL carsmgr.exe\nTIMEOUT /T 1 >nul\n\nGOTO CHECK_EXECUTABLE\n:EXECUTABLE_REMOVED\n\nDEL nw.pak icudtl.dat carsmgr.exe\n\nfor /r %%i in (carsmgr_update~next\\*) do MOVE /Y \"%%i\" %%~nxi\nRMDIR /S /Q carsmgr_update~next\n\nstart carsmgr.exe\n\nDEL %0 carsmgr_update.next".replace(/\n/g, '\r\n'));
-				Shell.openItem(b);                                                 // check_update.jsxi:225
-				gui.App.quit();                                                    // check_update.jsxi:226
+				Shell.openItem(b);                                                 // check_update.jsxi:228
+				gui.App.quit();                                                    // check_update.jsxi:229
 			}
-		} catch (e){                                                               // check_update.jsxi:228
-			mediator.dispatch('autoupdate:failed', e);                             // check_update.jsxi:229
+		} catch (e){                                                               // check_update.jsxi:231
+			mediator.dispatch('autoupdate:failed', e);                             // check_update.jsxi:232
 			
 			try {
-				if (fs.existsSync(_updateFile)){                                   // check_update.jsxi:231
-					fs.unlinkSync(_updateFile);                                    // check_update.jsxi:232
+				if (fs.existsSync(_updateFile)){                                   // check_update.jsxi:234
+					fs.unlinkSync(_updateFile);                                    // check_update.jsxi:235
 				}
 			} catch (e){} 
 			
 			try {
 				var d = path.join(path.dirname(process.execPath), 'carsmgr_update~next');
 				
-				if (fs.existsSync(d)){                                             // check_update.jsxi:237
-					clearDir(d);                                                   // check_update.jsxi:238
-					fs.rmdirSync(d);                                               // check_update.jsxi:239
+				if (fs.existsSync(d)){                                             // check_update.jsxi:240
+					clearDir(d);                                                   // check_update.jsxi:241
+					fs.rmdirSync(d);                                               // check_update.jsxi:242
 				}
 			} catch (e){} 
 			
 			try {
 				var b = path.join(path.dirname(process.execPath), 'carsmgr_update.bat');
 				
-				if (fs.existsSync(b)){                                             // check_update.jsxi:245
-					fs.unlinkSync(b);                                              // check_update.jsxi:246
+				if (fs.existsSync(b)){                                             // check_update.jsxi:248
+					fs.unlinkSync(b);                                              // check_update.jsxi:249
 				}
 			} catch (e){} 
 		} 
 	};
-	(function (){                                                                  // check_update.jsxi:252
+	(function (){                                                                  // check_update.jsxi:255
 		CheckUpdate.autoupdate();
-		mediator.extend(CheckUpdate);                                              // check_update.jsxi:254
+		mediator.extend(CheckUpdate);                                              // check_update.jsxi:257
 	})();
 	return CheckUpdate;
 })();
@@ -2712,78 +2714,89 @@ var ViewList = (function (){                                                    
 			});
 		_aside.find('#cars-list-filter').on('change paste keyup keypress search', 
 			function (e){                                                          // view_list.jsxi:176
-				if (e.keyCode == 27){                                              // view_list.jsxi:177
-					this.value = '';                                               // view_list.jsxi:178
-					this.blur();                                                   // view_list.jsxi:179
+				if (e.keyCode == 13){                                              // view_list.jsxi:177
+					this.blur();                                                   // view_list.jsxi:178
 				}
 				
-				filter(this.value);                                                // view_list.jsxi:182
-			}).on('blur',                                                          // view_list.jsxi:184
-			function (){                                                           // view_list.jsxi:184
-				if (!this.value){                                                  // view_list.jsxi:185
-					$(this).hide();                                                // view_list.jsxi:186
+				if (e.keyCode == 27){                                              // view_list.jsxi:181
+					this.value = '';                                               // view_list.jsxi:182
+					this.blur();                                                   // view_list.jsxi:183
+				}
+				
+				filter(this.value);                                                // view_list.jsxi:186
+			}).on('keydown',                                                       // view_list.jsxi:188
+			function (e){                                                          // view_list.jsxi:188
+				if (e.keyCode == 8 && !this.value){                                // view_list.jsxi:189
+					this.blur();                                                   // view_list.jsxi:190
+				}
+			}).on('blur',                                                          // view_list.jsxi:193
+			function (){                                                           // view_list.jsxi:193
+				if (!this.value){                                                  // view_list.jsxi:194
+					$(this).hide();                                                // view_list.jsxi:195
 				}
 			});
-		$(window).keypress(function (e){                                           // view_list.jsxi:191
+		$(window).keydown(function (e){                                            // view_list.jsxi:200
 			if (/INPUT|SELECT|TEXTAREA/.test(e.target.tagName) || e.target.contentEditable === 'true')
 				return;
 			
-			if (e.ctrlKey || e.altKey || e.shiftKey)                               // view_list.jsxi:194
+			if (e.ctrlKey || e.altKey || e.shiftKey)                               // view_list.jsxi:203
 				return;
 			
-			var f = _aside.find('#cars-list-filter').show();
+			var f = _aside.find('#cars-list-filter');
 			
-			f[0].focus();                                                          // view_list.jsxi:197
+			if (/[a-zA-Z\d]/.test(String.fromCharCode(e.keyCode)) || e.keyCode == 8 && f.val()){
+				f.show()[0].focus();                                               // view_list.jsxi:206
+			}
 		});
-		_aside.find('#cars-list').click(function (e){                              // view_list.jsxi:201
+		_aside.find('#cars-list').click(function (e){                              // view_list.jsxi:211
 			var car = Cars.byName(e.target.getAttribute('data-id'));
 			
-			if (!car)                                                              // view_list.jsxi:203
+			if (!car)                                                              // view_list.jsxi:213
 				return;
 			
-			select(car);                                                           // view_list.jsxi:204
+			select(car);                                                           // view_list.jsxi:214
 		});
 		
 		var cmIgnore = false;
 		
-		_aside.on('contextmenu',                                                   // view_list.jsxi:209
-			function (){                                                           // view_list.jsxi:210
-				this.querySelector('footer').classList.toggle('active');           // view_list.jsxi:211
-				cmIgnore = true;                                                   // view_list.jsxi:212
+		_aside.on('contextmenu',                                                   // view_list.jsxi:219
+			function (){                                                           // view_list.jsxi:220
+				this.querySelector('footer').classList.toggle('active');           // view_list.jsxi:221
+				cmIgnore = true;                                                   // view_list.jsxi:222
 			});
-		$(window).on('click contextmenu',                                          // view_list.jsxi:215
-			(function (e){                                                         // view_list.jsxi:216
-				if (cmIgnore){                                                     // view_list.jsxi:217
-					cmIgnore = false;                                              // view_list.jsxi:218
-				} else if (e.target !== this){                                     // view_list.jsxi:219
-					this.classList.remove('active');                               // view_list.jsxi:220
+		$(window).on('click contextmenu',                                          // view_list.jsxi:225
+			(function (e){                                                         // view_list.jsxi:226
+				if (cmIgnore){                                                     // view_list.jsxi:227
+					cmIgnore = false;                                              // view_list.jsxi:228
+				} else if (e.target !== this){                                     // view_list.jsxi:229
+					this.classList.remove('active');                               // view_list.jsxi:230
 				}
-			}).bind(_aside.find('footer')[0]));                                    // view_list.jsxi:222
-		_aside.find('#cars-list-open-directory').click(function (){                // view_list.jsxi:225
-			if (!_selected)                                                        // view_list.jsxi:226
+			}).bind(_aside.find('footer')[0]));                                    // view_list.jsxi:232
+		_aside.find('#cars-list-open-directory').click(function (){                // view_list.jsxi:235
+			if (!_selected)                                                        // view_list.jsxi:236
 				return;
 			
-			Shell.openItem(AcDir.cars);                                            // view_list.jsxi:227
+			Shell.openItem(AcDir.cars);                                            // view_list.jsxi:237
 		});
-		_aside.find('#cars-list-reload').click(function (){                        // view_list.jsxi:230
-			if (Cars.list.some(function (e){                                       // view_list.jsxi:231
-				return e.changed;                                                  // view_list.jsxi:232
+		_aside.find('#cars-list-reload').click(function (){                        // view_list.jsxi:240
+			if (Cars.list.some(function (e){                                       // view_list.jsxi:241
+				return e.changed;                                                  // view_list.jsxi:242
 			})){
-				new Dialog('Reload',                                               // view_list.jsxi:234
+				new Dialog('Reload',                                               // view_list.jsxi:244
 					[
 						'<p>{0}</p>'.format('Your changes will be lost. Are you sure?')
 					], 
-					reload);                                                       // view_list.jsxi:236
+					reload);                                                       // view_list.jsxi:246
 			} else {
-				reload();                                                          // view_list.jsxi:238
+				reload();                                                          // view_list.jsxi:248
 			}
 			
-			function reload(){                                                     // view_list.jsxi:241
-				Cars.reloadAll();                                                  // view_list.jsxi:242
+			function reload(){                                                     // view_list.jsxi:251
+				Cars.reloadAll();                                                  // view_list.jsxi:252
 			}
 		});
-		_aside.find('#cars-list-save').click(function (){                          // view_list.jsxi:247
-			Cars.saveAll();                                                        // view_list.jsxi:248
+		_aside.find('#cars-list-save').click(function (){                          // view_list.jsxi:257
+			Cars.saveAll();                                                        // view_list.jsxi:258
 		});
 	}
 	
@@ -2791,12 +2804,12 @@ var ViewList = (function (){                                                    
 		'selected', 
 		{
 			get: (function (){
-				return _selected;                                                  // view_list.jsxi:252
+				return _selected;                                                  // view_list.jsxi:262
 			})
 		});
-	(function (){                                                                  // view_list.jsxi:254
-		init();                                                                    // view_list.jsxi:255
-		mediator.extend(ViewList);                                                 // view_list.jsxi:256
+	(function (){                                                                  // view_list.jsxi:264
+		init();                                                                    // view_list.jsxi:265
+		mediator.extend(ViewList);                                                 // view_list.jsxi:266
 	})();
 	return ViewList;
 })();
@@ -2939,104 +2952,141 @@ var ViewNewVersion = (function (){                                              
 
 /* Class "ViewSettings" declaration */
 var ViewSettings = (function (){                                                   // view_settings.jsxi:1
-	var ViewSettings = function (){};
+	var ViewSettings = function (){}, 
+		_prevFeedback;
 	
-	function openDialog(){                                                         // view_settings.jsxi:2
-		var d = new Dialog('Settings',                                             // view_settings.jsxi:3
+	function openDialog(){                                                         // view_settings.jsxi:4
+		var d = new Dialog('Settings',                                             // view_settings.jsxi:5
 			[
-				'<h6>AC Root Directory</h6>',                                      // view_settings.jsxi:4
+				'<h6>AC Root Directory</h6>',                                      // view_settings.jsxi:6
 				'<button id="settings-acdir-select" style="float:right;width:30px">…</button>', 
 				'<input id="settings-acdir" placeholder="…/Assetto Corsa" style="width:calc(100% - 35px)">', 
-				'<h6>Tips</h6>',                                                   // view_settings.jsxi:8
+				'<h6>Tips</h6>',                                                   // view_settings.jsxi:10
 				'<label><input id="settings-disable-tips" type="checkbox">Disable tips on launch</label>', 
-				'<h6>Database</h6>',                                               // view_settings.jsxi:11
+				'<h6>Database</h6>',                                               // view_settings.jsxi:13
 				'<label><input id="settings-update-database" type="checkbox">Update databases</label>', 
 				'<label><input id="settings-upload-data" type="checkbox">Upload some changes</label>', 
-				'<h6>Updates</h6>',                                                // view_settings.jsxi:15
+				'<h6>Updates</h6>',                                                // view_settings.jsxi:17
 				'<label><input id="settings-updates-check" type="checkbox">Check for new versions on launch</label>', 
 				'<select id="settings-updates-source"><option value="stable">Stable</option><option value="last">Beta</option></select>'
 			], 
-			function (){                                                           // view_settings.jsxi:21
-				if (acdirVal === false)                                            // view_settings.jsxi:22
+			function (){                                                           // view_settings.jsxi:23
+				if (acdirVal === false)                                            // view_settings.jsxi:24
 					return false;
 				
-				if (acdirVal != null){                                             // view_settings.jsxi:24
-					AcDir.set(acdirVal);                                           // view_settings.jsxi:25
+				if (acdirVal != null){                                             // view_settings.jsxi:26
+					AcDir.set(acdirVal);                                           // view_settings.jsxi:27
 				}
 				
-				Settings.update(function (s){                                      // view_settings.jsxi:28
-					s.disableTips = disableTips;                                   // view_settings.jsxi:29
-					s.updatesCheck = updatesCheck;                                 // view_settings.jsxi:30
-					s.updatesSource = updatesSource;                               // view_settings.jsxi:31
+				Settings.update(function (s){                                      // view_settings.jsxi:30
+					s.disableTips = disableTips;                                   // view_settings.jsxi:31
+					s.updatesCheck = updatesCheck;                                 // view_settings.jsxi:32
+					s.updatesSource = updatesSource;                               // view_settings.jsxi:33
 				});
 			}, 
-			false).setButton('Save').addButton('Cancel');                          // view_settings.jsxi:33
+			false).setButton('Save').addButton('Cancel');                          // view_settings.jsxi:35
 		
 		var acdirVal;
 		
-		function acdirChange(){                                                    // view_settings.jsxi:36
-			var err = AcDir.check(acdirVal = d.find('#settings-acdir').val());     // view_settings.jsxi:37
+		function acdirChange(){                                                    // view_settings.jsxi:38
+			var err = AcDir.check(acdirVal = d.find('#settings-acdir').val());     // view_settings.jsxi:39
 			
-			$(this).toggleClass('invalid', !!err).attr('title', err || null);      // view_settings.jsxi:38
+			$(this).toggleClass('invalid', !!err).attr('title', err || null);      // view_settings.jsxi:40
 			
-			if (err){                                                              // view_settings.jsxi:39
-				acdirVal = false;                                                  // view_settings.jsxi:40
+			if (err){                                                              // view_settings.jsxi:41
+				acdirVal = false;                                                  // view_settings.jsxi:42
 			}
 		}
 		
-		d.find('#settings-acdir').val(AcDir.root).change(acdirChange);             // view_settings.jsxi:44
-		d.find('#settings-acdir-select').click(function (){                        // view_settings.jsxi:46
+		d.find('#settings-acdir').val(AcDir.root).change(acdirChange);             // view_settings.jsxi:46
+		d.find('#settings-acdir-select').click(function (){                        // view_settings.jsxi:48
 			$('<input type="file" nwdirectory />').attr({ nwworkingdir: d.find('#settings-acdir').val() }).change(function (){
-				d.find('#settings-acdir').val(this.value);                         // view_settings.jsxi:50
-				acdirChange();                                                     // view_settings.jsxi:51
-			}).click();                                                            // view_settings.jsxi:52
+				d.find('#settings-acdir').val(this.value);                         // view_settings.jsxi:52
+				acdirChange();                                                     // view_settings.jsxi:53
+			}).click();                                                            // view_settings.jsxi:54
 		});
 		
 		var disableTips = Settings.get('disableTips', false);
 		
-		d.find('#settings-disable-tips').change(function (){                       // view_settings.jsxi:56
-			disableTips = this.checked;                                            // view_settings.jsxi:57
-		})[0].checked = disableTips;                                               // view_settings.jsxi:58
+		d.find('#settings-disable-tips').change(function (){                       // view_settings.jsxi:58
+			disableTips = this.checked;                                            // view_settings.jsxi:59
+		})[0].checked = disableTips;                                               // view_settings.jsxi:60
 		
 		var updatesCheck = Settings.get('updatesCheck', true);
 		
-		d.find('#settings-updates-check').change(function (){                      // view_settings.jsxi:61
-			updatesCheck = this.checked;                                           // view_settings.jsxi:62
-		})[0].checked = updatesCheck;                                              // view_settings.jsxi:63
+		d.find('#settings-updates-check').change(function (){                      // view_settings.jsxi:63
+			updatesCheck = this.checked;                                           // view_settings.jsxi:64
+		})[0].checked = updatesCheck;                                              // view_settings.jsxi:65
 		
 		var updatesSource = Settings.get('updatesSource', 'stable');
 		
-		d.find('#settings-updates-source').change(function (){                     // view_settings.jsxi:66
-			updatesSource = this.value;                                            // view_settings.jsxi:67
-		})[0].value = updatesSource;                                               // view_settings.jsxi:68
-		d.addTab('About',                                                          // view_settings.jsxi:70
+		d.find('#settings-updates-source').change(function (){                     // view_settings.jsxi:68
+			updatesSource = this.value;                                            // view_settings.jsxi:69
+		})[0].value = updatesSource;                                               // view_settings.jsxi:70
+		d.addTab('About',                                                          // view_settings.jsxi:72
 			[
-				'<h6>Version</h6>',                                                // view_settings.jsxi:71
-				gui.App.manifest.version,                                          // view_settings.jsxi:72
-				'<h6>Author</h6>',                                                 // view_settings.jsxi:73
+				'<h6>Version</h6>',                                                // view_settings.jsxi:73
+				gui.App.manifest.version,                                          // view_settings.jsxi:74
+				'<h6>Author</h6>',                                                 // view_settings.jsxi:75
 				'x4fab'
-			]).addButton('Feedback',                                               // view_settings.jsxi:75
-			function (){                                                           // view_settings.jsxi:75
-				new Dialog('Feedback',                                             // view_settings.jsxi:76
-					'<textarea style="width:400px;height:300px;resize:none" placeholder="If you have any ideas or suggestions please let me know"></textarea>', 
-					function (){                                                   // view_settings.jsxi:76
-						alert(this.content.find('textarea').val());                // view_settings.jsxi:78
-					}, 
-					false).setButton('Send').addButton('Cancel');                  // view_settings.jsxi:79
+			]).addButton('Feedback',                                               // view_settings.jsxi:77
+			function (){                                                           // view_settings.jsxi:77
+				feedbackForm();                                                    // view_settings.jsxi:78
 				return false;
-			}).addButton('Check for update',                                       // view_settings.jsxi:81
-			function (){                                                           // view_settings.jsxi:81
+			}).addButton('Check for update',                                       // view_settings.jsxi:80
+			function (){                                                           // view_settings.jsxi:80
+				var b = this.buttons.find('button:last-child').text('Please wait...').attr('disabled', true);
+				
 				CheckUpdate.check();                                               // view_settings.jsxi:82
+				CheckUpdate.one('check',                                           // view_settings.jsxi:83
+					function (arg){                                                // view_settings.jsxi:83
+						b.text('Check again').attr('disabled', null);              // view_settings.jsxi:84
+						
+						if (arg === 'check:failed'){                               // view_settings.jsxi:85
+							new Dialog('Check For Update', 'Cannot check for update.');
+						} else if (arg !== 'check:done:found'){                    // view_settings.jsxi:87
+							new Dialog('Check For Update', 'New version not found.');
+						}
+					});
 				return false;
 			});
 	}
 	
-	function init(){                                                               // view_settings.jsxi:87
-		$('#settings-open').click(openDialog);                                     // view_settings.jsxi:88
+	function feedbackForm(){                                                       // view_settings.jsxi:95
+		function sendFeedback(v){                                                  // view_settings.jsxi:96
+			d.buttons.find('button:first-child').text('Please wait...').attr('disabled', true);
+			AppServerRequest.sendFeedback(v,                                       // view_settings.jsxi:99
+				function (arg){                                                    // view_settings.jsxi:99
+					d.close();                                                     // view_settings.jsxi:100
+					
+					if (arg){                                                      // view_settings.jsxi:101
+						new Dialog('Cannot Send Feedback', 'Sorry about that.');   // view_settings.jsxi:102
+					} else {
+						_prevFeedback = null;                                      // view_settings.jsxi:104
+						new Dialog('Feedback Sent', 'Thank you.');                 // view_settings.jsxi:105
+					}
+				});
+		}
+		
+		var d = new Dialog('Feedback',                                             // view_settings.jsxi:110
+			'<textarea style="width:350px;height:200px;resize:none" maxlength="5000"\
+                placeholder="If you have any ideas or suggestions please let me know"></textarea>', 
+			function (){                                                           // view_settings.jsxi:111
+				var v = this.content.find('textarea').val().trim();
+				
+				if (v)                                                             // view_settings.jsxi:113
+					sendFeedback(v);                                               // view_settings.jsxi:113
+				return false;
+			}, 
+			false).setButton('Send').addButton('Cancel').closeOnEnter(false);      // view_settings.jsxi:115
+		
+		d.find('textarea').val(_prevFeedback || '').change(function (arg){         // view_settings.jsxi:116
+			return _prevFeedback = this.value;                                     // view_settings.jsxi:116
+		});
 	}
 	
-	(function (){                                                                  // view_settings.jsxi:92
-		init();                                                                    // view_settings.jsxi:93
+	(function (){                                                                  // view_settings.jsxi:119
+		$('#settings-open').click(openDialog);                                     // view_settings.jsxi:120
 	})();
 	return ViewSettings;
 })();

@@ -174,12 +174,21 @@ static class ViewList {
 
         _aside.find('#cars-list-filter')
             .on('change paste keyup keypress search', function (e){
+                if (e.keyCode == 13){
+                    this.blur();
+                }
+
                 if (e.keyCode == 27){
                     this.value = '';
                     this.blur();
                 }
 
                 filter(this.value);
+            })
+            .on('keydown', function (e){
+                if (e.keyCode == 8 && !this.value){
+                    this.blur();
+                }
             })
             .on('blur', function (){ 
                 if (!this.value){
@@ -189,12 +198,13 @@ static class ViewList {
 
         /* global hotkeys */
         $(window)
-            .keypress(function (e){
+            .keydown(function (e){
                 if (/INPUT|SELECT|TEXTAREA/.test(e.target.tagName) || e.target.contentEditable === 'true') return;
                 if (e.ctrlKey || e.altKey || e.shiftKey) return;
-
-                var f = _aside.find('#cars-list-filter').show();
-                f[0].focus();
+                var f = _aside.find('#cars-list-filter');
+                if (/[a-zA-Z\d]/.test(String.fromCharCode(e.keyCode)) || e.keyCode == 8 && f.val()){
+                    f.show()[0].focus();
+                }
             });
 
         /* select car */
