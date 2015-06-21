@@ -1,0 +1,153 @@
+    main {
+        position: absolute;
+        top: 0;
+        left: 250px;
+        right: 0;
+        bottom: 0;
+        overflow-y: auto;
+        padding: 10px;
+        box-sizing: border-box;
+    }
+
+    main footer {
+        left: 250px;
+        right: 0;
+    }
+
+    main > div > h4 {
+        margin-top: 0;
+    }
+
+    #selected-car-error ul {
+        margin-top: 0;
+        font-size: 12px;
+    }
+
+    #selected-car-header.changed:after {
+        content: "*";
+    }
+
+    #selected-car {
+        width: calc(100vw - 350px);
+    }
+
+    #selected-car-logo {
+        float: left;
+        max-height: 24px;
+        margin-right: 10px;
+    }
+
+    #details-message p {
+        font-size: 12px;
+    }
+
+    #details-message button {
+        margin-top: 10px;
+    }
+
+    #selected-car-desc {
+        font-size: 12px;
+        background: transparent;
+        border: none;
+        width: 100%;
+        resize: none;
+        outline: none;
+    }
+
+    #selected-car-desc:not([readonly]):focus, #selected-car[contenteditable]:focus {
+        box-shadow: 0 0 0 2px #59f;
+        color: black;
+    }
+
+    #selected-car-skins-article {
+        position: relative;
+        padding: 0;
+    }
+
+    #selected-car-skins {
+        position: absolute;
+        width: 110px;
+        top: 0;
+        height: 100%;
+        right: 0;
+        overflow: auto;
+        margin: -2px -2px 0 0;
+        bottom: 0;
+        line-height: 0;
+    }
+
+    #selected-car-skins > img {
+        width: 30px;
+        height: 30px;
+        margin: 2px;
+    }
+
+    #selected-car-skins > img:hover {
+        margin: 0;
+        border: 2px solid #59f;
+    }
+
+    #selected-car-preview {
+        display: block;
+        max-width: calc(100% - 114px);
+        min-height: 120px;
+    }
+
+/* properties */
+    #selected-car-properties {
+        margin: 0 0 10px;
+        font-size: 12px;
+        list-style-type: none;
+    }
+
+    #selected-car-properties .property {
+        text-transform: uppercase;
+        font-family: Roboto Condensed;
+        font-weight: 700;
+        display: inline-block;
+        width: 120px;
+    }
+
+    #selected-car-properties .property:after {
+        content: ":";
+    }
+
+    #selected-car, #selected-car-properties input, #selected-car-properties select {
+        background: transparent;
+        border: none;
+        outline: none;
+        font: inherit;
+        padding: 0;
+    }
+
+    #selected-car-properties input, #selected-car-properties select {
+        width: 240px;
+    }
+
+    #selected-car-properties input {
+        padding: 0 4px;
+        box-sizing: border-box;
+    }
+
+    #selected-car:focus, #selected-car-properties input:focus, #selected-car-properties select:focus {
+        box-shadow: 0 0 0 2px #59f;
+        color: black;
+    }
+
+    summary {
+        margin-left: -13px;
+    }
+
+    summary li {
+        display: inline-block;
+    }
+
+    #selected-car-properties {
+        position: relative;
+    }
+
+    #selected-car-upgrade {
+        position: absolute;
+        top: 0;
+        right: 0;
+    }

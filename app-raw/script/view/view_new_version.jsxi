@@ -1,0 +1,90 @@
+static class ViewNewVersion {
+    var _upd, _inf;
+    var _autoinstall = true;
+
+    function newVersion(inf){
+        _inf = inf;
+
+        var d = new Dialog('New Version', [
+            'Current version: {0}'.format(gui.App.manifest.version),
+            'New version: {0}'.format(inf.actualVersion),
+            inf.changelog && 'Changelog:<div style="max-height:400px;overflow-y:auto"><ul><li>{0}</li></ul></div>'.format(
+                inf.changelog.map(function (e){
+                    return '<div>' + e.version + '</div><ul><li>' + e.changes.join('</li><li>') + '</li></ul>';
+                }).join('</li><li>')
+            ),
+        ], function (){
+            Shell.openItem(inf.detailsUrl);
+            return !inf.downloadUrl && !inf.installUrl;
+        }, false).setButton('Details');
+
+        if (inf.installUrl){
+            d.addButton('Install', function (){
+                CheckUpdate.install(inf.installUrl);
+            });
+        } else if (inf.downloadUrl){
+            d.addButton('Download', function (){
+                Shell.openItem(inf.downloadUrl);
+            });
+        }
+
+        d.addButton('Later');
+    }
+
+    function installStart(){
+        _upd = new Dialog('Installation', [
+            '<progress indeterminate></progress>'
+        ], function (){
+            CheckUpdate.abort();
+        }, false).setButton('Abort');
+    }
+
+    function installProgress(value, max){
+        if (!_upd) installStart();
+        _upd.find('progress').attr({
+            max: max,
+            value: value
+        });
+    }
+
+    function installReady(){
+        if (_autoinstall){
+            CheckUpdate.autoupdate();
+        } else {
+            if (!_upd) installStart();
+            _upd.setContent('Update ready. Application will be restarted.');
+            _upd.setButton('Install', function (){
+                CheckUpdate.autoupdate();
+            }).addButton('Later');
+        }
+    }
+
+    function installInterrupt(){
+        if (!_upd) return;
+        _upd.close();
+        _upd = null;
+    }
+
+    function installFailed(e){
+        if (!_upd) installStart();
+        _upd.setContent('Update failed: {0}.'.format(e));
+        _upd.setButton('Nevermind', function (){}).addButton('Manual Update', function (){
+            Shell.openItem(_inf.downloadUrl || _inf.detailsUrl);
+        });
+    }
+
+    function autoupdateFailed(e){
+        ErrorHandler.handled('Autoupdate failed.', e);
+    }
+
+    {
+        CheckUpdate
+            .on('update', newVersion)
+            .on('install:start', installStart)
+            .on('install:progress', installProgress)
+            .on('install:ready', installReady)
+            .on('install:interrupt', installInterrupt)
+            .on('install:failed', installFailed)
+            .on('autoupdate:failed', autoupdateFailed);
+    }
+}

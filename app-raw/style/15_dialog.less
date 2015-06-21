@@ -1,0 +1,135 @@
+dialog {
+    width: 100%;
+    height: 100%;
+    position: fixed;
+    top: 0;
+    left: 0;
+    background: rgba(0,0,0,.24);
+    border-radius: 0;
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    z-index: 10;
+
+    h6 {
+        margin: 10px 0 4px;
+    }
+
+    progress {
+        margin: 0 0 10px;
+        width: 100%;
+    }
+
+    p, label, ul {
+        font-size: 12px;
+    }
+
+    input, select {
+        margin-bottom: 10px;
+    }
+
+    input:not([type="checkbox"]), select, button, table {
+        width: 100%;
+        box-sizing: border-box;
+    }
+
+    input[type="checkbox"] {
+        vertical-align: -webkit-baseline-middle;
+    }
+
+    & > article {
+        min-width: 400px;
+        background: #fff;
+        border-radius: 0;
+        border: 1px solid #aaa;
+        box-shadow: 0 1px 0 rgba(0,0,0,.17);
+        padding: 0 20px 40px;
+        box-sizing: border-box;
+        position: relative;
+    }
+}
+
+.dialog-header {
+    margin: 0 -20px;
+
+    h4 {
+        padding: 18px 20px;
+        display: inline-block;
+        margin: 0;
+    }
+
+    & > div:first-child {
+        float: right;
+        display: inline-block;
+        margin-top: 18px;
+        margin-right: 20px;
+
+        button {
+            width: auto;
+            margin: 0;
+        }
+    }
+
+    &.tabs {
+        background: #eee;
+
+        h4 {
+        }
+
+        h4.active {
+            background: #fff;
+        }
+    }
+}
+
+.dialog-content {
+    & > p:first-child {
+        margin-top: 0;
+    }
+
+    .left, .right {
+        display: inline-block;
+        width: 50%;
+        box-sizing: border-box;
+    }
+
+    .left {
+        padding-right: 5px;
+    }
+
+    .right {
+        padding-left: 5px;
+    }
+}
+
+.dialog-buttons {
+    display: flex;
+    
+    position: absolute;
+    background: #59f;
+    left: 0;
+    right: 0;
+    bottom: 0;
+
+    button {
+        height: 100%;
+        padding: 10px;
+    }
+}
+
+dialog.dark {
+    article {
+        background: #000;
+        color: #fff;
+    }
+
+    .dialog-header.tabs {
+        background: #333;
+
+        h4.active {
+            background: #000;
+        } 
+    }
+}

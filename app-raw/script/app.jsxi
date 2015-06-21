@@ -1,0 +1,56 @@
+if (Settings.get('updatesCheck', true)){
+    setTimeout(function (){
+        CheckUpdate.check();
+    }, 5e1);
+}
+
+setTimeout(function (){
+    try fs.rmdirSync(path.join(path.dirname(process.execPath), 'locales')); 
+}, 50);
+
+AppWindow
+    .on('close', function (){
+        if (Cars.list.filter(function (e){
+            return e.changed;
+        }).length > 0){
+            new Dialog('Close', [
+                'Unsaved changes will be lost. Are you sure?'
+            ], function (){
+                AppWindow.close(true);
+            });
+        } else {
+            AppWindow.close(true);
+        }
+    });
+
+ViewList
+    .on('select', function (car){
+        AppWindow.title = car.data ? car.data.name : car.id;
+    });
+
+Cars
+    .on('update:car:data', function (car){
+        if (car === ViewList.selected){
+            AppWindow.title = car.data ? car.data.name : car.id;
+        }
+    });
+
+var first = true;
+AcDir
+    .on('change', function (){
+        Cars.scan();
+
+        if (first && !Settings.get('disableTips', false)){
+            new Dialog('Tip', Tips.next, function (){
+                this.find('p').html(Tips.next);
+                this.find('h4').text('Another Tip');
+                return false;
+            }).setButton('Next').addButton('Disable Tips', function (){
+                Settings.set('disableTips', true);
+            }).find('p').css('maxWidth', 400);
+
+            first = false;
+        }
+    });
+
+AcDir.init();

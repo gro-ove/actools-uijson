@@ -6,7 +6,7 @@ Small utility for easy editing *ui_car.json* files. Written using [NW.js](http:/
 * [Visual C++ Redistributable 2013 (x86)](https://www.microsoft.com/en-us/download/details.aspx?id=40784)
 
 #### Download
-* [Last (0.2.23)](https://yadi.sk/d/Sq4hOs6PhMweN)
+* [Last (0.3.8)](https://yadi.sk/d/Sq4hOs6PhMweN)
 * [Stable (0.2.23)](http://www.racedepartment.com/downloads/actools-cars-manager.6518/)
 
 #### Features
@@ -34,7 +34,6 @@ Small utility for easy editing *ui_car.json* files. Written using [NW.js](http:/
     *Warning!* This thing could be pretty buggy. Sometimes you'll have to terminate updating (by press Esc) and try again.
 
 #### Known bugs
-* Dialog “Unsaved changes will be lost. Are you sure?” shows only when app closing by “X” button at the top. Looks like NW.js bug or something. I'll try to fix it later.
 * Sometimes Auto-updated Previews aren't able to detect new screenshot.
 * Auto-update wasn't tested.
 
@@ -59,8 +58,13 @@ Small utility for easy editing *ui_car.json* files. Written using [NW.js](http:/
 * Clone cars, modify in-game specs (?)
 
 #### Changelog
+* 0.3.0
+    * Now with Js-Ext & LESS, reworked
+    * Folder “locales” removed
+    * Updates check optimized
+    * Bugfixes
 * 0.2.23
-    * Two branches (Last/Stable) in options
+    * Two branches (Stable/Beta) in options
     * Added Upgrade Icon Editor Feature
 * 0.2.22
     * Auto-update feature (still could be pretty buggy though)

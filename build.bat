@@ -21,12 +21,19 @@ cd %~dp0
 mkdir tmp
 xcopy /E /Y app\* tmp
 
+del /Q /S output\*
+rmdir /Q /S output\*
+
 cd tmp
 ..\build\7z a -tzip -mx9 ..\output\carsmgr.nw *
 cd ..
 rd /S /Q tmp
 
 copy /B /Y build\nw.exe+output\carsmgr.nw output\tmp.exe 
+copy /B build\icudtl.dat output\icudtl.dat
+copy /B build\nw.pak output\nw.pak
+
+del output\carsmgr.nw
 
 taskkill /f /im carsmgr.exe
 rm output\carsmgr.exe
@@ -34,10 +41,10 @@ build\reshacker -modify output\tmp.exe, output\carsmgr.exe, app\icon.ico, icon, 
 del output\tmp.exe
 
 build\verpatch output\carsmgr.exe /fn /high /vft2 -1 /langid 1033 /va %FILE_VERSION% /pv %PRODUCT_VERSION% /s AssemblyVersion %NW_VERSION% /s OriginalFilename nw.exe /s InternalName actools-carsmgr-app /s ProductName AcTools /s FileDescription "%DESCRIPTION%" /s CompanyName "%COMPANY_NAME%" /s Comments "%COMMENTS%"
-build\upx.exe -9 output\carsmgr.exe
+rem build\upx.exe -9 output\carsmgr.exe
 
-cd output
-..\build\7z a -tzip -mx9 carsmgr.zip icudtl.dat nw.pak carsmgr.exe
+rem cd output
+rem ..\build\7z a -tzip -mx9 carsmgr.zip icudtl.dat nw.pak carsmgr.exe
 
-call ..\build\yadisk carsmgr.zip > download.txt
-call ..\build\wordpress
+rem call ..\build\yadisk carsmgr.zip > download.txt
+rem call ..\build\wordpress

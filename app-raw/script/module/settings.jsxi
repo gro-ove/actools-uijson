@@ -1,0 +1,36 @@
+static class Settings {
+    private var _settings;
+
+    private save(){
+        localStorage.settings = JSON.stringify(_settings);
+    }
+
+    public get(k, def){
+        return _settings.hasOwnProperty(k) ? _settings[k] : def;
+    }
+
+    public set(k, val){
+        if (typeof k == 'object'){
+            for (var n in k){
+                _settings[n] = k[n];
+            }
+        } else {
+            _settings[k] = val;
+        }
+
+        save();
+    }
+
+    public update(f){
+        f(_settings);
+        save();
+    }
+
+    {
+        _settings = {};
+
+        try {
+            _settings = JSON.parse(localStorage.settings) || {};
+        } catch (e){}
+    }
+}

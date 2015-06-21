@@ -1,0 +1,30 @@
+static class AppServerRequest {
+    private _host = 'ascobash.comuf.com';
+
+    private get http require('http');
+
+    public checkUpdate(version, source, callback){
+        http.request({ host: _host, path: 'check?v=%0&b=%1'(version, source) }, function (res){
+            if (res.statusCode != 200){
+                callback(res.statusCode == 204 ? null : res.statusCode);
+                return;
+            }
+
+            res.setEncoding('utf8');
+
+            var output = '';
+            res.on('data', lambda output += arg);
+            res.on('end', function() {
+                var data;
+                try {
+                    data = JSON.parse(output);
+                } catch (e){
+                    callback(e);
+                    return;
+                }
+
+                callback(null, data);
+            });
+        }).end();
+    }
+}

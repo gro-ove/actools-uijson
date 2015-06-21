@@ -1,0 +1,10 @@
+/* default modules */
+    var fs = require('fs'),
+        path = require('path');
+
+/* nw.js modules */
+    var gui = require('nw.gui'),
+        mainForm = gui.Window.get();
+
+    __defineGetter__('Shell', lambda gui.Shell);
+

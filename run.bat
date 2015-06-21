@@ -2,12 +2,13 @@
 
 call prepare
 
-taskkill /f /im carsmgr.exe
+taskkill /f /im carsmgr.exe 2>nul 
 
-rm app\native\AcTools.dll
-mklink /h app\native\AcTools.dll "D:\Development\GitHub\actools\AcTools\Bin\Release\AcTools.dll"
+del app\native\AcTools.dll
+mklink /h app\native\AcTools.dll "D:\Development\GitHub\actools\AcTools\Bin\Release\AcTools.dll" >nul 
 
-rm output\carsmgr.exe
-mklink /h output\carsmgr.exe build\nw.exe
+del output\carsmgr.exe
+mklink /h output\carsmgr.exe build\nw.exe >nul 
 
-start output\carsmgr.exe app
+output\carsmgr.exe --enable-logging app
+del output\debug.log

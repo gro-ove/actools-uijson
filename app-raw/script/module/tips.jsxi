@@ -1,0 +1,8 @@
+static class Tips {
+    var _t = @macro :object {
+        return fs.readFileSync('app-raw/data/tips.txt').toString().split('\n\n');
+    }();
+    
+    var _i = _t.length * Math.random() | 0;
+    public get next _t[++_i % _t.length];
+}

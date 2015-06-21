@@ -1,0 +1,36 @@
+static class ErrorHandler {
+    private _details(e){
+        return ''.replace.call(e.stack, /file:\/{3}[A-Z]:\/.+?(?=\/app\/)/g, '…')
+    }
+
+    public handled(msg, err){
+        new Dialog('Oops!', [
+            '<p>' + msg + '</p>',
+            err ? '<pre>' + _details(err) + '</pre>' : null
+        ]);
+    }
+
+    private show(){
+        require('nw.gui').Window.get().show();
+    }
+
+    {
+        process.on('uncaughtException2', function (err) {
+            console.warn(_details(err));
+
+            show();
+
+            new Dialog('Oops!', [
+                '<p>Uncaught exception, sorry.</p>',
+                '<pre>' + _details(err) + '</pre>'
+            ], lambda {
+                mainForm.reloadDev();
+            }, lambda false).find('button').text('Restart');
+        });
+
+        Mediator.errorHandler = function (err){
+            handled('Listener exception', err);
+        };
+    }
+}
+

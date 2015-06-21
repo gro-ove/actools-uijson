@@ -1,0 +1,142 @@
+!function (){
+    var winState;
+    var currWinMode;
+    var resizeTimeout;
+    var isMaximizationEvent = false;
+
+    // extra height added in linux x64 gnome-shell env, use it as workaround
+    var deltaHeight = (function () {
+        // use deltaHeight only in windows with frame enabled
+        if (gui.App.manifest.window.frame) return true; else return 'disabled';
+    })();
+
+    function initWindowState() {
+        winState = JSON.parse(localStorage.windowState || 'null');
+
+        if (winState) {
+            currWinMode = winState.mode;
+            if (currWinMode === 'maximized') {
+                mainForm.maximize();
+            } else {
+                restoreWindowState();
+            }
+        } else {
+            currWinMode = 'normal';
+            if (deltaHeight !== 'disabled') deltaHeight = 0;
+            dumpWindowState();
+        }
+
+        // On Windows mainForm.show() also acts like mainForm.requestAttention().
+        // If you use LiveReload, it becomes annoying when your app is already open
+        // but starts to blink in the taskbar on changes.
+        // There seems to be no way to check if a window is open, so let's at least
+        // check for dev tools.
+        if (!mainForm.isDevToolsOpen()) {
+            setTimeout(function (){
+                mainForm.show();
+            }, 100);
+        }
+    }
+
+    function dumpWindowState() {
+        if (!winState) {
+            winState = {};
+        }
+
+        // we don't want to save minimized state, only maximized or normal
+        if (currWinMode === 'maximized') {
+            winState.mode = 'maximized';
+        } else {
+            winState.mode = 'normal';
+        }
+
+        // when window is maximized you want to preserve normal
+        // window dimensions to restore them later (even between sessions)
+        if (currWinMode === 'normal') {
+            winState.x = mainForm.x;
+            winState.y = mainForm.y;
+            winState.width = mainForm.width;
+            winState.height = mainForm.height;
+
+            // save delta only of it is not zero
+            if (deltaHeight !== 'disabled' && deltaHeight !== 0 && currWinMode !== 'maximized') {
+                winState.deltaHeight = deltaHeight;
+            }
+        }
+    }
+
+    function restoreWindowState() {
+        // deltaHeight already saved, so just restore it and adjust window height
+        if (deltaHeight !== 'disabled' && typeof winState.deltaHeight !== 'undefined') {
+            deltaHeight = winState.deltaHeight
+            winState.height = winState.height - deltaHeight
+        }
+
+        mainForm.resizeTo(winState.width, winState.height);
+        mainForm.moveTo(winState.x, winState.y);
+    }
+
+    function saveWindowState() {
+        dumpWindowState();
+        localStorage['windowState'] = JSON.stringify(winState);
+    }
+
+    initWindowState();
+
+    mainForm.on('maximize', function () {
+        isMaximizationEvent = true;
+        currWinMode = 'maximized';
+    });
+
+    mainForm.on('unmaximize', function () {
+        currWinMode = 'normal';
+        restoreWindowState();
+    });
+
+    mainForm.on('minimize', function () {
+        currWinMode = 'minimized';
+    });
+
+    mainForm.on('restore', function () {
+        currWinMode = 'normal';
+    });
+
+    mainForm.window.addEventListener('resize', function () {
+        // resize event is fired many times on one resize action,
+        // this hack with setTiemout forces it to fire only once
+        clearTimeout(resizeTimeout);
+        resizeTimeout = setTimeout(function () {
+
+            // on MacOS you can resize maximized window, so it's no longer maximized
+            if (isMaximizationEvent) {
+                // first resize after maximization event should be ignored
+                isMaximizationEvent = false;
+            } else {
+                if (currWinMode === 'maximized') {
+                    currWinMode = 'normal';
+                }
+            }
+
+            // there is no deltaHeight yet, calculate it and adjust window size
+            if (deltaHeight !== 'disabled' && deltaHeight === false) {
+                deltaHeight = mainForm.height - winState.height;
+
+                // set correct size
+                if (deltaHeight !== 0) {
+                    mainForm.resizeTo(winState.width, mainForm.height - deltaHeight);
+                }
+            }
+
+            dumpWindowState();
+            saveWindowState();
+        }, 500);
+    }, false);
+
+    mainForm.on('close', function () {
+        try {
+            saveWindowState();
+        } catch(err) {
+            console.log("winstateError: " + err);
+        }
+    });
+}();

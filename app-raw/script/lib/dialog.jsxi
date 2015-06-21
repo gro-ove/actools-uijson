@@ -1,0 +1,112 @@
+/* всплывающие диалоговые окна */
+
+class Dialog {
+    public el;
+    public header, content, buttons;
+    public tabs;
+
+    private _callback, _closeCallback;
+
+    private _prepareContent(elements){
+        if (typeof elements == 'string'){
+            elements = [ elements ];
+        }
+
+        return elements.map(function (e){
+            return e ? e[0] == '<' && e[e.length - 1] == '>' ? e : '<p>' + e + '</p>' : '';
+        }).join('');
+    }
+
+    (title, elements, callback, closeCallback) {
+        el = $('<dialog>').html('<article><div class="dialog-header"><h4>' + title + 
+            '</h4></div><div class="dialog-content">' + _prepareContent(elements) + 
+            '</div><div class="dialog-buttons"><button data-id="dialog-ok">ОК</button></div></article>').click(function (e){
+            if (e.target.tagName == 'DIALOG' && (_closeCallback == null || 
+                    _closeCallback !== false && _closeCallback() !== false)){
+                close();
+            }
+        }).appendTo('body');
+
+        header = el.find('.dialog-header > h4');
+        content = el.find('.dialog-content');
+        buttons = el.find('.dialog-buttons');
+
+        _callback = callback && callback.bind(this);
+        _closeCallback = closeCallback && closeCallback.bind(this);
+
+        if (_callback === false){
+            el.find('[data-id="dialog-ok"]').hide();
+        }
+
+        el.find('[data-id="dialog-ok"]').click(function (e){
+            if (!_callback || _callback() !== false){
+                close();
+            }
+        });
+
+        el.find('*').keydown(function (e){
+            if (e.keyCode == 13){
+                el.find('[data-id="dialog-ok"]')[0].click();
+                return false;
+            }
+        });
+    }
+
+    public setButton(a, c){
+        buttons.find('[data-id="dialog-ok"]').toggle(a != null).text(a);
+        if (c != null){ _callback = c; }
+        return this;
+    }
+
+    public setContent(content){
+        content.html(_prepareContent(content));
+        return this;
+    }
+
+    public addButton(text, fn){
+        fn = fn && fn.bind(this);
+        $('<button>' + text + '</button>').appendTo(buttons).click(function (e){
+            if (!fn || fn() !== false){
+                close();
+            }
+        });
+        return this;
+    }
+
+    public find(a){
+        return el.find(a);
+    }
+
+    public close(){
+        el.remove();
+    }
+
+    public addTab(title, content, callback, closeCallback){
+        if (!tabs){
+            tabs = [ this ];
+            header.parent().addClass('tabs').click(function (e){
+                if (e.target.tagName === 'H4' && !e.target.classList.contains('active')){
+                    el.find('.dialog-header h4.active').removeClass('active');
+                    e.target.classList.add('active');
+
+                    var i = Array.prototype.indexOf.call(e.target.parentNode.childNodes, e.target);
+                    var l = el.find('.dialog-content')[0];
+                    l.parentNode.removeChild(l);
+                    var l = el.find('.dialog-buttons')[0];
+                    l.parentNode.removeChild(l);
+                    tabs[i].content.appendTo(el.children());
+                    tabs[i].buttons.appendTo(el.children());
+                }
+            });
+        }
+
+        var n = new Dialog(title, content, callback, closeCallback);
+        tabs.push(n);
+
+        document.body.removeChild(n.el[0]);
+        n.header.appendTo(header.addClass('active').parent());
+        n.close = close.bind(this);
+
+        return n;
+    }
+}

@@ -1,0 +1,74 @@
+static class AppWindow {
+    var mediator = new Mediator();
+
+    var _defTitle, _maximized;
+
+    function init(){
+        _defTitle = gui.App.manifest.name;
+        _maximized = false;
+
+        mainForm
+            .on('close', function (){
+                close(false);
+            });
+
+        mainForm
+            .on('maximize', function() {
+                _maximized = true;
+                $('#window-maximize').text('↓');
+                $('body').addClass('maximized');
+            });
+
+        mainForm
+            .on('unmaximize', function() {
+                _maximized = false;
+                $('#window-maximize').text('□');
+                $('body').removeClass('maximized');
+            });
+
+        $('#window-close')
+            .click(function (){
+                close();
+            });
+
+        $('#window-minimize')
+            .click(function (){
+                mainForm.minimize();
+            });
+
+        $('#window-maximize')
+            .click(function (){
+                if (_maximized){
+                    mainForm.unmaximize();
+                } else {
+                    mainForm.maximize();
+                }
+            });
+
+        $(document.body)
+            .mousemove(function (e){
+                $('#window-drag').toggleClass('active', /MAIN|ASIDE/.test(e.target.tagName) && e.pageY < 20);
+            });
+    }
+
+    public close(force){
+        if (force){
+            mainForm.close(true);
+        } else {
+            mediator.dispatch('close');
+        }
+    }
+
+    function setTitle(t){
+        $('#window-title').text(t ? '{0} - {1}'.format(t, _defTitle) : _defTitle);
+    }
+
+    public set title setTitle(arg);
+
+    {
+        init();
+        title = null;
+
+        mediator.extend(AppWindow);
+    }
+}
