@@ -1,0 +1,178 @@
+static class AcShowroom {
+    var _showrooms = null;
+
+    var _blackShowroom = 'studio_black';
+    var _blackShowroomUrl = 'http://www.racedepartment.com/downloads/studio-black-showroom.4353/';
+
+    public get list {
+        if (!_showrooms){
+            loadShowrooms();
+        }
+
+        return _showrooms;
+    };
+
+    function loadShowrooms(){
+        _showrooms = fs.readdirSync(AcDir.showrooms).map(function (e){
+            var p = path.join(AcDir.showrooms, e);
+            var d = null;
+            var j = path.join(p, 'ui', 'ui_showroom.json');
+
+            if (fs.existsSync(j)){
+                try {
+                    d = JSON.parse(fs.readFileSync(j));
+                } catch (e){}
+            }
+
+            return {
+                id: e,
+                data: d,
+                path: p,
+                json: j,
+            }
+        }).filter(function (e){
+            return e;
+        });
+    }
+
+    public start(c, s, r){
+        if (c.path.indexOf(AcDir.cars)) return;
+
+        if (s == null){
+            s = c.skins.selected.id;
+        }
+
+        r = r || localStorage.lastShowroom || 'showroom';
+        try {
+            AcTools.Processes.Showroom.Start(AcDir.root, c.id, s, r);
+        } catch (err){
+            ErrorHandler.handled('Cannot start showroom. Maybe there is not enough rights or the car is broken.');
+            return;
+        }
+        localStorage.lastShowroom = r;
+    }
+
+    public select(c, s){
+        if (!_showrooms){
+            loadShowrooms();
+        }
+
+        new Dialog('Showroom', [
+            '<select>{0}</select>'.format(_showrooms.map(function (e){
+                return '<option value="{0}">{1}</option>'.format(e.id, e.data ? e.data.name : e.id);
+            }).join(''))
+        ], function (){
+            start(c, s, this.find('select').val());
+        }).addButton('Reload List', function (){
+            setTimeout(function (){
+                loadShowrooms();
+                select(c, s);
+            });
+        }).find('select').val(localStorage.lastShowroom || 'showroom').change(function (){
+            localStorage.lastShowroom = this.value;
+        });
+    }
+
+    private shotOutputPreview(car, output, callback){
+        // Shell.openItem(output);
+        var d = new Dialog('Update Previews', [
+            '<div class="left"><h6>Current</h6><img id="current-preview"></div>',
+            '<div class="right"><h6>New</h6><img id="new-preview"></div>',
+        ], function (){
+            callback();
+        }, false).setButton('Apply').addButton('Cancel');
+
+        var t = $('<div>' +
+            '<button data-action="prev" id="button-prev" disabled>←</button> ' +
+            '<button data-action="next" id="button-next">→</button>' +
+        '</div>').insertBefore(d.header);
+
+        t.find('#button-prev').click(function (){
+            pos--;
+            out();
+        });
+
+        t.find('#button-next').click(function (){
+            pos++;
+            out();
+        });
+
+        d.content.css({
+            maxWidth: 'calc(100vw - 100px)',
+            paddingBottom: '10px'
+        }).find('img').css({
+            width: '100%',
+            verticalAlign: 'top'
+        });
+
+        var pos = 0;
+        function out(){
+            t.find('#button-prev').attr('disabled', pos > 0 ? null : true);
+            t.find('#button-next').attr('disabled', pos < car.skins.length - 1 ? null : true);
+            d.content.find('#current-preview').prop('src', car.skins[pos].preview.cssUrl());
+            d.content.find('#new-preview').prop('src', '%0/%1.jpg'(output, car.skins[pos].id).cssUrl());
+        }
+
+        out();
+    }
+
+    public shot(c, m){
+        if (c.path.indexOf(AcDir.cars)) return;
+
+        var showroom = Settings.get('aptShowroom') || _blackShowroom;
+        var x = -Settings.get('aptCameraX');
+        var y = -Settings.get('aptCameraY');
+        var filter = Settings.get('aptFilter') || null;
+        var disableSweetFx = !!Settings.get('aptDisableSweetFx');
+        var delays = !!Settings.get('aptIncreaseDelays');
+
+        if (Number.isNaN(x)) x = Settings.defaults.aptCameraX;
+        if (Number.isNaN(y)) y = Settings.defaults.aptCameraY;
+
+        showroomTest();
+
+        function showroomTest(){
+            function blackShowroomTest(){
+                return fs.existsSync(AcTools.Utils.FileUtils.GetShowroomFolder(AcDir.root, showroom));
+            }
+
+            if (showroom == _blackShowroom && !blackShowroomTest()){
+                new Dialog('One More Thing',
+                    'Please, install <a href="#" onclick="Shell.openItem(\'%0\')">Black Showroom</a> first.'(_blackShowroomUrl),
+                    function (){
+                        Shell.openItem(_blackShowroomUrl);
+                        return false;
+                    }).setButton('From Here').addButton('Right Here', function (){
+                        Shell.openItem(AcTools.Utils.FileUtils.GetShowroomsFolder(AcDir.root));
+                        return false;
+                    }).addButton('Done', function (){
+                        if (blackShowroomTest()){
+                            setTimeout(proceed);
+                        } else {
+                            new Dialog('Are You Sure?', 'Because showroom is still missing.');
+                            this.buttons.find('button:last-child').text('Really Done');
+                            return false;
+                        }                        
+                    });
+            } else {
+                proceed();
+            }
+        }
+
+        function proceed(){
+            var output;
+            try {
+                output = AcTools.Processes.Showroom.Shot(AcDir.root, c.id, showroom, !!m, x, y, filter, disableSweetFx, delays);
+            } catch (err){
+                ErrorHandler.handled('Cannot get previews. Maybe process was terminated, there is not enough rights or the car is broken.');
+                return;
+            }
+
+            shotOutputPreview(c, output, function (){
+                AcTools.Utils.ImageUtils.ApplyPreviews(AcDir.root, c.id, output, Settings.get('aptResize'));
+                c.updateSkins();
+                fs.rmdirSync(output);
+            });
+        }
+    }
+}

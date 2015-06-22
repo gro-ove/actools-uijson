@@ -25,16 +25,20 @@
             <div id="loading-grab"></div>
         </div>
         <aside>
-            <h4>Total cars: <output id="total-cars"></output><button id="settings-open"></button></h4>
-            <input id="cars-list-filter" type="search">
+            <h4>Total cars: <output id="total-cars"></output>
+                <button id="settings-open" title="Open settings"></button>
+                <button id="cars-list-filter-focus" title="Filter cars list"></button>
+            </h4>
+            <input id="cars-list-filter" type="search" title="Available filters: brand:…, class:…">
             <span id="window-drag-left"></span>
             <div id="cars-list"></div>
 
             <footer>
-                <button id="cars-list-open-directory">Directory</button>
-                <button id="cars-list-reload">Reload</button>
+                <button id="cars-list-open-directory" title="Open cars folder">Folder</button>
+                <!-- <button id="cars-list-sort" title="By name or by ID">Sort</button> -->
+                <button id="cars-list-reload" title="Reload cars">Reload</button>
                 <br>
-                <button id="cars-list-save">Save all</button>
+                <button id="cars-list-save" title="Save all changed cars">Save all</button>
             </footer>
         </aside>
         <main style="display:none">
@@ -46,6 +50,7 @@
                 <p id="selected-car-error" class="error"></p>
                 <article id="selected-car-skins-article">
                     <img id="selected-car-preview"></img>
+                    <img class="car-upgrade" id="selected-car-upgrade">   
                     <div id="selected-car-skins"></div>
                 </article>
                 <article>
@@ -57,8 +62,7 @@
                         </li>
                         <li>
                             <span class="property">Parent</span>
-                            <select id="selected-car-parent" class="property-value" disabled title="Feature temporary unavailable"></select>
-                            <img class="car-upgrade" id="selected-car-upgrade">   
+                            <select id="selected-car-parent" class="property-value"></select>
                         </li>
                         <li>
                             <span class="property">Class</span>
@@ -97,30 +101,30 @@
                 </article>
             </div>
             <footer>
-                <button id="selected-car-open-directory">Directory</button>
+                <button id="selected-car-open-directory" title="Open car folder">Folder</button>
                 <span>
-                    <button id="selected-car-showroom">Showroom</button>
+                    <button id="selected-car-showroom" title="Start showroom">Showroom</button>
                     <div>
-                        <button id="selected-car-showroom-select">Select</button>
+                        <button id="selected-car-showroom-select" title="Select and start showroom">Select</button>
                     </div>
                 </span>
                 <span>
-                    <button id="selected-car-practice">Practice</button>
+                    <button id="selected-car-practice" title="Start practice">Practice</button>
                     <div>
-                        <button id="selected-car-practice-select">Select</button>
+                        <button id="selected-car-practice-select" title="Select track and start practice">Select</button>
                     </div>
                 </span>
-                <button id="selected-car-reload">Reload</button>
+                <button id="selected-car-reload" title="Reload car">Reload</button>
                 <br>
-                <button id="selected-car-disable">Disable</button>
+                <button id="selected-car-disable" title="Enable/disable car">Disable</button>
                 <span>
-                    <button id="selected-car-update-previews">Update Previews</button>
+                    <button id="selected-car-update-previews" title="Auto-update skins previews">Update Previews</button>
                     <div>
-                        <button id="selected-car-update-previews-manual">Manual</button>
+                        <button id="selected-car-update-previews-manual" title="Manually adjust camera and update skins previews">Manual</button>
                     </div>
                 </span>
-                <button id="selected-car-update-description">Find Description</button>
-                <button id="selected-car-save">Save</button>
+                <button id="selected-car-update-description" title="Try to find car description on the Internet">Find Description</button>
+                <button id="selected-car-save" title="Save changes">Save</button>
             </footer>
         </main>
 

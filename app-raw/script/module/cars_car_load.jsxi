@@ -1,0 +1,150 @@
+static partial class Cars {
+    partial class Car {
+        public loadBadge(callback){
+            fs.exists(badge, function (result){
+                if (!result){
+                    error.push({ id: 'badge-missing', msg: 'Missing badge.png' });
+                    mediator.dispatch('error', this);
+                }
+
+                if (callback) callback();
+            }.bind(this));
+        }
+
+        public loadSkins(callback){
+            fs.readdir('%0/skins'(path), function (err, result){
+                skins = false;
+
+                if (err){
+                    error.push({ id: 'skins-access', msg: 'Cannot access skins', details: err });
+                    mediator.dispatch('error', this);
+                } else {
+                    result = result.filter(function (e){
+                        return fs.statSync('%0/skins/%1'(path, e)).isDirectory();
+                    });
+
+                    if (skins.length === 0){
+                        error.push({ id: 'skins-empty', msg: 'Skins folder is empty' });
+                        mediator.dispatch('error', this);
+                    } else {
+                        skins = result.map(function (e){
+                            var p = '%0/skins/%1'(path, e);
+                            return {
+                                id: e,
+                                path: p,
+                                livery: p + '/livery.png',
+                                preview: p + '/preview.jpg',
+                            };
+                        });
+
+                        skins.selected = skins[0];
+                        mediator.dispatch('update.car.skins', this);
+                    }
+                }
+
+                if (callback) callback();
+            }.bind(this));
+        }
+
+        public loadData(callback){
+            if (!fs.existsSync(json)){
+                if (fs.existsSync(json + '.disabled')){
+                    fs.renameSync(json + '.disabled', json);
+                } else {
+                    if (changed){
+                        changed = false;
+                        mediator.dispatch('update.car.changed', this);
+                    }
+
+                    data = false;
+                    error.push({ id: 'json-missing', msg: 'Missing ui_car.json' });
+                    mediator.dispatch('error', this);
+                    mediator.dispatch('update.car.data', this);
+                    if (callback) callback();
+                    return;
+                }
+            }
+
+            fs.readFile(json, function (err, result){
+                if (changed){
+                    changed = false;
+                    mediator.dispatch('update.car.changed', this);
+                }
+
+                if (err){
+                    data = false;
+                    error.push({ id: 'json-read', msg: 'Unavailable ui_car.json', details: err });
+                    mediator.dispatch('error', this);
+                } else {
+                    var dat;
+                    try {
+                        eval('dat=' + result.toString().replace(/"(?:[^"\\]*(?:\\.)?)+"/g, function (_){
+                            return _.replace(/\r?\n/g, '\\n');
+                        }));
+                    } catch (er){
+                        err = er;
+                    }
+
+                    data = false;
+                    if (err || !dat){
+                        error.push({ id: 'json-parse', msg: 'Damaged ui_car.json', details: err });
+                        mediator.dispatch('error', this);
+                    } else if (!dat.name){
+                        error.push({ id: 'data-name', msg: 'Name is missing' });
+                        mediator.dispatch('error', this);
+                    } else if (!dat.brand){
+                        error.push({ id: 'data-brand', msg: 'Brand is missing' });
+                        mediator.dispatch('error', this);
+                    } else {
+                        data = dat;
+                        if (!data.description) data.description = '';
+                        if (!data.tags) data.tags = [];
+                        if (!data.specs) data.specs = {};
+
+                        data.class = data.class || '';
+                        data.description = data.description.replace(/\n/g, ' ')
+                            .replace(/<\/?br\/?>[ \t]*|\n[ \t]+/g, '\n').replace(/<\s*\/?\s*\w+\s*>/g, '').replace(/[\t ]+/g, ' ');
+
+                        if (data.parent != null){
+                            if (data.parent == id){
+                                error.push({ id: 'parent-wrong', msg: 'Parent is child' });
+                                // TODO: check if A → B → C or A → B → A
+                            } else {
+                                var par = byName(data.parent);
+                                if (par == null){
+                                    error.push({ id: 'parent-missing', msg: 'Parent is missing' });
+                                } else {
+                                    parent = par;
+                                    parent.children.push(this);
+
+                                    mediator.dispatch('update.car.parent', this);
+                                    mediator.dispatch('update.car.children', parent);
+                                }
+
+                                if (!fs.existsSync(upgrade)){
+                                    error.push({ id: 'upgrade-missing', msg: 'Missing upgrade.png' });
+                                    mediator.dispatch('error', this);
+                                }
+                            }
+                        }
+
+                        registerTags(data.tags);
+                        registerClass(data.class);
+                        registerBrand(data.brand);
+                    }
+                }
+
+                mediator.dispatch('update.car.data', this);
+                if (callback) callback();
+            }.bind(this));
+        }
+
+        public load(callback){
+            error = [];
+
+            loadBadge();
+            loadSkins();
+            loadData(callback);
+        }
+    }
+}

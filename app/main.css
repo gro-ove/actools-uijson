@@ -614,7 +614,23 @@ aside,
 .car-upgrade {
   width: 64px;
   height: 64px;
-  -webkit-filter: drop-shadow(0 0 1px #000000);
+  /*-webkit-filter: drop-shadow(0 0 1px #000);*/
+  background-color: rgba(0, 0, 0, 0.32);
+}
+#settings-open,
+#cars-list-filter-focus {
+  background: center none no-repeat;
+  background-size: cover;
+  height: 19px;
+  width: 24px;
+}
+#settings-open:hover,
+#cars-list-filter-focus:hover {
+  background-color: rgba(0, 0, 0, 0.1);
+}
+#settings-open:active,
+#cars-list-filter-focus:active {
+  opacity: .7;
 }
 dialog {
   width: 100%;
@@ -717,6 +733,9 @@ dialog > article {
 .dialog-buttons button {
   height: 100%;
   padding: 10px;
+}
+dialog.dark {
+  border-color: #333;
 }
 dialog.dark article {
   background: #000;
@@ -967,11 +986,18 @@ aside > h4 {
 #cars-list span.changed:after {
   content: "*";
 }
+#cars-list-filter-focus {
+  background-image: url(img/search.png);
+  float: right;
+}
 #cars-list-filter {
   display: none;
   position: absolute;
-  right: 7px;
-  top: 7px;
+  right: 8px;
+  top: 8px;
+  font-size: 11px;
+  height: 23px;
+  width: 110px;
 }
 #loading {
   position: fixed;
@@ -1128,19 +1154,10 @@ summary li {
 }
 #selected-car-upgrade {
   position: absolute;
-  top: 0;
-  right: 0;
+  top: 8px;
+  right: 122px;
 }
 #settings-open {
-  background: center url(img/settings.png) no-repeat;
-  background-size: cover;
-  height: 19px;
-  width: 24px;
+  background-image: url(img/settings.png);
   float: right;
-}
-#settings-open:hover {
-  background-color: rgba(0, 0, 0, 0.1);
-}
-#settings-open:active {
-  opacity: .7;
 }

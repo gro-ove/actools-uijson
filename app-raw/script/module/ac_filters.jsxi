@@ -1,0 +1,25 @@
+static class AcFilters {
+    var _filters = null;
+
+    public get list {
+        if (!_filters){
+            loadFilters();
+        }
+
+        return _filters;
+    };
+
+    function loadFilters(){
+        var path = AcTools.Utils.FileUtils.GetDocumentsFiltersFolder();
+
+        _filters = fs.readdirSync(path).map(function (e){
+            if (!/\.ini$/i.test(e)) return;
+            return {
+                id: e.replace(/\.ini$/i, ''),
+                path: path + '/' + e,
+            }
+        }).filter(function (e){
+            return e;
+        });
+    }
+}

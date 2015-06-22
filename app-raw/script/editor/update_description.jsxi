@@ -1,4 +1,4 @@
-class UpdateDescriptionProvider {
+class SearchProvider {
     protected _car;
 
     (car){
@@ -15,8 +15,8 @@ class UpdateDescriptionProvider {
     public clearUp(w){}
 }
 
-class UpdateDescriptionGoogleProvider extends UpdateDescriptionProvider {
-    public get url 'https://www.google.com/search?q=' + encodeURIComponent(_car.data.name);
+class GoogleSearchProvider extends SearchProvider {
+    public get url 'https://www.google.com/search?q=%0'(encodeURIComponent(_car.data.name));
 
     public clearUp(w){
         $('#before-appbar, #fbarcnt', w.document).remove();
@@ -24,15 +24,19 @@ class UpdateDescriptionGoogleProvider extends UpdateDescriptionProvider {
     }
 }
 
+class WikiSearchProvider extends SearchProvider {
+    public get url 'http://en.wikipedia.org/w/index.php?search=%0'(encodeURIComponent(_car.data.name));
+}
+
 static class UpdateDescription {
     public update(car){
-        provider = new UpdateDescriptionGoogleProvider(car);
+        provider = new GoogleSearchProvider(car);
 
         var dialog = new Dialog('Update Description', [
             '<iframe nwdisable nwfaketop nwUserAgent="{0}" src="{1}"></iframe>'.format(provider.userAgent, provider.url),
         ], function (){
             if (s){
-                Cars.changeData(c, 'description', provider.prepare(s));
+                Cars.changeData(car, 'description', provider.prepare(s));
             }
         });
 
@@ -45,18 +49,13 @@ static class UpdateDescription {
             });
         });
 
-        var t = $('<div>\
-            <button id="button-back">←</button>\
-            <button id="button-return">↑</button>\
-            <button id="button-external">↗</button>\
-        </div>').insertBefore(dialog.header);
+        var t = $('<div>' + 
+            '<button id="button-back">←</button> ' +
+            '<button id="button-external">↑</button>' + 
+        '</div>').insertBefore(dialog.header);
 
         t.find('#button-back').click(function (){
             dialog.find('iframe')[0].contentWindow.history.back(); 
-        });
-
-        t.find('#button-return').click(function (){
-            dialog.find('iframe')[0].src = provider.url;
         });
 
         t.find('#button-external').click(function (){

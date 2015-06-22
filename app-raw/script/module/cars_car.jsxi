@@ -1,0 +1,191 @@
+static partial class Cars {
+    partial class Car {
+        public id, path;
+        public disabled;
+
+        public get json '%0/ui/ui_car.json'(path),
+            badge '%0/ui/badge.png'(path),
+            upgrade '%0/ui/upgrade.png'(path);
+
+        public get displayName data && data.name || id;
+
+        public data;
+        public error = [];
+        public changed = false;
+
+        public skins;
+
+        public parent = null;
+        public children = [];
+
+        (carPath){
+            id = carPath.slice(Math.max(carPath.lastIndexOf('/'), carPath.lastIndexOf('\\')) + 1);
+            path = carPath;
+
+            disabled = carPath.indexOf(AcDir.carsOff) != -1;
+        }
+
+        private addError(id, msg, details){
+            error.push({ id: id, msg: msg, details: details });
+        }
+
+        public hasError(id){
+            for (var e in-array error){
+                if (e.id === id) return true;
+            }
+
+            return false;
+        }
+
+        public toggle(state){
+            var d = state == null ? !disabled : !state;
+            if (disabled == d) return;
+
+            var a, b;
+            if (d){
+                a = AcDir.cars, b = AcDir.carsOff;
+            } else {
+                a = AcDir.carsOff, b = AcDir.cars;
+            }
+
+            var newPath = path.replace(a, b);
+            try {
+                fs.renameSync(path, newPath);
+            } catch (err){
+                ErrorHandler.handled('Cannot change car state.', err);
+                return;
+            }
+
+            disabled = d;
+            path = newPath;
+            if (skins){
+                skins.forEach(function (e){
+                    for (var n in e){
+                        if (typeof e[n] === 'string'){
+                            e[n] = e[n].replace(a, b);
+                        }
+                    }
+                });
+            }
+
+            mediator.dispatch('update.car.disabled', this);
+            mediator.dispatch('update.car.path', this);
+            mediator.dispatch('update.car.skins', this);
+
+            if (parent && !disabled && parent.disabled){
+                toggle(parent, true);
+            }
+
+            children.forEach(function (e){
+                toggle(e, !disabled);
+            });
+        }
+
+        public changeData(key, value){
+            if (!data || data[key] == value) return;
+
+            data[key] = value;
+            changed = true;
+
+            if (key === 'tags'){
+                registerTags(value);
+            }
+
+            if (key === 'brand'){
+                registerBrand(value);
+            }
+
+            if (key === 'class'){
+                registerClass(value);
+            }
+
+            if (Settings.get('uploadData')){
+                AppServerRequest.sendData(id, key, value);
+            }
+
+            mediator.dispatch('update.car.data:%0'(key), this);
+            mediator.dispatch('update.car.changed', this);
+        }
+
+        public changeDataSpecs(key, value){
+            if (!data || data.specs[key] == value) return;
+
+            data.specs[key] = value;
+            changed = true;
+
+            if (Settings.get('uploadData')){
+                AppServerRequest.sendData(id, 'specs:' + key, value);
+            }
+
+            mediator.dispatch('update.car.data', this);
+            mediator.dispatch('update.car.changed', this);
+        }
+
+        public changeParent(parentId){
+            if (!data || parent && parent.id == parentId || !parent && parentId == null) return;
+
+            if (parent){
+                parent.children.splice(parent.children.indexOf(this), 1);
+                mediator.dispatch('update.car.children', parent);
+            }
+
+            if (parentId){
+                var par = byName(parentId);
+                if (!par) throw new Error('Parent car "%0" not found'(parentId));
+
+                parent = par;
+                parent.children.push(this);
+                mediator.dispatch('update.car.parent', this);
+                mediator.dispatch('update.car.children', parent);
+
+                data.parent = parent.id;
+                mediator.dispatch('update.car.data', this);
+            } else {
+                parent = null;
+                mediator.dispatch('update.car.parent', this);
+
+                delete data.parent;
+                mediator.dispatch('update.car.data', this);
+            }
+
+            changed = true;
+            mediator.dispatch('update.car.changed', this);
+        }
+
+        public selectSkin(skinId){
+            var newSkin = skins.filter(function (e){
+                return e.id == skinId;
+            })[0];
+
+            if (newSkin == skins.selected) return;
+
+            skins.selected = newSkin;
+            mediator.dispatch('update.car.skins', this);
+        }
+
+        public updateSkins(){
+            gui.App.clearCache();
+            setTimeout(function (){
+                mediator.dispatch('update.car.skins', this);
+            }.bind(this), 100);
+        }
+
+        public updateUpgrade(){
+            gui.App.clearCache();
+            setTimeout(function (){
+                mediator.dispatch('update.car.data', this);
+            }.bind(this), 100);
+        }
+
+        public save(){
+            if (data){
+                var p = Object.clone(data);
+                p.description = p.description.replace(/\n/g, '<br>');
+                p.class = p.class.toLowerCase();
+                fs.writeFileSync(json, JSON.stringify(p, null, 4));
+                changed = false;
+                mediator.dispatch('update.car.changed', this);
+            }
+        }
+    }
+}

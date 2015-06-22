@@ -5,11 +5,11 @@ static class AcDir {
 
     public check(d){
         if (!fs.existsSync(d)){
-            return 'Directory not found';
+            return 'Folder not found';
         }
 
         if (!fs.existsSync(path.join(d, 'content', 'cars'))){
-            return 'Directory content/cars not found';
+            return 'Folder content/cars not found';
         }
     }
 
@@ -43,7 +43,7 @@ static class AcDir {
         }
 
         function prompt(e){
-            var dialog = new Dialog('Cars Directory', [
+            var dialog = new Dialog('Assetto Corsa Folder', [
                 e && '<p class="error">' + e + '</p>',
                 '<button id="select-dir" style="float:right;width:30px">…</button>',
                 '<input placeholder="…/Assetto Corsa" style="width:calc(100% - 35px)">',

@@ -7,27 +7,67 @@ static class AppServerRequest {
         $.ajax({
             url: 'http://ascobash.comuf.com/api.php?0=check&v=%0&b=%1'(version, source),
         }).fail(function() {
-            callback('error:request');
+            if (callback) callback('error:request');
         }).done(function (data){
             if (data == null || typeof data === 'object'){
-                callback(null, data);
+                if (callback) callback(null, data);
             } else {
-                callback('error:' + data);
+                if (callback) callback('error:' + data);
             }
         });
     }
 
     public sendFeedback(feedback, callback){
         $.ajax({
-            url: 'http://ascobash.comuf.com/api.php?0=feedback'(version, source),
+            url: 'http://ascobash.comuf.com/api.php?0=feedback',
             type: 'POST',
             contentType: 'text/plain',
             data: feedback,
             processData: false,
         }).fail(function() {
-            callback('error:request');
+            if (callback) callback('error:request');
         }).done(function (data){
-            callback(null);
+            if (callback) callback(null);
         });
+    }
+
+    var _dataToSend = [];
+    var _sendTimeout;
+    var _sendDelay = 3e3;
+
+    private sendDataInner(carId, key, value){
+        $.ajax({
+            url: 'http://ascobash.comuf.com/api.php?0=database&c=%0&f=%1'(carId, key),
+            type: 'POST',
+            contentType: 'text/plain',
+            data: value,
+            processData: false,
+        }).fail(function() {
+            console.warn('send data failed');
+        });
+    }
+
+    private sendDataGroup(carId, key, value, callback){
+        for (var i, e in-array _dataToSend){
+            if (e){
+                sendDataInner(e.car, e.key, e.value);
+            }
+        }
+
+        _dataToSend = [];
+    }
+
+    public sendData(carId, key, value, callback){
+        for (var i, e in-array _dataToSend){
+            if (e && e.car === carId && e.key === key){
+                _dataToSend[i] = null;
+            }
+        }
+
+        _dataToSend.push({ car: carId, key: key, value: value });
+        if (callback) callback(null);
+
+        clearTimeout(_sendTimeout);
+        _sendTimeout = setTimeout(sendDataGroup, _sendDelay);
     }
 }

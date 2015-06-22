@@ -17,10 +17,10 @@ static class ViewDetails {
     function outErrors(car){
         var er = $('#selected-car-error');
         if (car.error.length > 0){
-            er.show().html('Errors:<ul><li>' +
-                car.error.map(function (e){
-                    return e.msg;
-                }).join('</li><li>') + '</li></ul>');
+            er.show().html('Errors:<ul>%0</ul>'(car.error.map(function (e){
+                return '<li><a href="#" data-error-id="%0">%1</a></li>'(e.id, e.msg);
+                // TODO: …
+            }).join('')));
         } else {
             er.hide();
         }
@@ -28,36 +28,32 @@ static class ViewDetails {
 
     function outBadge(car){
         var lo = $('#selected-car-logo');
-        lo.attr('src', car.badge.cssUrl());
-    }
-
-    function updateParents(car){
-        var s = document.getElementById('selected-car-parent');
-        if (!s) return;
-
-        if (car.children.length > 0){
-            s.parentNode.style.display = 'none';
+        if (car.hasError('badge-missing')){
+            lo.hide();
         } else {
-            s.parentNode.style.display = null;
-
-            s.innerHTML = '<option value="">None</option>' + Cars.list.filter(function (e){
-                return e.data && !e.disabled && e.parent == null && e.id != car.id && (!car.parent || car.parent.id != car.id);
-            }).map(function (e){
-                return '<option value="{0}">{1}</option>'.format(e.id, e.data.name);
-            }).join('');
-
-            s.value = car.parent && car.parent.id || '';
+            lo.show().attr('src', car.badge.cssUrl());
         }
     }
 
     function outData(car){
+        function val(e, s){
+            if (typeof e === 'string') e = $(e);
+            if (e = e[0]){
+                var c = e.value;
+                if (!s) s = '';
+                if (c != s) e.value = s;
+            }
+        }
+
         var he = $('#selected-car'),
             de = $('#selected-car-desc'),
             ta = $('#selected-car-tags'),
             pr = $('#selected-car-properties');
+        he.attr('title', car.path);
         if (car.data){
-            he.removeAttr('readonly');
-            de.removeAttr('readonly');
+            val(he.removeAttr('readonly'), car.data.name);
+            val(de.removeAttr('readonly'), car.data.description);
+            de.elastic();
 
             ta.show().find('li').remove();
             car.data.tags.forEach(function (e){
@@ -65,28 +61,20 @@ static class ViewDetails {
             }.bind(ta.find('input')));
             updateTags(car.data.tags);
 
-            if (car.data.name != he.val()){
-                he.val(car.data.name);
-            }
-
-            if (car.data.description != de.val()){
-                de.val(car.data.description).elastic();
-            }
-
             pr.show();
-            $('#selected-car-brand').val(car.data.brand);
-            $('#selected-car-class').val(car.data.class || '');
+            val('#selected-car-brand', car.data.brand);
+            val('#selected-car-class', car.data.class);
 
-            $('#selected-car-bhp').val(car.data.specs.bhp || '');
-            $('#selected-car-torque').val(car.data.specs.torque || '');
-            $('#selected-car-weight').val(car.data.specs.weight || '');
-            $('#selected-car-topspeed').val(car.data.specs.topspeed || '');
-            $('#selected-car-acceleration').val(car.data.specs.acceleration || '');
-            $('#selected-car-pwratio').val(car.data.specs.pwratio || '');
+            val('#selected-car-bhp', car.data.specs.bhp);
+            val('#selected-car-torque', car.data.specs.torque);
+            val('#selected-car-weight', car.data.specs.weight);
+            val('#selected-car-topspeed', car.data.specs.topspeed);
+            val('#selected-car-acceleration', car.data.specs.acceleration);
+            val('#selected-car-pwratio', car.data.specs.pwratio);
 
             updateParents(car);
 
-            if (car.parent){
+            if (car.parent && !car.hasError('upgrade-missing')){
                 $('#selected-car-upgrade').show().attr('src', car.upgrade);
             } else {
                 $('#selected-car-upgrade').hide();
@@ -125,6 +113,7 @@ static class ViewDetails {
                 car.skins.forEach(function (e){
                     $('<img>').attr({
                         'data-id': e.id,
+                        'title': e.id,
                         'src': e.livery.cssUrl()
                     }).appendTo(ss);
                 });
@@ -134,7 +123,28 @@ static class ViewDetails {
         }, 50);
     }
 
+    function updateParents(car){
+        // TODO: optimization
+        var s = document.getElementById('selected-car-parent');
+        if (!s) return;
+
+        if (car.children.length > 0){
+            s.parentNode.style.display = 'none';
+        } else {
+            s.parentNode.style.display = null;
+
+            s.innerHTML = '<option value="">None</option>' + Cars.list.filter(function (e){
+                return e.data && !e.disabled && e.parent == null && e.id != car.id && (!car.parent || car.parent.id != car.id);
+            }).map(function (e){
+                return '<option value="{0}">{1}</option>'.format(e.id, e.data.name);
+            }).join('');
+
+            s.value = car.parent && car.parent.id || '';
+        }
+    }
+
     function updateTags(l){
+        // TODO: optimization
         var t = document.getElementById('tags-filtered');
         if (t){
             document.body.removeChild(t);
@@ -174,19 +184,19 @@ static class ViewDetails {
                 if (_selected != car) return;
                 outErrors(car);
             })
-            .on('update:car:data', function (car){
+            .on('update.car.data', function (car){
                 if (_selected != car) return;
                 outData(car);
             })
-            .on('update:car:skins', function (car){
+            .on('update.car.skins', function (car){
                 if (_selected != car) return;
                 outSkins(car);
             })
-            .on('update:car:disabled', function (car){
+            .on('update.car.disabled', function (car){
                 if (_selected != car) return;
                 outDisabled(car);
             })
-            .on('update:car:changed', function (car){
+            .on('update.car.changed', function (car){
                 if (_selected != car) return;
                 outChanged(car);
             });
@@ -213,7 +223,7 @@ static class ViewDetails {
 
         /* inputs */
         $('#selected-car')
-            .keydown(function (e){
+            .on('keydown', function (e){
                 if (e.keyCode == 13){
                     this.blur();
                     return false;
@@ -226,7 +236,7 @@ static class ViewDetails {
             });
 
         $('#selected-car-tags')
-            .click(function (e){
+            .on('click', function (e){
                 if (e.target.tagName === 'LI' && e.target.offsetWidth - e.offsetX < 20){
                     e.target.parentNode.removeChild(e.target);
                     applyTags();
@@ -251,42 +261,83 @@ static class ViewDetails {
             });
 
         $('#selected-car-desc').elastic()
-            .on('input', function (){
+            .on('change', function (){
                 if (!_selected || this.readonly) return;
                 Cars.changeData(_selected, 'description', this.value);
             });
 
         $('#selected-car-brand')
-            .keydown(function (e){
+            .on('keydown', function (e){
                 if (e.keyCode == 13){
                     this.blur();
                     return false;
                 }
             })
-            .change(function (e){
+            .on('change', function (e){
                 if (!_selected || this.readonly || !this.value) return;
                 Cars.changeData(_selected, 'brand', this.value);
+            })
+            .on('contextmenu', function (e){
+                if (!_selected || !_selected.data) return;
+
+                var menu = new gui.Menu();
+                menu.append(new gui.MenuItem({ label: 'Filter Brand', key: 'F', click: function (){
+                    if (!_selected) return;
+                    ViewList.addFilter('brand:%0'(_selected.data.brand));
+                } }));
+
+                menu.popup(e.clientX, e.clientY);
+                return false;
             });
 
         $('#selected-car-parent')
-            .change(function (e){
-                Cars.changeParent(_selected, this.value || null);
+            .on('change', function (e){
+                if (!_selected) return;
+
+                var t = this, v = this.value || null;
+                if (v && !fs.existsSync(_selected.upgrade)){
+                    UpgradeEditor.start(_selected, lambda {
+                        if (fs.existsSync(_selected.upgrade)){
+                            fn();
+                        } else {
+                            t.value = '';
+                        }
+                    });
+                } else {
+                    fn();
+                }
+
+                function fn(){
+                    _selected.changeParent(v);
+                }
             });
 
         $('#selected-car-class')
-            .keydown(function (e){
+            .on('keydown', function (e){
                 if (e.keyCode == 13){
                     this.blur();
                     return false;
                 }
             })
-            .change(function (){
+            .on('change', function (){
                 if (!_selected || this.readonly) return;
                 Cars.changeData(_selected, 'class', this.value);
+            })
+            .on('contextmenu', function (e){
+                if (!_selected || !_selected.data) return;
+
+                var menu = new gui.Menu();
+                menu.append(new gui.MenuItem({ label: 'Filter Class', key: 'F', click: function (){
+                    if (!_selected) return;
+                    ViewList.addFilter('class:%0'(_selected.data.class));
+                } }));
+
+                menu.popup(e.clientX, e.clientY);
+                return false;
             });
 
         [ 'bhp', 'torque', 'weight', 'topspeed', 'acceleration', 'pwratio' ].forEach(function (e){
-            $('#selected-car-' + e).keydown(function (e){
+            $('#selected-car-' + e).on('keydown', function (e){
                 if (e.keyCode == 13){
                     this.blur();
                     return false;
@@ -298,19 +349,32 @@ static class ViewDetails {
                         return false;
                     }
                 }
-            }).on('change input', function (){
+            }).on('change', function (){
                 if (!_selected || this.readonly) return;
                 Cars.changeDataSpecs(_selected, e, this.value);
             });
         });
 
         $('#selected-car-pwratio')
-            .dblclick(function (){
+            .on('dblclick contextmenu', function (e){
                 if (!_selected || !_selected.data || this.readonly) return;
-                var w = (_selected.data.specs.weight || '').match(/\d+/),
-                    p = (_selected.data.specs.bhp || '').match(/\d+/);
-                if (w && p){
-                    Cars.changeDataSpecs(_selected, 'pwratio', (+w / +p).toFixed(2) + 'kg/cv');
+
+                function r(){
+                    if (!_selected || !_selected.data || this.readonly) return;
+                    var w = (_selected.data.specs.weight || '').match(/\d+/),
+                        p = (_selected.data.specs.bhp || '').match(/\d+/);
+                    if (w && p){
+                        Cars.changeDataSpecs(_selected, 'pwratio', +(+w / +p).toFixed(2) + 'kg/cv');
+                    }
+                }
+
+                if (e.type === 'dblclick'){
+                    r();
+                } else {
+                    var menu = new gui.Menu();
+                    menu.append(new gui.MenuItem({ label: 'Recalculate', key: 'R', click: r }));
+                    menu.popup(e.clientX, e.clientY);
+                    return false;
                 }
             });
 
@@ -341,9 +405,10 @@ static class ViewDetails {
                     if (!_selected) return;
                     AcPractice.start(_selected, id);
                 } }));
-                menu.append(new gui.MenuItem({ type: 'separator' }));
-                menu.append(new gui.MenuItem({ label: 'Edit', enabled: false }));
-                menu.append(new gui.MenuItem({ label: 'Remove', enabled: false }));
+                // menu.append(new gui.MenuItem({ type: 'separator' }));
+                // menu.append(new gui.MenuItem({ label: 'Livery Editor', enabled: false }));
+                // menu.append(new gui.MenuItem({ label: 'Skin Editor', enabled: false }));
+                // menu.append(new gui.MenuItem({ label: 'Remove skin', enabled: false }));
 
                 menu.popup(e.clientX, e.clientY);
                 return false;
@@ -351,7 +416,7 @@ static class ViewDetails {
 
         /* skins changer */
         $('#selected-car-skins')
-            .click(function (e){
+            .on('click', function (e){
                 if (!_selected) return;
 
                 var id = e.target.getAttribute('data-id');
@@ -362,7 +427,7 @@ static class ViewDetails {
 
         /* global hotkeys */
         $(window)
-            .keydown(function (e){
+            .on('keydown', function (e){
                 if (!_selected) return;
 
                 if (e.keyCode == 83 && e.ctrlKey){

@@ -6,7 +6,7 @@ Small utility for easy editing *ui_car.json* files. Written using [NW.js](http:/
 * [Visual C++ Redistributable 2013 (x86)](https://www.microsoft.com/en-us/download/details.aspx?id=40784)
 
 #### Download
-* [Last (0.3.8)](https://yadi.sk/d/Sq4hOs6PhMweN)
+* [Last (0.3.10)](https://yadi.sk/d/Sq4hOs6PhMweN)
 * [Stable (0.2.23)](http://www.racedepartment.com/downloads/actools-cars-manager.6518/)
 
 #### Features
@@ -24,6 +24,13 @@ Small utility for easy editing *ui_car.json* files. Written using [NW.js](http:/
 * Select found text in built-in browser and press “OK”
 * Don't forget to save changes (Ctrl+S)
 
+#### Data Collection
+This feature allows to collect huge database with correct information (description, tags and etc.) about every car! All you have to do is open Settings, enable option “Upload some changes” and then some of your fixes will be uploaded on server! After that everybody will have access to clean, right and actual information!
+
+###### Notes
+* Option disabled by default because of privacy and stuff
+* Data Application part still in development
+
 #### How to update previews
 * Install [Black Showroom](http://www.racedepartment.com/downloads/studio-black-showroom.4353/)
 * Press RMB and click “Update Previews”
@@ -34,17 +41,16 @@ Small utility for easy editing *ui_car.json* files. Written using [NW.js](http:/
     *Warning!* This thing could be pretty buggy. Sometimes you'll have to terminate updating (by press Esc) and try again.
 
 #### Known bugs
-* Sometimes Auto-updated Previews aren't able to detect new screenshot.
-* Auto-update wasn't tested.
+* Sometimes Auto-updated Previews aren't able to detect new screenshot
+* Auto-update wasn't tested
+* Practice: if Steam isn't running, default launcher will be opened instead
 
 #### TODO
-* Changable parent
-* Auto-download black showroom
-* Auto-disable SweetFX and stuff
-* New mods installation
 * Restoration Wizard
 * Switchable & custom search providers
+* New mods installation
 * More hotkeys
+* Optional sorting, sorting by brand/id/…
 * Detect broken cars
 * Brand logo select
 * New custom fields: year
@@ -52,12 +58,26 @@ Small utility for easy editing *ui_car.json* files. Written using [NW.js](http:/
 * Batch name processing (add/remove brand, add/remove year)
 * View/edit torque & powes curves, load from data/power.lut
 * Batch JS-based processing
-* Edit mode for livery.png (?)
+* Edit mode for livery.png
 * Fix body_shadow.png (?)
 * Manage skins (?)
 * Clone cars, modify in-game specs (?)
 
 #### Changelog
+* 0.3.11
+    * Introducing: Data Collection
+    * Sorting
+    * Search icon
+* 0.3.10
+    * Changable parent
+    * Filter by brand & class
+    * Auto-update Previews: 
+        * New changes viewer
+        * Fixed filter
+        * Auto-disable SweetFX
+        * Black Showroom download helper (but not auto-download, you gotta respect creator!)
+        * Options: showroom, camera position, sweetfx, filter, resize, extra delay
+        * Skin switch bug fixed
 * 0.3.0
     * Now with Js-Ext & LESS, reworked
     * Folder “locales” removed

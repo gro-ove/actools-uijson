@@ -1,24 +1,40 @@
-    #cars-list span.disabled, #selected-car-header.disabled {
-        color: #aaa !important;
+#cars-list span.disabled, #selected-car-header.disabled {
+    color: #aaa !important;
+}
+
+#selected-car-error:before {
+    content: "";
+    font-family: Segoe UI Symbol;
+    float: right;
+    background: no-repeat url(img/warn.png) center;
+    background-size: contain;
+    width: 14px;
+    height: 14px;
+    display: inline-block;
+}
+
+h1, h2, h3, h4, h5, h6, aside, #selected-car-tags li {
+    -webkit-user-select: none;
+}
+
+.car-upgrade {
+    width: 64px;
+    height: 64px;
+    /*-webkit-filter: drop-shadow(0 0 1px #000);*/
+    background-color: rgba(0,0,0,.32);
+}
+
+#settings-open, #cars-list-filter-focus {
+    background: center none no-repeat;
+    background-size: cover;
+    height: 19px;
+    width: 24px;
+
+    &:hover {
+        background-color: rgba(0,0,0,.1);
     }
 
-    #selected-car-error:before {
-        content: "";
-        font-family: Segoe UI Symbol;
-        float: right;
-        background: no-repeat url(img/warn.png) center;
-        background-size: contain;
-        width: 14px;
-        height: 14px;
-        display: inline-block;
+    &:active {
+        opacity: .7;
     }
-
-    h1, h2, h3, h4, h5, h6, aside, #selected-car-tags li {
-        -webkit-user-select: none;
-    }
-
-    .car-upgrade {
-        width: 64px;
-        height: 64px;
-        -webkit-filter: drop-shadow(0 0 1px #000);
-    }
+}

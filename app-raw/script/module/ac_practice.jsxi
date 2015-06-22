@@ -1,6 +1,14 @@
 static class AcPractice {
     var _tracks = null;
 
+    public get list {
+        if (!_tracks){
+            loadTracks();
+        }
+
+        return _tracks;
+    };
+
     function loadTracks(){
         _tracks = fs.readdirSync(AcDir.tracks).map(function (e){
             var p = path.join(AcDir.tracks, e);

@@ -1,4 +1,4 @@
-if (Settings.get('updatesCheck', true)){
+if (Settings.get('updatesCheck')){
     setTimeout(function (){
         CheckUpdate.check();
     }, 5e1);
@@ -8,13 +8,26 @@ setTimeout(function (){
     try fs.rmdirSync(path.join(path.dirname(process.execPath), 'locales')); 
 }, 50);
 
+$(window)
+    .on('keydown', function (e){
+        if (Event.isSomeInput(e)) return;
+        if (e.keyCode == 39){
+            var l = $('[data-action="next"]');
+            if (l[l.length - 1]) l[l.length - 1].click();
+        }
+        if (e.keyCode == 37){
+            var l = $('[data-action="prev"]');
+            if (l[l.length - 1]) l[l.length - 1].click();
+        }
+    })
+
 AppWindow
     .on('close', function (){
         if (Cars.list.filter(function (e){
             return e.changed;
         }).length > 0){
             new Dialog('Close', [
-                'Unsaved changes will be lost. Are you sure?'
+                'Unsaved changes will be lost. Are you sure?',
             ], function (){
                 AppWindow.close(true);
             });
@@ -29,7 +42,7 @@ ViewList
     });
 
 Cars
-    .on('update:car:data', function (car){
+    .on('update.car.data', function (car){
         if (car === ViewList.selected){
             AppWindow.title = car.data ? car.data.name : car.id;
         }
@@ -40,7 +53,7 @@ AcDir
     .on('change', function (){
         Cars.scan();
 
-        if (first && !Settings.get('disableTips', false)){
+        if (first && !Settings.get('disableTips')){
             new Dialog('Tip', Tips.next, function (){
                 this.find('p').html(Tips.next);
                 this.find('h4').text('Another Tip');

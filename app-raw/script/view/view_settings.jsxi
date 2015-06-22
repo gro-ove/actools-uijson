@@ -2,25 +2,7 @@ static class ViewSettings {
     var _prevFeedback;
 
     function openDialog(){
-        var d = new Dialog('Settings', [
-            '<h6>AC Root Directory</h6>',
-            '<button id="settings-acdir-select" style="float:right;width:30px">…</button>',
-            '<input id="settings-acdir" placeholder="…/Assetto Corsa" style="width:calc(100% - 35px)">',
-
-            '<h6>Tips</h6>',
-            '<label><input id="settings-disable-tips" type="checkbox">Disable tips on launch</label>',
-
-            '<h6>Database</h6>',
-            '<label><input id="settings-update-database" type="checkbox">Update databases</label>',
-            '<label><input id="settings-upload-data" type="checkbox">Upload some changes</label>',
-
-            '<h6>Updates</h6>',
-            '<label><input id="settings-updates-check" type="checkbox">Check for new versions on launch</label>',
-            '<select id="settings-updates-source"><option value="stable">Stable</option><option value="last">Beta</option></select>',
-
-            /*'<h6>Search Provider</h6>',
-            '<label><select id="settings-search-provider"><option value="google"></option></select>',*/
-        ], function (){
+        function save(){
             if (acdirVal === false) return false;
 
             if (acdirVal != null){
@@ -29,11 +11,42 @@ static class ViewSettings {
 
             Settings.update(function (s){
                 s.disableTips = disableTips;
+                s.updateDatabase = updateDatabase;
+                s.uploadData = uploadData;
                 s.updatesCheck = updatesCheck;
                 s.updatesSource = updatesSource;
-            });
-        }, false).setButton('Save').addButton('Cancel');
 
+                s.aptShowroom = aptShowroom;
+                s.aptFilter = aptFilter;
+                s.aptDisableSweetFx = aptDisableSweetFx;
+                s.aptResize = aptResize;
+                s.aptCameraX = aptCameraX;
+                s.aptCameraY = aptCameraY;
+                s.aptIncreaseDelays = aptIncreaseDelays;
+            });
+        }
+
+        var d = new Dialog('Settings', [
+            '<h6>Assetto Corsa Folder</h6>',
+            '<button id="settings-acdir-select" style="float:right;width:30px">…</button>',
+            '<input id="settings-acdir" placeholder="…/Assetto Corsa" style="width:calc(100% - 35px)">',
+
+            '<h6>Tips</h6>',
+            '<label><input id="settings-disable-tips" type="checkbox">Disable tips on launch</label>',
+
+            '<h6>Database</h6>',
+            '<label><input id="settings-update-database" type="checkbox" disabled>Update databases</label><br>',
+            '<label><input id="settings-upload-data" type="checkbox">Upload some changes</label>',
+
+            '<h6>Updates</h6>',
+            '<label><input id="settings-updates-check" type="checkbox">Check for new versions on launch</label>',
+            '<select id="settings-updates-source"><option value="stable">Stable</option><option value="last">Beta</option></select>',
+
+            /*'<h6>Search Provider</h6>',
+            '<label><select id="settings-search-provider"><option value="google"></option></select>',*/
+        ], save, false).setButton('Save').addButton('Cancel');
+
+        /* acdir */
         var acdirVal;
         function acdirChange(){
             var err = AcDir.check(acdirVal = d.find('#settings-acdir').val());
@@ -43,32 +56,92 @@ static class ViewSettings {
             }
         }
 
-        d.find('#settings-acdir').val(AcDir.root).change(acdirChange);
+        d.content.find('#settings-acdir').val(AcDir.root).change(acdirChange);
 
-        d.find('#settings-acdir-select').click(function (){
+        d.content.find('#settings-acdir-select').click(function (){
             $('<input type="file" nwdirectory />').attr({
-                nwworkingdir: d.find('#settings-acdir').val()
+                nwworkingdir: d.content.find('#settings-acdir').val()
             }).change(function (){
-                d.find('#settings-acdir').val(this.value);
+                d.content.find('#settings-acdir').val(this.value);
                 acdirChange();
             }).click();
         });
 
-        var disableTips = Settings.get('disableTips', false);
-        d.find('#settings-disable-tips').change(function (){
-            disableTips = this.checked;
-        })[0].checked = disableTips;
+        /* tips */
+        var disableTips = Settings.get('disableTips');
+        d.content.find('#settings-disable-tips').change(lambda { disableTips = this.checked })[0].checked = disableTips;
 
-        var updatesCheck = Settings.get('updatesCheck', true);
-        d.find('#settings-updates-check').change(function (){
-            updatesCheck = this.checked;
-        })[0].checked = updatesCheck;
+        /* database */
+        var updateDatabase = Settings.get('updateDatabase');
+        d.content.find('#settings-update-database').change(lambda { updateDatabase = this.checked })[0].checked = updateDatabase;
 
-        var updatesSource = Settings.get('updatesSource', 'stable');
-        d.find('#settings-updates-source').change(function (){
-            updatesSource = this.value;
-        })[0].value = updatesSource;
+        var uploadData = Settings.get('uploadData');
+        d.content.find('#settings-upload-data').change(lambda { uploadData = this.checked })[0].checked = uploadData;
 
+        /* updates */
+        var updatesCheck = Settings.get('updatesCheck');
+        d.content.find('#settings-updates-check').change(lambda { updatesCheck = this.checked })[0].checked = updatesCheck;
+
+        var updatesSource = Settings.get('updatesSource');
+        d.content.find('#settings-updates-source').change(lambda { updatesSource = this.value })[0].value = updatesSource;
+
+        /* auto-preview tab */
+        var apt = d.addTab('Auto-Preview', [
+            '<h6>Showroom</h6>',
+            '<select id="apt-showroom"><option value="">Black Showroom (Recommended)</option>{0}</select>'.format(AcShowroom.list.map(function (e){
+                return '<option value="{0}">{1}</option>'.format(e.id, e.data ? e.data.name : e.id);
+            }).join('')),
+
+            '<h6>Filter</h6>',
+            '<select id="apt-filter"><option value="">Don\'t change</option>{0}</select>'.format(AcFilters.list.map(function (e){
+                return '<option value="{0}">{1}</option>'.format(e.id, e.id);
+            }).join('')),
+            '<label><input id="apt-disable-sweetfx" type="checkbox">Disable SweetFX (Recommended)</label>',
+
+            '<h6>Resize</h6>',
+            '<label><input id="apt-resize" type="checkbox">Change size to default 1024×576 (Recommended)</label>',
+
+            '<h6>Camera Position</h6>',
+            '<label>X: <input id="apt-camera-x" type="number" step="1"></label>',
+            '<label>Y: <input id="apt-camera-y" type="number" step="1"></label>',
+
+            '<h6>Delays</h6>',
+            '<label><input id="apt-increase-delays" type="checkbox">Increased delays</label>',
+
+        ], save).setButton('Save').addButton('Defaults', function (){
+            apt.content.find('#apt-showroom')[0].value = aptShowroom = Settings.defaults.aptShowroom;
+            apt.content.find('#apt-filter')[0].value = aptFilter = Settings.defaults.aptFilter;
+            apt.content.find('#apt-disable-sweetfx')[0].checked = aptDisableSweetFx = Settings.defaults.aptDisableSweetFx;
+            apt.content.find('#apt-resize')[0].checked = aptResize = Settings.defaults.aptResize;
+            apt.content.find('#apt-camera-x')[0].value = aptCameraX = Settings.defaults.aptCameraX;
+            apt.content.find('#apt-camera-y')[0].value = aptCameraY = Settings.defaults.aptCameraY;
+            apt.content.find('#apt-increase-delays')[0].checked = aptIncreaseDelays = Settings.defaults.aptIncreaseDelays;
+            return false;
+        }).addButton('Cancel');
+
+        var aptShowroom = Settings.get('aptShowroom');
+        apt.content.find('#apt-showroom').change(lambda { aptShowroom = this.value })[0].value = aptShowroom;
+
+        var aptFilter = Settings.get('aptFilter');
+        apt.content.find('#apt-filter').change(lambda { aptFilter = this.value })[0].value = aptFilter;
+        apt.content.find('#apt-filter [value="%0"]'(Settings.defaults.aptFilter))[0].textContent += ' (Recommended)';
+
+        var aptDisableSweetFx = Settings.get('aptDisableSweetFx');
+        apt.content.find('#apt-disable-sweetfx').change(lambda { aptDisableSweetFx = this.checked })[0].checked = aptDisableSweetFx;
+
+        var aptResize = Settings.get('aptResize');
+        apt.content.find('#apt-resize').change(lambda { aptResize = this.checked })[0].checked = aptResize;
+
+        var aptCameraX = Settings.get('aptCameraX');
+        apt.content.find('#apt-camera-x').change(lambda { aptCameraX = this.value })[0].value = aptCameraX;
+
+        var aptCameraY = Settings.get('aptCameraY');
+        apt.content.find('#apt-camera-y').change(lambda { aptCameraY = this.value })[0].value = aptCameraY;
+
+        var aptIncreaseDelays = Settings.get('aptIncreaseDelays');
+        apt.content.find('#apt-increase-delays').change(lambda { aptIncreaseDelays = this.checked })[0].checked = aptIncreaseDelays;
+
+        /* about tab */
         d.addTab('About', [
             '<h6>Version</h6>',
             gui.App.manifest.version,
@@ -92,6 +165,11 @@ static class ViewSettings {
         });
     }
 
+    var _list;
+    private filtersList(){
+
+    }
+
     private feedbackForm(){
         function sendFeedback(v){
             d.buttons.find('button:first-child').text('Please wait...').attr('disabled', true);
@@ -113,7 +191,7 @@ static class ViewSettings {
             if (v) sendFeedback(v);
             return false;
         }, false).setButton('Send').addButton('Cancel').closeOnEnter(false);
-        d.find('textarea').val(_prevFeedback || '').change(lambda _prevFeedback = this.value);
+        d.content.find('textarea').val(_prevFeedback || '').change(lambda _prevFeedback = this.value);
     }
     
     {

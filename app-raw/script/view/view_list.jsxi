@@ -5,35 +5,56 @@ static class ViewList {
         _aside = $(document.getElementsByTagName('aside')[0]),
         _node = $(document.getElementById('cars-list'));
 
-    function select(car){
+    private scrollToSelected(){
+        var n = _node[0].querySelector('.selected');
+        if (!n) return;
+
+        var p = n.offsetTop - n.parentNode.scrollTop;
+        if (p < 10){
+            n.parentNode.scrollTop += p - 10;
+        } else if (p > n.parentNode.offsetHeight - 30){
+            n.parentNode.scrollTop += p + 30 - n.parentNode.offsetHeight;
+            // n.scrollIntoView();
+        }
+    }
+
+    public select(car){
         _selected = car;
         _node.find('.expand').removeClass('expand');
         _node.find('.selected').removeClass('selected');
 
         if (car){
-            _node.find('[data-id="' + car.id + '"]').addClass('expand').parent().addClass('selected');
-
+            var n = _node.find('[data-id="%0"]'(car.id)).addClass('expand').parent().addClass('selected')[0];
             if (car.parent){
-                _node.find('[data-id="' + car.parent.id + '"]').addClass('expand');
+                n = _node.find('[data-id="' + car.parent.id + '"]').addClass('expand')[0];
             }
+
+            scrollToSelected();
         }
 
         mediator.dispatch('select', car);
     }
 
-    function filter(v){
+    public filter(v){
         var i = _aside.find('#cars-list-filter')[0];
         if (i.value != v){
             i.value = v;
         }
 
         if (v){
+            i.style.display = 'block';
+
             var s = v.trim().split(/\s+/);
-            var bb = '';
+            var bb = '', cc = '';
 
             var vv = s.filter(function (e){
                 if (/^brand:(.*)/.test(e)){
                     bb = (bb && bb + '|') + RegExp.$1;
+                    return false;
+                }
+
+                if (/^class:(.*)/.test(e)){
+                    cc = (cc && cc + '|') + RegExp.$1;
                     return false;
                 }
 
@@ -42,18 +63,51 @@ static class ViewList {
 
             var r = RegExp.fromQuery(vv.join(' '));
             var b = bb && RegExp.fromQuery(bb, true); 
+            var c = cc && RegExp.fromQuery(cc, true); 
 
-            var f = function (c){
-                if (b && (!c.data || !b.test(c.data.brand))) return false;
-                return r.test(c.id) || c.data && r.test(c.data.name);
+            var f = function (car){
+                if (b && (!car.data || !b.test(car.data.brand))) return false;
+                if (c && (!car.data || !c.test(car.data.class))) return false;
+                return r.test(car.id) || car.data && r.test(car.data.name);
             };
 
             _aside.find('#cars-list > div > [data-id]').each(function (){
                 this.parentNode.style.display = f(Cars.byName(this.getAttribute('data-id'))) ? null : 'none';
             });
         } else {
+            i.style.display = 'hide';
             _aside.find('#cars-list > div').show();
         }
+    }
+
+    public addFilter(v){
+        var a = _aside.find('#cars-list-filter')[0].value;
+        filter((a && a + ' ') + v);
+    }
+
+    private _sortFn = {
+        id: lambda (a, b) !a.disabled && b.disabled ? -1 : 
+            a.disabled && !b.disabled ? 1 : a.id.localeCompare(b.id)
+
+        displayName: lambda (a, b) !a.disabled && b.disabled ? -1 : 
+            a.disabled && !b.disabled ? 1 : a.displayName.localeCompare(b.displayName)
+    };
+
+    public sort(){
+        var c = Cars.list.sort(_sortFn.displayName);
+        var n = _node[0];
+        var a = n.children;
+
+        c.forEach(lambda {
+            for (var s in-array a){
+                if (s.children[0].getAttribute('data-id') == arg.id){
+                    n.appendChild(s);
+                    return;
+                }
+            }
+        });
+
+        scrollToSelected();
     }
 
     function init(){
@@ -71,11 +125,12 @@ static class ViewList {
                     select(list[0])
                 }
 
+                sort();
                 document.body.appendChild(_aside[0]);
             })
             .on('new.car', function (car){
                 var s = document.createElement('span');
-                s.textContent = car.id;
+                s.textContent = car.displayName;
                 if (car.disabled) s.classList.add('disabled');
 
                 s.setAttribute('title', car.path);
@@ -92,36 +147,40 @@ static class ViewList {
 
                 _node[0].appendChild(d);
             })
-            .on('update:car:data', function (car){
-                var n = car.data && car.data.name || car.id;
-                _node.find('[data-id="' + car.id + '"]')
-                    .text(n).attr('data-name', n.toLowerCase());
-
+            .on('update.car.data', function (car, upd){
+                _node.find('[data-id="%0"]'(car.id))
+                    .text(car.displayName).attr('data-name', car.displayName.toLowerCase());
                 filter(_aside.find('#cars-list-filter').val());
+
+                if (upd === 'update.car.data:name'){
+                    sort();
+                }
             })
-            .on('update:car:parent', function (car){
-                var d = _node.find('[data-id="' + car.id + '"]').parent();
+            .on('update.car.parent', function (car){
+                var d = _node[0].querySelector('[data-id="%0"]'(car.id)).parentNode;
                 if (car.error.length > 0){
-                    var c = d.parent();
-                    if (c[0].tagName === 'DIV' && c.find('.error').length == 1){
-                        c.removeClass('error');
+                    var c = d.parentNode;
+                    if (c.tagName === 'DIV' && c.querySelectorAll('.error').length == 1){
+                        c.classList.remove('error');
                     }
                 }
 
                 if (car.parent){
-                    var p = _node.find('[data-id="' + car.parent.id + '"]').parent();
-                    d.appendTo(p);
-                    if (d.hasClass('error')){
-                        d.removeClass('error');
-                        p.addClass('error');
+                    var p = _node[0].querySelector('[data-id="%0"]'(car.parent.id)).parentNode;
+                    p.appendChild(d);
+                    if (d.classList.contains('error')){
+                        d.classList.remove('error');
+                        p.classList.add('error');
                     }
                 } else {
-                    // TODO: Sort?
-                    d.appendTo(_node);
+                    _node[0].appendChild(d);
+                    sort();
                 }
+
+                scrollToSelected();
             })
-            .on('update:car:children', function (car){
-                var e = _node[0].querySelector('[data-id="' + car.id + '"]');
+            .on('update.car.children', function (car){
+                var e = _node[0].querySelector('[data-id="%0"]'(car.id));
                 if (!e) return;
                 if (car.children.length){
                     e.parentNode.setAttribute('data-children', car.children.length + 1);
@@ -129,22 +188,25 @@ static class ViewList {
                     e.parentNode.removeAttribute('data-children');
                 }
             })
-            .on('update:car:path', function (car){
-                var e = _node[0].querySelector('[data-id="' + car.id + '"]');
+            .on('update.car.path', function (car){
+                var e = _node[0].querySelector('[data-id="%0"]'(car.id));
                 if (!e) return;
                 e.setAttribute('data-path', car.path);
+                e.setAttribute('title', car.path);
             })
-            .on('update:car:disabled', function (car){
-                var e = _node[0].querySelector('[data-id="' + car.id + '"]');
+            .on('update.car.disabled', function (car){
+                var e = _node[0].querySelector('[data-id="%0"]'(car.id));
                 if (!e) return;
                 if (car.disabled){
                     e.classList.add('disabled');
                 } else {
                     e.classList.remove('disabled');
                 }
+
+                sort();
             })
-            .on('update:car:changed', function (car){
-                var e = _node[0].querySelector('[data-id="' + car.id + '"]');
+            .on('update.car.changed', function (car){
+                var e = _node[0].querySelector('[data-id="%0"]'(car.id));
                 if (!e) return;
                 if (car.changed){
                     e.classList.add('changed');
@@ -153,7 +215,7 @@ static class ViewList {
                 }
             })
             .on('error', function (car){
-                var e = _node[0].querySelector('[data-id="' + car.id + '"]');
+                var e = _node[0].querySelector('[data-id="%0"]'(car.id));
                 if (!e) return;
                 if (car.error.length > 0){
                     e.classList.add('error');
@@ -199,13 +261,17 @@ static class ViewList {
         /* global hotkeys */
         $(window)
             .keydown(function (e){
-                if (/INPUT|SELECT|TEXTAREA/.test(e.target.tagName) || e.target.contentEditable === 'true') return;
+                if (Event.isSomeInput(e)) return;
                 if (e.ctrlKey || e.altKey || e.shiftKey) return;
                 var f = _aside.find('#cars-list-filter');
                 if (/[a-zA-Z\d]/.test(String.fromCharCode(e.keyCode)) || e.keyCode == 8 && f.val()){
                     f.show()[0].focus();
                 }
             });
+
+        _aside.find('#cars-list-filter-focus').click(function (){
+            _aside.find('#cars-list-filter').show()[0].focus();
+        });
 
         /* select car */
         _aside.find('#cars-list').click(function (e){

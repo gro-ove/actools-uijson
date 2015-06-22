@@ -50,6 +50,7 @@ static class UpgradeEditor {
     }
 
     private saveFromHtml(html, file, callback){
+        /* workaround for an issue with the foreignObject security system */
         var du = 'data:image/png;base64,' + fs.readFileSync('data/upgrade.png').toString('base64');
         var da = '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="128" height="128">\
             <image x="0" y="0" width="128px" height="128px" xlink:href="{0}"></image>\
@@ -91,13 +92,14 @@ static class UpgradeEditor {
         fs.writeFile(file, fs.readFileSync(library), callback);
     }
 
-    public start(car){
+    public start(car, callback){
         function cb(e){
             if (e){
-                ErrorHandler.handled(e);
+                ErrorHandler.handled('Cannot save upgrade icon.', e);
             } else {
-                Cars.reloadUpgrade(car);
+                car.updateUpgrade();
             }
+            if (callback) callback();
         }
 
         var d = new Dialog('Upgrade Editor', [
@@ -105,12 +107,21 @@ static class UpgradeEditor {
             '<div class="right"><h6>New</h6><div id="car-upgrade-editor"></div></div>',
             '<p><i>Ctrl+I: Italic, Ctrl+B: Bold</i></p>',
         ], function (){
-            saveFromHtml(this.content.find('#car-upgrade-editor')[0].innerHTML, car.upgrade, cb);
+            var label = this.content.find('#car-upgrade-editor')[0].innerHTML;
+            car.data.upgradeLabel = $('#editable-focus').html();
+            if (!car.changed){
+                car.save();
+            }
+            saveFromHtml(label, car.upgrade, cb);
         }, false).setButton('Save').addButton('Cancel');
 
         d.el.addClass('dark');
-        d.content.find('img').attr('src', car.upgrade);
-        d.content.find('#car-upgrade-editor').append(editable('S1'));
+        if (fs.existsSync(car.upgrade)){
+            d.content.find('img').attr('src', car.upgrade);
+        } else {
+            d.content.find('.left').remove();
+        }
+        d.content.find('#car-upgrade-editor').append(editable(car.data.upgradeLabel || 'S1'));
 
         focus(d.content.find('#editable-focus')[0]);
 

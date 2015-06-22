@@ -1,12 +1,30 @@
 static class Settings {
     private var _settings;
 
+    private var _defaults = {
+        disableTips:        false,
+        updateDatabase:     true,
+        uploadData:         false,
+        updatesCheck:       true,
+        updatesSource:      'stable',
+
+        aptShowroom:        '',
+        aptFilter:          'S1-Dynamic',
+        aptResize:          true,
+        aptDisableSweetFx:  true,
+        aptCameraX:         -140,
+        aptCameraY:         36,
+        aptIncreaseDelays:  false,
+    };
+
+    public get defaults _defaults;
+
     private save(){
         localStorage.settings = JSON.stringify(_settings);
     }
 
-    public get(k, def){
-        return _settings.hasOwnProperty(k) ? _settings[k] : def;
+    public get(k){
+        return _settings.hasOwnProperty(k) ? _settings[k] : _defaults[k];
     }
 
     public set(k, val){
