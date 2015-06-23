@@ -141,8 +141,8 @@ This feature allows to collect huge database with correct information (descripti
     * Added manual mode
 
 #### Screenshots
-![Screenshot](http://i.imgur.com/eDJs1wu.png)
-![Upgrade Icon Editor](http://i.imgur.com/riLu2iB.png)
+![Screenshot](http://i.imgur.com/kGJCn2L.png)
+![Upgrade Icon Editor](http://i.imgur.com/qhYp3Mp.png)
 
 #### Auto-updated Previews
 ![Porsche 944 Turbo S](https://pp.vk.me/c621730/v621730892/2e1e7/LO25pCMqvpg.jpg)
