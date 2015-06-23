@@ -1,0 +1,162 @@
+class AbstractBatchProcessor {
+    abstract public process(car, callback);
+}
+
+class JsBatchProcessor {
+    var _fn;
+
+    (fn){
+        _fn = fn;
+    }
+
+    public process(car, callback){
+        try {
+            _fn(car);
+        } catch (err){
+            callback(err);
+            return;
+        }
+
+        callback();
+    }
+}
+
+static class BatchProcessing {
+    var _procs;
+
+    public process(cars, processor){
+        AppServerRequest.sendDataDisabled = true;
+
+        var abort = false;
+
+        var d = new Dialog('Batch Processing', [ '<progress></progress>' ], function (){
+            AppServerRequest.sendDataDisabled = false;
+            abort = true;
+        }, false);
+
+        var progress = d.find('progress');
+        progress[0].max = cars.length;
+
+        var i = 0;
+        function next(){
+            if (abort) return;
+
+            if (!cars[i]){
+                AppServerRequest.sendDataDisabled = false;
+                d.close();
+            }
+
+            progress[0].value = i++;
+            processor.process(cars[i], lambda setTimeout(next));
+        }
+
+        next();
+    }
+
+    public add(name, proc){
+        if (!_procs) _procs = [];
+        _procs.push({ name: name, proc: proc });
+    }
+
+    public select(cars){
+        if (!_procs) init();
+        new Dialog('Batch Processing', [
+            '<h6>Cars</h6>',
+            '%0 cars to process'(cars.length),
+            '<h6>Processor</h6>',
+            '<select>%0</select>'(_procs.map(lambda (e, i) '<option value="%0">%1</option>'(i, e.name))),
+            '<div id="proc-options"></div>',
+            'If you have any ideas about different processors, you can use Feedback Form in Settings.',
+        ], function (){
+            setTimeout(function (){
+                process(cars, _procs[this.find('select').val()].proc); 
+            }.bind(this));
+        }).find('select').val(0);
+    }
+
+    private init(){
+        add('Add Missing Brand Names to Car Names', new JsBatchProcessor(function (car){
+            if (!car.data || !car.data.name || !car.data.brand) return;
+            var brand  = car.data.brand;
+            var name = car.data.name;
+            if (brand === 'Kunos') return;
+            if (brand === 'Mercedes-Benz'){
+                if (name.indexOf(brand + ' ') === 0){
+                    name = name.substr(brand.length + 1);
+                }
+
+                brand = 'Mercedes';
+            }
+
+            if (name.indexOf(brand + ' ') === 0) return;
+            car.changeData('name', brand + ' ' + name);
+        }));
+
+        add('Remove Brand Names from Car Names', new JsBatchProcessor(function (car){
+            if (!car.data || !car.data.name || !car.data.brand) return;
+            var brand  = car.data.brand;
+            var name = car.data.name;
+            if (brand === 'Mercedes-Benz'){
+                if (name.indexOf(brand + ' ') === 0){
+                    car.changeData('name', name.substr(brand.length + 1));
+                    return;
+                }
+
+                brand = 'Mercedes';
+            }
+            if (name.indexOf(brand + ' ') !== 0) return;
+            car.changeData('name', name.substr(brand.length + 1));
+        }));
+
+        add('Lowercase Classes', new JsBatchProcessor(function (car){
+            if (!car.data || !car.data.class) return;
+            car.changeData('class', car.data.class.toLowerCase());
+        }));
+
+        add('Lowercase & Fix Tags', new JsBatchProcessor(function (car){
+            if (!car.data || !car.data.tags) return;
+            var temp = 0,
+                tags = car.data.tags.map(function (raw){
+                    var tag = raw.toLowerCase();
+                    if (/^#?(a\d+)$/.test(tag)){
+                        return '#' + RegExp.$1.toUpperCase();
+                    }
+
+                    switch (tag){
+                        case 'us':
+                        case 'america':
+                            return 'usa';
+                        case 'gb':
+                        case 'uk':
+                        case 'united kingdom':
+                        case 'england':
+                        case 'britain':
+                            return 'great britain';
+                        case 'swedish':
+                            return 'sweden';
+                        default:
+                            if (tag === raw){
+                                temp++;
+                            }
+
+                            return tag;
+                    }
+                });
+
+            if (temp.length !== car.data.tags.length){
+                car.changeData('tags', tags);
+            }
+        }));
+
+        add('Remove logo.png', new JsBatchProcessor(function (car){
+            if (fs.existsSync(car.path + '/logo.png')){
+                fs.unlinkSync(car.path + '/logo.png');
+            }
+        }));
+
+        add('Replace logo.png by ui/badge.png', new JsBatchProcessor(function (car){
+            if (!fs.existsSync(car.badge)) return;
+            fs.writeFileSync(car.path + '/logo.png', fs.readFileSync(car.badge));
+        }));
+    }
+}

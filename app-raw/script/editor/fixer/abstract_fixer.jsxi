@@ -82,7 +82,7 @@ class AbstractFixer {
 
         if (fs.existsSync(dir)){
             if (fs.statSync(dir).isDirectory()){
-                return fs.readdirSync(dir).filter(lambda simularFile(basename, arg)).map(function (e){
+                return fs.readdirSync(dir).filter(lambda simularFile(basename, arg) && (arg != basename || !deep)).map(function (e){
                     return dir + '/' + e;
                 }).filter(lambda filter(fs.statSync(arg)));
             } else {
@@ -101,13 +101,16 @@ class AbstractFixer {
     }
 
     protected static restoreFile(filename, from, c){
+        if (fs.existsSync(filename))
+            fs.unlinkSync(filename);
+
         function mkdirp(d){
             if (fs.existsSync(d)) return;
             mkdirp(path.dirname(d));
             fs.mkdirSync(d);
         }
 
-        mkdirp(filename);
+        mkdirp(path.dirname(filename));
         fs.rename(from, filename, function (err) {
             if (err) {
                 if (err.code === 'EXDEV') {

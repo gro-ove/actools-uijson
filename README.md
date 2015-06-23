@@ -17,6 +17,8 @@ Small utility for easy editing *ui_car.json* files. Written using [NW.js](http:/
 * Auto-update Previews
 * Quick Practive
 * Upgrade Icon Editor
+* Restoration Wizard
+* Batch Processing
 
 #### Tips
 * Double click on preview to launch acShowroom.
@@ -25,11 +27,7 @@ Small utility for easy editing *ui_car.json* files. Written using [NW.js](http:/
 * Don't forget to save changes (Ctrl+S)
 
 #### Data Collection
-This feature allows to collect huge database with correct information (description, tags and etc.) about every car! All you have to do is open Settings, enable option “Upload some changes” and then some of your fixes will be uploaded on server! After that everybody will have access to clean, right and actual information!
-
-###### Notes
-* Option disabled by default because of privacy and stuff
-* Data Application part still in development
+This feature allows to collect huge database with correct information (description, tags and etc.) about every car! All you have to do is open Settings, enable option “Upload some changes” (it's disabled by default because of privacy and stuff) and then some of your fixes will be uploaded on server! After that everybody will have access to clean, right and actual information!
 
 #### How to update previews
 * Install [Black Showroom](http://www.racedepartment.com/downloads/studio-black-showroom.4353/)
@@ -46,33 +44,39 @@ This feature allows to collect huge database with correct information (descripti
 * Practice: if Steam isn't running, default launcher will be opened instead
 
 #### TODO
+* Brand logo select
 * Switchable & custom search providers
 * New mods installation
 * More hotkeys
 * Optional sorting, sorting by brand/id/…
 * Detect broken cars
-* Brand logo select
 * New custom fields: year, country
 * Data Application part
 * Batch name processing (add/remove brand, add/remove year)
 * View/edit torque & powes curves, load from data/power.lut
-* Batch JS-based processing
 * Edit mode for livery.png
+* Custom Batch Processing (?)
 * Fix body_shadow.png, custom auto-previews generator (?)
 * Manage skins (?)
 * Clone cars, modify in-game specs (?)
 
 #### Changelog
-* 0.3.11
+* 0.3.12
     * Introducing: Data Collection
     * Introducing: Restoration Wizard
-        * Renamed ui_car.json
+        * Damaged ui_car.json
+        * Renamed badge.png
         * Missing or incorrent parent
         * Missing name/brand
         * Missing upgrade.png
         * Missing or empty skins folder
+    * Introducing: Batch Processing
+        * Add/remove brand names to car names
+        * Lowercase classes, lowercase & fix tags
+        * Remove logo.png, or replace it with ui/badge.png
     * Sorting
     * Search icon
+    * Bugfixes
 * 0.3.10
     * Changable parent
     * Filter by brand & class

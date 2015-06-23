@@ -57,7 +57,10 @@ static class AppServerRequest {
         _dataToSend = [];
     }
 
+    public sendDataDisabled = false;
     public sendData(carId, key, value, callback){
+        if (sendDataDisabled) return;
+        
         for (var i, e in-array _dataToSend){
             if (e && e.car === carId && e.key === key){
                 _dataToSend[i] = null;

@@ -187,6 +187,10 @@ static class ViewDetails {
                 if (_selected != car) return;
                 outErrors(car);
             })
+            .on('update.car.badge', function (car){
+                if (_selected != car) return;
+                outBadge(car);
+            })
             .on('update.car.data', function (car){
                 if (_selected != car) return;
                 outData(car);

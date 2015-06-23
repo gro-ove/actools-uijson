@@ -352,6 +352,21 @@ static class ViewList {
         });
 
         /* second row */
+        _aside.find('#cars-list-batch').click(function (){
+            if (_aside.find('#cars-list-filter').val()){
+                var filtered = [];
+
+                var n = _node[0].querySelectorAll('[data-id]');
+                for (var i = 0; i < n.length; i++){
+                    filtered.push(Cars.byName(n[i].getAttribute('data-id')));
+                }
+
+                BatchProcessing.select(filtered);
+            } else {
+                BatchProcessing.select(Cars.list.slice());
+            }
+        });
+
         _aside.find('#cars-list-save').click(function (){
             Cars.saveAll();
         });

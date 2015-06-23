@@ -1,4 +1,4 @@
-class DataFileFixer extends AbstractFixer {
+class MissingDataFileFixer extends AbstractFixer {
     protected reloadAfter(){
         car.loadData();
     }
@@ -8,4 +8,27 @@ class DataFileFixer extends AbstractFixer {
             lambda arg.isFile() && arg.size > 10 && arg.size < 1e5);
 }
 
-RestorationWizard.register('data-missing', DataFileFixer);
+RestorationWizard.register('data-missing', MissingDataFileFixer);
+
+class DamagedDataFileFixer extends AbstractFixer {
+    protected reloadAfter(){
+        car.loadData();
+    }
+
+    protected restore(c){
+        var parsed = UiJsonDamaged.parseCarFile(car.json);
+        if (!fs.existsSync(car.json + '~at_bak')){
+            fs.renameSync(car.json, car.json + '~at_bak');
+        }
+        fs.writeFileSync(car.json, JSON.stringify(parsed, null, 4));
+        c();
+    }
+
+    protected get title 'File ui/ui_car.json is damaged',
+        solutions [
+            { name: 'Try to restore', fn: restore }
+        ].concat(tryToRestoreFile(car.json, 
+            lambda arg.isFile() && arg.size > 10 && arg.size < 1e5));
+}
+
+RestorationWizard.register('data-damaged', DamagedDataFileFixer);

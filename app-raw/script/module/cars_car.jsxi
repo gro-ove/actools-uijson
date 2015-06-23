@@ -198,6 +198,13 @@ static partial class Cars {
             }.bind(this), 100);
         }
 
+        public updateBadge(){
+            gui.App.clearCache();
+            setTimeout(function (){
+                mediator.dispatch('update.car.badge', this);
+            }.bind(this), 100);
+        }
+
         public updateUpgrade(){
             gui.App.clearCache();
             setTimeout(function (){

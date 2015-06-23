@@ -13,7 +13,7 @@ class MissingBadgeIconFixer extends AbstractFixer {
         ].concat(tryToRestoreFile(car.badge, 
             lambda arg.isFile() && arg.size > 1e3 && arg.size < 1e5,
             function (c){
-                car.updateUpgrade();
+                car.updateBadge();
             }));
 }
 

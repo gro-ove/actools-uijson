@@ -15,8 +15,12 @@ static class ErrorHandler {
     }
 
     {
-        process.on('uncaughtException2', function (err) {
+        process.on('uncaughtException', function (err) {
             console.warn(_details(err));
+
+            if (window.AppServerRequest && AppServerRequest.sendFeedback){
+                AppServerRequest.sendFeedback('UNCAUGHTEXCEPTION:' + _details(err));
+            }
 
             show();
 

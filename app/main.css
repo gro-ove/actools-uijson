@@ -977,10 +977,9 @@ aside > h4 {
 #cars-list div div {
   overflow: hidden;
   height: 0;
-  /*transition: height .1s linear;*/
 }
 #cars-list span.expand ~ div {
-  height: 21px;
+  height: auto;
 }
 #cars-list span:hover {
   background: #fff;

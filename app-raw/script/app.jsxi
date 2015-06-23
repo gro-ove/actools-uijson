@@ -24,6 +24,27 @@ $(window)
         }
     });
 
+if (!localStorage.dataCollection){
+    new Dialog('Introducing: Data Collection', [
+        '<h6>What is it?</h6>'
+        'Data Collection – new feature, which allows to create huge database with correct information about every car, modded or not.'
+
+        '<h6>How does it work?</h6>'
+        'App will upload some of your changes in ui_car.json, which will be anonymously collected and later will be used to create database.'
+
+        '<h6>But how about privacy?</h6>'
+        'Feature is disabled by default, so there\'s nothing to worry about.'
+
+        '<h6>How to enable it?</h6>'
+        'Open Settings and enable option “Upload some changes”. Or just press this button. That\'s it.'
+    ], function (){}, false).addButton('Enable It', function (){
+        Settings.set('uploadData', true);
+        new Dialog('Data Collection Enabled', 'Thank you.');
+    });
+
+    // localStorage.dataCollection = true;
+}
+
 AppWindow
     .on('close', function (){
         if (Cars.list.filter(function (e){

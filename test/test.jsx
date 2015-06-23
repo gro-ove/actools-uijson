@@ -1,46 +1,4 @@
-Object.clone = function (o){
-    if (Array.isArray(o)){
-        return o.map(Object.clone);
-    } else if (o && typeof o === 'object'){
-        var r = {};
-        for (var n in o){
-            r[n] = Object.clone(o[n]);
-        }
-        return r;
-    } else {
-        return o;
-    }
-};
-
-Event.isSomeInput = function (e){
-    var n = e.target;
-
-    if (n.tagName === 'INPUT' || n.tagName === 'TEXTAREA' || n.tagName === 'SELECT') return true;
-
-    while (n){
-        if (n.contentEditable === 'true') return true;
-        n = n.parentNode;
-    }
-
-    return false;
-};
-
-RegExp.fromQuery = function (q, w){
-    var r = q.replace(/(?=[\$^.+(){}[\]])/g, '\\').replace(/\?|(\*)/g, '.$1');
-    return new RegExp(w ? '^(?:' + r + ')$' : r, 'i');
-};
-
-String.prototype.cssUrl = function (){
-    return 'file://' + this.replace(/\\/g, '/');
-};
-
-JSON.flexibleParse = function (d){
-    var r;
-    eval('r=' + d.toString().replace(/"(?:[^"\\]*(?:\\.)?)+"/g, function (_){
-        return _.replace(/\r?\n/g, '\\n');
-    }));
-    return r;
-};
+fs = require('fs');
 
 JSON.restoreDamaged = function (data, fields){
     data = data.toString().replace(/\r?\n|\r/g, '\n').trim();
@@ -109,3 +67,33 @@ JSON.restoreDamaged = function (data, fields){
 
     return result;
 };
+
+fs.readdirSync(dd = 'D:\\Development\\GitHub\\actools-uijson\\test\\skins').forEach(function (e){
+    console.log(e, JSON.stringify(JSON.restoreDamaged(fs.readFileSync(dd + '/' + e), {
+        skinname: 'string'
+        drivername: 'string'
+        country: 'string'
+        team: 'string'
+        number: 'number'
+    }), null, 4));
+});
+
+fs.readdirSync(dd = 'D:\\Development\\GitHub\\actools-uijson\\test\\cars').forEach(function (e){
+    console.log(e, JSON.stringify(JSON.restoreDamaged(fs.readFileSync(dd + '/' + e), {
+        name: 'string'
+        brand: 'string'
+        parent: 'string'
+        description: 'multiline'
+        class: 'string'
+        tags: 'array'
+        bhp: 'string'
+        torque: 'string'
+        weight: 'string'
+        topspeed: 'string'
+        acceleration: 'string'
+        pwratio: 'string'
+        range: 'number'
+        torqueCurve: 'pairsArray'
+        powerCurve: 'pairsArray'
+    }), null, 4));
+});

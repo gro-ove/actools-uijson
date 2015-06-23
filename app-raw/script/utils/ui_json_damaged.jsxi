@@ -1,0 +1,46 @@
+static class UiJsonDamaged {
+    public parseSkinFile(filename){
+        var result = JSON.restoreDamaged(fs.readFileSync(filename), {
+            skinname: 'string'
+            drivername: 'string'
+            country: 'string'
+            team: 'string'
+            number: 'number'
+        });
+
+        return result;
+    }
+
+    public parseCarFile(filename){
+        var result = JSON.restoreDamaged(fs.readFileSync(filename), {
+            name: 'string'
+            brand: 'string'
+            parent: 'string'
+            description: 'multiline'
+            class: 'string'
+            tags: 'array'
+            year: 'number'
+            country: 'string'
+            bhp: 'string'
+            torque: 'string'
+            weight: 'string'
+            topspeed: 'string'
+            acceleration: 'string'
+            pwratio: 'string'
+            range: 'number'
+            torqueCurve: 'pairsArray'
+            powerCurve: 'pairsArray'
+        });
+
+        result.specs = {};
+
+        [ 'bhp', 'torque', 'weight', 'topspeed', 'acceleration', 'pwratio' ].forEach(lambda {
+            if (arg in-object result){
+                result.specs[arg] = result[arg];
+                delete result[arg];
+            }
+        });
+
+        return result;
+    }
+} 

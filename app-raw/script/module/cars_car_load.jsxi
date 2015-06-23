@@ -116,7 +116,7 @@ static partial class Cars {
 
                     data = false;
                     if (err || !dat){
-                        addError('data-json', 'Damaged ui_car.json', err);
+                        addError('data-damaged', 'Damaged ui_car.json', err);
                     } else if (!dat.name){
                         addError('data-name-missing', 'Name is missing');
                     } else if (!dat.brand){
