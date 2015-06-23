@@ -527,7 +527,8 @@ body {
   cursor: default;
   overflow: hidden;
 }
-.error {
+.error,
+[data-error-id] {
   color: brown;
   font-weight: 700;
 }

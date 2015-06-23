@@ -4,6 +4,8 @@ rem type app-raw\lib\*.js > app-raw\libs.js 2>nul
 rem call yuicompressor app-raw\libs.js -o app\libs.js
 rem del app-raw\libs.js
 
+call update_dll.bat
+
 type app-raw\style\*.less > app-raw\style.less 2>nul 
 call lessc --no-ie-compat --strict-math=on app-raw\style.less app\main.css
 del app-raw\style.less
