@@ -1,10 +1,11 @@
 static partial class Cars {
     partial class Car {
         public loadBadge(callback){
+            clearErrors('badge');
+
             fs.exists(badge, function (result){
                 if (!result){
-                    error.push({ id: 'badge-missing', msg: 'Missing badge.png' });
-                    mediator.dispatch('error', this);
+                    addError('badge-missing', 'Missing badge.png');
                 }
 
                 if (callback) callback();
@@ -12,20 +13,32 @@ static partial class Cars {
         }
 
         public loadSkins(callback){
-            fs.readdir('%0/skins'(path), function (err, result){
+            clearErrors('skins');
+
+            if (!fs.existsSync(skinsDir)){
+                addError('skins-missing', 'Skins folder is missing');
+                if (callback) callback();
+                return;
+            }
+
+            if (!fs.statSync(skinsDir).isDirectory()){
+                addError('skins-file', 'There is a file instead of skins folder', err);
+                if (callback) callback();
+                return;
+            }
+
+            fs.readdir(skinsDir, function (err, result){
                 skins = false;
 
                 if (err){
-                    error.push({ id: 'skins-access', msg: 'Cannot access skins', details: err });
-                    mediator.dispatch('error', this);
+                    addError('skins-access', 'Cannot access skins', err);
                 } else {
                     result = result.filter(function (e){
                         return fs.statSync('%0/skins/%1'(path, e)).isDirectory();
                     });
 
                     if (skins.length === 0){
-                        error.push({ id: 'skins-empty', msg: 'Skins folder is empty' });
-                        mediator.dispatch('error', this);
+                        addError('skins-empty', 'Skins folder is empty');
                     } else {
                         skins = result.map(function (e){
                             var p = '%0/skins/%1'(path, e);
@@ -47,6 +60,9 @@ static partial class Cars {
         }
 
         public loadData(callback){
+            clearErrors('data');
+            clearErrors('parent');
+
             if (!fs.existsSync(json)){
                 if (fs.existsSync(json + '.disabled')){
                     fs.renameSync(json + '.disabled', json);
@@ -57,8 +73,7 @@ static partial class Cars {
                     }
 
                     data = false;
-                    error.push({ id: 'json-missing', msg: 'Missing ui_car.json' });
-                    mediator.dispatch('error', this);
+                    addError('data-missing', 'Missing ui_car.json');
                     mediator.dispatch('update.car.data', this);
                     if (callback) callback();
                     return;
@@ -73,28 +88,22 @@ static partial class Cars {
 
                 if (err){
                     data = false;
-                    error.push({ id: 'json-read', msg: 'Unavailable ui_car.json', details: err });
-                    mediator.dispatch('error', this);
+                    addError('data-access', 'Unavailable ui_car.json', err);
                 } else {
                     var dat;
                     try {
-                        eval('dat=' + result.toString().replace(/"(?:[^"\\]*(?:\\.)?)+"/g, function (_){
-                            return _.replace(/\r?\n/g, '\\n');
-                        }));
+                        dat = JSON.flexibleParse(result);
                     } catch (er){
                         err = er;
                     }
 
                     data = false;
                     if (err || !dat){
-                        error.push({ id: 'json-parse', msg: 'Damaged ui_car.json', details: err });
-                        mediator.dispatch('error', this);
+                        addError('data-json', 'Damaged ui_car.json', err);
                     } else if (!dat.name){
-                        error.push({ id: 'data-name', msg: 'Name is missing' });
-                        mediator.dispatch('error', this);
+                        addError('data-name-missing', 'Name is missing');
                     } else if (!dat.brand){
-                        error.push({ id: 'data-brand', msg: 'Brand is missing' });
-                        mediator.dispatch('error', this);
+                        addError('data-brand-missing', 'Brand is missing');
                     } else {
                         data = dat;
                         if (!data.description) data.description = '';
@@ -107,12 +116,12 @@ static partial class Cars {
 
                         if (data.parent != null){
                             if (data.parent == id){
-                                error.push({ id: 'parent-wrong', msg: 'Parent is child' });
+                                addError('parent-wrong', 'Parent is child');
                                 // TODO: check if A → B → C or A → B → A
                             } else {
                                 var par = byName(data.parent);
                                 if (par == null){
-                                    error.push({ id: 'parent-missing', msg: 'Parent is missing' });
+                                    addError('parent-missing', 'Parent is missing');
                                 } else {
                                     parent = par;
                                     parent.children.push(this);
@@ -122,8 +131,7 @@ static partial class Cars {
                                 }
 
                                 if (!fs.existsSync(upgrade)){
-                                    error.push({ id: 'upgrade-missing', msg: 'Missing upgrade.png' });
-                                    mediator.dispatch('error', this);
+                                    addError('parent-upgrade-missing', 'Missing upgrade.png');
                                 }
                             }
                         }
@@ -140,8 +148,7 @@ static partial class Cars {
         }
 
         public load(callback){
-            error = [];
-
+            clearErrors();
             loadBadge();
             loadSkins();
             loadData(callback);

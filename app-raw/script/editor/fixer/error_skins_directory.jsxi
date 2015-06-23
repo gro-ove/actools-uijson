@@ -1,0 +1,49 @@
+class MissingSkinsDirectoryFixer extends AbstractFixer {
+    createNew(c){
+        fs.mkdirSync(car.skinsDir);
+        fs.mkdirSync(car.skinsDir + '/default');
+        setTimeout(lambda car.loadSkins());
+        c();
+    }
+
+    protected get title 'Skins folder is missing',
+        solutions [
+            { name: 'Create new with empty skin', fn: createNew }
+        ].concat(tryToRestoreFile(car.skinsDir, 
+            lambda arg.isDirectory(),
+            function (){
+                setTimeout(lambda car.loadSkins());
+            }));
+}
+
+class EmptySkinsDirectoryFixer extends AbstractFixer {
+    createNew(c){
+        fs.mkdirSync(car.skinsDir + '/default');
+        setTimeout(lambda car.loadSkins());
+        c();
+    }
+
+    protected get title 'Skins folder is empty',
+        solutions [
+            { name: 'Create new empty skin', fn: createNew }
+        ];
+}
+
+class FileSkinsDirectoryFixer extends AbstractFixer {
+    fix(c){
+        fs.renameSync(car.skinsDir, car.skinsDir + '.bak');
+        fs.mkdirSync(car.skinsDir);
+        fs.mkdirSync(car.skinsDir + '/default');
+        setTimeout(lambda car.loadSkins());
+        c();
+    }
+
+    protected get title 'There is a file instead of skins folder',
+        solutions [
+            { name: 'Rename file to “skins.bak” and create new skins directory with empty skin', fn: fix }
+        ];
+}
+
+RestorationWizard.register('skins-missing', MissingSkinsDirectoryFixer);
+RestorationWizard.register('skins-empty', EmptySkinsDirectoryFixer);
+RestorationWizard.register('skins-file', FileSkinsDirectoryFixer);

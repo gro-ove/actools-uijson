@@ -1,0 +1,63 @@
+class MissingDataNameFixer extends AbstractFixer {
+    fix(v){
+        fixJsonFile(car.json, function (data){
+            data.name = v;
+        });
+        
+        setTimeout(lambda car.loadData());
+    }
+
+    createNew(c){
+        new Dialog('Input A New Name', '<input required>', function (){
+            fix(this.find('input').val());
+            c();
+        });
+    }
+
+    useId(c){
+        fix(car.id);
+        c();
+    }
+
+    protected get title 'Car name is missing',
+        solutions [
+            { name: 'Enter a new name', fn: createNew }
+            { name: 'Use id as a name', fn: useId }
+        ];
+}
+
+class MissingDataBrandFixer extends AbstractFixer {
+    fix(v){
+        fixJsonFile(car.json, function (data){
+            data.brand = v;
+        });
+
+        setTimeout(lambda car.loadData());
+    }
+
+    createNew(c){
+        new Dialog('Select Brand Name', '<input autocomplete list="brands" required>', function (){
+            fix(this.find('input').val());
+            c();
+        });
+    }
+
+    useBr(c){
+        fix(br);
+        c();
+    }
+
+    var br;
+    extractBrand(){
+        return br = Cars.brands.filter(lambda car.id.indexOf(arg.toLowerCase()) === 0)[0];
+    }
+
+    protected get title 'Car brand is missing',
+        solutions [
+            extractBrand() && { name: 'Use “%0” as a brand'(br), fn: useBr }
+            { name: 'Select a new brand', fn: createNew }
+        ];
+}
+
+RestorationWizard.register('data-name-missing', MissingDataNameFixer);
+RestorationWizard.register('data-brand-missing', MissingDataBrandFixer);

@@ -515,10 +515,14 @@ select {
   text-transform: none;
   outline: none;
 }
-input:not([type="checkbox"]):focus,
+input:focus,
 [contenteditable]:focus,
 select:focus {
   box-shadow: 0 0 0 2px #59f;
+}
+input[type="checkbox"]:focus,
+input[type="radio"]:focus {
+  box-shadow: none;
 }
 html,
 body {
@@ -664,14 +668,15 @@ dialog input,
 dialog select {
   margin-bottom: 10px;
 }
-dialog input:not([type="checkbox"]),
+dialog input:not([type="checkbox"]):not([type="radio"]),
 dialog select,
 dialog button,
 dialog table {
   width: 100%;
   box-sizing: border-box;
 }
-dialog input[type="checkbox"] {
+dialog input[type="checkbox"],
+dialog input[type="radio"] {
   vertical-align: -webkit-baseline-middle;
 }
 dialog > article {

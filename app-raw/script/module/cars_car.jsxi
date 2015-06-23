@@ -7,6 +7,8 @@ static partial class Cars {
             badge '%0/ui/badge.png'(path),
             upgrade '%0/ui/upgrade.png'(path);
 
+        public get skinsDir '%0/skins'(path);
+
         public get displayName data && data.name || id;
 
         public data;
@@ -25,8 +27,34 @@ static partial class Cars {
             disabled = carPath.indexOf(AcDir.carsOff) != -1;
         }
 
-        private addError(id, msg, details){
+        public addError(id, msg, details){
+            if (hasError(id)) return;
             error.push({ id: id, msg: msg, details: details });
+            mediator.dispatch('error:add', this);
+        }
+
+        public removeError(id){
+            for (var i, e in-array error){
+                if (e.id === id){
+                    error.splice(i, 1);
+                    mediator.dispatch('error:remove', this);
+                    return;
+                }
+            }
+        }
+
+        public clearErrors(filter){
+            if (error.length > 0){
+                if (filter){
+                    var o = error.length;
+                    error = error.filter(lambda arg.id.indexOf(filter) < 0);
+                    if (o === error.length) return;
+                } else {
+                    error.length = 0;
+                }
+
+                mediator.dispatch('error:remove', this);
+            }
         }
 
         public hasError(id){

@@ -1,0 +1,26 @@
+class MissingUpgradeIconFixer extends AbstractFixer {
+    newIcon(c){
+        UpgradeEditor.start(car, lambda {
+            if (fs.existsSync(car.upgrade)){
+                c();
+            }
+        });
+    }
+
+    makeIndependent(c){
+        car.changeParent(null);
+        c();
+    }
+
+    protected get title 'Upgrade icon missing',
+        solutions [
+            { name: 'Create new', fn: newIcon }
+            { name: 'Make independent', fn: makeIndependent }
+        ].concat(tryToRestoreFile(car.upgrade, 
+            lambda arg.isFile() && arg.size > 1e3 && arg.size < 1e5,
+            function (c){
+                car.updateUpgrade();
+            }));
+}
+
+RestorationWizard.register('parent-upgrade-missing', MissingUpgradeIconFixer);

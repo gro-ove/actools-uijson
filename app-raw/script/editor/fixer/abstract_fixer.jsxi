@@ -1,0 +1,136 @@
+class AbstractFixer {
+    protected car, errorId;
+
+    (c, e){
+        car = c;
+        errorId = e;
+    }
+
+    public run(){
+        try {
+            work(function (err){
+                if (_error) return;
+                
+                if (err){
+                    error(err === true ? null : err);
+                } else {
+                    car.removeError(errorId);
+                }
+            });
+        } catch (err){
+            error(err);
+        }
+    }
+
+    var _error;
+    private error(err){
+        _error = true;
+        ErrorHandler.handled('Cannot fix error: %0'(errorId), err);
+    }
+
+    private work(c){
+        var s = solutions.filter(lambda arg);
+        new Dialog(title, [
+            '<h6>Available solutions:</h6>',
+            s.map(lambda (e, i) '<label><input name="solution" data-solution-id="%0" type="radio">%1</label>'(i, e.name)).join('<br>'),
+        ], function (){
+            var id = this.find('input[name="solution"]:checked').data('solution-id');
+            try {
+                s[id].fn(c);
+            } catch (err){
+                error(err);
+            }
+        }).addButton('Cancel').find('input[name="solution"]')[0].checked = true;
+    }
+
+    abstract protected get title,
+        solutions;
+
+    protected fixJsonFile(filename, fn){
+        try {
+            var dat = JSON.flexibleParse(fs.readFileSync(filename));
+            fn(dat);
+            fs.writeFileSync(filename, JSON.stringify(dat, false, 4));
+        } catch (err){
+            error(err);
+        }
+    }
+
+    protected static simularFile(a, b){
+        // is b looks like a bit renamed a
+        a = a.toLowerCase();
+        b = b.toLowerCase();
+        if (b.indexOf(a) !== -1)
+            return true;
+        for (var i = a.length - 1; i > a.length / 2 ; i--)
+            if (b.indexOf(a.substr(0, i)) !== -1)
+                return true;
+        return false;
+    }
+
+    protected static simularFiles(filename, filter = lambda true, deep = true){
+        var dir = path.dirname(filename);
+        var basename = path.basename(filename);
+
+        if (fs.existsSync(dir)){
+            if (fs.statSync(dir).isDirectory()){
+                return fs.readdirSync(dir).filter(lambda simularFile(basename, arg)).map(function (e){
+                    return dir + '/' + e;
+                }).filter(lambda filter(fs.statSync(arg)));
+            } else {
+                return [];
+            }
+        } else if (deep){
+            var r = [];
+            var s = simularFiles(dir, lambda arg.isDirectory(), false);
+            for (var d in-array s){
+                r.push.call(r, simularFiles(d + '/' + basename, filter, false));
+            }
+            return r;
+        } else {
+            return [];
+        }
+    }
+
+    protected static restoreFile(filename, from, c){
+        fs.rename(from, filename, function (err) {
+            if (err) {
+                if (err.code === 'EXDEV') {
+                    copy();
+                } else {
+                    c(err);
+                }
+            } else {
+                c();
+            }
+        });
+
+        function copy () {
+            var rs = fs.createReadStream(from);
+            var ws = fs.createWriteStream(filename);
+            rs.on('error', c);
+            ws.on('error', c);
+            rs.on('close', function () {
+                c();
+                fs.unlink(from);
+            });
+            rs.pipe(ws);
+        }
+    }
+
+    protected static tryToRestoreFile(filename, filter, callback){
+        return simularFiles(filename, filter).map(function (e){
+            return {
+                name: 'Restore from …%0'(path.normalize(e).slice(AcDir.root.length)),
+                fn: function (c){
+                    restoreFile(filename, e, function (err){
+                        if (err) return c(err);
+                        if (callback) callback();
+                        c();
+                    });
+                }
+            };
+        });
+    }
+}
+

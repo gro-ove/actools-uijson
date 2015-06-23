@@ -19,7 +19,6 @@ static class ViewDetails {
         if (car.error.length > 0){
             er.show().html('Errors:<ul>%0</ul>'(car.error.map(function (e){
                 return '<li><a href="#" data-error-id="%0">%1</a></li>'(e.id, e.msg);
-                // TODO: …
             }).join('')));
         } else {
             er.hide();
@@ -98,6 +97,7 @@ static class ViewDetails {
 
     function outSkins(car){
         setTimeout(function (){
+            if (car !== _selected) return;
             var sa = $('#selected-car-skins-article'),
                 sp = $('#selected-car-preview'),
                 ss = $('#selected-car-skins');
@@ -290,28 +290,6 @@ static class ViewDetails {
                 return false;
             });
 
-        $('#selected-car-parent')
-            .on('change', function (e){
-                if (!_selected) return;
-
-                var t = this, v = this.value || null;
-                if (v && !fs.existsSync(_selected.upgrade)){
-                    UpgradeEditor.start(_selected, lambda {
-                        if (fs.existsSync(_selected.upgrade)){
-                            fn();
-                        } else {
-                            t.value = '';
-                        }
-                    });
-                } else {
-                    fn();
-                }
-
-                function fn(){
-                    _selected.changeParent(v);
-                }
-            });
-
         $('#selected-car-class')
             .on('keydown', function (e){
                 if (e.keyCode == 13){
@@ -334,6 +312,28 @@ static class ViewDetails {
 
                 menu.popup(e.clientX, e.clientY);
                 return false;
+            });
+
+        $('#selected-car-parent')
+            .on('change', function (e){
+                if (!_selected) return;
+
+                var t = this, v = this.value || null;
+                if (v && !fs.existsSync(_selected.upgrade)){
+                    UpgradeEditor.start(_selected, lambda {
+                        if (fs.existsSync(_selected.upgrade)){
+                            fn();
+                        } else {
+                            t.value = '';
+                        }
+                    });
+                } else {
+                    fn();
+                }
+
+                function fn(){
+                    _selected.changeParent(v);
+                }
             });
 
         [ 'bhp', 'torque', 'weight', 'topspeed', 'acceleration', 'pwratio' ].forEach(function (e){
@@ -424,6 +424,15 @@ static class ViewDetails {
 
                 Cars.selectSkin(_selected, id);
             });
+
+        /* errors */
+        $('#selected-car-error').click(function (e){
+            if (!_selected) return;
+            var id = e.target.getAttribute('data-error-id');
+            if (id){
+                RestorationWizard.fix(_selected, id);
+            }
+        });
 
         /* global hotkeys */
         $(window)

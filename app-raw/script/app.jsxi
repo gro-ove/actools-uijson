@@ -11,15 +11,18 @@ setTimeout(function (){
 $(window)
     .on('keydown', function (e){
         if (Event.isSomeInput(e)) return;
-        if (e.keyCode == 39){
+        if (e.ctrlKey || e.altKey || e.shiftKey) return;
+
+        if (e.keyCode === 39){
             var l = $('[data-action="next"]');
             if (l[l.length - 1]) l[l.length - 1].click();
         }
-        if (e.keyCode == 37){
+
+        if (e.keyCode === 37){
             var l = $('[data-action="prev"]');
             if (l[l.length - 1]) l[l.length - 1].click();
         }
-    })
+    });
 
 AppWindow
     .on('close', function (){

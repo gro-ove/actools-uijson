@@ -12,6 +12,14 @@ Object.clone = function (o){
     }
 };
 
+JSON.flexibleParse = function (d){
+    var r;
+    eval('r=' + d.toString().replace(/"(?:[^"\\]*(?:\\.)?)+"/g, function (_){
+        return _.replace(/\r?\n/g, '\\n');
+    }));
+    return r;
+}
+
 Event.isSomeInput = function (e){
     var n = e.target;
 

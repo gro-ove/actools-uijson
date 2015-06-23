@@ -61,8 +61,12 @@
         outline: none;
     }
 
-    input:not([type="checkbox"]):focus, [contenteditable]:focus, select:focus {
+    input:focus, [contenteditable]:focus, select:focus {
         box-shadow: 0 0 0 2px #59f;
+    }
+
+    input[type="checkbox"]:focus, input[type="radio"]:focus {
+        box-shadow: none;
     }
 
     html, body {

@@ -46,26 +46,29 @@ This feature allows to collect huge database with correct information (descripti
 * Practice: if Steam isn't running, default launcher will be opened instead
 
 #### TODO
-* Restoration Wizard
 * Switchable & custom search providers
 * New mods installation
 * More hotkeys
 * Optional sorting, sorting by brand/id/…
 * Detect broken cars
 * Brand logo select
-* New custom fields: year
-* DB with names, years and stuff
+* New custom fields: year, country
+* Data Application part
 * Batch name processing (add/remove brand, add/remove year)
 * View/edit torque & powes curves, load from data/power.lut
 * Batch JS-based processing
 * Edit mode for livery.png
-* Fix body_shadow.png (?)
+* Fix body_shadow.png, custom auto-previews generator (?)
 * Manage skins (?)
 * Clone cars, modify in-game specs (?)
 
 #### Changelog
 * 0.3.11
     * Introducing: Data Collection
+    * Introducing: Restoration Wizard
+        * Missing name/brand
+        * Missing upgrade.png
+        * Missing or empty skins folder
     * Sorting
     * Search icon
 * 0.3.10

@@ -9,12 +9,14 @@ static class ViewList {
         var n = _node[0].querySelector('.selected');
         if (!n) return;
 
+        while (n && n.parentNode !== _node[0])
+            n = n.parentNode;
+
         var p = n.offsetTop - n.parentNode.scrollTop;
-        if (p < 10){
-            n.parentNode.scrollTop += p - 10;
-        } else if (p > n.parentNode.offsetHeight - 30){
-            n.parentNode.scrollTop += p + 30 - n.parentNode.offsetHeight;
-            // n.scrollIntoView();
+        if (p < 50){
+            n.parentNode.scrollTop += p - 50;
+        } else if (p > n.parentNode.offsetHeight - 80){
+            n.parentNode.scrollTop += p + 80 - n.parentNode.offsetHeight;
         }
     }
 
@@ -24,15 +26,33 @@ static class ViewList {
         _node.find('.selected').removeClass('selected');
 
         if (car){
+            localStorage.selectedCar = car.id;
+
             var n = _node.find('[data-id="%0"]'(car.id)).addClass('expand').parent().addClass('selected')[0];
             if (car.parent){
-                n = _node.find('[data-id="' + car.parent.id + '"]').addClass('expand')[0];
+                n = _node.find('[data-id="%0"]'(car.parent.id)).addClass('expand')[0];
             }
 
             scrollToSelected();
         }
 
         mediator.dispatch('select', car);
+    }
+
+    public selectNear(d){
+        if (!_selected) return select(Cars.list[0]);
+
+        var n = _node[0].querySelectorAll('[data-id]');
+        for (var p, i = 0; i < n.length; i++){
+            if (n[i].getAttribute('data-id') === _selected.id){
+                p = i;
+                break;
+            }
+        }
+
+        if (p == null) return;
+        var j = n[(p + d + n.length) % n.length].getAttribute('data-id');
+        select(Cars.byName(j));
     }
 
     public filter(v){
@@ -121,12 +141,12 @@ static class ViewList {
                     return e.parent == null;
                 }).length).attr('title', 'Including modded versions: {0}'.format(list.length));
 
-                if (list.length > 0){
-                    select(list[0])
-                }
-
                 sort();
                 document.body.appendChild(_aside[0]);
+
+                if (list.length > 0){
+                    select(Cars.byName(localStorage.selectedCar) || list[0]);
+                }
             })
             .on('new.car', function (car){
                 var s = document.createElement('span');
@@ -217,6 +237,7 @@ static class ViewList {
             .on('error', function (car){
                 var e = _node[0].querySelector('[data-id="%0"]'(car.id));
                 if (!e) return;
+                
                 if (car.error.length > 0){
                     e.classList.add('error');
                 } else {
@@ -260,12 +281,23 @@ static class ViewList {
 
         /* global hotkeys */
         $(window)
-            .keydown(function (e){
+            .on('keydown', function (e){
                 if (Event.isSomeInput(e)) return;
                 if (e.ctrlKey || e.altKey || e.shiftKey) return;
+
                 var f = _aside.find('#cars-list-filter');
                 if (/[a-zA-Z\d]/.test(String.fromCharCode(e.keyCode)) || e.keyCode == 8 && f.val()){
                     f.show()[0].focus();
+                }
+
+                if (e.keyCode === 38){
+                    selectNear(-1);
+                    return false;
+                }
+
+                if (e.keyCode === 40){
+                    selectNear(1);
+                    return false;
                 }
             });
 

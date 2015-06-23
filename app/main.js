@@ -540,26 +540,35 @@ Object.clone = function (o){                                                    
 		return o;                                                                  // helpers.jsxi:11
 	}
 };
-Event.isSomeInput = function (e){                                                  // helpers.jsxi:15
+JSON.flexibleParse = function (d){                                                 // helpers.jsxi:15
+	var r;
+	
+	eval('r=' + d.toString().replace(/"(?:[^"\\]*(?:\\.)?)+"/g,                    // helpers.jsxi:17
+		function (_){                                                              // helpers.jsxi:17
+			return _.replace(/\r?\n/g, '\\n');                                     // helpers.jsxi:18
+		}));
+	return r;                                                                      // helpers.jsxi:20
+};
+Event.isSomeInput = function (e){                                                  // helpers.jsxi:23
 	var n = e.target;
 	
 	if (n.tagName === 'INPUT' || n.tagName === 'TEXTAREA' || n.tagName === 'SELECT')
 		return true;
 	
-	while (n){                                                                     // helpers.jsxi:20
-		if (n.contentEditable === 'true')                                          // helpers.jsxi:21
+	while (n){                                                                     // helpers.jsxi:28
+		if (n.contentEditable === 'true')                                          // helpers.jsxi:29
 			return true;
 		
-		n = n.parentNode;                                                          // helpers.jsxi:22
+		n = n.parentNode;                                                          // helpers.jsxi:30
 	}
 	return false;
 };
-RegExp.fromQuery = function (q, w){                                                // helpers.jsxi:28
-	var r = q.replace(/(?=[\$^.+(){}[\]])/g, '\\').replace(/\?|(\*)/g, '.$1');     // helpers.jsxi:29
-	return new RegExp(w ? '^(?:' + r + ')$' : r, 'i');                             // helpers.jsxi:30
+RegExp.fromQuery = function (q, w){                                                // helpers.jsxi:36
+	var r = q.replace(/(?=[\$^.+(){}[\]])/g, '\\').replace(/\?|(\*)/g, '.$1');     // helpers.jsxi:37
+	return new RegExp(w ? '^(?:' + r + ')$' : r, 'i');                             // helpers.jsxi:38
 };
-String.prototype.cssUrl = function (){                                             // helpers.jsxi:33
-	return 'file://' + this.replace(/\\/g, '/');                                   // helpers.jsxi:34
+String.prototype.cssUrl = function (){                                             // helpers.jsxi:41
+	return 'file://' + this.replace(/\\/g, '/');                                   // helpers.jsxi:42
 };
 
 /* Class "ErrorHandler" declaration */
@@ -1339,31 +1348,64 @@ var Cars = (function (){                                                        
 		this.parent = null;
 		this.children = [];
 		this.id = carPath.slice(Math.max(carPath.lastIndexOf('/'), carPath.lastIndexOf('\\')) + 1);
-		this.path = carPath;                                                       // cars_car.jsxi:23
-		this.disabled = carPath.indexOf(AcDir.carsOff) != - 1;                     // cars_car.jsxi:25
+		this.path = carPath;                                                       // cars_car.jsxi:25
+		this.disabled = carPath.indexOf(AcDir.carsOff) != - 1;                     // cars_car.jsxi:27
 	}
-	Car.prototype.__Car_addError = function (id, msg, details){                    // cars_car.jsxi:28
-		this.error.push({ id: id, msg: msg, details: details });                   // cars_car.jsxi:29
+	Car.prototype.addError = function (id, msg, details){                          // cars_car.jsxi:30
+		if (this.hasError(id))
+			return;
+		
+		this.error.push({ id: id, msg: msg, details: details });                   // cars_car.jsxi:32
+		mediator.dispatch('error:add', this);                                      // cars_car.jsxi:33
 	};
-	Car.prototype.hasError = function (id){                                        // cars_car.jsxi:32
+	Car.prototype.removeError = function (id){                                     // cars_car.jsxi:36
+		for (var i = 0; i < this.error.length; i ++){                              // cars_car.jsxi:37
+			var e = this.error[i];
+			
+			if (e.id === id){                                                      // cars_car.jsxi:38
+				this.error.splice(i, 1);                                           // cars_car.jsxi:39
+				mediator.dispatch('error:remove', this);                           // cars_car.jsxi:40
+				return;
+			}
+		}
+	};
+	Car.prototype.clearErrors = function (filter){                                 // cars_car.jsxi:46
+		if (this.error.length > 0){                                                // cars_car.jsxi:47
+			if (filter){                                                           // cars_car.jsxi:48
+				var o = this.error.length;
+				
+				this.error = this.error.filter(function (arg){                     // cars_car.jsxi:50
+					return arg.id.indexOf(filter) < 0;                             // cars_car.jsxi:50
+				});
+				
+				if (o === this.error.length)                                       // cars_car.jsxi:51
+					return;
+			} else {
+				this.error.length = 0;                                             // cars_car.jsxi:53
+			}
+			
+			mediator.dispatch('error:remove', this);                               // cars_car.jsxi:56
+		}
+	};
+	Car.prototype.hasError = function (id){                                        // cars_car.jsxi:60
 		for (var __0 = 0; __0 < this.error.length; __0 ++){
 			var e = this.error[__0];
 			
-			if (e.id === id)                                                       // cars_car.jsxi:34
+			if (e.id === id)                                                       // cars_car.jsxi:62
 				return true;
 		}
 		return false;
 	};
-	Car.prototype.toggle = function (state){                                       // cars_car.jsxi:40
+	Car.prototype.toggle = function (state){                                       // cars_car.jsxi:68
 		var __that = this, 
-			d = state == null ? !this.disabled : !state;                           // cars_car.jsxi:41
+			d = state == null ? !this.disabled : !state;                           // cars_car.jsxi:69
 		
-		if (this.disabled == d)                                                    // cars_car.jsxi:42
+		if (this.disabled == d)                                                    // cars_car.jsxi:70
 			return;
 		
 		var a, b;
 		
-		if (d){                                                                    // cars_car.jsxi:45
+		if (d){                                                                    // cars_car.jsxi:73
 			a = AcDir.cars, b = AcDir.carsOff;
 		} else {
 			a = AcDir.carsOff, b = AcDir.cars;
@@ -1372,310 +1414,316 @@ var Cars = (function (){                                                        
 		var newPath = this.path.replace(a, b);
 		
 		try {
-			fs.renameSync(this.path, newPath);                                     // cars_car.jsxi:53
-		} catch (err){                                                             // cars_car.jsxi:54
-			ErrorHandler.handled('Cannot change car state.', err);                 // cars_car.jsxi:55
+			fs.renameSync(this.path, newPath);                                     // cars_car.jsxi:81
+		} catch (err){                                                             // cars_car.jsxi:82
+			ErrorHandler.handled('Cannot change car state.', err);                 // cars_car.jsxi:83
 			return;
 		} 
 		
-		this.disabled = d;                                                         // cars_car.jsxi:59
-		this.path = newPath;                                                       // cars_car.jsxi:60
+		this.disabled = d;                                                         // cars_car.jsxi:87
+		this.path = newPath;                                                       // cars_car.jsxi:88
 		
 		if (this.skins){
-			this.skins.forEach(function (e){                                       // cars_car.jsxi:62
-				for (var n in e){                                                  // cars_car.jsxi:63
-					if (typeof e[n] === 'string'){                                 // cars_car.jsxi:64
-						e[n] = e[n].replace(a, b);                                 // cars_car.jsxi:65
+			this.skins.forEach(function (e){                                       // cars_car.jsxi:90
+				for (var n in e){                                                  // cars_car.jsxi:91
+					if (typeof e[n] === 'string'){                                 // cars_car.jsxi:92
+						e[n] = e[n].replace(a, b);                                 // cars_car.jsxi:93
 					}
 				}
 			});
 		}
 		
-		mediator.dispatch('update.car.disabled', this);                            // cars_car.jsxi:71
-		mediator.dispatch('update.car.path', this);                                // cars_car.jsxi:72
-		mediator.dispatch('update.car.skins', this);                               // cars_car.jsxi:73
+		mediator.dispatch('update.car.disabled', this);                            // cars_car.jsxi:99
+		mediator.dispatch('update.car.path', this);                                // cars_car.jsxi:100
+		mediator.dispatch('update.car.skins', this);                               // cars_car.jsxi:101
 		
-		if (this.parent && !this.disabled && this.parent.disabled){                // cars_car.jsxi:75
+		if (this.parent && !this.disabled && this.parent.disabled){                // cars_car.jsxi:103
 			Cars.toggle(this.parent, 
 				true);
 		}
 		
-		this.children.forEach(function (e){                                        // cars_car.jsxi:79
+		this.children.forEach(function (e){                                        // cars_car.jsxi:107
 			Cars.toggle(e, !__that.disabled);
 		});
 	};
-	Car.prototype.changeData = function (key, value){                              // cars_car.jsxi:84
-		if (!this.data || this.data[key] == value)                                 // cars_car.jsxi:85
+	Car.prototype.changeData = function (key, value){                              // cars_car.jsxi:112
+		if (!this.data || this.data[key] == value)                                 // cars_car.jsxi:113
 			return;
 		
-		this.data[key] = value;                                                    // cars_car.jsxi:87
+		this.data[key] = value;                                                    // cars_car.jsxi:115
 		this.changed = true;
 		
-		if (key === 'tags'){                                                       // cars_car.jsxi:90
-			registerTags(value);                                                   // cars_car.jsxi:91
+		if (key === 'tags'){                                                       // cars_car.jsxi:118
+			registerTags(value);                                                   // cars_car.jsxi:119
 		}
 		
-		if (key === 'brand'){                                                      // cars_car.jsxi:94
-			registerBrand(value);                                                  // cars_car.jsxi:95
+		if (key === 'brand'){                                                      // cars_car.jsxi:122
+			registerBrand(value);                                                  // cars_car.jsxi:123
 		}
 		
-		if (key === 'class'){                                                      // cars_car.jsxi:98
-			registerClass(value);                                                  // cars_car.jsxi:99
+		if (key === 'class'){                                                      // cars_car.jsxi:126
+			registerClass(value);                                                  // cars_car.jsxi:127
 		}
 		
-		if (Settings.get('uploadData')){                                           // cars_car.jsxi:102
-			AppServerRequest.sendData(this.id, key, value);                        // cars_car.jsxi:103
+		if (Settings.get('uploadData')){                                           // cars_car.jsxi:130
+			AppServerRequest.sendData(this.id, key, value);                        // cars_car.jsxi:131
 		}
 		
-		mediator.dispatch('update.car.data:' + key, this);                         // cars_car.jsxi:106
-		mediator.dispatch('update.car.changed', this);                             // cars_car.jsxi:107
+		mediator.dispatch('update.car.data:' + key, this);                         // cars_car.jsxi:134
+		mediator.dispatch('update.car.changed', this);                             // cars_car.jsxi:135
 	};
-	Car.prototype.changeDataSpecs = function (key, value){                         // cars_car.jsxi:110
-		if (!this.data || this.data.specs[key] == value)                           // cars_car.jsxi:111
+	Car.prototype.changeDataSpecs = function (key, value){                         // cars_car.jsxi:138
+		if (!this.data || this.data.specs[key] == value)                           // cars_car.jsxi:139
 			return;
 		
-		this.data.specs[key] = value;                                              // cars_car.jsxi:113
+		this.data.specs[key] = value;                                              // cars_car.jsxi:141
 		this.changed = true;
 		
-		if (Settings.get('uploadData')){                                           // cars_car.jsxi:116
-			AppServerRequest.sendData(this.id, 'specs:' + key, value);             // cars_car.jsxi:117
+		if (Settings.get('uploadData')){                                           // cars_car.jsxi:144
+			AppServerRequest.sendData(this.id, 'specs:' + key, value);             // cars_car.jsxi:145
 		}
 		
-		mediator.dispatch('update.car.data', this);                                // cars_car.jsxi:120
-		mediator.dispatch('update.car.changed', this);                             // cars_car.jsxi:121
+		mediator.dispatch('update.car.data', this);                                // cars_car.jsxi:148
+		mediator.dispatch('update.car.changed', this);                             // cars_car.jsxi:149
 	};
-	Car.prototype.changeParent = function (parentId){                              // cars_car.jsxi:124
+	Car.prototype.changeParent = function (parentId){                              // cars_car.jsxi:152
 		if (!this.data || this.parent && this.parent.id == parentId || !this.parent && parentId == null)
 			return;
 		
 		if (this.parent){
-			this.parent.children.splice(this.parent.children.indexOf(this), 1);    // cars_car.jsxi:128
-			mediator.dispatch('update.car.children', this.parent);                 // cars_car.jsxi:129
+			this.parent.children.splice(this.parent.children.indexOf(this), 1);    // cars_car.jsxi:156
+			mediator.dispatch('update.car.children', this.parent);                 // cars_car.jsxi:157
 		}
 		
-		if (parentId){                                                             // cars_car.jsxi:132
+		if (parentId){                                                             // cars_car.jsxi:160
 			var par = Cars.byName(parentId);
 			
-			if (!par)                                                              // cars_car.jsxi:134
-				throw new Error('Parent car "' + parentId + '" not found');        // cars_car.jsxi:134
+			if (!par)                                                              // cars_car.jsxi:162
+				throw new Error('Parent car "' + parentId + '" not found');        // cars_car.jsxi:162
 			
-			this.parent = par;                                                     // cars_car.jsxi:136
-			this.parent.children.push(this);                                       // cars_car.jsxi:137
-			mediator.dispatch('update.car.parent', this);                          // cars_car.jsxi:138
-			mediator.dispatch('update.car.children', this.parent);                 // cars_car.jsxi:139
-			this.data.parent = this.parent.id;                                     // cars_car.jsxi:141
-			mediator.dispatch('update.car.data', this);                            // cars_car.jsxi:142
+			this.parent = par;                                                     // cars_car.jsxi:164
+			this.parent.children.push(this);                                       // cars_car.jsxi:165
+			mediator.dispatch('update.car.parent', this);                          // cars_car.jsxi:166
+			mediator.dispatch('update.car.children', this.parent);                 // cars_car.jsxi:167
+			this.data.parent = this.parent.id;                                     // cars_car.jsxi:169
+			mediator.dispatch('update.car.data', this);                            // cars_car.jsxi:170
 		} else {
 			this.parent = null;
-			mediator.dispatch('update.car.parent', this);                          // cars_car.jsxi:145
-			delete this.data.parent;                                               // cars_car.jsxi:147
-			mediator.dispatch('update.car.data', this);                            // cars_car.jsxi:148
+			mediator.dispatch('update.car.parent', this);                          // cars_car.jsxi:173
+			delete this.data.parent;                                               // cars_car.jsxi:175
+			mediator.dispatch('update.car.data', this);                            // cars_car.jsxi:176
 		}
 		
 		this.changed = true;
-		mediator.dispatch('update.car.changed', this);                             // cars_car.jsxi:152
+		mediator.dispatch('update.car.changed', this);                             // cars_car.jsxi:180
 	};
-	Car.prototype.selectSkin = function (skinId){                                  // cars_car.jsxi:155
-		var newSkin = this.skins.filter(function (e){                              // cars_car.jsxi:156
-			return e.id == skinId;                                                 // cars_car.jsxi:157
+	Car.prototype.selectSkin = function (skinId){                                  // cars_car.jsxi:183
+		var newSkin = this.skins.filter(function (e){                              // cars_car.jsxi:184
+			return e.id == skinId;                                                 // cars_car.jsxi:185
 		})[0];
 		
-		if (newSkin == this.skins.selected)                                        // cars_car.jsxi:160
+		if (newSkin == this.skins.selected)                                        // cars_car.jsxi:188
 			return;
 		
-		this.skins.selected = newSkin;                                             // cars_car.jsxi:162
-		mediator.dispatch('update.car.skins', this);                               // cars_car.jsxi:163
+		this.skins.selected = newSkin;                                             // cars_car.jsxi:190
+		mediator.dispatch('update.car.skins', this);                               // cars_car.jsxi:191
 	};
-	Car.prototype.updateSkins = function (){                                       // cars_car.jsxi:166
-		gui.App.clearCache();                                                      // cars_car.jsxi:167
-		setTimeout((function (){                                                   // cars_car.jsxi:168
-			mediator.dispatch('update.car.skins', this);                           // cars_car.jsxi:169
-		}).bind(this),                                                             // cars_car.jsxi:170
+	Car.prototype.updateSkins = function (){                                       // cars_car.jsxi:194
+		gui.App.clearCache();                                                      // cars_car.jsxi:195
+		setTimeout((function (){                                                   // cars_car.jsxi:196
+			mediator.dispatch('update.car.skins', this);                           // cars_car.jsxi:197
+		}).bind(this),                                                             // cars_car.jsxi:198
 		100);
 	};
-	Car.prototype.updateUpgrade = function (){                                     // cars_car.jsxi:173
-		gui.App.clearCache();                                                      // cars_car.jsxi:174
-		setTimeout((function (){                                                   // cars_car.jsxi:175
-			mediator.dispatch('update.car.data', this);                            // cars_car.jsxi:176
-		}).bind(this),                                                             // cars_car.jsxi:177
+	Car.prototype.updateUpgrade = function (){                                     // cars_car.jsxi:201
+		gui.App.clearCache();                                                      // cars_car.jsxi:202
+		setTimeout((function (){                                                   // cars_car.jsxi:203
+			mediator.dispatch('update.car.data', this);                            // cars_car.jsxi:204
+		}).bind(this),                                                             // cars_car.jsxi:205
 		100);
 	};
-	Car.prototype.save = function (){                                              // cars_car.jsxi:180
+	Car.prototype.save = function (){                                              // cars_car.jsxi:208
 		if (this.data){
 			var p = Object.clone(this.data);
 			
-			p.description = p.description.replace(/\n/g, '<br>');                  // cars_car.jsxi:183
-			p.class = p.class.toLowerCase();                                       // cars_car.jsxi:184
-			fs.writeFileSync(this.json,                                            // cars_car.jsxi:185
+			p.description = p.description.replace(/\n/g, '<br>');                  // cars_car.jsxi:211
+			p.class = p.class.toLowerCase();                                       // cars_car.jsxi:212
+			fs.writeFileSync(this.json,                                            // cars_car.jsxi:213
 				JSON.stringify(p, null, 
-					4));                                                           // cars_car.jsxi:185
+					4));                                                           // cars_car.jsxi:213
 			this.changed = false;
-			mediator.dispatch('update.car.changed', this);                         // cars_car.jsxi:187
+			mediator.dispatch('update.car.changed', this);                         // cars_car.jsxi:215
 		}
 	};
 	Car.prototype.loadBadge = function (callback){                                 // cars_car_load.jsxi:3
 		var __that = this;
 		
-		fs.exists(this.badge,                                                      // cars_car_load.jsxi:4
-			(function (result){                                                    // cars_car_load.jsxi:4
-				if (!result){                                                      // cars_car_load.jsxi:5
-					__that.error.push({ id: 'badge-missing', msg: 'Missing badge.png' });
-					mediator.dispatch('error', this);                              // cars_car_load.jsxi:7
+		this.clearErrors('badge');
+		fs.exists(this.badge,                                                      // cars_car_load.jsxi:6
+			(function (result){                                                    // cars_car_load.jsxi:6
+				if (!result){                                                      // cars_car_load.jsxi:7
+					__that.addError('badge-missing', 'Missing badge.png');
 				}
 				
-				if (callback)                                                      // cars_car_load.jsxi:10
-					callback();                                                    // cars_car_load.jsxi:10
-			}).bind(this));                                                        // cars_car_load.jsxi:11
+				if (callback)                                                      // cars_car_load.jsxi:11
+					callback();                                                    // cars_car_load.jsxi:11
+			}).bind(this));                                                        // cars_car_load.jsxi:12
 	};
-	Car.prototype.loadSkins = function (callback){                                 // cars_car_load.jsxi:14
+	Car.prototype.loadSkins = function (callback){                                 // cars_car_load.jsxi:15
 		var __that = this;
 		
-		fs.readdir(this.path + '/skins',                                           // cars_car_load.jsxi:15
-			(function (err, result){                                               // cars_car_load.jsxi:15
+		this.clearErrors('skins');
+		
+		if (!fs.existsSync(this.skinsDir)){                                        // cars_car_load.jsxi:18
+			this.addError('skins-missing', 'Skins folder is missing');
+			
+			if (callback)                                                          // cars_car_load.jsxi:20
+				callback();                                                        // cars_car_load.jsxi:20
+			return;
+		}
+		
+		if (!fs.statSync(this.skinsDir).isDirectory()){                            // cars_car_load.jsxi:24
+			this.addError('skins-file', 'There is a file instead of skins folder', err);
+			
+			if (callback)                                                          // cars_car_load.jsxi:26
+				callback();                                                        // cars_car_load.jsxi:26
+			return;
+		}
+		
+		fs.readdir(this.skinsDir,                                                  // cars_car_load.jsxi:30
+			(function (err, result){                                               // cars_car_load.jsxi:30
 				__that.skins = false;
 				
-				if (err){                                                          // cars_car_load.jsxi:18
-					__that.error.push({ id: 'skins-access', msg: 'Cannot access skins', details: err });
-					mediator.dispatch('error', this);                              // cars_car_load.jsxi:20
+				if (err){                                                          // cars_car_load.jsxi:33
+					__that.addError('skins-access', 'Cannot access skins', err);
 				} else {
-					result = result.filter(function (e){                           // cars_car_load.jsxi:22
+					result = result.filter(function (e){                           // cars_car_load.jsxi:36
 						return fs.statSync(__that.path + '/skins/' + e).isDirectory();
 					});
 					
-					if (__that.skins.length === 0){                                // cars_car_load.jsxi:26
-						__that.error.push({ id: 'skins-empty', msg: 'Skins folder is empty' });
-						mediator.dispatch('error', this);                          // cars_car_load.jsxi:28
+					if (__that.skins.length === 0){                                // cars_car_load.jsxi:40
+						__that.addError('skins-empty', 'Skins folder is empty');
 					} else {
-						__that.skins = result.map(function (e){                    // cars_car_load.jsxi:30
+						__that.skins = result.map(function (e){                    // cars_car_load.jsxi:43
 							var p = __that.path + '/skins/' + e;
 							return {
-								id: e,                                             // cars_car_load.jsxi:33
-								path: p,                                           // cars_car_load.jsxi:34
-								livery: p + '/livery.png',                         // cars_car_load.jsxi:35
+								id: e,                                             // cars_car_load.jsxi:46
+								path: p,                                           // cars_car_load.jsxi:47
+								livery: p + '/livery.png',                         // cars_car_load.jsxi:48
 								preview: p + '/preview.jpg'
 							};
 						});
-						__that.skins.selected = __that.skins[0];                   // cars_car_load.jsxi:40
-						mediator.dispatch('update.car.skins', this);               // cars_car_load.jsxi:41
+						__that.skins.selected = __that.skins[0];                   // cars_car_load.jsxi:53
+						mediator.dispatch('update.car.skins', this);               // cars_car_load.jsxi:54
 					}
 				}
 				
-				if (callback)                                                      // cars_car_load.jsxi:45
-					callback();                                                    // cars_car_load.jsxi:45
-			}).bind(this));                                                        // cars_car_load.jsxi:46
+				if (callback)                                                      // cars_car_load.jsxi:58
+					callback();                                                    // cars_car_load.jsxi:58
+			}).bind(this));                                                        // cars_car_load.jsxi:59
 	};
-	Car.prototype.loadData = function (callback){                                  // cars_car_load.jsxi:49
+	Car.prototype.loadData = function (callback){                                  // cars_car_load.jsxi:62
 		var __that = this;
 		
-		if (!fs.existsSync(this.json)){                                            // cars_car_load.jsxi:50
-			if (fs.existsSync(this.json + '.disabled')){                           // cars_car_load.jsxi:51
-				fs.renameSync(this.json + '.disabled', this.json);                 // cars_car_load.jsxi:52
+		this.clearErrors('data');
+		this.clearErrors('parent');
+		
+		if (!fs.existsSync(this.json)){                                            // cars_car_load.jsxi:66
+			if (fs.existsSync(this.json + '.disabled')){                           // cars_car_load.jsxi:67
+				fs.renameSync(this.json + '.disabled', this.json);                 // cars_car_load.jsxi:68
 			} else {
 				if (this.changed){
 					this.changed = false;
-					mediator.dispatch('update.car.changed', this);                 // cars_car_load.jsxi:56
+					mediator.dispatch('update.car.changed', this);                 // cars_car_load.jsxi:72
 				}
 				
 				this.data = false;
-				this.error.push({ id: 'json-missing', msg: 'Missing ui_car.json' });
-				mediator.dispatch('error', this);                                  // cars_car_load.jsxi:61
-				mediator.dispatch('update.car.data', this);                        // cars_car_load.jsxi:62
+				this.addError('data-missing', 'Missing ui_car.json');
+				mediator.dispatch('update.car.data', this);                        // cars_car_load.jsxi:77
 				
-				if (callback)                                                      // cars_car_load.jsxi:63
-					callback();                                                    // cars_car_load.jsxi:63
+				if (callback)                                                      // cars_car_load.jsxi:78
+					callback();                                                    // cars_car_load.jsxi:78
 				return;
 			}
 		}
 		
-		fs.readFile(this.json,                                                     // cars_car_load.jsxi:68
-			(function (err, result){                                               // cars_car_load.jsxi:68
+		fs.readFile(this.json,                                                     // cars_car_load.jsxi:83
+			(function (err, result){                                               // cars_car_load.jsxi:83
 				if (__that.changed){
 					__that.changed = false;
-					mediator.dispatch('update.car.changed', this);                 // cars_car_load.jsxi:71
+					mediator.dispatch('update.car.changed', this);                 // cars_car_load.jsxi:86
 				}
 				
-				if (err){                                                          // cars_car_load.jsxi:74
+				if (err){                                                          // cars_car_load.jsxi:89
 					__that.data = false;
-					__that.error.push({                                            // cars_car_load.jsxi:76
-						id: 'json-read',                                           // cars_car_load.jsxi:76
-						msg: 'Unavailable ui_car.json',                            // cars_car_load.jsxi:76
-						details: err
-					});
-					mediator.dispatch('error', this);                              // cars_car_load.jsxi:77
+					__that.addError('data-access', 'Unavailable ui_car.json', err);
 				} else {
 					var dat;
 					
 					try {
-						eval('dat=' + result.toString().replace(/"(?:[^"\\]*(?:\\.)?)+"/g, 
-							function (_){                                          // cars_car_load.jsxi:81
-								return _.replace(/\r?\n/g, '\\n');                 // cars_car_load.jsxi:82
-							}));
-					} catch (er){                                                  // cars_car_load.jsxi:84
-						err = er;                                                  // cars_car_load.jsxi:85
+						dat = JSON.flexibleParse(result);                          // cars_car_load.jsxi:95
+					} catch (er){                                                  // cars_car_load.jsxi:96
+						err = er;                                                  // cars_car_load.jsxi:97
 					} 
 					
 					__that.data = false;
 					
-					if (err || !dat){                                              // cars_car_load.jsxi:89
-						__that.error.push({ id: 'json-parse', msg: 'Damaged ui_car.json', details: err });
-						mediator.dispatch('error', this);                          // cars_car_load.jsxi:91
-					} else if (!dat.name){                                         // cars_car_load.jsxi:92
-						__that.error.push({ id: 'data-name', msg: 'Name is missing' });
-						mediator.dispatch('error', this);                          // cars_car_load.jsxi:94
-					} else if (!dat.brand){                                        // cars_car_load.jsxi:95
-						__that.error.push({ id: 'data-brand', msg: 'Brand is missing' });
-						mediator.dispatch('error', this);                          // cars_car_load.jsxi:97
+					if (err || !dat){                                              // cars_car_load.jsxi:101
+						__that.addError('data-json', 'Damaged ui_car.json', err);
+					} else if (!dat.name){                                         // cars_car_load.jsxi:103
+						__that.addError('data-name-missing', 'Name is missing');
+					} else if (!dat.brand){                                        // cars_car_load.jsxi:105
+						__that.addError('data-brand-missing', 'Brand is missing');
 					} else {
-						__that.data = dat;                                         // cars_car_load.jsxi:99
+						__that.data = dat;                                         // cars_car_load.jsxi:108
 						
-						if (!__that.data.description)                              // cars_car_load.jsxi:100
-							__that.data.description = '';                          // cars_car_load.jsxi:100
+						if (!__that.data.description)                              // cars_car_load.jsxi:109
+							__that.data.description = '';                          // cars_car_load.jsxi:109
 						
-						if (!__that.data.tags)                                     // cars_car_load.jsxi:101
-							__that.data.tags = [];                                 // cars_car_load.jsxi:101
+						if (!__that.data.tags)                                     // cars_car_load.jsxi:110
+							__that.data.tags = [];                                 // cars_car_load.jsxi:110
 						
-						if (!__that.data.specs)                                    // cars_car_load.jsxi:102
-							__that.data.specs = {};                                // cars_car_load.jsxi:102
+						if (!__that.data.specs)                                    // cars_car_load.jsxi:111
+							__that.data.specs = {};                                // cars_car_load.jsxi:111
 						
-						__that.data.class = __that.data.class || '';               // cars_car_load.jsxi:104
+						__that.data.class = __that.data.class || '';               // cars_car_load.jsxi:113
 						__that.data.description = __that.data.description.replace(/\n/g, ' ').replace(/<\/?br\/?>[ \t]*|\n[ \t]+/g, '\n').replace(/<\s*\/?\s*\w+\s*>/g, '').replace(/[\t ]+/g, ' ');
 						
-						if (__that.data.parent != null){                           // cars_car_load.jsxi:108
-							if (__that.data.parent == __that.id){                  // cars_car_load.jsxi:109
-								__that.error.push({ id: 'parent-wrong', msg: 'Parent is child' });
+						if (__that.data.parent != null){                           // cars_car_load.jsxi:117
+							if (__that.data.parent == __that.id){                  // cars_car_load.jsxi:118
+								__that.addError('parent-wrong', 'Parent is child');
 							} else {
 								var par = Cars.byName(__that.data.parent);
 								
-								if (par == null){                                  // cars_car_load.jsxi:114
-									__that.error.push({ id: 'parent-missing', msg: 'Parent is missing' });
+								if (par == null){                                  // cars_car_load.jsxi:123
+									__that.addError('parent-missing', 'Parent is missing');
 								} else {
-									__that.parent = par;                           // cars_car_load.jsxi:117
-									__that.parent.children.push(this);             // cars_car_load.jsxi:118
+									__that.parent = par;                           // cars_car_load.jsxi:126
+									__that.parent.children.push(this);             // cars_car_load.jsxi:127
 									mediator.dispatch('update.car.parent', this);
 									mediator.dispatch('update.car.children', __that.parent);
 								}
 								
-								if (!fs.existsSync(__that.upgrade)){               // cars_car_load.jsxi:124
-									__that.error.push({ id: 'upgrade-missing', msg: 'Missing upgrade.png' });
-									mediator.dispatch('error', this);              // cars_car_load.jsxi:126
+								if (!fs.existsSync(__that.upgrade)){               // cars_car_load.jsxi:133
+									__that.addError('parent-upgrade-missing', 'Missing upgrade.png');
 								}
 							}
 						}
 						
-						registerTags(__that.data.tags);                            // cars_car_load.jsxi:131
-						registerClass(__that.data.class);                          // cars_car_load.jsxi:132
-						registerBrand(__that.data.brand);                          // cars_car_load.jsxi:133
+						registerTags(__that.data.tags);                            // cars_car_load.jsxi:139
+						registerClass(__that.data.class);                          // cars_car_load.jsxi:140
+						registerBrand(__that.data.brand);                          // cars_car_load.jsxi:141
 					}
 				}
 				
-				mediator.dispatch('update.car.data', this);                        // cars_car_load.jsxi:137
+				mediator.dispatch('update.car.data', this);                        // cars_car_load.jsxi:145
 				
-				if (callback)                                                      // cars_car_load.jsxi:138
-					callback();                                                    // cars_car_load.jsxi:138
-			}).bind(this));                                                        // cars_car_load.jsxi:139
+				if (callback)                                                      // cars_car_load.jsxi:146
+					callback();                                                    // cars_car_load.jsxi:146
+			}).bind(this));                                                        // cars_car_load.jsxi:147
 	};
-	Car.prototype.load = function (callback){                                      // cars_car_load.jsxi:142
-		this.error = [];
+	Car.prototype.load = function (callback){                                      // cars_car_load.jsxi:150
+		this.clearErrors();
 		this.loadBadge();
 		this.loadSkins();
 		this.loadData(callback);
@@ -1702,10 +1750,17 @@ var Cars = (function (){                                                        
 			})
 		});
 	Object.defineProperty(Car.prototype, 
+		'skinsDir', 
+		{
+			get: (function (){
+				return this.path + '/skins';
+			})
+		});
+	Object.defineProperty(Car.prototype, 
 		'displayName', 
 		{
 			get: (function (){
-				return this.data && this.data.name || this.id;                     // cars_car.jsxi:10
+				return this.data && this.data.name || this.id;                     // cars_car.jsxi:12
 			})
 		});
 	
@@ -2128,6 +2183,26 @@ var Tips = (function (){                                                        
 	return Tips;
 })();
 
+/* Class "RestorationWizard" declaration */
+var RestorationWizard = (function (){                                              // restoration_wizard.jsxi:1
+	var RestorationWizard = function (){}, 
+		_fixers = {};
+	
+	RestorationWizard.fix = function (car, errorId){                               // restoration_wizard.jsxi:4
+		if (_fixers.hasOwnProperty(errorId)){                                      // restoration_wizard.jsxi:5
+			new _fixers[errorId](car, errorId).run();                              // restoration_wizard.jsxi:6
+		} else {
+			ErrorHandler.handled('Not supported error: ' + errorId);               // restoration_wizard.jsxi:8
+		}
+	};
+	RestorationWizard.register = function (id, classObj){                          // restoration_wizard.jsxi:12
+		_fixers[id] = classObj;                                                    // restoration_wizard.jsxi:13
+	};
+	return RestorationWizard;
+})();
+
+;
+
 /* Class "SearchProvider" declaration */
 function SearchProvider(car){                                                      // update_description.jsxi:1
 	if (this.constructor === SearchProvider)
@@ -2369,6 +2444,478 @@ var UpgradeEditor = (function (){                                               
 	return UpgradeEditor;
 })();
 
+/* Class "AbstractFixer" declaration */
+function AbstractFixer(c, e){                                                      // abstract_fixer.jsxi:1
+	if (this.constructor === AbstractFixer)
+		throw new Error('Trying to instantiate abstract class AbstractFixer');
+	
+	this.__car = c;                                                                // abstract_fixer.jsxi:5
+	this.__errorId = e;                                                            // abstract_fixer.jsxi:6
+}
+AbstractFixer.prototype.run = function (){                                         // abstract_fixer.jsxi:9
+	var __that = this;
+	
+	try {
+		this.__AbstractFixer_work(function (err){                                  // abstract_fixer.jsxi:11
+			if (__that.__AbstractFixer__error)
+				return;
+			
+			if (err){                                                              // abstract_fixer.jsxi:14
+				__that.__AbstractFixer_error(err === true ? null : err);
+			} else {
+				__that.__car.removeError(__that.__errorId);                        // abstract_fixer.jsxi:17
+			}
+		});
+	} catch (err){                                                                 // abstract_fixer.jsxi:20
+		this.__AbstractFixer_error(err);
+	} 
+};
+AbstractFixer.prototype.__AbstractFixer_error = function (err){                    // abstract_fixer.jsxi:26
+	this.__AbstractFixer__error = true;
+	ErrorHandler.handled('Cannot fix error: ' + this.__errorId, err);              // abstract_fixer.jsxi:28
+};
+AbstractFixer.prototype.__AbstractFixer_work = function (c){                       // abstract_fixer.jsxi:31
+	var __that = this, 
+		s = this.__solutions.filter(function (arg){                                // abstract_fixer.jsxi:32
+			return arg;                                                            // abstract_fixer.jsxi:32
+		});
+	
+	new Dialog(this.__title,                                                       // abstract_fixer.jsxi:33
+		[
+			'<h6>Available solutions:</h6>',                                       // abstract_fixer.jsxi:34
+			s.map(function (e, i){                                                 // abstract_fixer.jsxi:35
+				return '<label><input name="solution" data-solution-id="' + i + '" type="radio">' + e.name + '</label>';
+			}).join('<br>')
+		], 
+		function (){                                                               // abstract_fixer.jsxi:36
+			var id = this.find('input[name="solution"]:checked').data('solution-id');
+			
+			try {
+				s[id].fn(c);                                                       // abstract_fixer.jsxi:39
+			} catch (err){                                                         // abstract_fixer.jsxi:40
+				__that.__AbstractFixer_error(err);
+			} 
+		}).addButton('Cancel').find('input[name="solution"]')[0].checked = true;   // abstract_fixer.jsxi:43
+};
+AbstractFixer.prototype.__fixJsonFile = function (filename, fn){                   // abstract_fixer.jsxi:49
+	try {
+		var dat = JSON.flexibleParse(fs.readFileSync(filename));
+		
+		fn(dat);                                                                   // abstract_fixer.jsxi:52
+		fs.writeFileSync(filename,                                                 // abstract_fixer.jsxi:53
+			JSON.stringify(dat, false, 
+				4));                                                               // abstract_fixer.jsxi:53
+	} catch (err){                                                                 // abstract_fixer.jsxi:54
+		this.__AbstractFixer_error(err);
+	} 
+};
+AbstractFixer.__simularFile = function (a, b){                                     // abstract_fixer.jsxi:59
+	a = a.toLowerCase();                                                           // abstract_fixer.jsxi:61
+	b = b.toLowerCase();                                                           // abstract_fixer.jsxi:62
+	
+	if (b.indexOf(a) !== - 1)                                                      // abstract_fixer.jsxi:63
+		return true;
+	
+	for (var i = a.length - 1; i > a.length / 2; i --)                             // abstract_fixer.jsxi:65
+		if (b.indexOf(a.substr(0, i)) !== - 1)                                     // abstract_fixer.jsxi:66
+			return true;
+	return false;
+};
+AbstractFixer.__simularFiles = function (filename, filter, deep){                  // abstract_fixer.jsxi:71
+	if (filter === undefined)                                                      // abstract_fixer.jsxi:71
+		filter = (function (arg){                                                  // abstract_fixer.jsxi:71
+	return true;
+});
+
+	if (deep === undefined)                                                        // abstract_fixer.jsxi:71
+		deep = true;                                                               // abstract_fixer.jsxi:71
+
+	var dir = path.dirname(filename);
+	
+	var basename = path.basename(filename);
+	
+	if (fs.existsSync(dir)){                                                       // abstract_fixer.jsxi:75
+		if (fs.statSync(dir).isDirectory()){                                       // abstract_fixer.jsxi:76
+			return fs.readdirSync(dir).filter(function (arg){                      // abstract_fixer.jsxi:77
+				return AbstractFixer.__simularFile(basename, arg);
+			}).map(function (e){                                                   // abstract_fixer.jsxi:77
+				return dir + '/' + e;                                              // abstract_fixer.jsxi:78
+			}).filter(function (arg){                                              // abstract_fixer.jsxi:79
+				return filter(fs.statSync(arg));                                   // abstract_fixer.jsxi:79
+			});
+		} else {
+			return [];
+		}
+	} else if (deep){                                                              // abstract_fixer.jsxi:83
+		var r = [];
+		
+		var s = AbstractFixer.__simularFiles(dir,                                  // abstract_fixer.jsxi:85
+			function (arg){                                                        // abstract_fixer.jsxi:85
+				return arg.isDirectory();                                          // abstract_fixer.jsxi:85
+			}, 
+			false);
+		
+		for (var __1 = 0; __1 < s.length; __1 ++){                                 // abstract_fixer.jsxi:86
+			var d = s[__1];
+			
+			r.push.call(r,                                                         // abstract_fixer.jsxi:87
+				AbstractFixer.__simularFiles(d + '/' + basename, filter, false));
+		}
+		return r;                                                                  // abstract_fixer.jsxi:89
+	} else {
+		return [];
+	}
+};
+AbstractFixer.__restoreFile = function (filename, from, c){                        // abstract_fixer.jsxi:95
+	fs.rename(from,                                                                // abstract_fixer.jsxi:96
+		filename,                                                                  // abstract_fixer.jsxi:96
+		function (err){                                                            // abstract_fixer.jsxi:96
+			if (err){                                                              // abstract_fixer.jsxi:97
+				if (err.code === 'EXDEV'){                                         // abstract_fixer.jsxi:98
+					copy();                                                        // abstract_fixer.jsxi:99
+				} else {
+					c(err);                                                        // abstract_fixer.jsxi:101
+				}
+			} else {
+				c();                                                               // abstract_fixer.jsxi:104
+			}
+		});
+	
+	function copy(){                                                               // abstract_fixer.jsxi:108
+		var rs = fs.createReadStream(from);
+		
+		var ws = fs.createWriteStream(filename);
+		
+		rs.on('error', c);                                                         // abstract_fixer.jsxi:111
+		ws.on('error', c);                                                         // abstract_fixer.jsxi:112
+		rs.on('close',                                                             // abstract_fixer.jsxi:113
+			function (){                                                           // abstract_fixer.jsxi:113
+				c();                                                               // abstract_fixer.jsxi:114
+				fs.unlink(from);                                                   // abstract_fixer.jsxi:115
+			});
+		rs.pipe(ws);                                                               // abstract_fixer.jsxi:117
+	}
+};
+AbstractFixer.__tryToRestoreFile = function (filename, filter, callback){          // abstract_fixer.jsxi:121
+	return AbstractFixer.__simularFiles(filename, filter).map(function (e){        // abstract_fixer.jsxi:122
+		return {
+			name: 'Restore from …' + path.normalize(e).slice(AcDir.root.length), 
+			fn: (function (c){                                                     // abstract_fixer.jsxi:125
+				AbstractFixer.__restoreFile(filename,                              // abstract_fixer.jsxi:126
+					e,                                                             // abstract_fixer.jsxi:126
+					function (err){                                                // abstract_fixer.jsxi:126
+						if (err)                                                   // abstract_fixer.jsxi:127
+							return c(err);                                         // abstract_fixer.jsxi:127
+						
+						if (callback)                                              // abstract_fixer.jsxi:128
+							callback();                                            // abstract_fixer.jsxi:128
+						
+						c();                                                       // abstract_fixer.jsxi:129
+					});
+			})
+		};
+	});
+};
+
+/* Class "MissingDataNameFixer" declaration */
+function MissingDataNameFixer(){                                                   // error_data_fields.jsxi:1
+	AbstractFixer.apply(this, 
+		arguments);
+}
+__prototypeExtend(MissingDataNameFixer, 
+	AbstractFixer);
+MissingDataNameFixer.prototype.__MissingDataNameFixer_fix = function (v){          // error_data_fields.jsxi:2
+	var __that = this;
+	
+	this.__fixJsonFile(this.__car.json,                                            // error_data_fields.jsxi:3
+		function (data){                                                           // error_data_fields.jsxi:3
+			data.name = v;                                                         // error_data_fields.jsxi:4
+		});
+	setTimeout(function (arg){                                                     // error_data_fields.jsxi:7
+		return __that.__car.loadData();                                            // error_data_fields.jsxi:7
+	});
+};
+MissingDataNameFixer.prototype.__MissingDataNameFixer_createNew = function (c){    // error_data_fields.jsxi:10
+	var __that = this;
+	
+	new Dialog('Input A New Name',                                                 // error_data_fields.jsxi:11
+		'<input required>',                                                        // error_data_fields.jsxi:11
+		function (){                                                               // error_data_fields.jsxi:11
+			__that.__MissingDataNameFixer_fix(this.find('input').val());
+			c();                                                                   // error_data_fields.jsxi:13
+		});
+};
+MissingDataNameFixer.prototype.__MissingDataNameFixer_useId = function (c){        // error_data_fields.jsxi:17
+	this.__MissingDataNameFixer_fix(this.__car.id);
+	c();                                                                           // error_data_fields.jsxi:19
+};
+Object.defineProperty(MissingDataNameFixer.prototype, 
+	'__title', 
+	{
+		get: (function (){
+			return 'Car name is missing';                                          // error_data_fields.jsxi:22
+		})
+	});
+Object.defineProperty(MissingDataNameFixer.prototype, 
+	'__solutions', 
+	{
+		get: (function (){
+			return [
+				{
+					name: 'Enter a new name',                                      // error_data_fields.jsxi:24
+					fn: __bindOnce(this, '__MissingDataNameFixer_createNew')
+				}, 
+				{
+					name: 'Use id as a name',                                      // error_data_fields.jsxi:25
+					fn: __bindOnce(this, '__MissingDataNameFixer_useId')
+				}
+			];
+		})
+	});
+
+/* Class "MissingDataBrandFixer" declaration */
+function MissingDataBrandFixer(){                                                  // error_data_fields.jsxi:29
+	AbstractFixer.apply(this, 
+		arguments);
+}
+__prototypeExtend(MissingDataBrandFixer, 
+	AbstractFixer);
+MissingDataBrandFixer.prototype.__MissingDataBrandFixer_fix = function (v){        // error_data_fields.jsxi:30
+	var __that = this;
+	
+	this.__fixJsonFile(this.__car.json,                                            // error_data_fields.jsxi:31
+		function (data){                                                           // error_data_fields.jsxi:31
+			data.brand = v;                                                        // error_data_fields.jsxi:32
+		});
+	setTimeout(function (arg){                                                     // error_data_fields.jsxi:35
+		return __that.__car.loadData();                                            // error_data_fields.jsxi:35
+	});
+};
+MissingDataBrandFixer.prototype.__MissingDataBrandFixer_createNew = function (c){
+	var __that = this;
+	
+	new Dialog('Select Brand Name',                                                // error_data_fields.jsxi:39
+		'<input autocomplete list="brands" required>',                             // error_data_fields.jsxi:39
+		function (){                                                               // error_data_fields.jsxi:39
+			__that.__MissingDataBrandFixer_fix(this.find('input').val());
+			c();                                                                   // error_data_fields.jsxi:41
+		});
+};
+MissingDataBrandFixer.prototype.__MissingDataBrandFixer_useBr = function (c){      // error_data_fields.jsxi:45
+	this.__MissingDataBrandFixer_fix(this.__MissingDataBrandFixer_br);
+	c();                                                                           // error_data_fields.jsxi:47
+};
+MissingDataBrandFixer.prototype.__MissingDataBrandFixer_extractBrand = function (){
+	var __that = this;
+	return this.__MissingDataBrandFixer_br = Cars.brands.filter(function (arg){    // error_data_fields.jsxi:52
+		return __that.__car.id.indexOf(arg.toLowerCase()) === 0;                   // error_data_fields.jsxi:52
+	})[0];
+};
+Object.defineProperty(MissingDataBrandFixer.prototype, 
+	'__title', 
+	{
+		get: (function (){
+			return 'Car brand is missing';                                         // error_data_fields.jsxi:55
+		})
+	});
+Object.defineProperty(MissingDataBrandFixer.prototype, 
+	'__solutions', 
+	{
+		get: (function (){
+			return [
+				this.__MissingDataBrandFixer_extractBrand() && {
+					name: 'Use “' + this.__MissingDataBrandFixer_br + '” as a brand', 
+					fn: __bindOnce(this, '__MissingDataBrandFixer_useBr')
+				}, 
+				{
+					name: 'Select a new brand',                                    // error_data_fields.jsxi:58
+					fn: __bindOnce(this, '__MissingDataBrandFixer_createNew')
+				}
+			];
+		})
+	});
+
+RestorationWizard.register('data-name-missing', MissingDataNameFixer);             // error_data_fields.jsxi:62
+RestorationWizard.register('data-brand-missing', MissingDataBrandFixer);           // error_data_fields.jsxi:63
+
+/* Class "MissingSkinsDirectoryFixer" declaration */
+function MissingSkinsDirectoryFixer(){                                             // error_skins_directory.jsxi:1
+	AbstractFixer.apply(this, 
+		arguments);
+}
+__prototypeExtend(MissingSkinsDirectoryFixer, 
+	AbstractFixer);
+MissingSkinsDirectoryFixer.prototype.__MissingSkinsDirectoryFixer_createNew = function (c){
+	var __that = this;
+	
+	fs.mkdirSync(this.__car.skinsDir);                                             // error_skins_directory.jsxi:3
+	fs.mkdirSync(this.__car.skinsDir + '/default');                                // error_skins_directory.jsxi:4
+	setTimeout(function (arg){                                                     // error_skins_directory.jsxi:5
+		return __that.__car.loadSkins();                                           // error_skins_directory.jsxi:5
+	});
+	c();                                                                           // error_skins_directory.jsxi:6
+};
+Object.defineProperty(MissingSkinsDirectoryFixer.prototype, 
+	'__title', 
+	{
+		get: (function (){
+			return 'Skins folder is missing';                                      // error_skins_directory.jsxi:9
+		})
+	});
+Object.defineProperty(MissingSkinsDirectoryFixer.prototype, 
+	'__solutions', 
+	{
+		get: (function (){
+			var __that = this;
+			return [
+				{
+					name: 'Create new with empty skin',                            // error_skins_directory.jsxi:11
+					fn: __bindOnce(this, '__MissingSkinsDirectoryFixer_createNew')
+				}
+			].concat(AbstractFixer.__tryToRestoreFile(this.__car.skinsDir,         // error_skins_directory.jsxi:12
+				function (arg){                                                    // error_skins_directory.jsxi:13
+					return arg.isDirectory();                                      // error_skins_directory.jsxi:13
+				}, 
+				function (){                                                       // error_skins_directory.jsxi:14
+					setTimeout(function (arg){                                     // error_skins_directory.jsxi:15
+						return __that.__car.loadSkins();                           // error_skins_directory.jsxi:15
+					});
+				}));
+		})
+	});
+
+/* Class "EmptySkinsDirectoryFixer" declaration */
+function EmptySkinsDirectoryFixer(){                                               // error_skins_directory.jsxi:19
+	AbstractFixer.apply(this, 
+		arguments);
+}
+__prototypeExtend(EmptySkinsDirectoryFixer, 
+	AbstractFixer);
+EmptySkinsDirectoryFixer.prototype.__EmptySkinsDirectoryFixer_createNew = function (c){
+	var __that = this;
+	
+	fs.mkdirSync(this.__car.skinsDir + '/default');                                // error_skins_directory.jsxi:21
+	setTimeout(function (arg){                                                     // error_skins_directory.jsxi:22
+		return __that.__car.loadSkins();                                           // error_skins_directory.jsxi:22
+	});
+	c();                                                                           // error_skins_directory.jsxi:23
+};
+Object.defineProperty(EmptySkinsDirectoryFixer.prototype, 
+	'__title', 
+	{
+		get: (function (){
+			return 'Skins folder is empty';                                        // error_skins_directory.jsxi:26
+		})
+	});
+Object.defineProperty(EmptySkinsDirectoryFixer.prototype, 
+	'__solutions', 
+	{
+		get: (function (){
+			return [
+				{
+					name: 'Create new empty skin',                                 // error_skins_directory.jsxi:28
+					fn: __bindOnce(this, '__EmptySkinsDirectoryFixer_createNew')
+				}
+			];
+		})
+	});
+
+/* Class "FileSkinsDirectoryFixer" declaration */
+function FileSkinsDirectoryFixer(){                                                // error_skins_directory.jsxi:32
+	AbstractFixer.apply(this, 
+		arguments);
+}
+__prototypeExtend(FileSkinsDirectoryFixer, 
+	AbstractFixer);
+FileSkinsDirectoryFixer.prototype.__FileSkinsDirectoryFixer_fix = function (c){    // error_skins_directory.jsxi:33
+	var __that = this;
+	
+	fs.renameSync(this.__car.skinsDir, this.__car.skinsDir + '.bak');              // error_skins_directory.jsxi:34
+	fs.mkdirSync(this.__car.skinsDir);                                             // error_skins_directory.jsxi:35
+	fs.mkdirSync(this.__car.skinsDir + '/default');                                // error_skins_directory.jsxi:36
+	setTimeout(function (arg){                                                     // error_skins_directory.jsxi:37
+		return __that.__car.loadSkins();                                           // error_skins_directory.jsxi:37
+	});
+	c();                                                                           // error_skins_directory.jsxi:38
+};
+Object.defineProperty(FileSkinsDirectoryFixer.prototype, 
+	'__title', 
+	{
+		get: (function (){
+			return 'There is a file instead of skins folder';                      // error_skins_directory.jsxi:41
+		})
+	});
+Object.defineProperty(FileSkinsDirectoryFixer.prototype, 
+	'__solutions', 
+	{
+		get: (function (){
+			return [
+				{
+					name: 'Rename file to “skins.bak” and create new skins directory with empty skin', 
+					fn: __bindOnce(this, '__FileSkinsDirectoryFixer_fix')
+				}
+			];
+		})
+	});
+
+RestorationWizard.register('skins-missing', MissingSkinsDirectoryFixer);           // error_skins_directory.jsxi:47
+RestorationWizard.register('skins-empty', EmptySkinsDirectoryFixer);               // error_skins_directory.jsxi:48
+RestorationWizard.register('skins-file', FileSkinsDirectoryFixer);                 // error_skins_directory.jsxi:49
+
+/* Class "MissingUpgradeIconFixer" declaration */
+function MissingUpgradeIconFixer(){                                                // error_upgrade_missing.jsxi:1
+	AbstractFixer.apply(this, 
+		arguments);
+}
+__prototypeExtend(MissingUpgradeIconFixer, 
+	AbstractFixer);
+MissingUpgradeIconFixer.prototype.__MissingUpgradeIconFixer_newIcon = function (c){
+	var __that = this;
+	
+	UpgradeEditor.start(this.__car,                                                // error_upgrade_missing.jsxi:3
+		function (arg){                                                            // error_upgrade_missing.jsxi:3
+			if (fs.existsSync(__that.__car.upgrade)){                              // error_upgrade_missing.jsxi:4
+				c();                                                               // error_upgrade_missing.jsxi:5
+			}
+		});
+};
+MissingUpgradeIconFixer.prototype.__MissingUpgradeIconFixer_makeIndependent = function (c){
+	this.__car.changeParent(null);                                                 // error_upgrade_missing.jsxi:11
+	c();                                                                           // error_upgrade_missing.jsxi:12
+};
+Object.defineProperty(MissingUpgradeIconFixer.prototype, 
+	'__title', 
+	{
+		get: (function (){
+			return 'Upgrade icon missing';                                         // error_upgrade_missing.jsxi:15
+		})
+	});
+Object.defineProperty(MissingUpgradeIconFixer.prototype, 
+	'__solutions', 
+	{
+		get: (function (){
+			var __that = this;
+			return [
+				{
+					name: 'Create new',                                            // error_upgrade_missing.jsxi:17
+					fn: __bindOnce(this, '__MissingUpgradeIconFixer_newIcon')
+				}, 
+				{
+					name: 'Make independent',                                      // error_upgrade_missing.jsxi:18
+					fn: __bindOnce(this, '__MissingUpgradeIconFixer_makeIndependent')
+				}
+			].concat(AbstractFixer.__tryToRestoreFile(this.__car.upgrade,          // error_upgrade_missing.jsxi:19
+				function (arg){                                                    // error_upgrade_missing.jsxi:20
+					return arg.isFile() && arg.size > 1e3 && arg.size < 1e5;       // error_upgrade_missing.jsxi:20
+				}, 
+				function (c){                                                      // error_upgrade_missing.jsxi:21
+					__that.__car.updateUpgrade();                                  // error_upgrade_missing.jsxi:22
+				}));
+		})
+	});
+
+RestorationWizard.register('parent-upgrade-missing', MissingUpgradeIconFixer);     // error_upgrade_missing.jsxi:26
+
 /* Class "ViewDetails" declaration */
 var ViewDetails = (function (){                                                    // view_details.jsxi:1
 	var ViewDetails = function (){}, 
@@ -2392,89 +2939,92 @@ var ViewDetails = (function (){                                                 
 		if (car.error.length > 0){                                                 // view_details.jsxi:19
 			er.show().html('Errors:<ul>' + car.error.map(function (e){             // view_details.jsxi:20
 				return '<li><a href="#" data-error-id="' + e.id + '">' + e.msg + '</a></li>';
-			}).join('') + '</ul>');                                                // view_details.jsxi:23
+			}).join('') + '</ul>');                                                // view_details.jsxi:22
 		} else {
-			er.hide();                                                             // view_details.jsxi:25
+			er.hide();                                                             // view_details.jsxi:24
 		}
 	}
 	
-	function outBadge(car){                                                        // view_details.jsxi:29
+	function outBadge(car){                                                        // view_details.jsxi:28
 		var lo = $('#selected-car-logo');
 		
-		if (car.hasError('badge-missing')){                                        // view_details.jsxi:31
-			lo.hide();                                                             // view_details.jsxi:32
+		if (car.hasError('badge-missing')){                                        // view_details.jsxi:30
+			lo.hide();                                                             // view_details.jsxi:31
 		} else {
-			lo.show().attr('src', car.badge.cssUrl());                             // view_details.jsxi:34
+			lo.show().attr('src', car.badge.cssUrl());                             // view_details.jsxi:33
 		}
 	}
 	
-	function outData(car){                                                         // view_details.jsxi:38
-		function val(e, s){                                                        // view_details.jsxi:39
-			if (typeof e === 'string')                                             // view_details.jsxi:40
-				e = $(e);                                                          // view_details.jsxi:40
+	function outData(car){                                                         // view_details.jsxi:37
+		function val(e, s){                                                        // view_details.jsxi:38
+			if (typeof e === 'string')                                             // view_details.jsxi:39
+				e = $(e);                                                          // view_details.jsxi:39
 			
-			if (e = e[0]){                                                         // view_details.jsxi:41
+			if (e = e[0]){                                                         // view_details.jsxi:40
 				var c = e.value;
 				
-				if (!s)                                                            // view_details.jsxi:43
-					s = '';                                                        // view_details.jsxi:43
+				if (!s)                                                            // view_details.jsxi:42
+					s = '';                                                        // view_details.jsxi:42
 				
-				if (c != s)                                                        // view_details.jsxi:44
-					e.value = s;                                                   // view_details.jsxi:44
+				if (c != s)                                                        // view_details.jsxi:43
+					e.value = s;                                                   // view_details.jsxi:43
 			}
 		}
 		
-		var he = $('#selected-car'),                                               // view_details.jsxi:48
-			de = $('#selected-car-desc'),                                          // view_details.jsxi:49
-			ta = $('#selected-car-tags'),                                          // view_details.jsxi:50
-			pr = $('#selected-car-properties');                                    // view_details.jsxi:51
+		var he = $('#selected-car'),                                               // view_details.jsxi:47
+			de = $('#selected-car-desc'),                                          // view_details.jsxi:48
+			ta = $('#selected-car-tags'),                                          // view_details.jsxi:49
+			pr = $('#selected-car-properties');                                    // view_details.jsxi:50
 		
-		he.attr('title', car.path);                                                // view_details.jsxi:52
+		he.attr('title', car.path);                                                // view_details.jsxi:51
 		
-		if (car.data){                                                             // view_details.jsxi:53
-			val(he.removeAttr('readonly'), car.data.name);                         // view_details.jsxi:54
-			val(de.removeAttr('readonly'), car.data.description);                  // view_details.jsxi:55
-			de.elastic();                                                          // view_details.jsxi:56
-			ta.show().find('li').remove();                                         // view_details.jsxi:58
-			car.data.tags.forEach((function (e){                                   // view_details.jsxi:59
-				$('<li>').text(e).insertBefore(this);                              // view_details.jsxi:60
-			}).bind(ta.find('input')));                                            // view_details.jsxi:61
-			updateTags(car.data.tags);                                             // view_details.jsxi:62
-			pr.show();                                                             // view_details.jsxi:64
-			val('#selected-car-brand', car.data.brand);                            // view_details.jsxi:65
-			val('#selected-car-class', car.data.class);                            // view_details.jsxi:66
-			val('#selected-car-bhp', car.data.specs.bhp);                          // view_details.jsxi:68
-			val('#selected-car-torque', car.data.specs.torque);                    // view_details.jsxi:69
-			val('#selected-car-weight', car.data.specs.weight);                    // view_details.jsxi:70
-			val('#selected-car-topspeed', car.data.specs.topspeed);                // view_details.jsxi:71
-			val('#selected-car-acceleration', car.data.specs.acceleration);        // view_details.jsxi:72
-			val('#selected-car-pwratio', car.data.specs.pwratio);                  // view_details.jsxi:73
-			updateParents(car);                                                    // view_details.jsxi:75
+		if (car.data){                                                             // view_details.jsxi:52
+			val(he.removeAttr('readonly'), car.data.name);                         // view_details.jsxi:53
+			val(de.removeAttr('readonly'), car.data.description);                  // view_details.jsxi:54
+			de.elastic();                                                          // view_details.jsxi:55
+			ta.show().find('li').remove();                                         // view_details.jsxi:57
+			car.data.tags.forEach((function (e){                                   // view_details.jsxi:58
+				$('<li>').text(e).insertBefore(this);                              // view_details.jsxi:59
+			}).bind(ta.find('input')));                                            // view_details.jsxi:60
+			updateTags(car.data.tags);                                             // view_details.jsxi:61
+			pr.show();                                                             // view_details.jsxi:63
+			val('#selected-car-brand', car.data.brand);                            // view_details.jsxi:64
+			val('#selected-car-class', car.data.class);                            // view_details.jsxi:65
+			val('#selected-car-bhp', car.data.specs.bhp);                          // view_details.jsxi:67
+			val('#selected-car-torque', car.data.specs.torque);                    // view_details.jsxi:68
+			val('#selected-car-weight', car.data.specs.weight);                    // view_details.jsxi:69
+			val('#selected-car-topspeed', car.data.specs.topspeed);                // view_details.jsxi:70
+			val('#selected-car-acceleration', car.data.specs.acceleration);        // view_details.jsxi:71
+			val('#selected-car-pwratio', car.data.specs.pwratio);                  // view_details.jsxi:72
+			updateParents(car);                                                    // view_details.jsxi:74
 			
-			if (car.parent && !car.hasError('upgrade-missing')){                   // view_details.jsxi:77
-				$('#selected-car-upgrade').show().attr('src', car.upgrade);        // view_details.jsxi:78
+			if (car.parent && !car.hasError('upgrade-missing')){                   // view_details.jsxi:76
+				$('#selected-car-upgrade').show().attr('src', car.upgrade);        // view_details.jsxi:77
 			} else {
-				$('#selected-car-upgrade').hide();                                 // view_details.jsxi:80
+				$('#selected-car-upgrade').hide();                                 // view_details.jsxi:79
 			}
 		} else {
-			he.attr('readonly', true).val(car.id);                                 // view_details.jsxi:83
-			de.attr('readonly', true).val('');                                     // view_details.jsxi:84
-			ta.hide();                                                             // view_details.jsxi:85
-			pr.hide();                                                             // view_details.jsxi:86
+			he.attr('readonly', true).val(car.id);                                 // view_details.jsxi:82
+			de.attr('readonly', true).val('');                                     // view_details.jsxi:83
+			ta.hide();                                                             // view_details.jsxi:84
+			pr.hide();                                                             // view_details.jsxi:85
 		}
 	}
 	
-	function outDisabled(car){                                                     // view_details.jsxi:90
-		$('#selected-car-disable').text(car.disabled ? 'Enable' : 'Disable');      // view_details.jsxi:91
-		$('#selected-car-header').toggleClass('disabled', car.disabled);           // view_details.jsxi:92
+	function outDisabled(car){                                                     // view_details.jsxi:89
+		$('#selected-car-disable').text(car.disabled ? 'Enable' : 'Disable');      // view_details.jsxi:90
+		$('#selected-car-header').toggleClass('disabled', car.disabled);           // view_details.jsxi:91
 	}
 	
-	function outChanged(car){                                                      // view_details.jsxi:95
-		$('#selected-car-header').toggleClass('changed', car.changed);             // view_details.jsxi:96
+	function outChanged(car){                                                      // view_details.jsxi:94
+		$('#selected-car-header').toggleClass('changed', car.changed);             // view_details.jsxi:95
 	}
 	
-	function outSkins(car){                                                        // view_details.jsxi:99
-		setTimeout(function (){                                                    // view_details.jsxi:100
+	function outSkins(car){                                                        // view_details.jsxi:98
+		setTimeout(function (){                                                    // view_details.jsxi:99
+			if (car !== _selected)                                                 // view_details.jsxi:100
+				return;
+			
 			var sa = $('#selected-car-skins-article'),                             // view_details.jsxi:101
 				sp = $('#selected-car-preview'),                                   // view_details.jsxi:102
 				ss = $('#selected-car-skins');                                     // view_details.jsxi:103
@@ -2682,61 +3232,61 @@ var ViewDetails = (function (){                                                 
 				menu.popup(e.clientX, e.clientY);                                  // view_details.jsxi:289
 				return false;
 			});
-		$('#selected-car-parent').on('change',                                     // view_details.jsxi:293
+		$('#selected-car-class').on('keydown',                                     // view_details.jsxi:293
 			function (e){                                                          // view_details.jsxi:294
-				if (!_selected)                                                    // view_details.jsxi:295
-					return;
-				
-				var t = this, v = this.value || null;
-				
-				if (v && !fs.existsSync(_selected.upgrade)){                       // view_details.jsxi:298
-					UpgradeEditor.start(_selected,                                 // view_details.jsxi:299
-						function (arg){                                            // view_details.jsxi:299
-							if (fs.existsSync(_selected.upgrade)){                 // view_details.jsxi:300
-								fn();                                              // view_details.jsxi:301
-							} else {
-								t.value = '';                                      // view_details.jsxi:303
-							}
-						});
-				} else {
-					fn();                                                          // view_details.jsxi:307
-				}
-				
-				function fn(){                                                     // view_details.jsxi:310
-					_selected.changeParent(v);                                     // view_details.jsxi:311
-				}
-			});
-		$('#selected-car-class').on('keydown',                                     // view_details.jsxi:315
-			function (e){                                                          // view_details.jsxi:316
-				if (e.keyCode == 13){                                              // view_details.jsxi:317
-					this.blur();                                                   // view_details.jsxi:318
+				if (e.keyCode == 13){                                              // view_details.jsxi:295
+					this.blur();                                                   // view_details.jsxi:296
 					return false;
 				}
-			}).on('change',                                                        // view_details.jsxi:322
-			function (){                                                           // view_details.jsxi:322
-				if (!_selected || this.readonly)                                   // view_details.jsxi:323
+			}).on('change',                                                        // view_details.jsxi:300
+			function (){                                                           // view_details.jsxi:300
+				if (!_selected || this.readonly)                                   // view_details.jsxi:301
 					return;
 				
-				Cars.changeData(_selected, 'class', this.value);                   // view_details.jsxi:324
-			}).on('contextmenu',                                                   // view_details.jsxi:326
-			function (e){                                                          // view_details.jsxi:326
-				if (!_selected || !_selected.data)                                 // view_details.jsxi:327
+				Cars.changeData(_selected, 'class', this.value);                   // view_details.jsxi:302
+			}).on('contextmenu',                                                   // view_details.jsxi:304
+			function (e){                                                          // view_details.jsxi:304
+				if (!_selected || !_selected.data)                                 // view_details.jsxi:305
 					return;
 				
 				var menu = new gui.Menu();
 				
-				menu.append(new gui.MenuItem({                                     // view_details.jsxi:330
-					label: 'Filter Class',                                         // view_details.jsxi:330
-					key: 'F',                                                      // view_details.jsxi:330
-					click: (function (){                                           // view_details.jsxi:330
-						if (!_selected)                                            // view_details.jsxi:331
+				menu.append(new gui.MenuItem({                                     // view_details.jsxi:308
+					label: 'Filter Class',                                         // view_details.jsxi:308
+					key: 'F',                                                      // view_details.jsxi:308
+					click: (function (){                                           // view_details.jsxi:308
+						if (!_selected)                                            // view_details.jsxi:309
 							return;
 						
-						ViewList.addFilter('class:' + _selected.data.class);       // view_details.jsxi:332
+						ViewList.addFilter('class:' + _selected.data.class);       // view_details.jsxi:310
 					})
 				}));
-				menu.popup(e.clientX, e.clientY);                                  // view_details.jsxi:335
+				menu.popup(e.clientX, e.clientY);                                  // view_details.jsxi:313
 				return false;
+			});
+		$('#selected-car-parent').on('change',                                     // view_details.jsxi:317
+			function (e){                                                          // view_details.jsxi:318
+				if (!_selected)                                                    // view_details.jsxi:319
+					return;
+				
+				var t = this, v = this.value || null;
+				
+				if (v && !fs.existsSync(_selected.upgrade)){                       // view_details.jsxi:322
+					UpgradeEditor.start(_selected,                                 // view_details.jsxi:323
+						function (arg){                                            // view_details.jsxi:323
+							if (fs.existsSync(_selected.upgrade)){                 // view_details.jsxi:324
+								fn();                                              // view_details.jsxi:325
+							} else {
+								t.value = '';                                      // view_details.jsxi:327
+							}
+						});
+				} else {
+					fn();                                                          // view_details.jsxi:331
+				}
+				
+				function fn(){                                                     // view_details.jsxi:334
+					_selected.changeParent(v);                                     // view_details.jsxi:335
+				}
 			});
 		[
 			'bhp',                                                                 // view_details.jsxi:339
@@ -2855,112 +3405,122 @@ var ViewDetails = (function (){                                                 
 				
 				Cars.selectSkin(_selected, id);                                    // view_details.jsxi:425
 			});
-		$(window).on('keydown',                                                    // view_details.jsxi:429
-			function (e){                                                          // view_details.jsxi:430
-				if (!_selected)                                                    // view_details.jsxi:431
+		$('#selected-car-error').click(function (e){                               // view_details.jsxi:429
+			if (!_selected)                                                        // view_details.jsxi:430
+				return;
+			
+			var id = e.target.getAttribute('data-error-id');
+			
+			if (id){                                                               // view_details.jsxi:432
+				RestorationWizard.fix(_selected, id);                              // view_details.jsxi:433
+			}
+		});
+		$(window).on('keydown',                                                    // view_details.jsxi:438
+			function (e){                                                          // view_details.jsxi:439
+				if (!_selected)                                                    // view_details.jsxi:440
 					return;
 				
-				if (e.keyCode == 83 && e.ctrlKey){                                 // view_details.jsxi:433
-					Cars.save(_selected);                                          // view_details.jsxi:435
+				if (e.keyCode == 83 && e.ctrlKey){                                 // view_details.jsxi:442
+					Cars.save(_selected);                                          // view_details.jsxi:444
 					return false;
 				}
 			});
 		
 		var cmIgnore = false;
 		
-		$('main').on('contextmenu',                                                // view_details.jsxi:442
-			function (){                                                           // view_details.jsxi:443
-				this.querySelector('footer').classList.toggle('active');           // view_details.jsxi:444
-				cmIgnore = true;                                                   // view_details.jsxi:445
+		$('main').on('contextmenu',                                                // view_details.jsxi:451
+			function (){                                                           // view_details.jsxi:452
+				this.querySelector('footer').classList.toggle('active');           // view_details.jsxi:453
+				cmIgnore = true;                                                   // view_details.jsxi:454
 			});
-		$(window).on('click contextmenu',                                          // view_details.jsxi:448
-			(function (e){                                                         // view_details.jsxi:449
-				if (cmIgnore){                                                     // view_details.jsxi:450
-					cmIgnore = false;                                              // view_details.jsxi:451
-				} else if (e.target !== this){                                     // view_details.jsxi:452
-					this.classList.remove('active');                               // view_details.jsxi:453
+		$(window).on('click contextmenu',                                          // view_details.jsxi:457
+			(function (e){                                                         // view_details.jsxi:458
+				if (cmIgnore){                                                     // view_details.jsxi:459
+					cmIgnore = false;                                              // view_details.jsxi:460
+				} else if (e.target !== this){                                     // view_details.jsxi:461
+					this.classList.remove('active');                               // view_details.jsxi:462
 				}
-			}).bind($('main footer')[0]));                                         // view_details.jsxi:455
-		$('#selected-car-open-directory').click(function (){                       // view_details.jsxi:458
-			if (!_selected)                                                        // view_details.jsxi:459
+			}).bind($('main footer')[0]));                                         // view_details.jsxi:464
+		$('#selected-car-open-directory').click(function (){                       // view_details.jsxi:467
+			if (!_selected)                                                        // view_details.jsxi:468
 				return;
 			
-			Shell.openItem(_selected.path);                                        // view_details.jsxi:460
+			Shell.openItem(_selected.path);                                        // view_details.jsxi:469
 		});
-		$('#selected-car-showroom').click(function (){                             // view_details.jsxi:463
-			if (!_selected)                                                        // view_details.jsxi:464
+		$('#selected-car-showroom').click(function (){                             // view_details.jsxi:472
+			if (!_selected)                                                        // view_details.jsxi:473
 				return;
 			
-			AcShowroom.start(_selected);                                           // view_details.jsxi:465
+			AcShowroom.start(_selected);                                           // view_details.jsxi:474
 		});
-		$('#selected-car-showroom-select').click(function (){                      // view_details.jsxi:468
-			if (!_selected)                                                        // view_details.jsxi:469
+		$('#selected-car-showroom-select').click(function (){                      // view_details.jsxi:477
+			if (!_selected)                                                        // view_details.jsxi:478
 				return;
 			
-			AcShowroom.select(_selected);                                          // view_details.jsxi:470
+			AcShowroom.select(_selected);                                          // view_details.jsxi:479
 		});
-		$('#selected-car-practice').click(function (){                             // view_details.jsxi:473
-			if (!_selected)                                                        // view_details.jsxi:474
+		$('#selected-car-practice').click(function (){                             // view_details.jsxi:482
+			if (!_selected)                                                        // view_details.jsxi:483
 				return;
 			
-			AcPractice.start(_selected);                                           // view_details.jsxi:475
+			AcPractice.start(_selected);                                           // view_details.jsxi:484
 		});
-		$('#selected-car-practice-select').click(function (){                      // view_details.jsxi:478
-			if (!_selected)                                                        // view_details.jsxi:479
+		$('#selected-car-practice-select').click(function (){                      // view_details.jsxi:487
+			if (!_selected)                                                        // view_details.jsxi:488
 				return;
 			
-			AcPractice.select(_selected);                                          // view_details.jsxi:480
+			AcPractice.select(_selected);                                          // view_details.jsxi:489
 		});
-		$('#selected-car-reload').click(function (){                               // view_details.jsxi:483
-			if (!_selected)                                                        // view_details.jsxi:484
+		$('#selected-car-reload').click(function (){                               // view_details.jsxi:492
+			if (!_selected)                                                        // view_details.jsxi:493
 				return;
 			
-			if (_selected.changed){                                                // view_details.jsxi:486
-				new Dialog('Reload',                                               // view_details.jsxi:487
+			if (_selected.changed){                                                // view_details.jsxi:495
+				new Dialog('Reload',                                               // view_details.jsxi:496
 					[ 'Your changes will be lost. Are you sure?' ], 
-					reload);                                                       // view_details.jsxi:489
+					reload);                                                       // view_details.jsxi:498
 			} else {
-				reload();                                                          // view_details.jsxi:491
+				reload();                                                          // view_details.jsxi:500
 			}
 			
-			function reload(){                                                     // view_details.jsxi:494
-				Cars.reload(_selected);                                            // view_details.jsxi:495
+			function reload(){                                                     // view_details.jsxi:503
+				Cars.reload(_selected);                                            // view_details.jsxi:504
 			}
 		});
-		$('#selected-car-disable').click(function (){                              // view_details.jsxi:500
-			if (!_selected)                                                        // view_details.jsxi:501
+		$('#selected-car-disable').click(function (){                              // view_details.jsxi:509
+			if (!_selected)                                                        // view_details.jsxi:510
 				return;
 			
-			Cars.toggle(_selected);                                                // view_details.jsxi:502
+			Cars.toggle(_selected);                                                // view_details.jsxi:511
 		});
-		$('#selected-car-update-previews').click(function (){                      // view_details.jsxi:505
-			if (!_selected)                                                        // view_details.jsxi:506
+		$('#selected-car-update-previews').click(function (){                      // view_details.jsxi:514
+			if (!_selected)                                                        // view_details.jsxi:515
 				return;
 			
-			AcShowroom.shot(_selected);                                            // view_details.jsxi:507
+			AcShowroom.shot(_selected);                                            // view_details.jsxi:516
 		});
-		$('#selected-car-update-previews-manual').click(function (){               // view_details.jsxi:510
-			if (!_selected)                                                        // view_details.jsxi:511
+		$('#selected-car-update-previews-manual').click(function (){               // view_details.jsxi:519
+			if (!_selected)                                                        // view_details.jsxi:520
 				return;
 			
-			AcShowroom.shot(_selected, true);                                      // view_details.jsxi:512
+			AcShowroom.shot(_selected, true);                                      // view_details.jsxi:521
 		});
-		$('#selected-car-update-description').click(function (){                   // view_details.jsxi:515
-			if (!_selected)                                                        // view_details.jsxi:516
+		$('#selected-car-update-description').click(function (){                   // view_details.jsxi:524
+			if (!_selected)                                                        // view_details.jsxi:525
 				return;
 			
-			UpdateDescription.update(_selected);                                   // view_details.jsxi:517
+			UpdateDescription.update(_selected);                                   // view_details.jsxi:526
 		});
-		$('#selected-car-save').click(function (){                                 // view_details.jsxi:520
-			if (!_selected)                                                        // view_details.jsxi:521
+		$('#selected-car-save').click(function (){                                 // view_details.jsxi:529
+			if (!_selected)                                                        // view_details.jsxi:530
 				return;
 			
-			Cars.save(_selected);                                                  // view_details.jsxi:522
+			Cars.save(_selected);                                                  // view_details.jsxi:531
 		});
 	}
 	
-	(function (){                                                                  // view_details.jsxi:526
-		$(init);                                                                   // view_details.jsxi:527
+	(function (){                                                                  // view_details.jsxi:535
+		$(init);                                                                   // view_details.jsxi:536
 	})();
 	return ViewDetails;
 })();
@@ -2972,11 +3532,11 @@ var ViewList = (function (){                                                    
 		_selected,                                                                 // view_list.jsxi:4
 		_aside = $(document.getElementsByTagName('aside')[0]),                     // view_list.jsxi:5
 		_node = $(document.getElementById('cars-list')),                           // view_list.jsxi:6
-		_sortFn = {                                                                // view_list.jsxi:88
-			id: (function (a, b){                                                  // view_list.jsxi:88
+		_sortFn = {                                                                // view_list.jsxi:108
+			id: (function (a, b){                                                  // view_list.jsxi:108
 				return !a.disabled && b.disabled ? - 1 : a.disabled && !b.disabled ? 1 : a.id.localeCompare(b.id);
 			}), 
-			displayName: (function (a, b){                                         // view_list.jsxi:92
+			displayName: (function (a, b){                                         // view_list.jsxi:112
 				return !a.disabled && b.disabled ? - 1 : a.disabled && !b.disabled ? 1 : a.displayName.localeCompare(b.displayName);
 			})
 		};
@@ -2987,54 +3547,80 @@ var ViewList = (function (){                                                    
 		if (!n)                                                                    // view_list.jsxi:10
 			return;
 		
+		while (n && n.parentNode !== _node[0])                                     // view_list.jsxi:12
+			n = n.parentNode;                                                      // view_list.jsxi:13
+		
 		var p = n.offsetTop - n.parentNode.scrollTop;
 		
-		if (p < 10){                                                               // view_list.jsxi:13
-			n.parentNode.scrollTop += p - 10;                                      // view_list.jsxi:14
-		} else if (p > n.parentNode.offsetHeight - 30){                            // view_list.jsxi:15
-			n.parentNode.scrollTop += p + 30 - n.parentNode.offsetHeight;          // view_list.jsxi:16
+		if (p < 50){                                                               // view_list.jsxi:16
+			n.parentNode.scrollTop += p - 50;                                      // view_list.jsxi:17
+		} else if (p > n.parentNode.offsetHeight - 80){                            // view_list.jsxi:18
+			n.parentNode.scrollTop += p + 80 - n.parentNode.offsetHeight;          // view_list.jsxi:19
 		}
 	}
 	
-	ViewList.select = function (car){                                              // view_list.jsxi:21
-		_selected = car;                                                           // view_list.jsxi:22
-		_node.find('.expand').removeClass('expand');                               // view_list.jsxi:23
-		_node.find('.selected').removeClass('selected');                           // view_list.jsxi:24
+	ViewList.select = function (car){                                              // view_list.jsxi:23
+		_selected = car;                                                           // view_list.jsxi:24
+		_node.find('.expand').removeClass('expand');                               // view_list.jsxi:25
+		_node.find('.selected').removeClass('selected');                           // view_list.jsxi:26
 		
-		if (car){                                                                  // view_list.jsxi:26
+		if (car){                                                                  // view_list.jsxi:28
+			localStorage.selectedCar = car.id;                                     // view_list.jsxi:29
+			
 			var n = _node.find('[data-id="' + car.id + '"]').addClass('expand').parent().addClass('selected')[0];
 			
-			if (car.parent){                                                       // view_list.jsxi:28
+			if (car.parent){                                                       // view_list.jsxi:32
 				n = _node.find('[data-id="' + car.parent.id + '"]').addClass('expand')[0];
 			}
 			
-			scrollToSelected();                                                    // view_list.jsxi:32
+			scrollToSelected();                                                    // view_list.jsxi:36
 		}
 		
-		mediator.dispatch('select', car);                                          // view_list.jsxi:35
+		mediator.dispatch('select', car);                                          // view_list.jsxi:39
 	};
-	ViewList.filter = function (v){                                                // view_list.jsxi:38
+	ViewList.selectNear = function (d){                                            // view_list.jsxi:42
+		if (!_selected)                                                            // view_list.jsxi:43
+			return ViewList.select(Cars.list[0]);
+		
+		var n = _node[0].querySelectorAll('[data-id]');
+		
+		for (var p, i = 0; i < n.length; i ++){                                    // view_list.jsxi:46
+			if (n[i].getAttribute('data-id') === _selected.id){                    // view_list.jsxi:47
+				p = i;                                                             // view_list.jsxi:48
+				
+				break;
+			}
+		}
+		
+		if (p == null)                                                             // view_list.jsxi:53
+			return;
+		
+		var j = n[(p + d + n.length) % n.length].getAttribute('data-id');
+		
+		ViewList.select(Cars.byName(j));
+	};
+	ViewList.filter = function (v){                                                // view_list.jsxi:58
 		var i = _aside.find('#cars-list-filter')[0];
 		
-		if (i.value != v){                                                         // view_list.jsxi:40
-			i.value = v;                                                           // view_list.jsxi:41
+		if (i.value != v){                                                         // view_list.jsxi:60
+			i.value = v;                                                           // view_list.jsxi:61
 		}
 		
-		if (v){                                                                    // view_list.jsxi:44
-			i.style.display = 'block';                                             // view_list.jsxi:45
+		if (v){                                                                    // view_list.jsxi:64
+			i.style.display = 'block';                                             // view_list.jsxi:65
 			
 			var s = v.trim().split(/\s+/);
 			
 			var bb = '', cc = '';
 			
-			var vv = s.filter(function (e){                                        // view_list.jsxi:50
-				if (/^brand:(.*)/.test(e)){                                        // view_list.jsxi:51
-					bb = (bb && bb + '|') + RegExp.$1;                             // view_list.jsxi:52
+			var vv = s.filter(function (e){                                        // view_list.jsxi:70
+				if (/^brand:(.*)/.test(e)){                                        // view_list.jsxi:71
+					bb = (bb && bb + '|') + RegExp.$1;                             // view_list.jsxi:72
 					return false;
 				}
 				
-				if (/^class:(.*)/.test(e)){                                        // view_list.jsxi:56
-					cc = (cc && cc + '|') + RegExp.$1;                             // view_list.jsxi:57
+				if (/^class:(.*)/.test(e)){                                        // view_list.jsxi:76
+					cc = (cc && cc + '|') + RegExp.$1;                             // view_list.jsxi:77
 					return false;
 				}
 				return true;
@@ -3046,237 +3632,247 @@ var ViewList = (function (){                                                    
 			
 			var c = cc && RegExp.fromQuery(cc, true);
 			
-			var f = function (car){                                                // view_list.jsxi:68
-				if (b && (!car.data || !b.test(car.data.brand)))                   // view_list.jsxi:69
+			var f = function (car){                                                // view_list.jsxi:88
+				if (b && (!car.data || !b.test(car.data.brand)))                   // view_list.jsxi:89
 					return false;
 				
-				if (c && (!car.data || !c.test(car.data.class)))                   // view_list.jsxi:70
+				if (c && (!car.data || !c.test(car.data.class)))                   // view_list.jsxi:90
 					return false;
-				return r.test(car.id) || car.data && r.test(car.data.name);        // view_list.jsxi:71
+				return r.test(car.id) || car.data && r.test(car.data.name);        // view_list.jsxi:91
 			};
 			
-			_aside.find('#cars-list > div > [data-id]').each(function (){          // view_list.jsxi:74
+			_aside.find('#cars-list > div > [data-id]').each(function (){          // view_list.jsxi:94
 				this.parentNode.style.display = f(Cars.byName(this.getAttribute('data-id'))) ? null : 'none';
 			});
 		} else {
-			i.style.display = 'hide';                                              // view_list.jsxi:78
-			_aside.find('#cars-list > div').show();                                // view_list.jsxi:79
+			i.style.display = 'hide';                                              // view_list.jsxi:98
+			_aside.find('#cars-list > div').show();                                // view_list.jsxi:99
 		}
 	};
-	ViewList.addFilter = function (v){                                             // view_list.jsxi:83
+	ViewList.addFilter = function (v){                                             // view_list.jsxi:103
 		var a = _aside.find('#cars-list-filter')[0].value;
 		
 		ViewList.filter((a && a + ' ') + v);
 	};
-	ViewList.sort = function (){                                                   // view_list.jsxi:96
+	ViewList.sort = function (){                                                   // view_list.jsxi:116
 		var c = Cars.list.sort(_sortFn.displayName);
 		
 		var n = _node[0];
 		
 		var a = n.children;
 		
-		c.forEach(function (arg){                                                  // view_list.jsxi:101
-			for (var __1 = 0; __1 < a.length; __1 ++){                             // view_list.jsxi:102
-				var s = a[__1];
+		c.forEach(function (arg){                                                  // view_list.jsxi:121
+			for (var __2 = 0; __2 < a.length; __2 ++){                             // view_list.jsxi:122
+				var s = a[__2];
 				
-				if (s.children[0].getAttribute('data-id') == arg.id){              // view_list.jsxi:103
-					n.appendChild(s);                                              // view_list.jsxi:104
+				if (s.children[0].getAttribute('data-id') == arg.id){              // view_list.jsxi:123
+					n.appendChild(s);                                              // view_list.jsxi:124
 					return;
 				}
 			}
 		});
-		scrollToSelected();                                                        // view_list.jsxi:110
+		scrollToSelected();                                                        // view_list.jsxi:130
 	};
 	
-	function init(){                                                               // view_list.jsxi:113
-		Cars.on('scan:start',                                                      // view_list.jsxi:114
-			function (){                                                           // view_list.jsxi:115
-				_aside.find('#cars-list').empty();                                 // view_list.jsxi:116
-				document.body.removeChild(_aside[0]);                              // view_list.jsxi:117
-			}).on('scan:ready',                                                    // view_list.jsxi:119
-			function (list){                                                       // view_list.jsxi:119
-				$('#total-cars').val(list.filter(function (e){                     // view_list.jsxi:120
-					return e.parent == null;                                       // view_list.jsxi:121
-				}).length).attr('title',                                           // view_list.jsxi:122
-					'Including modded versions: {0}'.format(list.length));         // view_list.jsxi:122
-				
-				if (list.length > 0){                                              // view_list.jsxi:124
-					ViewList.select(list[0]);
-				}
-				
+	function init(){                                                               // view_list.jsxi:133
+		Cars.on('scan:start',                                                      // view_list.jsxi:134
+			function (){                                                           // view_list.jsxi:135
+				_aside.find('#cars-list').empty();                                 // view_list.jsxi:136
+				document.body.removeChild(_aside[0]);                              // view_list.jsxi:137
+			}).on('scan:ready',                                                    // view_list.jsxi:139
+			function (list){                                                       // view_list.jsxi:139
+				$('#total-cars').val(list.filter(function (e){                     // view_list.jsxi:140
+					return e.parent == null;                                       // view_list.jsxi:141
+				}).length).attr('title',                                           // view_list.jsxi:142
+					'Including modded versions: {0}'.format(list.length));         // view_list.jsxi:142
 				ViewList.sort();
-				document.body.appendChild(_aside[0]);                              // view_list.jsxi:129
-			}).on('new.car',                                                       // view_list.jsxi:131
-			function (car){                                                        // view_list.jsxi:131
+				document.body.appendChild(_aside[0]);                              // view_list.jsxi:145
+				
+				if (list.length > 0){                                              // view_list.jsxi:147
+					ViewList.select(Cars.byName(localStorage.selectedCar) || list[0]);
+				}
+			}).on('new.car',                                                       // view_list.jsxi:151
+			function (car){                                                        // view_list.jsxi:151
 				var s = document.createElement('span');
 				
-				s.textContent = car.displayName;                                   // view_list.jsxi:133
+				s.textContent = car.displayName;                                   // view_list.jsxi:153
 				
-				if (car.disabled)                                                  // view_list.jsxi:134
-					s.classList.add('disabled');                                   // view_list.jsxi:134
+				if (car.disabled)                                                  // view_list.jsxi:154
+					s.classList.add('disabled');                                   // view_list.jsxi:154
 				
-				s.setAttribute('title', car.path);                                 // view_list.jsxi:136
-				s.setAttribute('data-id', car.id);                                 // view_list.jsxi:137
-				s.setAttribute('data-name', car.id);                               // view_list.jsxi:138
-				s.setAttribute('data-path', car.path);                             // view_list.jsxi:139
+				s.setAttribute('title', car.path);                                 // view_list.jsxi:156
+				s.setAttribute('data-id', car.id);                                 // view_list.jsxi:157
+				s.setAttribute('data-name', car.id);                               // view_list.jsxi:158
+				s.setAttribute('data-path', car.path);                             // view_list.jsxi:159
 				
 				var d = document.createElement('div');
 				
-				d.appendChild(s);                                                  // view_list.jsxi:142
+				d.appendChild(s);                                                  // view_list.jsxi:162
 				
-				if (car.children.length > 0){                                      // view_list.jsxi:144
-					d.setAttribute('data-children', car.children.length + 1);      // view_list.jsxi:145
+				if (car.children.length > 0){                                      // view_list.jsxi:164
+					d.setAttribute('data-children', car.children.length + 1);      // view_list.jsxi:165
 				}
 				
-				_node[0].appendChild(d);                                           // view_list.jsxi:148
-			}).on('update.car.data',                                               // view_list.jsxi:150
-			function (car, upd){                                                   // view_list.jsxi:150
+				_node[0].appendChild(d);                                           // view_list.jsxi:168
+			}).on('update.car.data',                                               // view_list.jsxi:170
+			function (car, upd){                                                   // view_list.jsxi:170
 				_node.find('[data-id="' + car.id + '"]').text(car.displayName).attr('data-name', car.displayName.toLowerCase());
 				ViewList.filter(_aside.find('#cars-list-filter').val());
 				
-				if (upd === 'update.car.data:name'){                               // view_list.jsxi:155
+				if (upd === 'update.car.data:name'){                               // view_list.jsxi:175
 					ViewList.sort();
 				}
-			}).on('update.car.parent',                                             // view_list.jsxi:159
-			function (car){                                                        // view_list.jsxi:159
+			}).on('update.car.parent',                                             // view_list.jsxi:179
+			function (car){                                                        // view_list.jsxi:179
 				var d = _node[0].querySelector('[data-id="' + car.id + '"]').parentNode;
 				
-				if (car.error.length > 0){                                         // view_list.jsxi:161
+				if (car.error.length > 0){                                         // view_list.jsxi:181
 					var c = d.parentNode;
 					
 					if (c.tagName === 'DIV' && c.querySelectorAll('.error').length == 1){
-						c.classList.remove('error');                               // view_list.jsxi:164
+						c.classList.remove('error');                               // view_list.jsxi:184
 					}
 				}
 				
-				if (car.parent){                                                   // view_list.jsxi:168
+				if (car.parent){                                                   // view_list.jsxi:188
 					var p = _node[0].querySelector('[data-id="' + car.parent.id + '"]').parentNode;
 					
-					p.appendChild(d);                                              // view_list.jsxi:170
+					p.appendChild(d);                                              // view_list.jsxi:190
 					
-					if (d.classList.contains('error')){                            // view_list.jsxi:171
-						d.classList.remove('error');                               // view_list.jsxi:172
-						p.classList.add('error');                                  // view_list.jsxi:173
+					if (d.classList.contains('error')){                            // view_list.jsxi:191
+						d.classList.remove('error');                               // view_list.jsxi:192
+						p.classList.add('error');                                  // view_list.jsxi:193
 					}
 				} else {
-					_node[0].appendChild(d);                                       // view_list.jsxi:176
+					_node[0].appendChild(d);                                       // view_list.jsxi:196
 					ViewList.sort();
 				}
 				
-				scrollToSelected();                                                // view_list.jsxi:180
-			}).on('update.car.children',                                           // view_list.jsxi:182
-			function (car){                                                        // view_list.jsxi:182
+				scrollToSelected();                                                // view_list.jsxi:200
+			}).on('update.car.children',                                           // view_list.jsxi:202
+			function (car){                                                        // view_list.jsxi:202
 				var e = _node[0].querySelector('[data-id="' + car.id + '"]');
 				
-				if (!e)                                                            // view_list.jsxi:184
+				if (!e)                                                            // view_list.jsxi:204
 					return;
 				
-				if (car.children.length){                                          // view_list.jsxi:185
+				if (car.children.length){                                          // view_list.jsxi:205
 					e.parentNode.setAttribute('data-children', car.children.length + 1);
 				} else {
-					e.parentNode.removeAttribute('data-children');                 // view_list.jsxi:188
+					e.parentNode.removeAttribute('data-children');                 // view_list.jsxi:208
 				}
-			}).on('update.car.path',                                               // view_list.jsxi:191
-			function (car){                                                        // view_list.jsxi:191
+			}).on('update.car.path',                                               // view_list.jsxi:211
+			function (car){                                                        // view_list.jsxi:211
 				var e = _node[0].querySelector('[data-id="' + car.id + '"]');
 				
-				if (!e)                                                            // view_list.jsxi:193
+				if (!e)                                                            // view_list.jsxi:213
 					return;
 				
-				e.setAttribute('data-path', car.path);                             // view_list.jsxi:194
-				e.setAttribute('title', car.path);                                 // view_list.jsxi:195
-			}).on('update.car.disabled',                                           // view_list.jsxi:197
-			function (car){                                                        // view_list.jsxi:197
-				var e = _node[0].querySelector('[data-id="' + car.id + '"]');
-				
-				if (!e)                                                            // view_list.jsxi:199
-					return;
-				
-				if (car.disabled){                                                 // view_list.jsxi:200
-					e.classList.add('disabled');                                   // view_list.jsxi:201
-				} else {
-					e.classList.remove('disabled');                                // view_list.jsxi:203
-				}
-				
-				ViewList.sort();
-			}).on('update.car.changed',                                            // view_list.jsxi:208
-			function (car){                                                        // view_list.jsxi:208
-				var e = _node[0].querySelector('[data-id="' + car.id + '"]');
-				
-				if (!e)                                                            // view_list.jsxi:210
-					return;
-				
-				if (car.changed){                                                  // view_list.jsxi:211
-					e.classList.add('changed');                                    // view_list.jsxi:212
-				} else {
-					e.classList.remove('changed');                                 // view_list.jsxi:214
-				}
-			}).on('error',                                                         // view_list.jsxi:217
+				e.setAttribute('data-path', car.path);                             // view_list.jsxi:214
+				e.setAttribute('title', car.path);                                 // view_list.jsxi:215
+			}).on('update.car.disabled',                                           // view_list.jsxi:217
 			function (car){                                                        // view_list.jsxi:217
 				var e = _node[0].querySelector('[data-id="' + car.id + '"]');
 				
 				if (!e)                                                            // view_list.jsxi:219
 					return;
 				
-				if (car.error.length > 0){                                         // view_list.jsxi:220
-					e.classList.add('error');                                      // view_list.jsxi:221
+				if (car.disabled){                                                 // view_list.jsxi:220
+					e.classList.add('disabled');                                   // view_list.jsxi:221
 				} else {
-					e.classList.remove('error');                                   // view_list.jsxi:223
+					e.classList.remove('disabled');                                // view_list.jsxi:223
 				}
 				
-				while (e.parentNode.id !== 'cars-list'){                           // view_list.jsxi:226
-					e = e.parentNode;                                              // view_list.jsxi:227
+				ViewList.sort();
+			}).on('update.car.changed',                                            // view_list.jsxi:228
+			function (car){                                                        // view_list.jsxi:228
+				var e = _node[0].querySelector('[data-id="' + car.id + '"]');
+				
+				if (!e)                                                            // view_list.jsxi:230
+					return;
+				
+				if (car.changed){                                                  // view_list.jsxi:231
+					e.classList.add('changed');                                    // view_list.jsxi:232
+				} else {
+					e.classList.remove('changed');                                 // view_list.jsxi:234
+				}
+			}).on('error',                                                         // view_list.jsxi:237
+			function (car){                                                        // view_list.jsxi:237
+				var e = _node[0].querySelector('[data-id="' + car.id + '"]');
+				
+				if (!e)                                                            // view_list.jsxi:239
+					return;
+				
+				if (car.error.length > 0){                                         // view_list.jsxi:241
+					e.classList.add('error');                                      // view_list.jsxi:242
+				} else {
+					e.classList.remove('error');                                   // view_list.jsxi:244
 				}
 				
-				if (car.error.length > 0){                                         // view_list.jsxi:230
-					e.classList.add('error');                                      // view_list.jsxi:231
+				while (e.parentNode.id !== 'cars-list'){                           // view_list.jsxi:247
+					e = e.parentNode;                                              // view_list.jsxi:248
+				}
+				
+				if (car.error.length > 0){                                         // view_list.jsxi:251
+					e.classList.add('error');                                      // view_list.jsxi:252
 				} else {
-					e.classList.remove('error');                                   // view_list.jsxi:233
+					e.classList.remove('error');                                   // view_list.jsxi:254
 				}
 			});
 		_aside.find('#cars-list-filter').on('change paste keyup keypress search', 
-			function (e){                                                          // view_list.jsxi:238
-				if (e.keyCode == 13){                                              // view_list.jsxi:239
-					this.blur();                                                   // view_list.jsxi:240
+			function (e){                                                          // view_list.jsxi:259
+				if (e.keyCode == 13){                                              // view_list.jsxi:260
+					this.blur();                                                   // view_list.jsxi:261
 				}
 				
-				if (e.keyCode == 27){                                              // view_list.jsxi:243
-					this.value = '';                                               // view_list.jsxi:244
-					this.blur();                                                   // view_list.jsxi:245
+				if (e.keyCode == 27){                                              // view_list.jsxi:264
+					this.value = '';                                               // view_list.jsxi:265
+					this.blur();                                                   // view_list.jsxi:266
 				}
 				
 				ViewList.filter(this.value);
-			}).on('keydown',                                                       // view_list.jsxi:250
-			function (e){                                                          // view_list.jsxi:250
-				if (e.keyCode == 8 && !this.value){                                // view_list.jsxi:251
-					this.blur();                                                   // view_list.jsxi:252
+			}).on('keydown',                                                       // view_list.jsxi:271
+			function (e){                                                          // view_list.jsxi:271
+				if (e.keyCode == 8 && !this.value){                                // view_list.jsxi:272
+					this.blur();                                                   // view_list.jsxi:273
 				}
-			}).on('blur',                                                          // view_list.jsxi:255
-			function (){                                                           // view_list.jsxi:255
-				if (!this.value){                                                  // view_list.jsxi:256
-					$(this).hide();                                                // view_list.jsxi:257
+			}).on('blur',                                                          // view_list.jsxi:276
+			function (){                                                           // view_list.jsxi:276
+				if (!this.value){                                                  // view_list.jsxi:277
+					$(this).hide();                                                // view_list.jsxi:278
 				}
 			});
-		$(window).keydown(function (e){                                            // view_list.jsxi:262
-			if (Event.isSomeInput(e))                                              // view_list.jsxi:264
-				return;
-			
-			if (e.ctrlKey || e.altKey || e.shiftKey)                               // view_list.jsxi:265
-				return;
-			
-			var f = _aside.find('#cars-list-filter');
-			
-			if (/[a-zA-Z\d]/.test(String.fromCharCode(e.keyCode)) || e.keyCode == 8 && f.val()){
-				f.show()[0].focus();                                               // view_list.jsxi:268
-			}
+		$(window).on('keydown',                                                    // view_list.jsxi:283
+			function (e){                                                          // view_list.jsxi:284
+				if (Event.isSomeInput(e))                                          // view_list.jsxi:285
+					return;
+				
+				if (e.ctrlKey || e.altKey || e.shiftKey)                           // view_list.jsxi:286
+					return;
+				
+				var f = _aside.find('#cars-list-filter');
+				
+				if (/[a-zA-Z\d]/.test(String.fromCharCode(e.keyCode)) || e.keyCode == 8 && f.val()){
+					f.show()[0].focus();                                           // view_list.jsxi:290
+				}
+				
+				if (e.keyCode === 38){                                             // view_list.jsxi:293
+					ViewList.selectNear(- 1);
+					return false;
+				}
+				
+				if (e.keyCode === 40){                                             // view_list.jsxi:298
+					ViewList.selectNear(1);
+					return false;
+				}
+			});
+		_aside.find('#cars-list-filter-focus').click(function (){                  // view_list.jsxi:304
+			_aside.find('#cars-list-filter').show()[0].focus();                    // view_list.jsxi:305
 		});
-		_aside.find('#cars-list-filter-focus').click(function (){                  // view_list.jsxi:272
-			_aside.find('#cars-list-filter').show()[0].focus();                    // view_list.jsxi:273
-		});
-		_aside.find('#cars-list').click(function (e){                              // view_list.jsxi:277
+		_aside.find('#cars-list').click(function (e){                              // view_list.jsxi:309
 			var car = Cars.byName(e.target.getAttribute('data-id'));
 			
-			if (!car)                                                              // view_list.jsxi:279
+			if (!car)                                                              // view_list.jsxi:311
 				return;
 			
 			ViewList.select(car);
@@ -3284,44 +3880,44 @@ var ViewList = (function (){                                                    
 		
 		var cmIgnore = false;
 		
-		_aside.on('contextmenu',                                                   // view_list.jsxi:285
-			function (){                                                           // view_list.jsxi:286
-				this.querySelector('footer').classList.toggle('active');           // view_list.jsxi:287
-				cmIgnore = true;                                                   // view_list.jsxi:288
+		_aside.on('contextmenu',                                                   // view_list.jsxi:317
+			function (){                                                           // view_list.jsxi:318
+				this.querySelector('footer').classList.toggle('active');           // view_list.jsxi:319
+				cmIgnore = true;                                                   // view_list.jsxi:320
 			});
-		$(window).on('click contextmenu',                                          // view_list.jsxi:291
-			(function (e){                                                         // view_list.jsxi:292
-				if (cmIgnore){                                                     // view_list.jsxi:293
-					cmIgnore = false;                                              // view_list.jsxi:294
-				} else if (e.target !== this){                                     // view_list.jsxi:295
-					this.classList.remove('active');                               // view_list.jsxi:296
+		$(window).on('click contextmenu',                                          // view_list.jsxi:323
+			(function (e){                                                         // view_list.jsxi:324
+				if (cmIgnore){                                                     // view_list.jsxi:325
+					cmIgnore = false;                                              // view_list.jsxi:326
+				} else if (e.target !== this){                                     // view_list.jsxi:327
+					this.classList.remove('active');                               // view_list.jsxi:328
 				}
-			}).bind(_aside.find('footer')[0]));                                    // view_list.jsxi:298
-		_aside.find('#cars-list-open-directory').click(function (){                // view_list.jsxi:301
-			if (!_selected)                                                        // view_list.jsxi:302
+			}).bind(_aside.find('footer')[0]));                                    // view_list.jsxi:330
+		_aside.find('#cars-list-open-directory').click(function (){                // view_list.jsxi:333
+			if (!_selected)                                                        // view_list.jsxi:334
 				return;
 			
-			Shell.openItem(AcDir.cars);                                            // view_list.jsxi:303
+			Shell.openItem(AcDir.cars);                                            // view_list.jsxi:335
 		});
-		_aside.find('#cars-list-reload').click(function (){                        // view_list.jsxi:306
-			if (Cars.list.some(function (e){                                       // view_list.jsxi:307
-				return e.changed;                                                  // view_list.jsxi:308
+		_aside.find('#cars-list-reload').click(function (){                        // view_list.jsxi:338
+			if (Cars.list.some(function (e){                                       // view_list.jsxi:339
+				return e.changed;                                                  // view_list.jsxi:340
 			})){
-				new Dialog('Reload',                                               // view_list.jsxi:310
+				new Dialog('Reload',                                               // view_list.jsxi:342
 					[
 						'<p>{0}</p>'.format('Your changes will be lost. Are you sure?')
 					], 
-					reload);                                                       // view_list.jsxi:312
+					reload);                                                       // view_list.jsxi:344
 			} else {
-				reload();                                                          // view_list.jsxi:314
+				reload();                                                          // view_list.jsxi:346
 			}
 			
-			function reload(){                                                     // view_list.jsxi:317
-				Cars.reloadAll();                                                  // view_list.jsxi:318
+			function reload(){                                                     // view_list.jsxi:349
+				Cars.reloadAll();                                                  // view_list.jsxi:350
 			}
 		});
-		_aside.find('#cars-list-save').click(function (){                          // view_list.jsxi:323
-			Cars.saveAll();                                                        // view_list.jsxi:324
+		_aside.find('#cars-list-save').click(function (){                          // view_list.jsxi:355
+			Cars.saveAll();                                                        // view_list.jsxi:356
 		});
 	}
 	
@@ -3329,12 +3925,12 @@ var ViewList = (function (){                                                    
 		'selected', 
 		{
 			get: (function (){
-				return _selected;                                                  // view_list.jsxi:328
+				return _selected;                                                  // view_list.jsxi:360
 			})
 		});
-	(function (){                                                                  // view_list.jsxi:330
-		init();                                                                    // view_list.jsxi:331
-		mediator.extend(ViewList);                                                 // view_list.jsxi:332
+	(function (){                                                                  // view_list.jsxi:362
+		init();                                                                    // view_list.jsxi:363
+		mediator.extend(ViewList);                                                 // view_list.jsxi:364
 	})();
 	return ViewList;
 })();
@@ -3733,64 +4329,67 @@ $(window).on('keydown',                                                         
 		if (Event.isSomeInput(e))                                                  // app.jsxi:13
 			return;
 		
-		if (e.keyCode == 39){                                                      // app.jsxi:14
+		if (e.ctrlKey || e.altKey || e.shiftKey)                                   // app.jsxi:14
+			return;
+		
+		if (e.keyCode === 39){                                                     // app.jsxi:16
 			var l = $('[data-action="next"]');
 			
-			if (l[l.length - 1])                                                   // app.jsxi:16
-				l[l.length - 1].click();                                           // app.jsxi:16
+			if (l[l.length - 1])                                                   // app.jsxi:18
+				l[l.length - 1].click();                                           // app.jsxi:18
 		}
 		
-		if (e.keyCode == 37){                                                      // app.jsxi:18
+		if (e.keyCode === 37){                                                     // app.jsxi:21
 			var l = $('[data-action="prev"]');
 			
-			if (l[l.length - 1])                                                   // app.jsxi:20
-				l[l.length - 1].click();                                           // app.jsxi:20
+			if (l[l.length - 1])                                                   // app.jsxi:23
+				l[l.length - 1].click();                                           // app.jsxi:23
 		}
 	});
-AppWindow.on('close',                                                              // app.jsxi:24
-	function (){                                                                   // app.jsxi:25
-		if (Cars.list.filter(function (e){                                         // app.jsxi:26
-			return e.changed;                                                      // app.jsxi:27
-		}).length > 0){                                                            // app.jsxi:28
-			new Dialog('Close',                                                    // app.jsxi:29
+AppWindow.on('close',                                                              // app.jsxi:27
+	function (){                                                                   // app.jsxi:28
+		if (Cars.list.filter(function (e){                                         // app.jsxi:29
+			return e.changed;                                                      // app.jsxi:30
+		}).length > 0){                                                            // app.jsxi:31
+			new Dialog('Close',                                                    // app.jsxi:32
 				[ 'Unsaved changes will be lost. Are you sure?' ], 
-				function (){                                                       // app.jsxi:31
-					AppWindow.close(true);                                         // app.jsxi:32
+				function (){                                                       // app.jsxi:34
+					AppWindow.close(true);                                         // app.jsxi:35
 				});
 		} else {
-			AppWindow.close(true);                                                 // app.jsxi:35
+			AppWindow.close(true);                                                 // app.jsxi:38
 		}
 	});
-ViewList.on('select',                                                              // app.jsxi:39
-	function (car){                                                                // app.jsxi:40
-		AppWindow.title = car.data ? car.data.name : car.id;                       // app.jsxi:41
+ViewList.on('select',                                                              // app.jsxi:42
+	function (car){                                                                // app.jsxi:43
+		AppWindow.title = car.data ? car.data.name : car.id;                       // app.jsxi:44
 	});
-Cars.on('update.car.data',                                                         // app.jsxi:44
-	function (car){                                                                // app.jsxi:45
-		if (car === ViewList.selected){                                            // app.jsxi:46
-			AppWindow.title = car.data ? car.data.name : car.id;                   // app.jsxi:47
+Cars.on('update.car.data',                                                         // app.jsxi:47
+	function (car){                                                                // app.jsxi:48
+		if (car === ViewList.selected){                                            // app.jsxi:49
+			AppWindow.title = car.data ? car.data.name : car.id;                   // app.jsxi:50
 		}
 	});
 
 var first = true;
 
-AcDir.on('change',                                                                 // app.jsxi:52
-	function (){                                                                   // app.jsxi:53
-		Cars.scan();                                                               // app.jsxi:54
+AcDir.on('change',                                                                 // app.jsxi:55
+	function (){                                                                   // app.jsxi:56
+		Cars.scan();                                                               // app.jsxi:57
 		
-		if (first && !Settings.get('disableTips')){                                // app.jsxi:56
-			new Dialog('Tip',                                                      // app.jsxi:57
-				Tips.next,                                                         // app.jsxi:57
-				function (){                                                       // app.jsxi:57
-					this.find('p').html(Tips.next);                                // app.jsxi:58
-					this.find('h4').text('Another Tip');                           // app.jsxi:59
+		if (first && !Settings.get('disableTips')){                                // app.jsxi:59
+			new Dialog('Tip',                                                      // app.jsxi:60
+				Tips.next,                                                         // app.jsxi:60
+				function (){                                                       // app.jsxi:60
+					this.find('p').html(Tips.next);                                // app.jsxi:61
+					this.find('h4').text('Another Tip');                           // app.jsxi:62
 					return false;
-				}).setButton('Next').addButton('Disable Tips',                     // app.jsxi:61
-				function (){                                                       // app.jsxi:61
-					Settings.set('disableTips', true);                             // app.jsxi:62
-				}).find('p').css('maxWidth', 400);                                 // app.jsxi:63
-			first = false;                                                         // app.jsxi:65
+				}).setButton('Next').addButton('Disable Tips',                     // app.jsxi:64
+				function (){                                                       // app.jsxi:64
+					Settings.set('disableTips', true);                             // app.jsxi:65
+				}).find('p').css('maxWidth', 400);                                 // app.jsxi:66
+			first = false;                                                         // app.jsxi:68
 		}
 	});
-AcDir.init();                                                                      // app.jsxi:69
+AcDir.init();                                                                      // app.jsxi:72
 
