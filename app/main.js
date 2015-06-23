@@ -2390,577 +2390,577 @@ var ViewDetails = (function (){                                                 
 		var er = $('#selected-car-error');
 		
 		if (car.error.length > 0){                                                 // view_details.jsxi:19
-			er.show().html('Errors:<ul><li>' + car.error.map(function (e){         // view_details.jsxi:20
-				return e.msg;                                                      // view_details.jsxi:22
-			}).join('</li><li>') + '</li></ul>');                                  // view_details.jsxi:23
+			er.show().html('Errors:<ul>' + car.error.map(function (e){             // view_details.jsxi:20
+				return '<li><a href="#" data-error-id="' + e.id + '">' + e.msg + '</a></li>';
+			}).join('') + '</ul>');                                                // view_details.jsxi:23
 		} else {
 			er.hide();                                                             // view_details.jsxi:25
 		}
 	}
 	
-	function updateParents(car){                                                   // view_details.jsxi:29
-		var s = document.getElementById('selected-car-parent');
-		
-		if (!s)                                                                    // view_details.jsxi:31
-			return;
-		
-		if (car.children.length > 0){                                              // view_details.jsxi:33
-			s.parentNode.style.display = 'none';                                   // view_details.jsxi:34
-		} else {
-			s.parentNode.style.display = null;                                     // view_details.jsxi:36
-			s.innerHTML = '<option value="">None</option>' + Cars.list.filter(function (e){
-				return e.data && !e.disabled && e.parent == null && e.id != car.id && (!car.parent || car.parent.id != car.id);
-			}).map(function (e){                                                   // view_details.jsxi:40
-				return '<option value="{0}">{1}</option>'.format(e.id, e.data.name);
-			}).join('');                                                           // view_details.jsxi:42
-			s.value = car.parent && car.parent.id || '';                           // view_details.jsxi:44
-		}
-	}
-	
-	function outBadge(car){                                                        // view_details.jsxi:48
+	function outBadge(car){                                                        // view_details.jsxi:29
 		var lo = $('#selected-car-logo');
 		
-		if (car.hasError('badge-missing')){                                        // view_details.jsxi:50
-			lo.hide();                                                             // view_details.jsxi:51
+		if (car.hasError('badge-missing')){                                        // view_details.jsxi:31
+			lo.hide();                                                             // view_details.jsxi:32
 		} else {
-			lo.show().attr('src', car.badge.cssUrl());                             // view_details.jsxi:53
+			lo.show().attr('src', car.badge.cssUrl());                             // view_details.jsxi:34
 		}
 	}
 	
-	function outData(car){                                                         // view_details.jsxi:57
-		function val(e, s){                                                        // view_details.jsxi:58
-			if (typeof e === 'string')                                             // view_details.jsxi:59
-				e = $(e);                                                          // view_details.jsxi:59
+	function outData(car){                                                         // view_details.jsxi:38
+		function val(e, s){                                                        // view_details.jsxi:39
+			if (typeof e === 'string')                                             // view_details.jsxi:40
+				e = $(e);                                                          // view_details.jsxi:40
 			
-			if (e = e[0]){                                                         // view_details.jsxi:60
+			if (e = e[0]){                                                         // view_details.jsxi:41
 				var c = e.value;
 				
-				if (!s)                                                            // view_details.jsxi:62
-					s = '';                                                        // view_details.jsxi:62
+				if (!s)                                                            // view_details.jsxi:43
+					s = '';                                                        // view_details.jsxi:43
 				
-				if (c != s)                                                        // view_details.jsxi:63
-					e.value = s;                                                   // view_details.jsxi:63
+				if (c != s)                                                        // view_details.jsxi:44
+					e.value = s;                                                   // view_details.jsxi:44
 			}
 		}
 		
-		var he = $('#selected-car'),                                               // view_details.jsxi:67
-			de = $('#selected-car-desc'),                                          // view_details.jsxi:68
-			ta = $('#selected-car-tags'),                                          // view_details.jsxi:69
-			pr = $('#selected-car-properties');                                    // view_details.jsxi:70
+		var he = $('#selected-car'),                                               // view_details.jsxi:48
+			de = $('#selected-car-desc'),                                          // view_details.jsxi:49
+			ta = $('#selected-car-tags'),                                          // view_details.jsxi:50
+			pr = $('#selected-car-properties');                                    // view_details.jsxi:51
 		
-		he.attr('title', car.path);                                                // view_details.jsxi:71
+		he.attr('title', car.path);                                                // view_details.jsxi:52
 		
-		if (car.data){                                                             // view_details.jsxi:72
-			val(he.removeAttr('readonly'), car.data.name);                         // view_details.jsxi:73
-			val(de.removeAttr('readonly'), car.data.description);                  // view_details.jsxi:74
-			de.elastic();                                                          // view_details.jsxi:75
-			ta.show().find('li').remove();                                         // view_details.jsxi:77
-			car.data.tags.forEach((function (e){                                   // view_details.jsxi:78
-				$('<li>').text(e).insertBefore(this);                              // view_details.jsxi:79
-			}).bind(ta.find('input')));                                            // view_details.jsxi:80
-			updateTags(car.data.tags);                                             // view_details.jsxi:81
-			pr.show();                                                             // view_details.jsxi:83
-			val('#selected-car-brand', car.data.brand);                            // view_details.jsxi:84
-			val('#selected-car-class', car.data.class);                            // view_details.jsxi:85
-			val('#selected-car-bhp', car.data.specs.bhp);                          // view_details.jsxi:87
-			val('#selected-car-torque', car.data.specs.torque);                    // view_details.jsxi:88
-			val('#selected-car-weight', car.data.specs.weight);                    // view_details.jsxi:89
-			val('#selected-car-topspeed', car.data.specs.topspeed);                // view_details.jsxi:90
-			val('#selected-car-acceleration', car.data.specs.acceleration);        // view_details.jsxi:91
-			val('#selected-car-pwratio', car.data.specs.pwratio);                  // view_details.jsxi:92
-			updateParents(car);                                                    // view_details.jsxi:94
+		if (car.data){                                                             // view_details.jsxi:53
+			val(he.removeAttr('readonly'), car.data.name);                         // view_details.jsxi:54
+			val(de.removeAttr('readonly'), car.data.description);                  // view_details.jsxi:55
+			de.elastic();                                                          // view_details.jsxi:56
+			ta.show().find('li').remove();                                         // view_details.jsxi:58
+			car.data.tags.forEach((function (e){                                   // view_details.jsxi:59
+				$('<li>').text(e).insertBefore(this);                              // view_details.jsxi:60
+			}).bind(ta.find('input')));                                            // view_details.jsxi:61
+			updateTags(car.data.tags);                                             // view_details.jsxi:62
+			pr.show();                                                             // view_details.jsxi:64
+			val('#selected-car-brand', car.data.brand);                            // view_details.jsxi:65
+			val('#selected-car-class', car.data.class);                            // view_details.jsxi:66
+			val('#selected-car-bhp', car.data.specs.bhp);                          // view_details.jsxi:68
+			val('#selected-car-torque', car.data.specs.torque);                    // view_details.jsxi:69
+			val('#selected-car-weight', car.data.specs.weight);                    // view_details.jsxi:70
+			val('#selected-car-topspeed', car.data.specs.topspeed);                // view_details.jsxi:71
+			val('#selected-car-acceleration', car.data.specs.acceleration);        // view_details.jsxi:72
+			val('#selected-car-pwratio', car.data.specs.pwratio);                  // view_details.jsxi:73
+			updateParents(car);                                                    // view_details.jsxi:75
 			
-			if (car.parent && !car.hasError('upgrade-missing')){                   // view_details.jsxi:96
-				$('#selected-car-upgrade').show().attr('src', car.upgrade);        // view_details.jsxi:97
+			if (car.parent && !car.hasError('upgrade-missing')){                   // view_details.jsxi:77
+				$('#selected-car-upgrade').show().attr('src', car.upgrade);        // view_details.jsxi:78
 			} else {
-				$('#selected-car-upgrade').hide();                                 // view_details.jsxi:99
+				$('#selected-car-upgrade').hide();                                 // view_details.jsxi:80
 			}
 		} else {
-			he.attr('readonly', true).val(car.id);                                 // view_details.jsxi:102
-			de.attr('readonly', true).val('');                                     // view_details.jsxi:103
-			ta.hide();                                                             // view_details.jsxi:104
-			pr.hide();                                                             // view_details.jsxi:105
+			he.attr('readonly', true).val(car.id);                                 // view_details.jsxi:83
+			de.attr('readonly', true).val('');                                     // view_details.jsxi:84
+			ta.hide();                                                             // view_details.jsxi:85
+			pr.hide();                                                             // view_details.jsxi:86
 		}
 	}
 	
-	function outDisabled(car){                                                     // view_details.jsxi:109
-		$('#selected-car-disable').text(car.disabled ? 'Enable' : 'Disable');      // view_details.jsxi:110
-		$('#selected-car-header').toggleClass('disabled', car.disabled);           // view_details.jsxi:111
+	function outDisabled(car){                                                     // view_details.jsxi:90
+		$('#selected-car-disable').text(car.disabled ? 'Enable' : 'Disable');      // view_details.jsxi:91
+		$('#selected-car-header').toggleClass('disabled', car.disabled);           // view_details.jsxi:92
 	}
 	
-	function outChanged(car){                                                      // view_details.jsxi:114
-		$('#selected-car-header').toggleClass('changed', car.changed);             // view_details.jsxi:115
+	function outChanged(car){                                                      // view_details.jsxi:95
+		$('#selected-car-header').toggleClass('changed', car.changed);             // view_details.jsxi:96
 	}
 	
-	function outSkins(car){                                                        // view_details.jsxi:118
-		setTimeout(function (){                                                    // view_details.jsxi:119
-			var sa = $('#selected-car-skins-article'),                             // view_details.jsxi:120
-				sp = $('#selected-car-preview'),                                   // view_details.jsxi:121
-				ss = $('#selected-car-skins');                                     // view_details.jsxi:122
+	function outSkins(car){                                                        // view_details.jsxi:99
+		setTimeout(function (){                                                    // view_details.jsxi:100
+			var sa = $('#selected-car-skins-article'),                             // view_details.jsxi:101
+				sp = $('#selected-car-preview'),                                   // view_details.jsxi:102
+				ss = $('#selected-car-skins');                                     // view_details.jsxi:103
 			
-			if (car.skins){                                                        // view_details.jsxi:123
-				sa.show();                                                         // view_details.jsxi:124
-				ss.empty();                                                        // view_details.jsxi:125
-				sp.attr({                                                          // view_details.jsxi:127
-					'data-id': car.skins.selected.id,                              // view_details.jsxi:127
+			if (car.skins){                                                        // view_details.jsxi:104
+				sa.show();                                                         // view_details.jsxi:105
+				ss.empty();                                                        // view_details.jsxi:106
+				sp.attr({                                                          // view_details.jsxi:108
+					'data-id': car.skins.selected.id,                              // view_details.jsxi:108
 					'src': (car.skins.selected.preview + '?' + Math.random()).cssUrl()
 				});
-				car.skins.forEach(function (e){                                    // view_details.jsxi:132
+				car.skins.forEach(function (e){                                    // view_details.jsxi:113
 					$('<img>').attr({ 'data-id': e.id, 'title': e.id, 'src': e.livery.cssUrl() }).appendTo(ss);
 				});
 			} else {
-				sa.hide();                                                         // view_details.jsxi:140
+				sa.hide();                                                         // view_details.jsxi:121
 			}
 		}, 
 		50);
 	}
 	
-	function updateTags(l){                                                        // view_details.jsxi:145
+	function updateParents(car){                                                   // view_details.jsxi:126
+		var s = document.getElementById('selected-car-parent');
+		
+		if (!s)                                                                    // view_details.jsxi:129
+			return;
+		
+		if (car.children.length > 0){                                              // view_details.jsxi:131
+			s.parentNode.style.display = 'none';                                   // view_details.jsxi:132
+		} else {
+			s.parentNode.style.display = null;                                     // view_details.jsxi:134
+			s.innerHTML = '<option value="">None</option>' + Cars.list.filter(function (e){
+				return e.data && !e.disabled && e.parent == null && e.id != car.id && (!car.parent || car.parent.id != car.id);
+			}).map(function (e){                                                   // view_details.jsxi:138
+				return '<option value="{0}">{1}</option>'.format(e.id, e.data.name);
+			}).join('');                                                           // view_details.jsxi:140
+			s.value = car.parent && car.parent.id || '';                           // view_details.jsxi:142
+		}
+	}
+	
+	function updateTags(l){                                                        // view_details.jsxi:146
 		var t = document.getElementById('tags-filtered');
 		
-		if (t){                                                                    // view_details.jsxi:147
-			document.body.removeChild(t);                                          // view_details.jsxi:148
+		if (t){                                                                    // view_details.jsxi:149
+			document.body.removeChild(t);                                          // view_details.jsxi:150
 		}
 		
-		t = document.body.appendChild(document.createElement('datalist'));         // view_details.jsxi:151
-		t.id = 'tags-filtered';                                                    // view_details.jsxi:152
+		t = document.body.appendChild(document.createElement('datalist'));         // view_details.jsxi:153
+		t.id = 'tags-filtered';                                                    // view_details.jsxi:154
 		
-		var n = l.map(function (e){                                                // view_details.jsxi:154
-			return e.toLowerCase();                                                // view_details.jsxi:155
+		var n = l.map(function (e){                                                // view_details.jsxi:156
+			return e.toLowerCase();                                                // view_details.jsxi:157
 		});
 		
-		Cars.tags.forEach(function (v){                                            // view_details.jsxi:158
-			if (n.indexOf(v.toLowerCase()) < 0){                                   // view_details.jsxi:159
+		Cars.tags.forEach(function (v){                                            // view_details.jsxi:160
+			if (n.indexOf(v.toLowerCase()) < 0){                                   // view_details.jsxi:161
 				t.appendChild(document.createElement('option')).setAttribute('value', v);
 			}
 		});
 	}
 	
-	function applyTags(){                                                          // view_details.jsxi:165
-		if (!_selected || !_selected.data)                                         // view_details.jsxi:166
+	function applyTags(){                                                          // view_details.jsxi:167
+		if (!_selected || !_selected.data)                                         // view_details.jsxi:168
 			return;
 		
-		Cars.changeData(_selected,                                                 // view_details.jsxi:167
-			'tags',                                                                // view_details.jsxi:167
+		Cars.changeData(_selected,                                                 // view_details.jsxi:169
+			'tags',                                                                // view_details.jsxi:169
 			Array.prototype.map.call(document.querySelectorAll('#selected-car-tags li'), 
-				function (a){                                                      // view_details.jsxi:168
-					return a.textContent;                                          // view_details.jsxi:168
+				function (a){                                                      // view_details.jsxi:170
+					return a.textContent;                                          // view_details.jsxi:170
 				}));
-		updateTags(_selected.data.tags);                                           // view_details.jsxi:169
+		updateTags(_selected.data.tags);                                           // view_details.jsxi:171
 	}
 	
-	function init(){                                                               // view_details.jsxi:172
-		Cars.on('scan:ready',                                                      // view_details.jsxi:173
-			function (list){                                                       // view_details.jsxi:174
-				if (list.length == 0){                                             // view_details.jsxi:175
-					outMsg('Hmm', 'Cars not found');                               // view_details.jsxi:176
+	function init(){                                                               // view_details.jsxi:174
+		Cars.on('scan:ready',                                                      // view_details.jsxi:175
+			function (list){                                                       // view_details.jsxi:176
+				if (list.length == 0){                                             // view_details.jsxi:177
+					outMsg('Hmm', 'Cars not found');                               // view_details.jsxi:178
 				}
 				
-				$('main').show();                                                  // view_details.jsxi:179
-			}).on('error',                                                         // view_details.jsxi:181
-			function (car){                                                        // view_details.jsxi:181
-				if (_selected != car)                                              // view_details.jsxi:182
+				$('main').show();                                                  // view_details.jsxi:181
+			}).on('error',                                                         // view_details.jsxi:183
+			function (car){                                                        // view_details.jsxi:183
+				if (_selected != car)                                              // view_details.jsxi:184
 					return;
 				
-				outErrors(car);                                                    // view_details.jsxi:183
-			}).on('update.car.data',                                               // view_details.jsxi:185
-			function (car){                                                        // view_details.jsxi:185
-				if (_selected != car)                                              // view_details.jsxi:186
+				outErrors(car);                                                    // view_details.jsxi:185
+			}).on('update.car.data',                                               // view_details.jsxi:187
+			function (car){                                                        // view_details.jsxi:187
+				if (_selected != car)                                              // view_details.jsxi:188
 					return;
 				
-				outData(car);                                                      // view_details.jsxi:187
-			}).on('update.car.skins',                                              // view_details.jsxi:189
-			function (car){                                                        // view_details.jsxi:189
-				if (_selected != car)                                              // view_details.jsxi:190
+				outData(car);                                                      // view_details.jsxi:189
+			}).on('update.car.skins',                                              // view_details.jsxi:191
+			function (car){                                                        // view_details.jsxi:191
+				if (_selected != car)                                              // view_details.jsxi:192
 					return;
 				
-				outSkins(car);                                                     // view_details.jsxi:191
-			}).on('update.car.disabled',                                           // view_details.jsxi:193
-			function (car){                                                        // view_details.jsxi:193
-				if (_selected != car)                                              // view_details.jsxi:194
+				outSkins(car);                                                     // view_details.jsxi:193
+			}).on('update.car.disabled',                                           // view_details.jsxi:195
+			function (car){                                                        // view_details.jsxi:195
+				if (_selected != car)                                              // view_details.jsxi:196
 					return;
 				
-				outDisabled(car);                                                  // view_details.jsxi:195
-			}).on('update.car.changed',                                            // view_details.jsxi:197
-			function (car){                                                        // view_details.jsxi:197
-				if (_selected != car)                                              // view_details.jsxi:198
+				outDisabled(car);                                                  // view_details.jsxi:197
+			}).on('update.car.changed',                                            // view_details.jsxi:199
+			function (car){                                                        // view_details.jsxi:199
+				if (_selected != car)                                              // view_details.jsxi:200
 					return;
 				
-				outChanged(car);                                                   // view_details.jsxi:199
+				outChanged(car);                                                   // view_details.jsxi:201
 			});
-		ViewList.on('select',                                                      // view_details.jsxi:202
-			function (car){                                                        // view_details.jsxi:203
-				$('main').show();                                                  // view_details.jsxi:204
-				_selected = car;                                                   // view_details.jsxi:206
+		ViewList.on('select',                                                      // view_details.jsxi:204
+			function (car){                                                        // view_details.jsxi:205
+				$('main').show();                                                  // view_details.jsxi:206
+				_selected = car;                                                   // view_details.jsxi:208
 				
-				if (car){                                                          // view_details.jsxi:208
-					outMsg(null);                                                  // view_details.jsxi:209
+				if (car){                                                          // view_details.jsxi:210
+					outMsg(null);                                                  // view_details.jsxi:211
 				} else {
 					return;
 				}
 				
-				outData(car);                                                      // view_details.jsxi:214
-				outBadge(car);                                                     // view_details.jsxi:215
-				outDisabled(car);                                                  // view_details.jsxi:216
-				outChanged(car);                                                   // view_details.jsxi:217
-				outErrors(car);                                                    // view_details.jsxi:218
-				outSkins(car);                                                     // view_details.jsxi:219
+				outData(car);                                                      // view_details.jsxi:216
+				outBadge(car);                                                     // view_details.jsxi:217
+				outDisabled(car);                                                  // view_details.jsxi:218
+				outChanged(car);                                                   // view_details.jsxi:219
+				outErrors(car);                                                    // view_details.jsxi:220
+				outSkins(car);                                                     // view_details.jsxi:221
 			});
-		$('#selected-car').on('keydown',                                           // view_details.jsxi:223
-			function (e){                                                          // view_details.jsxi:224
-				if (e.keyCode == 13){                                              // view_details.jsxi:225
-					this.blur();                                                   // view_details.jsxi:226
+		$('#selected-car').on('keydown',                                           // view_details.jsxi:225
+			function (e){                                                          // view_details.jsxi:226
+				if (e.keyCode == 13){                                              // view_details.jsxi:227
+					this.blur();                                                   // view_details.jsxi:228
 					return false;
 				}
-			}).on('change',                                                        // view_details.jsxi:230
-			function (){                                                           // view_details.jsxi:230
-				if (!_selected || this.readonly || !this.value)                    // view_details.jsxi:231
+			}).on('change',                                                        // view_details.jsxi:232
+			function (){                                                           // view_details.jsxi:232
+				if (!_selected || this.readonly || !this.value)                    // view_details.jsxi:233
 					return;
 				
-				this.value = this.value.slice(0, 64);                              // view_details.jsxi:232
-				Cars.changeData(_selected, 'name', this.value);                    // view_details.jsxi:233
+				this.value = this.value.slice(0, 64);                              // view_details.jsxi:234
+				Cars.changeData(_selected, 'name', this.value);                    // view_details.jsxi:235
 			});
-		$('#selected-car-tags').on('click',                                        // view_details.jsxi:236
-			function (e){                                                          // view_details.jsxi:237
+		$('#selected-car-tags').on('click',                                        // view_details.jsxi:238
+			function (e){                                                          // view_details.jsxi:239
 				if (e.target.tagName === 'LI' && e.target.offsetWidth - e.offsetX < 20){
-					e.target.parentNode.removeChild(e.target);                     // view_details.jsxi:239
-					applyTags();                                                   // view_details.jsxi:240
+					e.target.parentNode.removeChild(e.target);                     // view_details.jsxi:241
+					applyTags();                                                   // view_details.jsxi:242
 				} else {
-					this.querySelector('input').focus();                           // view_details.jsxi:242
+					this.querySelector('input').focus();                           // view_details.jsxi:244
 				}
 			});
-		$('#selected-car-tags input').on('change',                                 // view_details.jsxi:246
-			function (){                                                           // view_details.jsxi:247
-				if (this.value){                                                   // view_details.jsxi:248
+		$('#selected-car-tags input').on('change',                                 // view_details.jsxi:248
+			function (){                                                           // view_details.jsxi:249
+				if (this.value){                                                   // view_details.jsxi:250
 					this.parentNode.insertBefore(document.createElement('li'), this).textContent = this.value;
-					this.value = '';                                               // view_details.jsxi:250
-					applyTags();                                                   // view_details.jsxi:251
+					this.value = '';                                               // view_details.jsxi:252
+					applyTags();                                                   // view_details.jsxi:253
 				}
-			}).on('keydown',                                                       // view_details.jsxi:254
-			function (e){                                                          // view_details.jsxi:254
-				if (e.keyCode == 8 && this.value == ''){                           // view_details.jsxi:255
+			}).on('keydown',                                                       // view_details.jsxi:256
+			function (e){                                                          // view_details.jsxi:256
+				if (e.keyCode == 8 && this.value == ''){                           // view_details.jsxi:257
 					this.parentNode.removeChild(this.parentNode.querySelector('li:last-of-type'));
-					applyTags();                                                   // view_details.jsxi:257
+					applyTags();                                                   // view_details.jsxi:259
 				}
 			});
-		$('#selected-car-desc').elastic().on('change',                             // view_details.jsxi:261
-			function (){                                                           // view_details.jsxi:262
-				if (!_selected || this.readonly)                                   // view_details.jsxi:263
+		$('#selected-car-desc').elastic().on('change',                             // view_details.jsxi:263
+			function (){                                                           // view_details.jsxi:264
+				if (!_selected || this.readonly)                                   // view_details.jsxi:265
 					return;
 				
-				Cars.changeData(_selected, 'description', this.value);             // view_details.jsxi:264
+				Cars.changeData(_selected, 'description', this.value);             // view_details.jsxi:266
 			});
-		$('#selected-car-brand').on('keydown',                                     // view_details.jsxi:267
-			function (e){                                                          // view_details.jsxi:268
-				if (e.keyCode == 13){                                              // view_details.jsxi:269
-					this.blur();                                                   // view_details.jsxi:270
+		$('#selected-car-brand').on('keydown',                                     // view_details.jsxi:269
+			function (e){                                                          // view_details.jsxi:270
+				if (e.keyCode == 13){                                              // view_details.jsxi:271
+					this.blur();                                                   // view_details.jsxi:272
 					return false;
 				}
-			}).on('change',                                                        // view_details.jsxi:274
-			function (e){                                                          // view_details.jsxi:274
-				if (!_selected || this.readonly || !this.value)                    // view_details.jsxi:275
+			}).on('change',                                                        // view_details.jsxi:276
+			function (e){                                                          // view_details.jsxi:276
+				if (!_selected || this.readonly || !this.value)                    // view_details.jsxi:277
 					return;
 				
-				Cars.changeData(_selected, 'brand', this.value);                   // view_details.jsxi:276
-			}).on('contextmenu',                                                   // view_details.jsxi:278
-			function (e){                                                          // view_details.jsxi:278
-				if (!_selected || !_selected.data)                                 // view_details.jsxi:279
+				Cars.changeData(_selected, 'brand', this.value);                   // view_details.jsxi:278
+			}).on('contextmenu',                                                   // view_details.jsxi:280
+			function (e){                                                          // view_details.jsxi:280
+				if (!_selected || !_selected.data)                                 // view_details.jsxi:281
 					return;
 				
 				var menu = new gui.Menu();
 				
-				menu.append(new gui.MenuItem({                                     // view_details.jsxi:282
-					label: 'Filter Brand',                                         // view_details.jsxi:282
-					key: 'F',                                                      // view_details.jsxi:282
-					click: (function (){                                           // view_details.jsxi:282
-						if (!_selected)                                            // view_details.jsxi:283
+				menu.append(new gui.MenuItem({                                     // view_details.jsxi:284
+					label: 'Filter Brand',                                         // view_details.jsxi:284
+					key: 'F',                                                      // view_details.jsxi:284
+					click: (function (){                                           // view_details.jsxi:284
+						if (!_selected)                                            // view_details.jsxi:285
 							return;
 						
-						ViewList.addFilter('brand:' + _selected.data.brand);       // view_details.jsxi:284
+						ViewList.addFilter('brand:' + _selected.data.brand);       // view_details.jsxi:286
 					})
 				}));
-				menu.popup(e.clientX, e.clientY);                                  // view_details.jsxi:287
+				menu.popup(e.clientX, e.clientY);                                  // view_details.jsxi:289
 				return false;
 			});
-		$('#selected-car-parent').on('change',                                     // view_details.jsxi:291
-			function (e){                                                          // view_details.jsxi:292
-				if (!_selected)                                                    // view_details.jsxi:293
+		$('#selected-car-parent').on('change',                                     // view_details.jsxi:293
+			function (e){                                                          // view_details.jsxi:294
+				if (!_selected)                                                    // view_details.jsxi:295
 					return;
 				
 				var t = this, v = this.value || null;
 				
-				if (v && !fs.existsSync(_selected.upgrade)){                       // view_details.jsxi:296
-					UpgradeEditor.start(_selected,                                 // view_details.jsxi:297
-						function (arg){                                            // view_details.jsxi:297
-							if (fs.existsSync(_selected.upgrade)){                 // view_details.jsxi:298
-								fn();                                              // view_details.jsxi:299
+				if (v && !fs.existsSync(_selected.upgrade)){                       // view_details.jsxi:298
+					UpgradeEditor.start(_selected,                                 // view_details.jsxi:299
+						function (arg){                                            // view_details.jsxi:299
+							if (fs.existsSync(_selected.upgrade)){                 // view_details.jsxi:300
+								fn();                                              // view_details.jsxi:301
 							} else {
-								t.value = '';                                      // view_details.jsxi:301
+								t.value = '';                                      // view_details.jsxi:303
 							}
 						});
 				} else {
-					fn();                                                          // view_details.jsxi:305
+					fn();                                                          // view_details.jsxi:307
 				}
 				
-				function fn(){                                                     // view_details.jsxi:308
-					_selected.changeParent(v);                                     // view_details.jsxi:309
+				function fn(){                                                     // view_details.jsxi:310
+					_selected.changeParent(v);                                     // view_details.jsxi:311
 				}
 			});
-		$('#selected-car-class').on('keydown',                                     // view_details.jsxi:313
-			function (e){                                                          // view_details.jsxi:314
-				if (e.keyCode == 13){                                              // view_details.jsxi:315
-					this.blur();                                                   // view_details.jsxi:316
+		$('#selected-car-class').on('keydown',                                     // view_details.jsxi:315
+			function (e){                                                          // view_details.jsxi:316
+				if (e.keyCode == 13){                                              // view_details.jsxi:317
+					this.blur();                                                   // view_details.jsxi:318
 					return false;
 				}
-			}).on('change',                                                        // view_details.jsxi:320
-			function (){                                                           // view_details.jsxi:320
-				if (!_selected || this.readonly)                                   // view_details.jsxi:321
+			}).on('change',                                                        // view_details.jsxi:322
+			function (){                                                           // view_details.jsxi:322
+				if (!_selected || this.readonly)                                   // view_details.jsxi:323
 					return;
 				
-				Cars.changeData(_selected, 'class', this.value);                   // view_details.jsxi:322
-			}).on('contextmenu',                                                   // view_details.jsxi:324
-			function (e){                                                          // view_details.jsxi:324
-				if (!_selected || !_selected.data)                                 // view_details.jsxi:325
+				Cars.changeData(_selected, 'class', this.value);                   // view_details.jsxi:324
+			}).on('contextmenu',                                                   // view_details.jsxi:326
+			function (e){                                                          // view_details.jsxi:326
+				if (!_selected || !_selected.data)                                 // view_details.jsxi:327
 					return;
 				
 				var menu = new gui.Menu();
 				
-				menu.append(new gui.MenuItem({                                     // view_details.jsxi:328
-					label: 'Filter Class',                                         // view_details.jsxi:328
-					key: 'F',                                                      // view_details.jsxi:328
-					click: (function (){                                           // view_details.jsxi:328
-						if (!_selected)                                            // view_details.jsxi:329
+				menu.append(new gui.MenuItem({                                     // view_details.jsxi:330
+					label: 'Filter Class',                                         // view_details.jsxi:330
+					key: 'F',                                                      // view_details.jsxi:330
+					click: (function (){                                           // view_details.jsxi:330
+						if (!_selected)                                            // view_details.jsxi:331
 							return;
 						
-						ViewList.addFilter('class:' + _selected.data.class);       // view_details.jsxi:330
+						ViewList.addFilter('class:' + _selected.data.class);       // view_details.jsxi:332
 					})
 				}));
-				menu.popup(e.clientX, e.clientY);                                  // view_details.jsxi:333
+				menu.popup(e.clientX, e.clientY);                                  // view_details.jsxi:335
 				return false;
 			});
 		[
-			'bhp',                                                                 // view_details.jsxi:337
-			'torque',                                                              // view_details.jsxi:337
-			'weight',                                                              // view_details.jsxi:337
-			'topspeed',                                                            // view_details.jsxi:337
-			'acceleration',                                                        // view_details.jsxi:337
+			'bhp',                                                                 // view_details.jsxi:339
+			'torque',                                                              // view_details.jsxi:339
+			'weight',                                                              // view_details.jsxi:339
+			'topspeed',                                                            // view_details.jsxi:339
+			'acceleration',                                                        // view_details.jsxi:339
 			'pwratio'
-		].forEach(function (e){                                                    // view_details.jsxi:337
-			$('#selected-car-' + e).on('keydown',                                  // view_details.jsxi:338
-				function (e){                                                      // view_details.jsxi:338
-					if (e.keyCode == 13){                                          // view_details.jsxi:339
-						this.blur();                                               // view_details.jsxi:340
+		].forEach(function (e){                                                    // view_details.jsxi:339
+			$('#selected-car-' + e).on('keydown',                                  // view_details.jsxi:340
+				function (e){                                                      // view_details.jsxi:340
+					if (e.keyCode == 13){                                          // view_details.jsxi:341
+						this.blur();                                               // view_details.jsxi:342
 						return false;
 					}
-				}).on('keyup keydown keypress',                                    // view_details.jsxi:343
-				function (e){                                                      // view_details.jsxi:343
-					if (e.keyCode == 32){                                          // view_details.jsxi:344
-						e.stopPropagation();                                       // view_details.jsxi:345
+				}).on('keyup keydown keypress',                                    // view_details.jsxi:345
+				function (e){                                                      // view_details.jsxi:345
+					if (e.keyCode == 32){                                          // view_details.jsxi:346
+						e.stopPropagation();                                       // view_details.jsxi:347
 						
-						if (e.type === 'keyup'){                                   // view_details.jsxi:346
+						if (e.type === 'keyup'){                                   // view_details.jsxi:348
 							return false;
 						}
 					}
-				}).on('change',                                                    // view_details.jsxi:350
-				function (){                                                       // view_details.jsxi:350
-					if (!_selected || this.readonly)                               // view_details.jsxi:351
+				}).on('change',                                                    // view_details.jsxi:352
+				function (){                                                       // view_details.jsxi:352
+					if (!_selected || this.readonly)                               // view_details.jsxi:353
 						return;
 					
-					Cars.changeDataSpecs(_selected, e, this.value);                // view_details.jsxi:352
+					Cars.changeDataSpecs(_selected, e, this.value);                // view_details.jsxi:354
 				});
 		});
-		$('#selected-car-pwratio').on('dblclick contextmenu',                      // view_details.jsxi:356
-			function (e){                                                          // view_details.jsxi:357
-				if (!_selected || !_selected.data || this.readonly)                // view_details.jsxi:358
+		$('#selected-car-pwratio').on('dblclick contextmenu',                      // view_details.jsxi:358
+			function (e){                                                          // view_details.jsxi:359
+				if (!_selected || !_selected.data || this.readonly)                // view_details.jsxi:360
 					return;
 				
-				function r(){                                                      // view_details.jsxi:360
-					if (!_selected || !_selected.data || this.readonly)            // view_details.jsxi:361
+				function r(){                                                      // view_details.jsxi:362
+					if (!_selected || !_selected.data || this.readonly)            // view_details.jsxi:363
 						return;
 					
-					var w = (_selected.data.specs.weight || '').match(/\d+/),      // view_details.jsxi:362
-						p = (_selected.data.specs.bhp || '').match(/\d+/);         // view_details.jsxi:363
+					var w = (_selected.data.specs.weight || '').match(/\d+/),      // view_details.jsxi:364
+						p = (_selected.data.specs.bhp || '').match(/\d+/);         // view_details.jsxi:365
 					
-					if (w && p){                                                   // view_details.jsxi:364
+					if (w && p){                                                   // view_details.jsxi:366
 						Cars.changeDataSpecs(_selected, 'pwratio', + (+ w / + p).toFixed(2) + 'kg/cv');
 					}
 				}
 				
-				if (e.type === 'dblclick'){                                        // view_details.jsxi:369
-					r();                                                           // view_details.jsxi:370
+				if (e.type === 'dblclick'){                                        // view_details.jsxi:371
+					r();                                                           // view_details.jsxi:372
 				} else {
 					var menu = new gui.Menu();
 					
 					menu.append(new gui.MenuItem({ label: 'Recalculate', key: 'R', click: r }));
-					menu.popup(e.clientX, e.clientY);                              // view_details.jsxi:374
+					menu.popup(e.clientX, e.clientY);                              // view_details.jsxi:376
 					return false;
 				}
 			});
-		$('#selected-car-upgrade').on('click',                                     // view_details.jsxi:379
-			function (){                                                           // view_details.jsxi:380
-				if (!_selected)                                                    // view_details.jsxi:381
+		$('#selected-car-upgrade').on('click',                                     // view_details.jsxi:381
+			function (){                                                           // view_details.jsxi:382
+				if (!_selected)                                                    // view_details.jsxi:383
 					return;
 				
-				UpgradeEditor.start(_selected);                                    // view_details.jsxi:382
+				UpgradeEditor.start(_selected);                                    // view_details.jsxi:384
 			});
-		$('#selected-car-skins-article').dblclick(function (e){                    // view_details.jsxi:386
-			if (!_selected)                                                        // view_details.jsxi:388
+		$('#selected-car-skins-article').dblclick(function (e){                    // view_details.jsxi:388
+			if (!_selected)                                                        // view_details.jsxi:390
 				return;
 			
-			AcShowroom.start(_selected);                                           // view_details.jsxi:389
-		}).on('contextmenu',                                                       // view_details.jsxi:391
-			function (e){                                                          // view_details.jsxi:391
-				if (!_selected)                                                    // view_details.jsxi:392
+			AcShowroom.start(_selected);                                           // view_details.jsxi:391
+		}).on('contextmenu',                                                       // view_details.jsxi:393
+			function (e){                                                          // view_details.jsxi:393
+				if (!_selected)                                                    // view_details.jsxi:394
 					return;
 				
 				var id = e.target.getAttribute('data-id');
 				
-				if (!id)                                                           // view_details.jsxi:395
+				if (!id)                                                           // view_details.jsxi:397
 					return;
 				
 				var menu = new gui.Menu();
 				
-				menu.append(new gui.MenuItem({                                     // view_details.jsxi:398
-					label: 'Open in Showroom',                                     // view_details.jsxi:398
-					key: 'S',                                                      // view_details.jsxi:398
-					click: (function (){                                           // view_details.jsxi:398
-						if (!_selected)                                            // view_details.jsxi:399
+				menu.append(new gui.MenuItem({                                     // view_details.jsxi:400
+					label: 'Open in Showroom',                                     // view_details.jsxi:400
+					key: 'S',                                                      // view_details.jsxi:400
+					click: (function (){                                           // view_details.jsxi:400
+						if (!_selected)                                            // view_details.jsxi:401
 							return;
 						
-						AcShowroom.start(_selected, id);                           // view_details.jsxi:400
+						AcShowroom.start(_selected, id);                           // view_details.jsxi:402
 					})
 				}));
-				menu.append(new gui.MenuItem({                                     // view_details.jsxi:402
-					label: 'Start Practice',                                       // view_details.jsxi:402
-					key: 'P',                                                      // view_details.jsxi:402
-					click: (function (){                                           // view_details.jsxi:402
-						if (!_selected)                                            // view_details.jsxi:403
+				menu.append(new gui.MenuItem({                                     // view_details.jsxi:404
+					label: 'Start Practice',                                       // view_details.jsxi:404
+					key: 'P',                                                      // view_details.jsxi:404
+					click: (function (){                                           // view_details.jsxi:404
+						if (!_selected)                                            // view_details.jsxi:405
 							return;
 						
-						AcPractice.start(_selected, id);                           // view_details.jsxi:404
+						AcPractice.start(_selected, id);                           // view_details.jsxi:406
 					})
 				}));
-				menu.popup(e.clientX, e.clientY);                                  // view_details.jsxi:411
+				menu.popup(e.clientX, e.clientY);                                  // view_details.jsxi:413
 				return false;
 			});
-		$('#selected-car-skins').on('click',                                       // view_details.jsxi:416
-			function (e){                                                          // view_details.jsxi:417
-				if (!_selected)                                                    // view_details.jsxi:418
+		$('#selected-car-skins').on('click',                                       // view_details.jsxi:418
+			function (e){                                                          // view_details.jsxi:419
+				if (!_selected)                                                    // view_details.jsxi:420
 					return;
 				
 				var id = e.target.getAttribute('data-id');
 				
-				if (!id)                                                           // view_details.jsxi:421
+				if (!id)                                                           // view_details.jsxi:423
 					return;
 				
-				Cars.selectSkin(_selected, id);                                    // view_details.jsxi:423
+				Cars.selectSkin(_selected, id);                                    // view_details.jsxi:425
 			});
-		$(window).on('keydown',                                                    // view_details.jsxi:427
-			function (e){                                                          // view_details.jsxi:428
-				if (!_selected)                                                    // view_details.jsxi:429
+		$(window).on('keydown',                                                    // view_details.jsxi:429
+			function (e){                                                          // view_details.jsxi:430
+				if (!_selected)                                                    // view_details.jsxi:431
 					return;
 				
-				if (e.keyCode == 83 && e.ctrlKey){                                 // view_details.jsxi:431
-					Cars.save(_selected);                                          // view_details.jsxi:433
+				if (e.keyCode == 83 && e.ctrlKey){                                 // view_details.jsxi:433
+					Cars.save(_selected);                                          // view_details.jsxi:435
 					return false;
 				}
 			});
 		
 		var cmIgnore = false;
 		
-		$('main').on('contextmenu',                                                // view_details.jsxi:440
-			function (){                                                           // view_details.jsxi:441
-				this.querySelector('footer').classList.toggle('active');           // view_details.jsxi:442
-				cmIgnore = true;                                                   // view_details.jsxi:443
+		$('main').on('contextmenu',                                                // view_details.jsxi:442
+			function (){                                                           // view_details.jsxi:443
+				this.querySelector('footer').classList.toggle('active');           // view_details.jsxi:444
+				cmIgnore = true;                                                   // view_details.jsxi:445
 			});
-		$(window).on('click contextmenu',                                          // view_details.jsxi:446
-			(function (e){                                                         // view_details.jsxi:447
-				if (cmIgnore){                                                     // view_details.jsxi:448
-					cmIgnore = false;                                              // view_details.jsxi:449
-				} else if (e.target !== this){                                     // view_details.jsxi:450
-					this.classList.remove('active');                               // view_details.jsxi:451
+		$(window).on('click contextmenu',                                          // view_details.jsxi:448
+			(function (e){                                                         // view_details.jsxi:449
+				if (cmIgnore){                                                     // view_details.jsxi:450
+					cmIgnore = false;                                              // view_details.jsxi:451
+				} else if (e.target !== this){                                     // view_details.jsxi:452
+					this.classList.remove('active');                               // view_details.jsxi:453
 				}
-			}).bind($('main footer')[0]));                                         // view_details.jsxi:453
-		$('#selected-car-open-directory').click(function (){                       // view_details.jsxi:456
-			if (!_selected)                                                        // view_details.jsxi:457
+			}).bind($('main footer')[0]));                                         // view_details.jsxi:455
+		$('#selected-car-open-directory').click(function (){                       // view_details.jsxi:458
+			if (!_selected)                                                        // view_details.jsxi:459
 				return;
 			
-			Shell.openItem(_selected.path);                                        // view_details.jsxi:458
+			Shell.openItem(_selected.path);                                        // view_details.jsxi:460
 		});
-		$('#selected-car-showroom').click(function (){                             // view_details.jsxi:461
-			if (!_selected)                                                        // view_details.jsxi:462
+		$('#selected-car-showroom').click(function (){                             // view_details.jsxi:463
+			if (!_selected)                                                        // view_details.jsxi:464
 				return;
 			
-			AcShowroom.start(_selected);                                           // view_details.jsxi:463
+			AcShowroom.start(_selected);                                           // view_details.jsxi:465
 		});
-		$('#selected-car-showroom-select').click(function (){                      // view_details.jsxi:466
-			if (!_selected)                                                        // view_details.jsxi:467
+		$('#selected-car-showroom-select').click(function (){                      // view_details.jsxi:468
+			if (!_selected)                                                        // view_details.jsxi:469
 				return;
 			
-			AcShowroom.select(_selected);                                          // view_details.jsxi:468
+			AcShowroom.select(_selected);                                          // view_details.jsxi:470
 		});
-		$('#selected-car-practice').click(function (){                             // view_details.jsxi:471
-			if (!_selected)                                                        // view_details.jsxi:472
+		$('#selected-car-practice').click(function (){                             // view_details.jsxi:473
+			if (!_selected)                                                        // view_details.jsxi:474
 				return;
 			
-			AcPractice.start(_selected);                                           // view_details.jsxi:473
+			AcPractice.start(_selected);                                           // view_details.jsxi:475
 		});
-		$('#selected-car-practice-select').click(function (){                      // view_details.jsxi:476
-			if (!_selected)                                                        // view_details.jsxi:477
+		$('#selected-car-practice-select').click(function (){                      // view_details.jsxi:478
+			if (!_selected)                                                        // view_details.jsxi:479
 				return;
 			
-			AcPractice.select(_selected);                                          // view_details.jsxi:478
+			AcPractice.select(_selected);                                          // view_details.jsxi:480
 		});
-		$('#selected-car-reload').click(function (){                               // view_details.jsxi:481
-			if (!_selected)                                                        // view_details.jsxi:482
+		$('#selected-car-reload').click(function (){                               // view_details.jsxi:483
+			if (!_selected)                                                        // view_details.jsxi:484
 				return;
 			
-			if (_selected.changed){                                                // view_details.jsxi:484
-				new Dialog('Reload',                                               // view_details.jsxi:485
+			if (_selected.changed){                                                // view_details.jsxi:486
+				new Dialog('Reload',                                               // view_details.jsxi:487
 					[ 'Your changes will be lost. Are you sure?' ], 
-					reload);                                                       // view_details.jsxi:487
+					reload);                                                       // view_details.jsxi:489
 			} else {
-				reload();                                                          // view_details.jsxi:489
+				reload();                                                          // view_details.jsxi:491
 			}
 			
-			function reload(){                                                     // view_details.jsxi:492
-				Cars.reload(_selected);                                            // view_details.jsxi:493
+			function reload(){                                                     // view_details.jsxi:494
+				Cars.reload(_selected);                                            // view_details.jsxi:495
 			}
 		});
-		$('#selected-car-disable').click(function (){                              // view_details.jsxi:498
-			if (!_selected)                                                        // view_details.jsxi:499
+		$('#selected-car-disable').click(function (){                              // view_details.jsxi:500
+			if (!_selected)                                                        // view_details.jsxi:501
 				return;
 			
-			Cars.toggle(_selected);                                                // view_details.jsxi:500
+			Cars.toggle(_selected);                                                // view_details.jsxi:502
 		});
-		$('#selected-car-update-previews').click(function (){                      // view_details.jsxi:503
-			if (!_selected)                                                        // view_details.jsxi:504
+		$('#selected-car-update-previews').click(function (){                      // view_details.jsxi:505
+			if (!_selected)                                                        // view_details.jsxi:506
 				return;
 			
-			AcShowroom.shot(_selected);                                            // view_details.jsxi:505
+			AcShowroom.shot(_selected);                                            // view_details.jsxi:507
 		});
-		$('#selected-car-update-previews-manual').click(function (){               // view_details.jsxi:508
-			if (!_selected)                                                        // view_details.jsxi:509
+		$('#selected-car-update-previews-manual').click(function (){               // view_details.jsxi:510
+			if (!_selected)                                                        // view_details.jsxi:511
 				return;
 			
-			AcShowroom.shot(_selected, true);                                      // view_details.jsxi:510
+			AcShowroom.shot(_selected, true);                                      // view_details.jsxi:512
 		});
-		$('#selected-car-update-description').click(function (){                   // view_details.jsxi:513
-			if (!_selected)                                                        // view_details.jsxi:514
+		$('#selected-car-update-description').click(function (){                   // view_details.jsxi:515
+			if (!_selected)                                                        // view_details.jsxi:516
 				return;
 			
-			UpdateDescription.update(_selected);                                   // view_details.jsxi:515
+			UpdateDescription.update(_selected);                                   // view_details.jsxi:517
 		});
-		$('#selected-car-save').click(function (){                                 // view_details.jsxi:518
-			if (!_selected)                                                        // view_details.jsxi:519
+		$('#selected-car-save').click(function (){                                 // view_details.jsxi:520
+			if (!_selected)                                                        // view_details.jsxi:521
 				return;
 			
-			Cars.save(_selected);                                                  // view_details.jsxi:520
+			Cars.save(_selected);                                                  // view_details.jsxi:522
 		});
 	}
 	
-	(function (){                                                                  // view_details.jsxi:524
-		$(init);                                                                   // view_details.jsxi:525
+	(function (){                                                                  // view_details.jsxi:526
+		$(init);                                                                   // view_details.jsxi:527
 	})();
 	return ViewDetails;
 })();

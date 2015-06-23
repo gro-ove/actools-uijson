@@ -9,6 +9,8 @@ output/*.upx
 output/download.txt
 output/locales
 
+*.bat
+
 # Windows image file caches
 Thumbs.db
 ehthumbs.db
