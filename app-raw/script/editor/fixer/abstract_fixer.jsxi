@@ -10,16 +10,20 @@ class AbstractFixer {
         try {
             work(function (err){
                 if (_error) return;
-                
+
                 if (err){
                     error(err === true ? null : err);
                 } else {
                     car.removeError(errorId);
+                    setTimeout(reloadAfter);
                 }
             });
         } catch (err){
             error(err);
         }
+    }
+
+    protected reloadAfter(){
     }
 
     var _error;
@@ -30,6 +34,10 @@ class AbstractFixer {
 
     private work(c){
         var s = solutions.filter(lambda arg);
+        if (s.length == 0){
+            new Dialog(title, [ '<h6>Available solutions:</h6>', 'Sorry, but none of solutions is available.' ]);
+            return;
+        }
         new Dialog(title, [
             '<h6>Available solutions:</h6>',
             s.map(lambda (e, i) '<label><input name="solution" data-solution-id="%0" type="radio">%1</label>'(i, e.name)).join('<br>'),
@@ -93,6 +101,13 @@ class AbstractFixer {
     }
 
     protected static restoreFile(filename, from, c){
+        function mkdirp(d){
+            if (fs.existsSync(d)) return;
+            mkdirp(path.dirname(d));
+            fs.mkdirSync(d);
+        }
+
+        mkdirp(filename);
         fs.rename(from, filename, function (err) {
             if (err) {
                 if (err.code === 'EXDEV') {

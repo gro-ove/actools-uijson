@@ -1,0 +1,11 @@
+class DataFileFixer extends AbstractFixer {
+    protected reloadAfter(){
+        car.loadData();
+    }
+
+    protected get title 'File ui/ui_car.json is missing',
+        solutions tryToRestoreFile(car.json, 
+            lambda arg.isFile() && arg.size > 10 && arg.size < 1e5);
+}
+
+RestorationWizard.register('data-missing', DataFileFixer);

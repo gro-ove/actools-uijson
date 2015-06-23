@@ -13,6 +13,11 @@ static partial class Cars {
         }
 
         public loadSkins(callback){
+            if (skins){
+                skins = null;
+                mediator.dispatch('update.car.skins', this);
+            }
+
             clearErrors('skins');
 
             if (!fs.existsSync(skinsDir)){
@@ -60,6 +65,18 @@ static partial class Cars {
         }
 
         public loadData(callback){
+            if (data){
+                data = null;
+                mediator.dispatch('update.car.data', this);
+            }
+
+            if (parent){
+                parent = null;
+                mediator.dispatch('update.car.parent', this);
+                parent.children.splice(parent.children.indexOf(this), 1);
+                mediator.dispatch('update.car.children', parent);
+            }
+
             clearErrors('data');
             clearErrors('parent');
 

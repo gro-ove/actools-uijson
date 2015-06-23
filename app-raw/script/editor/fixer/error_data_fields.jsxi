@@ -1,10 +1,12 @@
 class MissingDataNameFixer extends AbstractFixer {
+    protected reloadAfter(){
+        car.loadData();
+    }
+
     fix(v){
         fixJsonFile(car.json, function (data){
             data.name = v;
         });
-        
-        setTimeout(lambda car.loadData());
     }
 
     createNew(c){
@@ -27,12 +29,14 @@ class MissingDataNameFixer extends AbstractFixer {
 }
 
 class MissingDataBrandFixer extends AbstractFixer {
+    protected reloadAfter(){
+        car.loadData();
+    }
+
     fix(v){
         fixJsonFile(car.json, function (data){
             data.brand = v;
         });
-
-        setTimeout(lambda car.loadData());
     }
 
     createNew(c){
@@ -61,3 +65,47 @@ class MissingDataBrandFixer extends AbstractFixer {
 
 RestorationWizard.register('data-name-missing', MissingDataNameFixer);
 RestorationWizard.register('data-brand-missing', MissingDataBrandFixer);
+
+class WrongDataParentFixer extends AbstractFixer {
+    protected reloadAfter(){
+        car.loadData();
+    }
+
+    fix(v){
+        fixJsonFile(car.json, function (data){
+            if (v){
+                data.parent = v;
+            } else {
+                delete data.parent;
+            }
+        });
+    }
+
+    createNew(c){
+        d = new Dialog('Select New Parent', '<select></select>', function (){
+            fix(this.find('select').val());
+            c();
+        });
+
+        var s = d.find('select')[0];
+        s.innerHTML = '<option value="">None</option>' + Cars.list.filter(function (e){
+            return e.data && !e.disabled && e.parent == null && e.id != car.id && (!car.parent || car.parent.id != car.id);
+        }).map(function (e){
+            return '<option value="{0}">{1}</option>'.format(e.id, e.data.name);
+        }).join('');
+    }
+
+    makeInd(c){
+        fix(null);
+        c();
+    }
+
+    protected get title 'Parent id is incorrect',
+        solutions [
+            { name: 'Make independent', fn: makeInd }
+            car.children.length == 0 && { name: 'Select a new parent', fn: createNew }
+        ];
+}
+
+RestorationWizard.register('parent-wrong', WrongDataParentFixer);
+RestorationWizard.register('parent-missing', WrongDataParentFixer);

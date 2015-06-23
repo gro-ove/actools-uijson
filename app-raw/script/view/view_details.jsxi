@@ -111,11 +111,14 @@ static class ViewDetails {
                 });
 
                 car.skins.forEach(function (e){
-                    $('<img>').attr({
+                    var i = $('<img>').attr({
                         'data-id': e.id,
                         'title': e.id,
                         'src': e.livery.cssUrl()
                     }).appendTo(ss);
+                    if (e === car.skins.selected){
+                        i.addClass('selected');
+                    }
                 });
             } else {
                 sa.hide();

@@ -1572,157 +1572,174 @@ var Cars = (function (){                                                        
 	Car.prototype.loadSkins = function (callback){                                 // cars_car_load.jsxi:15
 		var __that = this;
 		
+		if (this.skins){
+			this.skins = null;
+			mediator.dispatch('update.car.skins', this);                           // cars_car_load.jsxi:18
+		}
+		
 		this.clearErrors('skins');
 		
-		if (!fs.existsSync(this.skinsDir)){                                        // cars_car_load.jsxi:18
+		if (!fs.existsSync(this.skinsDir)){                                        // cars_car_load.jsxi:23
 			this.addError('skins-missing', 'Skins folder is missing');
 			
-			if (callback)                                                          // cars_car_load.jsxi:20
-				callback();                                                        // cars_car_load.jsxi:20
+			if (callback)                                                          // cars_car_load.jsxi:25
+				callback();                                                        // cars_car_load.jsxi:25
 			return;
 		}
 		
-		if (!fs.statSync(this.skinsDir).isDirectory()){                            // cars_car_load.jsxi:24
+		if (!fs.statSync(this.skinsDir).isDirectory()){                            // cars_car_load.jsxi:29
 			this.addError('skins-file', 'There is a file instead of skins folder', err);
 			
-			if (callback)                                                          // cars_car_load.jsxi:26
-				callback();                                                        // cars_car_load.jsxi:26
+			if (callback)                                                          // cars_car_load.jsxi:31
+				callback();                                                        // cars_car_load.jsxi:31
 			return;
 		}
 		
-		fs.readdir(this.skinsDir,                                                  // cars_car_load.jsxi:30
-			(function (err, result){                                               // cars_car_load.jsxi:30
+		fs.readdir(this.skinsDir,                                                  // cars_car_load.jsxi:35
+			(function (err, result){                                               // cars_car_load.jsxi:35
 				__that.skins = false;
 				
-				if (err){                                                          // cars_car_load.jsxi:33
+				if (err){                                                          // cars_car_load.jsxi:38
 					__that.addError('skins-access', 'Cannot access skins', err);
 				} else {
-					result = result.filter(function (e){                           // cars_car_load.jsxi:36
+					result = result.filter(function (e){                           // cars_car_load.jsxi:41
 						return fs.statSync(__that.path + '/skins/' + e).isDirectory();
 					});
 					
-					if (__that.skins.length === 0){                                // cars_car_load.jsxi:40
+					if (__that.skins.length === 0){                                // cars_car_load.jsxi:45
 						__that.addError('skins-empty', 'Skins folder is empty');
 					} else {
-						__that.skins = result.map(function (e){                    // cars_car_load.jsxi:43
+						__that.skins = result.map(function (e){                    // cars_car_load.jsxi:48
 							var p = __that.path + '/skins/' + e;
 							return {
-								id: e,                                             // cars_car_load.jsxi:46
-								path: p,                                           // cars_car_load.jsxi:47
-								livery: p + '/livery.png',                         // cars_car_load.jsxi:48
+								id: e,                                             // cars_car_load.jsxi:51
+								path: p,                                           // cars_car_load.jsxi:52
+								livery: p + '/livery.png',                         // cars_car_load.jsxi:53
 								preview: p + '/preview.jpg'
 							};
 						});
-						__that.skins.selected = __that.skins[0];                   // cars_car_load.jsxi:53
-						mediator.dispatch('update.car.skins', this);               // cars_car_load.jsxi:54
+						__that.skins.selected = __that.skins[0];                   // cars_car_load.jsxi:58
+						mediator.dispatch('update.car.skins', this);               // cars_car_load.jsxi:59
 					}
 				}
 				
-				if (callback)                                                      // cars_car_load.jsxi:58
-					callback();                                                    // cars_car_load.jsxi:58
-			}).bind(this));                                                        // cars_car_load.jsxi:59
+				if (callback)                                                      // cars_car_load.jsxi:63
+					callback();                                                    // cars_car_load.jsxi:63
+			}).bind(this));                                                        // cars_car_load.jsxi:64
 	};
-	Car.prototype.loadData = function (callback){                                  // cars_car_load.jsxi:62
+	Car.prototype.loadData = function (callback){                                  // cars_car_load.jsxi:67
 		var __that = this;
+		
+		if (this.data){
+			this.data = null;
+			mediator.dispatch('update.car.data', this);                            // cars_car_load.jsxi:70
+		}
+		
+		if (this.parent){
+			this.parent = null;
+			mediator.dispatch('update.car.parent', this);                          // cars_car_load.jsxi:75
+			this.parent.children.splice(this.parent.children.indexOf(this), 1);    // cars_car_load.jsxi:76
+			mediator.dispatch('update.car.children', this.parent);                 // cars_car_load.jsxi:77
+		}
 		
 		this.clearErrors('data');
 		this.clearErrors('parent');
 		
-		if (!fs.existsSync(this.json)){                                            // cars_car_load.jsxi:66
-			if (fs.existsSync(this.json + '.disabled')){                           // cars_car_load.jsxi:67
-				fs.renameSync(this.json + '.disabled', this.json);                 // cars_car_load.jsxi:68
+		if (!fs.existsSync(this.json)){                                            // cars_car_load.jsxi:83
+			if (fs.existsSync(this.json + '.disabled')){                           // cars_car_load.jsxi:84
+				fs.renameSync(this.json + '.disabled', this.json);                 // cars_car_load.jsxi:85
 			} else {
 				if (this.changed){
 					this.changed = false;
-					mediator.dispatch('update.car.changed', this);                 // cars_car_load.jsxi:72
+					mediator.dispatch('update.car.changed', this);                 // cars_car_load.jsxi:89
 				}
 				
 				this.data = false;
 				this.addError('data-missing', 'Missing ui_car.json');
-				mediator.dispatch('update.car.data', this);                        // cars_car_load.jsxi:77
+				mediator.dispatch('update.car.data', this);                        // cars_car_load.jsxi:94
 				
-				if (callback)                                                      // cars_car_load.jsxi:78
-					callback();                                                    // cars_car_load.jsxi:78
+				if (callback)                                                      // cars_car_load.jsxi:95
+					callback();                                                    // cars_car_load.jsxi:95
 				return;
 			}
 		}
 		
-		fs.readFile(this.json,                                                     // cars_car_load.jsxi:83
-			(function (err, result){                                               // cars_car_load.jsxi:83
+		fs.readFile(this.json,                                                     // cars_car_load.jsxi:100
+			(function (err, result){                                               // cars_car_load.jsxi:100
 				if (__that.changed){
 					__that.changed = false;
-					mediator.dispatch('update.car.changed', this);                 // cars_car_load.jsxi:86
+					mediator.dispatch('update.car.changed', this);                 // cars_car_load.jsxi:103
 				}
 				
-				if (err){                                                          // cars_car_load.jsxi:89
+				if (err){                                                          // cars_car_load.jsxi:106
 					__that.data = false;
 					__that.addError('data-access', 'Unavailable ui_car.json', err);
 				} else {
 					var dat;
 					
 					try {
-						dat = JSON.flexibleParse(result);                          // cars_car_load.jsxi:95
-					} catch (er){                                                  // cars_car_load.jsxi:96
-						err = er;                                                  // cars_car_load.jsxi:97
+						dat = JSON.flexibleParse(result);                          // cars_car_load.jsxi:112
+					} catch (er){                                                  // cars_car_load.jsxi:113
+						err = er;                                                  // cars_car_load.jsxi:114
 					} 
 					
 					__that.data = false;
 					
-					if (err || !dat){                                              // cars_car_load.jsxi:101
+					if (err || !dat){                                              // cars_car_load.jsxi:118
 						__that.addError('data-json', 'Damaged ui_car.json', err);
-					} else if (!dat.name){                                         // cars_car_load.jsxi:103
+					} else if (!dat.name){                                         // cars_car_load.jsxi:120
 						__that.addError('data-name-missing', 'Name is missing');
-					} else if (!dat.brand){                                        // cars_car_load.jsxi:105
+					} else if (!dat.brand){                                        // cars_car_load.jsxi:122
 						__that.addError('data-brand-missing', 'Brand is missing');
 					} else {
-						__that.data = dat;                                         // cars_car_load.jsxi:108
+						__that.data = dat;                                         // cars_car_load.jsxi:125
 						
-						if (!__that.data.description)                              // cars_car_load.jsxi:109
-							__that.data.description = '';                          // cars_car_load.jsxi:109
+						if (!__that.data.description)                              // cars_car_load.jsxi:126
+							__that.data.description = '';                          // cars_car_load.jsxi:126
 						
-						if (!__that.data.tags)                                     // cars_car_load.jsxi:110
-							__that.data.tags = [];                                 // cars_car_load.jsxi:110
+						if (!__that.data.tags)                                     // cars_car_load.jsxi:127
+							__that.data.tags = [];                                 // cars_car_load.jsxi:127
 						
-						if (!__that.data.specs)                                    // cars_car_load.jsxi:111
-							__that.data.specs = {};                                // cars_car_load.jsxi:111
+						if (!__that.data.specs)                                    // cars_car_load.jsxi:128
+							__that.data.specs = {};                                // cars_car_load.jsxi:128
 						
-						__that.data.class = __that.data.class || '';               // cars_car_load.jsxi:113
+						__that.data.class = __that.data.class || '';               // cars_car_load.jsxi:130
 						__that.data.description = __that.data.description.replace(/\n/g, ' ').replace(/<\/?br\/?>[ \t]*|\n[ \t]+/g, '\n').replace(/<\s*\/?\s*\w+\s*>/g, '').replace(/[\t ]+/g, ' ');
 						
-						if (__that.data.parent != null){                           // cars_car_load.jsxi:117
-							if (__that.data.parent == __that.id){                  // cars_car_load.jsxi:118
+						if (__that.data.parent != null){                           // cars_car_load.jsxi:134
+							if (__that.data.parent == __that.id){                  // cars_car_load.jsxi:135
 								__that.addError('parent-wrong', 'Parent is child');
 							} else {
 								var par = Cars.byName(__that.data.parent);
 								
-								if (par == null){                                  // cars_car_load.jsxi:123
+								if (par == null){                                  // cars_car_load.jsxi:140
 									__that.addError('parent-missing', 'Parent is missing');
 								} else {
-									__that.parent = par;                           // cars_car_load.jsxi:126
-									__that.parent.children.push(this);             // cars_car_load.jsxi:127
+									__that.parent = par;                           // cars_car_load.jsxi:143
+									__that.parent.children.push(this);             // cars_car_load.jsxi:144
 									mediator.dispatch('update.car.parent', this);
 									mediator.dispatch('update.car.children', __that.parent);
 								}
 								
-								if (!fs.existsSync(__that.upgrade)){               // cars_car_load.jsxi:133
+								if (!fs.existsSync(__that.upgrade)){               // cars_car_load.jsxi:150
 									__that.addError('parent-upgrade-missing', 'Missing upgrade.png');
 								}
 							}
 						}
 						
-						registerTags(__that.data.tags);                            // cars_car_load.jsxi:139
-						registerClass(__that.data.class);                          // cars_car_load.jsxi:140
-						registerBrand(__that.data.brand);                          // cars_car_load.jsxi:141
+						registerTags(__that.data.tags);                            // cars_car_load.jsxi:156
+						registerClass(__that.data.class);                          // cars_car_load.jsxi:157
+						registerBrand(__that.data.brand);                          // cars_car_load.jsxi:158
 					}
 				}
 				
-				mediator.dispatch('update.car.data', this);                        // cars_car_load.jsxi:145
+				mediator.dispatch('update.car.data', this);                        // cars_car_load.jsxi:162
 				
-				if (callback)                                                      // cars_car_load.jsxi:146
-					callback();                                                    // cars_car_load.jsxi:146
-			}).bind(this));                                                        // cars_car_load.jsxi:147
+				if (callback)                                                      // cars_car_load.jsxi:163
+					callback();                                                    // cars_car_load.jsxi:163
+			}).bind(this));                                                        // cars_car_load.jsxi:164
 	};
-	Car.prototype.load = function (callback){                                      // cars_car_load.jsxi:150
+	Car.prototype.load = function (callback){                                      // cars_car_load.jsxi:167
 		this.clearErrors();
 		this.loadBadge();
 		this.loadSkins();
@@ -2464,153 +2481,164 @@ AbstractFixer.prototype.run = function (){                                      
 				__that.__AbstractFixer_error(err === true ? null : err);
 			} else {
 				__that.__car.removeError(__that.__errorId);                        // abstract_fixer.jsxi:17
+				setTimeout(__bindOnce(__that, '__reloadAfter'));                   // abstract_fixer.jsxi:18
 			}
 		});
-	} catch (err){                                                                 // abstract_fixer.jsxi:20
+	} catch (err){                                                                 // abstract_fixer.jsxi:21
 		this.__AbstractFixer_error(err);
 	} 
 };
-AbstractFixer.prototype.__AbstractFixer_error = function (err){                    // abstract_fixer.jsxi:26
+AbstractFixer.prototype.__reloadAfter = function (){};
+AbstractFixer.prototype.__AbstractFixer_error = function (err){                    // abstract_fixer.jsxi:30
 	this.__AbstractFixer__error = true;
-	ErrorHandler.handled('Cannot fix error: ' + this.__errorId, err);              // abstract_fixer.jsxi:28
+	ErrorHandler.handled('Cannot fix error: ' + this.__errorId, err);              // abstract_fixer.jsxi:32
 };
-AbstractFixer.prototype.__AbstractFixer_work = function (c){                       // abstract_fixer.jsxi:31
+AbstractFixer.prototype.__AbstractFixer_work = function (c){                       // abstract_fixer.jsxi:35
 	var __that = this, 
-		s = this.__solutions.filter(function (arg){                                // abstract_fixer.jsxi:32
-			return arg;                                                            // abstract_fixer.jsxi:32
+		s = this.__solutions.filter(function (arg){                                // abstract_fixer.jsxi:36
+			return arg;                                                            // abstract_fixer.jsxi:36
 		});
 	
-	new Dialog(this.__title,                                                       // abstract_fixer.jsxi:33
+	if (s.length == 0){                                                            // abstract_fixer.jsxi:37
+		new Dialog(this.__title,                                                   // abstract_fixer.jsxi:38
+			[
+				'<h6>Available solutions:</h6>',                                   // abstract_fixer.jsxi:38
+				'Sorry, but none of solutions is available.'
+			]);
+		return;
+	}
+	
+	new Dialog(this.__title,                                                       // abstract_fixer.jsxi:41
 		[
-			'<h6>Available solutions:</h6>',                                       // abstract_fixer.jsxi:34
-			s.map(function (e, i){                                                 // abstract_fixer.jsxi:35
+			'<h6>Available solutions:</h6>',                                       // abstract_fixer.jsxi:42
+			s.map(function (e, i){                                                 // abstract_fixer.jsxi:43
 				return '<label><input name="solution" data-solution-id="' + i + '" type="radio">' + e.name + '</label>';
 			}).join('<br>')
 		], 
-		function (){                                                               // abstract_fixer.jsxi:36
+		function (){                                                               // abstract_fixer.jsxi:44
 			var id = this.find('input[name="solution"]:checked').data('solution-id');
 			
 			try {
-				s[id].fn(c);                                                       // abstract_fixer.jsxi:39
-			} catch (err){                                                         // abstract_fixer.jsxi:40
+				s[id].fn(c);                                                       // abstract_fixer.jsxi:47
+			} catch (err){                                                         // abstract_fixer.jsxi:48
 				__that.__AbstractFixer_error(err);
 			} 
-		}).addButton('Cancel').find('input[name="solution"]')[0].checked = true;   // abstract_fixer.jsxi:43
+		}).addButton('Cancel').find('input[name="solution"]')[0].checked = true;   // abstract_fixer.jsxi:51
 };
-AbstractFixer.prototype.__fixJsonFile = function (filename, fn){                   // abstract_fixer.jsxi:49
+AbstractFixer.prototype.__fixJsonFile = function (filename, fn){                   // abstract_fixer.jsxi:57
 	try {
 		var dat = JSON.flexibleParse(fs.readFileSync(filename));
 		
-		fn(dat);                                                                   // abstract_fixer.jsxi:52
-		fs.writeFileSync(filename,                                                 // abstract_fixer.jsxi:53
+		fn(dat);                                                                   // abstract_fixer.jsxi:60
+		fs.writeFileSync(filename,                                                 // abstract_fixer.jsxi:61
 			JSON.stringify(dat, false, 
-				4));                                                               // abstract_fixer.jsxi:53
-	} catch (err){                                                                 // abstract_fixer.jsxi:54
+				4));                                                               // abstract_fixer.jsxi:61
+	} catch (err){                                                                 // abstract_fixer.jsxi:62
 		this.__AbstractFixer_error(err);
 	} 
 };
-AbstractFixer.__simularFile = function (a, b){                                     // abstract_fixer.jsxi:59
-	a = a.toLowerCase();                                                           // abstract_fixer.jsxi:61
-	b = b.toLowerCase();                                                           // abstract_fixer.jsxi:62
+AbstractFixer.__simularFile = function (a, b){                                     // abstract_fixer.jsxi:67
+	a = a.toLowerCase();                                                           // abstract_fixer.jsxi:69
+	b = b.toLowerCase();                                                           // abstract_fixer.jsxi:70
 	
-	if (b.indexOf(a) !== - 1)                                                      // abstract_fixer.jsxi:63
+	if (b.indexOf(a) !== - 1)                                                      // abstract_fixer.jsxi:71
 		return true;
 	
-	for (var i = a.length - 1; i > a.length / 2; i --)                             // abstract_fixer.jsxi:65
-		if (b.indexOf(a.substr(0, i)) !== - 1)                                     // abstract_fixer.jsxi:66
+	for (var i = a.length - 1; i > a.length / 2; i --)                             // abstract_fixer.jsxi:73
+		if (b.indexOf(a.substr(0, i)) !== - 1)                                     // abstract_fixer.jsxi:74
 			return true;
 	return false;
 };
-AbstractFixer.__simularFiles = function (filename, filter, deep){                  // abstract_fixer.jsxi:71
-	if (filter === undefined)                                                      // abstract_fixer.jsxi:71
-		filter = (function (arg){                                                  // abstract_fixer.jsxi:71
+AbstractFixer.__simularFiles = function (filename, filter, deep){                  // abstract_fixer.jsxi:79
+	if (filter === undefined)                                                      // abstract_fixer.jsxi:79
+		filter = (function (arg){                                                  // abstract_fixer.jsxi:79
 	return true;
 });
 
-	if (deep === undefined)                                                        // abstract_fixer.jsxi:71
-		deep = true;                                                               // abstract_fixer.jsxi:71
+	if (deep === undefined)                                                        // abstract_fixer.jsxi:79
+		deep = true;                                                               // abstract_fixer.jsxi:79
 
 	var dir = path.dirname(filename);
 	
 	var basename = path.basename(filename);
 	
-	if (fs.existsSync(dir)){                                                       // abstract_fixer.jsxi:75
-		if (fs.statSync(dir).isDirectory()){                                       // abstract_fixer.jsxi:76
-			return fs.readdirSync(dir).filter(function (arg){                      // abstract_fixer.jsxi:77
+	if (fs.existsSync(dir)){                                                       // abstract_fixer.jsxi:83
+		if (fs.statSync(dir).isDirectory()){                                       // abstract_fixer.jsxi:84
+			return fs.readdirSync(dir).filter(function (arg){                      // abstract_fixer.jsxi:85
 				return AbstractFixer.__simularFile(basename, arg);
-			}).map(function (e){                                                   // abstract_fixer.jsxi:77
-				return dir + '/' + e;                                              // abstract_fixer.jsxi:78
-			}).filter(function (arg){                                              // abstract_fixer.jsxi:79
-				return filter(fs.statSync(arg));                                   // abstract_fixer.jsxi:79
+			}).map(function (e){                                                   // abstract_fixer.jsxi:85
+				return dir + '/' + e;                                              // abstract_fixer.jsxi:86
+			}).filter(function (arg){                                              // abstract_fixer.jsxi:87
+				return filter(fs.statSync(arg));                                   // abstract_fixer.jsxi:87
 			});
 		} else {
 			return [];
 		}
-	} else if (deep){                                                              // abstract_fixer.jsxi:83
+	} else if (deep){                                                              // abstract_fixer.jsxi:91
 		var r = [];
 		
-		var s = AbstractFixer.__simularFiles(dir,                                  // abstract_fixer.jsxi:85
-			function (arg){                                                        // abstract_fixer.jsxi:85
-				return arg.isDirectory();                                          // abstract_fixer.jsxi:85
+		var s = AbstractFixer.__simularFiles(dir,                                  // abstract_fixer.jsxi:93
+			function (arg){                                                        // abstract_fixer.jsxi:93
+				return arg.isDirectory();                                          // abstract_fixer.jsxi:93
 			}, 
 			false);
 		
-		for (var __1 = 0; __1 < s.length; __1 ++){                                 // abstract_fixer.jsxi:86
+		for (var __1 = 0; __1 < s.length; __1 ++){                                 // abstract_fixer.jsxi:94
 			var d = s[__1];
 			
-			r.push.call(r,                                                         // abstract_fixer.jsxi:87
+			r.push.call(r,                                                         // abstract_fixer.jsxi:95
 				AbstractFixer.__simularFiles(d + '/' + basename, filter, false));
 		}
-		return r;                                                                  // abstract_fixer.jsxi:89
+		return r;                                                                  // abstract_fixer.jsxi:97
 	} else {
 		return [];
 	}
 };
-AbstractFixer.__restoreFile = function (filename, from, c){                        // abstract_fixer.jsxi:95
-	fs.rename(from,                                                                // abstract_fixer.jsxi:96
-		filename,                                                                  // abstract_fixer.jsxi:96
-		function (err){                                                            // abstract_fixer.jsxi:96
-			if (err){                                                              // abstract_fixer.jsxi:97
-				if (err.code === 'EXDEV'){                                         // abstract_fixer.jsxi:98
-					copy();                                                        // abstract_fixer.jsxi:99
+AbstractFixer.__restoreFile = function (filename, from, c){                        // abstract_fixer.jsxi:103
+	fs.rename(from,                                                                // abstract_fixer.jsxi:104
+		filename,                                                                  // abstract_fixer.jsxi:104
+		function (err){                                                            // abstract_fixer.jsxi:104
+			if (err){                                                              // abstract_fixer.jsxi:105
+				if (err.code === 'EXDEV'){                                         // abstract_fixer.jsxi:106
+					copy();                                                        // abstract_fixer.jsxi:107
 				} else {
-					c(err);                                                        // abstract_fixer.jsxi:101
+					c(err);                                                        // abstract_fixer.jsxi:109
 				}
 			} else {
-				c();                                                               // abstract_fixer.jsxi:104
+				c();                                                               // abstract_fixer.jsxi:112
 			}
 		});
 	
-	function copy(){                                                               // abstract_fixer.jsxi:108
+	function copy(){                                                               // abstract_fixer.jsxi:116
 		var rs = fs.createReadStream(from);
 		
 		var ws = fs.createWriteStream(filename);
 		
-		rs.on('error', c);                                                         // abstract_fixer.jsxi:111
-		ws.on('error', c);                                                         // abstract_fixer.jsxi:112
-		rs.on('close',                                                             // abstract_fixer.jsxi:113
-			function (){                                                           // abstract_fixer.jsxi:113
-				c();                                                               // abstract_fixer.jsxi:114
-				fs.unlink(from);                                                   // abstract_fixer.jsxi:115
+		rs.on('error', c);                                                         // abstract_fixer.jsxi:119
+		ws.on('error', c);                                                         // abstract_fixer.jsxi:120
+		rs.on('close',                                                             // abstract_fixer.jsxi:121
+			function (){                                                           // abstract_fixer.jsxi:121
+				c();                                                               // abstract_fixer.jsxi:122
+				fs.unlink(from);                                                   // abstract_fixer.jsxi:123
 			});
-		rs.pipe(ws);                                                               // abstract_fixer.jsxi:117
+		rs.pipe(ws);                                                               // abstract_fixer.jsxi:125
 	}
 };
-AbstractFixer.__tryToRestoreFile = function (filename, filter, callback){          // abstract_fixer.jsxi:121
-	return AbstractFixer.__simularFiles(filename, filter).map(function (e){        // abstract_fixer.jsxi:122
+AbstractFixer.__tryToRestoreFile = function (filename, filter, callback){          // abstract_fixer.jsxi:129
+	return AbstractFixer.__simularFiles(filename, filter).map(function (e){        // abstract_fixer.jsxi:130
 		return {
 			name: 'Restore from …' + path.normalize(e).slice(AcDir.root.length), 
-			fn: (function (c){                                                     // abstract_fixer.jsxi:125
-				AbstractFixer.__restoreFile(filename,                              // abstract_fixer.jsxi:126
-					e,                                                             // abstract_fixer.jsxi:126
-					function (err){                                                // abstract_fixer.jsxi:126
-						if (err)                                                   // abstract_fixer.jsxi:127
-							return c(err);                                         // abstract_fixer.jsxi:127
+			fn: (function (c){                                                     // abstract_fixer.jsxi:133
+				AbstractFixer.__restoreFile(filename,                              // abstract_fixer.jsxi:134
+					e,                                                             // abstract_fixer.jsxi:134
+					function (err){                                                // abstract_fixer.jsxi:134
+						if (err)                                                   // abstract_fixer.jsxi:135
+							return c(err);                                         // abstract_fixer.jsxi:135
 						
-						if (callback)                                              // abstract_fixer.jsxi:128
-							callback();                                            // abstract_fixer.jsxi:128
+						if (callback)                                              // abstract_fixer.jsxi:136
+							callback();                                            // abstract_fixer.jsxi:136
 						
-						c();                                                       // abstract_fixer.jsxi:129
+						c();                                                       // abstract_fixer.jsxi:137
 					});
 			})
 		};
@@ -2624,36 +2652,34 @@ function MissingDataNameFixer(){                                                
 }
 __prototypeExtend(MissingDataNameFixer, 
 	AbstractFixer);
-MissingDataNameFixer.prototype.__MissingDataNameFixer_fix = function (v){          // error_data_fields.jsxi:2
-	var __that = this;
-	
-	this.__fixJsonFile(this.__car.json,                                            // error_data_fields.jsxi:3
-		function (data){                                                           // error_data_fields.jsxi:3
-			data.name = v;                                                         // error_data_fields.jsxi:4
-		});
-	setTimeout(function (arg){                                                     // error_data_fields.jsxi:7
-		return __that.__car.loadData();                                            // error_data_fields.jsxi:7
-	});
+MissingDataNameFixer.prototype.__reloadAfter = function (){                        // error_data_fields.jsxi:2
+	this.__car.loadData();                                                         // error_data_fields.jsxi:3
 };
-MissingDataNameFixer.prototype.__MissingDataNameFixer_createNew = function (c){    // error_data_fields.jsxi:10
+MissingDataNameFixer.prototype.__MissingDataNameFixer_fix = function (v){          // error_data_fields.jsxi:6
+	this.__fixJsonFile(this.__car.json,                                            // error_data_fields.jsxi:7
+		function (data){                                                           // error_data_fields.jsxi:7
+			data.name = v;                                                         // error_data_fields.jsxi:8
+		});
+};
+MissingDataNameFixer.prototype.__MissingDataNameFixer_createNew = function (c){    // error_data_fields.jsxi:12
 	var __that = this;
 	
-	new Dialog('Input A New Name',                                                 // error_data_fields.jsxi:11
-		'<input required>',                                                        // error_data_fields.jsxi:11
-		function (){                                                               // error_data_fields.jsxi:11
+	new Dialog('Input A New Name',                                                 // error_data_fields.jsxi:13
+		'<input required>',                                                        // error_data_fields.jsxi:13
+		function (){                                                               // error_data_fields.jsxi:13
 			__that.__MissingDataNameFixer_fix(this.find('input').val());
-			c();                                                                   // error_data_fields.jsxi:13
+			c();                                                                   // error_data_fields.jsxi:15
 		});
 };
-MissingDataNameFixer.prototype.__MissingDataNameFixer_useId = function (c){        // error_data_fields.jsxi:17
+MissingDataNameFixer.prototype.__MissingDataNameFixer_useId = function (c){        // error_data_fields.jsxi:19
 	this.__MissingDataNameFixer_fix(this.__car.id);
-	c();                                                                           // error_data_fields.jsxi:19
+	c();                                                                           // error_data_fields.jsxi:21
 };
 Object.defineProperty(MissingDataNameFixer.prototype, 
 	'__title', 
 	{
 		get: (function (){
-			return 'Car name is missing';                                          // error_data_fields.jsxi:22
+			return 'Car name is missing';                                          // error_data_fields.jsxi:24
 		})
 	});
 Object.defineProperty(MissingDataNameFixer.prototype, 
@@ -2662,11 +2688,11 @@ Object.defineProperty(MissingDataNameFixer.prototype,
 		get: (function (){
 			return [
 				{
-					name: 'Enter a new name',                                      // error_data_fields.jsxi:24
+					name: 'Enter a new name',                                      // error_data_fields.jsxi:26
 					fn: __bindOnce(this, '__MissingDataNameFixer_createNew')
 				}, 
 				{
-					name: 'Use id as a name',                                      // error_data_fields.jsxi:25
+					name: 'Use id as a name',                                      // error_data_fields.jsxi:27
 					fn: __bindOnce(this, '__MissingDataNameFixer_useId')
 				}
 			];
@@ -2674,48 +2700,46 @@ Object.defineProperty(MissingDataNameFixer.prototype,
 	});
 
 /* Class "MissingDataBrandFixer" declaration */
-function MissingDataBrandFixer(){                                                  // error_data_fields.jsxi:29
+function MissingDataBrandFixer(){                                                  // error_data_fields.jsxi:31
 	AbstractFixer.apply(this, 
 		arguments);
 }
 __prototypeExtend(MissingDataBrandFixer, 
 	AbstractFixer);
-MissingDataBrandFixer.prototype.__MissingDataBrandFixer_fix = function (v){        // error_data_fields.jsxi:30
-	var __that = this;
-	
-	this.__fixJsonFile(this.__car.json,                                            // error_data_fields.jsxi:31
-		function (data){                                                           // error_data_fields.jsxi:31
-			data.brand = v;                                                        // error_data_fields.jsxi:32
+MissingDataBrandFixer.prototype.__reloadAfter = function (){                       // error_data_fields.jsxi:32
+	this.__car.loadData();                                                         // error_data_fields.jsxi:33
+};
+MissingDataBrandFixer.prototype.__MissingDataBrandFixer_fix = function (v){        // error_data_fields.jsxi:36
+	this.__fixJsonFile(this.__car.json,                                            // error_data_fields.jsxi:37
+		function (data){                                                           // error_data_fields.jsxi:37
+			data.brand = v;                                                        // error_data_fields.jsxi:38
 		});
-	setTimeout(function (arg){                                                     // error_data_fields.jsxi:35
-		return __that.__car.loadData();                                            // error_data_fields.jsxi:35
-	});
 };
 MissingDataBrandFixer.prototype.__MissingDataBrandFixer_createNew = function (c){
 	var __that = this;
 	
-	new Dialog('Select Brand Name',                                                // error_data_fields.jsxi:39
-		'<input autocomplete list="brands" required>',                             // error_data_fields.jsxi:39
-		function (){                                                               // error_data_fields.jsxi:39
+	new Dialog('Select Brand Name',                                                // error_data_fields.jsxi:43
+		'<input autocomplete list="brands" required>',                             // error_data_fields.jsxi:43
+		function (){                                                               // error_data_fields.jsxi:43
 			__that.__MissingDataBrandFixer_fix(this.find('input').val());
-			c();                                                                   // error_data_fields.jsxi:41
+			c();                                                                   // error_data_fields.jsxi:45
 		});
 };
-MissingDataBrandFixer.prototype.__MissingDataBrandFixer_useBr = function (c){      // error_data_fields.jsxi:45
+MissingDataBrandFixer.prototype.__MissingDataBrandFixer_useBr = function (c){      // error_data_fields.jsxi:49
 	this.__MissingDataBrandFixer_fix(this.__MissingDataBrandFixer_br);
-	c();                                                                           // error_data_fields.jsxi:47
+	c();                                                                           // error_data_fields.jsxi:51
 };
 MissingDataBrandFixer.prototype.__MissingDataBrandFixer_extractBrand = function (){
 	var __that = this;
-	return this.__MissingDataBrandFixer_br = Cars.brands.filter(function (arg){    // error_data_fields.jsxi:52
-		return __that.__car.id.indexOf(arg.toLowerCase()) === 0;                   // error_data_fields.jsxi:52
+	return this.__MissingDataBrandFixer_br = Cars.brands.filter(function (arg){    // error_data_fields.jsxi:56
+		return __that.__car.id.indexOf(arg.toLowerCase()) === 0;                   // error_data_fields.jsxi:56
 	})[0];
 };
 Object.defineProperty(MissingDataBrandFixer.prototype, 
 	'__title', 
 	{
 		get: (function (){
-			return 'Car brand is missing';                                         // error_data_fields.jsxi:55
+			return 'Car brand is missing';                                         // error_data_fields.jsxi:59
 		})
 	});
 Object.defineProperty(MissingDataBrandFixer.prototype, 
@@ -2728,15 +2752,114 @@ Object.defineProperty(MissingDataBrandFixer.prototype,
 					fn: __bindOnce(this, '__MissingDataBrandFixer_useBr')
 				}, 
 				{
-					name: 'Select a new brand',                                    // error_data_fields.jsxi:58
+					name: 'Select a new brand',                                    // error_data_fields.jsxi:62
 					fn: __bindOnce(this, '__MissingDataBrandFixer_createNew')
 				}
 			];
 		})
 	});
 
-RestorationWizard.register('data-name-missing', MissingDataNameFixer);             // error_data_fields.jsxi:62
-RestorationWizard.register('data-brand-missing', MissingDataBrandFixer);           // error_data_fields.jsxi:63
+RestorationWizard.register('data-name-missing', MissingDataNameFixer);             // error_data_fields.jsxi:66
+RestorationWizard.register('data-brand-missing', MissingDataBrandFixer);           // error_data_fields.jsxi:67
+
+/* Class "WrongDataParentFixer" declaration */
+function WrongDataParentFixer(){                                                   // error_data_fields.jsxi:69
+	AbstractFixer.apply(this, 
+		arguments);
+}
+__prototypeExtend(WrongDataParentFixer, 
+	AbstractFixer);
+WrongDataParentFixer.prototype.__reloadAfter = function (){                        // error_data_fields.jsxi:70
+	this.__car.loadData();                                                         // error_data_fields.jsxi:71
+};
+WrongDataParentFixer.prototype.__WrongDataParentFixer_fix = function (v){          // error_data_fields.jsxi:74
+	this.__fixJsonFile(this.__car.json,                                            // error_data_fields.jsxi:75
+		function (data){                                                           // error_data_fields.jsxi:75
+			if (v){                                                                // error_data_fields.jsxi:76
+				data.parent = v;                                                   // error_data_fields.jsxi:77
+			} else {
+				delete data.parent;                                                // error_data_fields.jsxi:79
+			}
+		});
+};
+WrongDataParentFixer.prototype.__WrongDataParentFixer_createNew = function (c){    // error_data_fields.jsxi:84
+	var __that = this;
+	
+	d = new Dialog('Select New Parent',                                            // error_data_fields.jsxi:85
+		'<select></select>',                                                       // error_data_fields.jsxi:85
+		function (){                                                               // error_data_fields.jsxi:85
+			__that.__WrongDataParentFixer_fix(this.find('select').val());
+			c();                                                                   // error_data_fields.jsxi:87
+		});
+	
+	var s = d.find('select')[0];
+	
+	s.innerHTML = '<option value="">None</option>' + Cars.list.filter(function (e){
+		return e.data && !e.disabled && e.parent == null && e.id != __that.__car.id && (!__that.__car.parent || __that.__car.parent.id != __that.__car.id);
+	}).map(function (e){                                                           // error_data_fields.jsxi:93
+		return '<option value="{0}">{1}</option>'.format(e.id, e.data.name);       // error_data_fields.jsxi:94
+	}).join('');                                                                   // error_data_fields.jsxi:95
+};
+WrongDataParentFixer.prototype.__WrongDataParentFixer_makeInd = function (c){      // error_data_fields.jsxi:98
+	this.__WrongDataParentFixer_fix(null);
+	c();                                                                           // error_data_fields.jsxi:100
+};
+Object.defineProperty(WrongDataParentFixer.prototype, 
+	'__title', 
+	{
+		get: (function (){
+			return 'Parent id is incorrect';                                       // error_data_fields.jsxi:103
+		})
+	});
+Object.defineProperty(WrongDataParentFixer.prototype, 
+	'__solutions', 
+	{
+		get: (function (){
+			return [
+				{
+					name: 'Make independent',                                      // error_data_fields.jsxi:105
+					fn: __bindOnce(this, '__WrongDataParentFixer_makeInd')
+				}, 
+				this.__car.children.length == 0 && {                               // error_data_fields.jsxi:106
+					name: 'Select a new parent',                                   // error_data_fields.jsxi:106
+					fn: __bindOnce(this, '__WrongDataParentFixer_createNew')
+				}
+			];
+		})
+	});
+
+RestorationWizard.register('parent-wrong', WrongDataParentFixer);                  // error_data_fields.jsxi:110
+RestorationWizard.register('parent-missing', WrongDataParentFixer);                // error_data_fields.jsxi:111
+
+/* Class "DataFileFixer" declaration */
+function DataFileFixer(){                                                          // error_data_file.jsxi:1
+	AbstractFixer.apply(this, 
+		arguments);
+}
+__prototypeExtend(DataFileFixer, 
+	AbstractFixer);
+DataFileFixer.prototype.__reloadAfter = function (){                               // error_data_file.jsxi:2
+	this.__car.loadData();                                                         // error_data_file.jsxi:3
+};
+Object.defineProperty(DataFileFixer.prototype, 
+	'__title', 
+	{
+		get: (function (){
+			return 'File ui/ui_car.json is missing';                               // error_data_file.jsxi:6
+		})
+	});
+Object.defineProperty(DataFileFixer.prototype, 
+	'__solutions', 
+	{
+		get: (function (){
+			return AbstractFixer.__tryToRestoreFile(this.__car.json,               // error_data_file.jsxi:7
+				function (arg){                                                    // error_data_file.jsxi:8
+					return arg.isFile() && arg.size > 10 && arg.size < 1e5;        // error_data_file.jsxi:8
+				});
+		})
+	});
+
+RestorationWizard.register('data-missing', DataFileFixer);                         // error_data_file.jsxi:11
 
 /* Class "MissingSkinsDirectoryFixer" declaration */
 function MissingSkinsDirectoryFixer(){                                             // error_skins_directory.jsxi:1
@@ -2746,65 +2869,55 @@ function MissingSkinsDirectoryFixer(){                                          
 __prototypeExtend(MissingSkinsDirectoryFixer, 
 	AbstractFixer);
 MissingSkinsDirectoryFixer.prototype.__MissingSkinsDirectoryFixer_createNew = function (c){
-	var __that = this;
-	
 	fs.mkdirSync(this.__car.skinsDir);                                             // error_skins_directory.jsxi:3
 	fs.mkdirSync(this.__car.skinsDir + '/default');                                // error_skins_directory.jsxi:4
-	setTimeout(function (arg){                                                     // error_skins_directory.jsxi:5
-		return __that.__car.loadSkins();                                           // error_skins_directory.jsxi:5
-	});
-	c();                                                                           // error_skins_directory.jsxi:6
+	c();                                                                           // error_skins_directory.jsxi:5
+};
+MissingSkinsDirectoryFixer.prototype.__reloadAfter = function (){                  // error_skins_directory.jsxi:13
+	this.__car.loadSkins();                                                        // error_skins_directory.jsxi:14
 };
 Object.defineProperty(MissingSkinsDirectoryFixer.prototype, 
 	'__title', 
 	{
 		get: (function (){
-			return 'Skins folder is missing';                                      // error_skins_directory.jsxi:9
+			return 'Skins folder is missing';                                      // error_skins_directory.jsxi:8
 		})
 	});
 Object.defineProperty(MissingSkinsDirectoryFixer.prototype, 
 	'__solutions', 
 	{
 		get: (function (){
-			var __that = this;
 			return [
 				{
-					name: 'Create new with empty skin',                            // error_skins_directory.jsxi:11
+					name: 'Create new with empty skin',                            // error_skins_directory.jsxi:10
 					fn: __bindOnce(this, '__MissingSkinsDirectoryFixer_createNew')
 				}
-			].concat(AbstractFixer.__tryToRestoreFile(this.__car.skinsDir,         // error_skins_directory.jsxi:12
-				function (arg){                                                    // error_skins_directory.jsxi:13
-					return arg.isDirectory();                                      // error_skins_directory.jsxi:13
-				}, 
-				function (){                                                       // error_skins_directory.jsxi:14
-					setTimeout(function (arg){                                     // error_skins_directory.jsxi:15
-						return __that.__car.loadSkins();                           // error_skins_directory.jsxi:15
-					});
+			].concat(AbstractFixer.__tryToRestoreFile(this.__car.skinsDir,         // error_skins_directory.jsxi:11
+				function (arg){                                                    // error_skins_directory.jsxi:11
+					return arg.isDirectory();                                      // error_skins_directory.jsxi:11
 				}));
 		})
 	});
 
 /* Class "EmptySkinsDirectoryFixer" declaration */
-function EmptySkinsDirectoryFixer(){                                               // error_skins_directory.jsxi:19
+function EmptySkinsDirectoryFixer(){                                               // error_skins_directory.jsxi:18
 	AbstractFixer.apply(this, 
 		arguments);
 }
 __prototypeExtend(EmptySkinsDirectoryFixer, 
 	AbstractFixer);
+EmptySkinsDirectoryFixer.prototype.__reloadAfter = function (){                    // error_skins_directory.jsxi:19
+	this.__car.loadSkins();                                                        // error_skins_directory.jsxi:20
+};
 EmptySkinsDirectoryFixer.prototype.__EmptySkinsDirectoryFixer_createNew = function (c){
-	var __that = this;
-	
-	fs.mkdirSync(this.__car.skinsDir + '/default');                                // error_skins_directory.jsxi:21
-	setTimeout(function (arg){                                                     // error_skins_directory.jsxi:22
-		return __that.__car.loadSkins();                                           // error_skins_directory.jsxi:22
-	});
-	c();                                                                           // error_skins_directory.jsxi:23
+	fs.mkdirSync(this.__car.skinsDir + '/default');                                // error_skins_directory.jsxi:24
+	c();                                                                           // error_skins_directory.jsxi:25
 };
 Object.defineProperty(EmptySkinsDirectoryFixer.prototype, 
 	'__title', 
 	{
 		get: (function (){
-			return 'Skins folder is empty';                                        // error_skins_directory.jsxi:26
+			return 'Skins folder is empty';                                        // error_skins_directory.jsxi:28
 		})
 	});
 Object.defineProperty(EmptySkinsDirectoryFixer.prototype, 
@@ -2813,7 +2926,7 @@ Object.defineProperty(EmptySkinsDirectoryFixer.prototype,
 		get: (function (){
 			return [
 				{
-					name: 'Create new empty skin',                                 // error_skins_directory.jsxi:28
+					name: 'Create new empty skin',                                 // error_skins_directory.jsxi:30
 					fn: __bindOnce(this, '__EmptySkinsDirectoryFixer_createNew')
 				}
 			];
@@ -2821,28 +2934,26 @@ Object.defineProperty(EmptySkinsDirectoryFixer.prototype,
 	});
 
 /* Class "FileSkinsDirectoryFixer" declaration */
-function FileSkinsDirectoryFixer(){                                                // error_skins_directory.jsxi:32
+function FileSkinsDirectoryFixer(){                                                // error_skins_directory.jsxi:34
 	AbstractFixer.apply(this, 
 		arguments);
 }
 __prototypeExtend(FileSkinsDirectoryFixer, 
 	AbstractFixer);
-FileSkinsDirectoryFixer.prototype.__FileSkinsDirectoryFixer_fix = function (c){    // error_skins_directory.jsxi:33
-	var __that = this;
-	
-	fs.renameSync(this.__car.skinsDir, this.__car.skinsDir + '.bak');              // error_skins_directory.jsxi:34
-	fs.mkdirSync(this.__car.skinsDir);                                             // error_skins_directory.jsxi:35
-	fs.mkdirSync(this.__car.skinsDir + '/default');                                // error_skins_directory.jsxi:36
-	setTimeout(function (arg){                                                     // error_skins_directory.jsxi:37
-		return __that.__car.loadSkins();                                           // error_skins_directory.jsxi:37
-	});
-	c();                                                                           // error_skins_directory.jsxi:38
+FileSkinsDirectoryFixer.prototype.__reloadAfter = function (){                     // error_skins_directory.jsxi:35
+	this.__car.loadSkins();                                                        // error_skins_directory.jsxi:36
+};
+FileSkinsDirectoryFixer.prototype.__FileSkinsDirectoryFixer_fix = function (c){    // error_skins_directory.jsxi:39
+	fs.renameSync(this.__car.skinsDir, this.__car.skinsDir + '.bak');              // error_skins_directory.jsxi:40
+	fs.mkdirSync(this.__car.skinsDir);                                             // error_skins_directory.jsxi:41
+	fs.mkdirSync(this.__car.skinsDir + '/default');                                // error_skins_directory.jsxi:42
+	c();                                                                           // error_skins_directory.jsxi:43
 };
 Object.defineProperty(FileSkinsDirectoryFixer.prototype, 
 	'__title', 
 	{
 		get: (function (){
-			return 'There is a file instead of skins folder';                      // error_skins_directory.jsxi:41
+			return 'There is a file instead of skins folder';                      // error_skins_directory.jsxi:46
 		})
 	});
 Object.defineProperty(FileSkinsDirectoryFixer.prototype, 
@@ -2858,9 +2969,9 @@ Object.defineProperty(FileSkinsDirectoryFixer.prototype,
 		})
 	});
 
-RestorationWizard.register('skins-missing', MissingSkinsDirectoryFixer);           // error_skins_directory.jsxi:47
-RestorationWizard.register('skins-empty', EmptySkinsDirectoryFixer);               // error_skins_directory.jsxi:48
-RestorationWizard.register('skins-file', FileSkinsDirectoryFixer);                 // error_skins_directory.jsxi:49
+RestorationWizard.register('skins-missing', MissingSkinsDirectoryFixer);           // error_skins_directory.jsxi:52
+RestorationWizard.register('skins-empty', EmptySkinsDirectoryFixer);               // error_skins_directory.jsxi:53
+RestorationWizard.register('skins-file', FileSkinsDirectoryFixer);                 // error_skins_directory.jsxi:54
 
 /* Class "MissingUpgradeIconFixer" declaration */
 function MissingUpgradeIconFixer(){                                                // error_upgrade_missing.jsxi:1
@@ -3037,490 +3148,494 @@ var ViewDetails = (function (){                                                 
 					'src': (car.skins.selected.preview + '?' + Math.random()).cssUrl()
 				});
 				car.skins.forEach(function (e){                                    // view_details.jsxi:113
-					$('<img>').attr({ 'data-id': e.id, 'title': e.id, 'src': e.livery.cssUrl() }).appendTo(ss);
+					var i = $('<img>').attr({ 'data-id': e.id, 'title': e.id, 'src': e.livery.cssUrl() }).appendTo(ss);
+					
+					if (e === car.skins.selected){                                 // view_details.jsxi:119
+						i.addClass('selected');                                    // view_details.jsxi:120
+					}
 				});
 			} else {
-				sa.hide();                                                         // view_details.jsxi:121
+				sa.hide();                                                         // view_details.jsxi:124
 			}
 		}, 
 		50);
 	}
 	
-	function updateParents(car){                                                   // view_details.jsxi:126
+	function updateParents(car){                                                   // view_details.jsxi:129
 		var s = document.getElementById('selected-car-parent');
 		
-		if (!s)                                                                    // view_details.jsxi:129
+		if (!s)                                                                    // view_details.jsxi:132
 			return;
 		
-		if (car.children.length > 0){                                              // view_details.jsxi:131
-			s.parentNode.style.display = 'none';                                   // view_details.jsxi:132
+		if (car.children.length > 0){                                              // view_details.jsxi:134
+			s.parentNode.style.display = 'none';                                   // view_details.jsxi:135
 		} else {
-			s.parentNode.style.display = null;                                     // view_details.jsxi:134
+			s.parentNode.style.display = null;                                     // view_details.jsxi:137
 			s.innerHTML = '<option value="">None</option>' + Cars.list.filter(function (e){
 				return e.data && !e.disabled && e.parent == null && e.id != car.id && (!car.parent || car.parent.id != car.id);
-			}).map(function (e){                                                   // view_details.jsxi:138
+			}).map(function (e){                                                   // view_details.jsxi:141
 				return '<option value="{0}">{1}</option>'.format(e.id, e.data.name);
-			}).join('');                                                           // view_details.jsxi:140
-			s.value = car.parent && car.parent.id || '';                           // view_details.jsxi:142
+			}).join('');                                                           // view_details.jsxi:143
+			s.value = car.parent && car.parent.id || '';                           // view_details.jsxi:145
 		}
 	}
 	
-	function updateTags(l){                                                        // view_details.jsxi:146
+	function updateTags(l){                                                        // view_details.jsxi:149
 		var t = document.getElementById('tags-filtered');
 		
-		if (t){                                                                    // view_details.jsxi:149
-			document.body.removeChild(t);                                          // view_details.jsxi:150
+		if (t){                                                                    // view_details.jsxi:152
+			document.body.removeChild(t);                                          // view_details.jsxi:153
 		}
 		
-		t = document.body.appendChild(document.createElement('datalist'));         // view_details.jsxi:153
-		t.id = 'tags-filtered';                                                    // view_details.jsxi:154
+		t = document.body.appendChild(document.createElement('datalist'));         // view_details.jsxi:156
+		t.id = 'tags-filtered';                                                    // view_details.jsxi:157
 		
-		var n = l.map(function (e){                                                // view_details.jsxi:156
-			return e.toLowerCase();                                                // view_details.jsxi:157
+		var n = l.map(function (e){                                                // view_details.jsxi:159
+			return e.toLowerCase();                                                // view_details.jsxi:160
 		});
 		
-		Cars.tags.forEach(function (v){                                            // view_details.jsxi:160
-			if (n.indexOf(v.toLowerCase()) < 0){                                   // view_details.jsxi:161
+		Cars.tags.forEach(function (v){                                            // view_details.jsxi:163
+			if (n.indexOf(v.toLowerCase()) < 0){                                   // view_details.jsxi:164
 				t.appendChild(document.createElement('option')).setAttribute('value', v);
 			}
 		});
 	}
 	
-	function applyTags(){                                                          // view_details.jsxi:167
-		if (!_selected || !_selected.data)                                         // view_details.jsxi:168
+	function applyTags(){                                                          // view_details.jsxi:170
+		if (!_selected || !_selected.data)                                         // view_details.jsxi:171
 			return;
 		
-		Cars.changeData(_selected,                                                 // view_details.jsxi:169
-			'tags',                                                                // view_details.jsxi:169
+		Cars.changeData(_selected,                                                 // view_details.jsxi:172
+			'tags',                                                                // view_details.jsxi:172
 			Array.prototype.map.call(document.querySelectorAll('#selected-car-tags li'), 
-				function (a){                                                      // view_details.jsxi:170
-					return a.textContent;                                          // view_details.jsxi:170
+				function (a){                                                      // view_details.jsxi:173
+					return a.textContent;                                          // view_details.jsxi:173
 				}));
-		updateTags(_selected.data.tags);                                           // view_details.jsxi:171
+		updateTags(_selected.data.tags);                                           // view_details.jsxi:174
 	}
 	
-	function init(){                                                               // view_details.jsxi:174
-		Cars.on('scan:ready',                                                      // view_details.jsxi:175
-			function (list){                                                       // view_details.jsxi:176
-				if (list.length == 0){                                             // view_details.jsxi:177
-					outMsg('Hmm', 'Cars not found');                               // view_details.jsxi:178
+	function init(){                                                               // view_details.jsxi:177
+		Cars.on('scan:ready',                                                      // view_details.jsxi:178
+			function (list){                                                       // view_details.jsxi:179
+				if (list.length == 0){                                             // view_details.jsxi:180
+					outMsg('Hmm', 'Cars not found');                               // view_details.jsxi:181
 				}
 				
-				$('main').show();                                                  // view_details.jsxi:181
-			}).on('error',                                                         // view_details.jsxi:183
-			function (car){                                                        // view_details.jsxi:183
-				if (_selected != car)                                              // view_details.jsxi:184
+				$('main').show();                                                  // view_details.jsxi:184
+			}).on('error',                                                         // view_details.jsxi:186
+			function (car){                                                        // view_details.jsxi:186
+				if (_selected != car)                                              // view_details.jsxi:187
 					return;
 				
-				outErrors(car);                                                    // view_details.jsxi:185
-			}).on('update.car.data',                                               // view_details.jsxi:187
-			function (car){                                                        // view_details.jsxi:187
-				if (_selected != car)                                              // view_details.jsxi:188
+				outErrors(car);                                                    // view_details.jsxi:188
+			}).on('update.car.data',                                               // view_details.jsxi:190
+			function (car){                                                        // view_details.jsxi:190
+				if (_selected != car)                                              // view_details.jsxi:191
 					return;
 				
-				outData(car);                                                      // view_details.jsxi:189
-			}).on('update.car.skins',                                              // view_details.jsxi:191
-			function (car){                                                        // view_details.jsxi:191
-				if (_selected != car)                                              // view_details.jsxi:192
+				outData(car);                                                      // view_details.jsxi:192
+			}).on('update.car.skins',                                              // view_details.jsxi:194
+			function (car){                                                        // view_details.jsxi:194
+				if (_selected != car)                                              // view_details.jsxi:195
 					return;
 				
-				outSkins(car);                                                     // view_details.jsxi:193
-			}).on('update.car.disabled',                                           // view_details.jsxi:195
-			function (car){                                                        // view_details.jsxi:195
-				if (_selected != car)                                              // view_details.jsxi:196
+				outSkins(car);                                                     // view_details.jsxi:196
+			}).on('update.car.disabled',                                           // view_details.jsxi:198
+			function (car){                                                        // view_details.jsxi:198
+				if (_selected != car)                                              // view_details.jsxi:199
 					return;
 				
-				outDisabled(car);                                                  // view_details.jsxi:197
-			}).on('update.car.changed',                                            // view_details.jsxi:199
-			function (car){                                                        // view_details.jsxi:199
-				if (_selected != car)                                              // view_details.jsxi:200
+				outDisabled(car);                                                  // view_details.jsxi:200
+			}).on('update.car.changed',                                            // view_details.jsxi:202
+			function (car){                                                        // view_details.jsxi:202
+				if (_selected != car)                                              // view_details.jsxi:203
 					return;
 				
-				outChanged(car);                                                   // view_details.jsxi:201
+				outChanged(car);                                                   // view_details.jsxi:204
 			});
-		ViewList.on('select',                                                      // view_details.jsxi:204
-			function (car){                                                        // view_details.jsxi:205
-				$('main').show();                                                  // view_details.jsxi:206
-				_selected = car;                                                   // view_details.jsxi:208
+		ViewList.on('select',                                                      // view_details.jsxi:207
+			function (car){                                                        // view_details.jsxi:208
+				$('main').show();                                                  // view_details.jsxi:209
+				_selected = car;                                                   // view_details.jsxi:211
 				
-				if (car){                                                          // view_details.jsxi:210
-					outMsg(null);                                                  // view_details.jsxi:211
+				if (car){                                                          // view_details.jsxi:213
+					outMsg(null);                                                  // view_details.jsxi:214
 				} else {
 					return;
 				}
 				
-				outData(car);                                                      // view_details.jsxi:216
-				outBadge(car);                                                     // view_details.jsxi:217
-				outDisabled(car);                                                  // view_details.jsxi:218
-				outChanged(car);                                                   // view_details.jsxi:219
-				outErrors(car);                                                    // view_details.jsxi:220
-				outSkins(car);                                                     // view_details.jsxi:221
+				outData(car);                                                      // view_details.jsxi:219
+				outBadge(car);                                                     // view_details.jsxi:220
+				outDisabled(car);                                                  // view_details.jsxi:221
+				outChanged(car);                                                   // view_details.jsxi:222
+				outErrors(car);                                                    // view_details.jsxi:223
+				outSkins(car);                                                     // view_details.jsxi:224
 			});
-		$('#selected-car').on('keydown',                                           // view_details.jsxi:225
-			function (e){                                                          // view_details.jsxi:226
-				if (e.keyCode == 13){                                              // view_details.jsxi:227
-					this.blur();                                                   // view_details.jsxi:228
+		$('#selected-car').on('keydown',                                           // view_details.jsxi:228
+			function (e){                                                          // view_details.jsxi:229
+				if (e.keyCode == 13){                                              // view_details.jsxi:230
+					this.blur();                                                   // view_details.jsxi:231
 					return false;
 				}
-			}).on('change',                                                        // view_details.jsxi:232
-			function (){                                                           // view_details.jsxi:232
-				if (!_selected || this.readonly || !this.value)                    // view_details.jsxi:233
+			}).on('change',                                                        // view_details.jsxi:235
+			function (){                                                           // view_details.jsxi:235
+				if (!_selected || this.readonly || !this.value)                    // view_details.jsxi:236
 					return;
 				
-				this.value = this.value.slice(0, 64);                              // view_details.jsxi:234
-				Cars.changeData(_selected, 'name', this.value);                    // view_details.jsxi:235
+				this.value = this.value.slice(0, 64);                              // view_details.jsxi:237
+				Cars.changeData(_selected, 'name', this.value);                    // view_details.jsxi:238
 			});
-		$('#selected-car-tags').on('click',                                        // view_details.jsxi:238
-			function (e){                                                          // view_details.jsxi:239
+		$('#selected-car-tags').on('click',                                        // view_details.jsxi:241
+			function (e){                                                          // view_details.jsxi:242
 				if (e.target.tagName === 'LI' && e.target.offsetWidth - e.offsetX < 20){
-					e.target.parentNode.removeChild(e.target);                     // view_details.jsxi:241
-					applyTags();                                                   // view_details.jsxi:242
+					e.target.parentNode.removeChild(e.target);                     // view_details.jsxi:244
+					applyTags();                                                   // view_details.jsxi:245
 				} else {
-					this.querySelector('input').focus();                           // view_details.jsxi:244
+					this.querySelector('input').focus();                           // view_details.jsxi:247
 				}
 			});
-		$('#selected-car-tags input').on('change',                                 // view_details.jsxi:248
-			function (){                                                           // view_details.jsxi:249
-				if (this.value){                                                   // view_details.jsxi:250
+		$('#selected-car-tags input').on('change',                                 // view_details.jsxi:251
+			function (){                                                           // view_details.jsxi:252
+				if (this.value){                                                   // view_details.jsxi:253
 					this.parentNode.insertBefore(document.createElement('li'), this).textContent = this.value;
-					this.value = '';                                               // view_details.jsxi:252
-					applyTags();                                                   // view_details.jsxi:253
+					this.value = '';                                               // view_details.jsxi:255
+					applyTags();                                                   // view_details.jsxi:256
 				}
-			}).on('keydown',                                                       // view_details.jsxi:256
-			function (e){                                                          // view_details.jsxi:256
-				if (e.keyCode == 8 && this.value == ''){                           // view_details.jsxi:257
+			}).on('keydown',                                                       // view_details.jsxi:259
+			function (e){                                                          // view_details.jsxi:259
+				if (e.keyCode == 8 && this.value == ''){                           // view_details.jsxi:260
 					this.parentNode.removeChild(this.parentNode.querySelector('li:last-of-type'));
-					applyTags();                                                   // view_details.jsxi:259
+					applyTags();                                                   // view_details.jsxi:262
 				}
 			});
-		$('#selected-car-desc').elastic().on('change',                             // view_details.jsxi:263
-			function (){                                                           // view_details.jsxi:264
-				if (!_selected || this.readonly)                                   // view_details.jsxi:265
+		$('#selected-car-desc').elastic().on('change',                             // view_details.jsxi:266
+			function (){                                                           // view_details.jsxi:267
+				if (!_selected || this.readonly)                                   // view_details.jsxi:268
 					return;
 				
-				Cars.changeData(_selected, 'description', this.value);             // view_details.jsxi:266
+				Cars.changeData(_selected, 'description', this.value);             // view_details.jsxi:269
 			});
-		$('#selected-car-brand').on('keydown',                                     // view_details.jsxi:269
-			function (e){                                                          // view_details.jsxi:270
-				if (e.keyCode == 13){                                              // view_details.jsxi:271
-					this.blur();                                                   // view_details.jsxi:272
+		$('#selected-car-brand').on('keydown',                                     // view_details.jsxi:272
+			function (e){                                                          // view_details.jsxi:273
+				if (e.keyCode == 13){                                              // view_details.jsxi:274
+					this.blur();                                                   // view_details.jsxi:275
 					return false;
 				}
-			}).on('change',                                                        // view_details.jsxi:276
-			function (e){                                                          // view_details.jsxi:276
-				if (!_selected || this.readonly || !this.value)                    // view_details.jsxi:277
+			}).on('change',                                                        // view_details.jsxi:279
+			function (e){                                                          // view_details.jsxi:279
+				if (!_selected || this.readonly || !this.value)                    // view_details.jsxi:280
 					return;
 				
-				Cars.changeData(_selected, 'brand', this.value);                   // view_details.jsxi:278
-			}).on('contextmenu',                                                   // view_details.jsxi:280
-			function (e){                                                          // view_details.jsxi:280
-				if (!_selected || !_selected.data)                                 // view_details.jsxi:281
+				Cars.changeData(_selected, 'brand', this.value);                   // view_details.jsxi:281
+			}).on('contextmenu',                                                   // view_details.jsxi:283
+			function (e){                                                          // view_details.jsxi:283
+				if (!_selected || !_selected.data)                                 // view_details.jsxi:284
 					return;
 				
 				var menu = new gui.Menu();
 				
-				menu.append(new gui.MenuItem({                                     // view_details.jsxi:284
-					label: 'Filter Brand',                                         // view_details.jsxi:284
-					key: 'F',                                                      // view_details.jsxi:284
-					click: (function (){                                           // view_details.jsxi:284
-						if (!_selected)                                            // view_details.jsxi:285
+				menu.append(new gui.MenuItem({                                     // view_details.jsxi:287
+					label: 'Filter Brand',                                         // view_details.jsxi:287
+					key: 'F',                                                      // view_details.jsxi:287
+					click: (function (){                                           // view_details.jsxi:287
+						if (!_selected)                                            // view_details.jsxi:288
 							return;
 						
-						ViewList.addFilter('brand:' + _selected.data.brand);       // view_details.jsxi:286
+						ViewList.addFilter('brand:' + _selected.data.brand);       // view_details.jsxi:289
 					})
 				}));
-				menu.popup(e.clientX, e.clientY);                                  // view_details.jsxi:289
+				menu.popup(e.clientX, e.clientY);                                  // view_details.jsxi:292
 				return false;
 			});
-		$('#selected-car-class').on('keydown',                                     // view_details.jsxi:293
-			function (e){                                                          // view_details.jsxi:294
-				if (e.keyCode == 13){                                              // view_details.jsxi:295
-					this.blur();                                                   // view_details.jsxi:296
+		$('#selected-car-class').on('keydown',                                     // view_details.jsxi:296
+			function (e){                                                          // view_details.jsxi:297
+				if (e.keyCode == 13){                                              // view_details.jsxi:298
+					this.blur();                                                   // view_details.jsxi:299
 					return false;
 				}
-			}).on('change',                                                        // view_details.jsxi:300
-			function (){                                                           // view_details.jsxi:300
-				if (!_selected || this.readonly)                                   // view_details.jsxi:301
+			}).on('change',                                                        // view_details.jsxi:303
+			function (){                                                           // view_details.jsxi:303
+				if (!_selected || this.readonly)                                   // view_details.jsxi:304
 					return;
 				
-				Cars.changeData(_selected, 'class', this.value);                   // view_details.jsxi:302
-			}).on('contextmenu',                                                   // view_details.jsxi:304
-			function (e){                                                          // view_details.jsxi:304
-				if (!_selected || !_selected.data)                                 // view_details.jsxi:305
+				Cars.changeData(_selected, 'class', this.value);                   // view_details.jsxi:305
+			}).on('contextmenu',                                                   // view_details.jsxi:307
+			function (e){                                                          // view_details.jsxi:307
+				if (!_selected || !_selected.data)                                 // view_details.jsxi:308
 					return;
 				
 				var menu = new gui.Menu();
 				
-				menu.append(new gui.MenuItem({                                     // view_details.jsxi:308
-					label: 'Filter Class',                                         // view_details.jsxi:308
-					key: 'F',                                                      // view_details.jsxi:308
-					click: (function (){                                           // view_details.jsxi:308
-						if (!_selected)                                            // view_details.jsxi:309
+				menu.append(new gui.MenuItem({                                     // view_details.jsxi:311
+					label: 'Filter Class',                                         // view_details.jsxi:311
+					key: 'F',                                                      // view_details.jsxi:311
+					click: (function (){                                           // view_details.jsxi:311
+						if (!_selected)                                            // view_details.jsxi:312
 							return;
 						
-						ViewList.addFilter('class:' + _selected.data.class);       // view_details.jsxi:310
+						ViewList.addFilter('class:' + _selected.data.class);       // view_details.jsxi:313
 					})
 				}));
-				menu.popup(e.clientX, e.clientY);                                  // view_details.jsxi:313
+				menu.popup(e.clientX, e.clientY);                                  // view_details.jsxi:316
 				return false;
 			});
-		$('#selected-car-parent').on('change',                                     // view_details.jsxi:317
-			function (e){                                                          // view_details.jsxi:318
-				if (!_selected)                                                    // view_details.jsxi:319
+		$('#selected-car-parent').on('change',                                     // view_details.jsxi:320
+			function (e){                                                          // view_details.jsxi:321
+				if (!_selected)                                                    // view_details.jsxi:322
 					return;
 				
 				var t = this, v = this.value || null;
 				
-				if (v && !fs.existsSync(_selected.upgrade)){                       // view_details.jsxi:322
-					UpgradeEditor.start(_selected,                                 // view_details.jsxi:323
-						function (arg){                                            // view_details.jsxi:323
-							if (fs.existsSync(_selected.upgrade)){                 // view_details.jsxi:324
-								fn();                                              // view_details.jsxi:325
+				if (v && !fs.existsSync(_selected.upgrade)){                       // view_details.jsxi:325
+					UpgradeEditor.start(_selected,                                 // view_details.jsxi:326
+						function (arg){                                            // view_details.jsxi:326
+							if (fs.existsSync(_selected.upgrade)){                 // view_details.jsxi:327
+								fn();                                              // view_details.jsxi:328
 							} else {
-								t.value = '';                                      // view_details.jsxi:327
+								t.value = '';                                      // view_details.jsxi:330
 							}
 						});
 				} else {
-					fn();                                                          // view_details.jsxi:331
+					fn();                                                          // view_details.jsxi:334
 				}
 				
-				function fn(){                                                     // view_details.jsxi:334
-					_selected.changeParent(v);                                     // view_details.jsxi:335
+				function fn(){                                                     // view_details.jsxi:337
+					_selected.changeParent(v);                                     // view_details.jsxi:338
 				}
 			});
 		[
-			'bhp',                                                                 // view_details.jsxi:339
-			'torque',                                                              // view_details.jsxi:339
-			'weight',                                                              // view_details.jsxi:339
-			'topspeed',                                                            // view_details.jsxi:339
-			'acceleration',                                                        // view_details.jsxi:339
+			'bhp',                                                                 // view_details.jsxi:342
+			'torque',                                                              // view_details.jsxi:342
+			'weight',                                                              // view_details.jsxi:342
+			'topspeed',                                                            // view_details.jsxi:342
+			'acceleration',                                                        // view_details.jsxi:342
 			'pwratio'
-		].forEach(function (e){                                                    // view_details.jsxi:339
-			$('#selected-car-' + e).on('keydown',                                  // view_details.jsxi:340
-				function (e){                                                      // view_details.jsxi:340
-					if (e.keyCode == 13){                                          // view_details.jsxi:341
-						this.blur();                                               // view_details.jsxi:342
+		].forEach(function (e){                                                    // view_details.jsxi:342
+			$('#selected-car-' + e).on('keydown',                                  // view_details.jsxi:343
+				function (e){                                                      // view_details.jsxi:343
+					if (e.keyCode == 13){                                          // view_details.jsxi:344
+						this.blur();                                               // view_details.jsxi:345
 						return false;
 					}
-				}).on('keyup keydown keypress',                                    // view_details.jsxi:345
-				function (e){                                                      // view_details.jsxi:345
-					if (e.keyCode == 32){                                          // view_details.jsxi:346
-						e.stopPropagation();                                       // view_details.jsxi:347
+				}).on('keyup keydown keypress',                                    // view_details.jsxi:348
+				function (e){                                                      // view_details.jsxi:348
+					if (e.keyCode == 32){                                          // view_details.jsxi:349
+						e.stopPropagation();                                       // view_details.jsxi:350
 						
-						if (e.type === 'keyup'){                                   // view_details.jsxi:348
+						if (e.type === 'keyup'){                                   // view_details.jsxi:351
 							return false;
 						}
 					}
-				}).on('change',                                                    // view_details.jsxi:352
-				function (){                                                       // view_details.jsxi:352
-					if (!_selected || this.readonly)                               // view_details.jsxi:353
+				}).on('change',                                                    // view_details.jsxi:355
+				function (){                                                       // view_details.jsxi:355
+					if (!_selected || this.readonly)                               // view_details.jsxi:356
 						return;
 					
-					Cars.changeDataSpecs(_selected, e, this.value);                // view_details.jsxi:354
+					Cars.changeDataSpecs(_selected, e, this.value);                // view_details.jsxi:357
 				});
 		});
-		$('#selected-car-pwratio').on('dblclick contextmenu',                      // view_details.jsxi:358
-			function (e){                                                          // view_details.jsxi:359
-				if (!_selected || !_selected.data || this.readonly)                // view_details.jsxi:360
+		$('#selected-car-pwratio').on('dblclick contextmenu',                      // view_details.jsxi:361
+			function (e){                                                          // view_details.jsxi:362
+				if (!_selected || !_selected.data || this.readonly)                // view_details.jsxi:363
 					return;
 				
-				function r(){                                                      // view_details.jsxi:362
-					if (!_selected || !_selected.data || this.readonly)            // view_details.jsxi:363
+				function r(){                                                      // view_details.jsxi:365
+					if (!_selected || !_selected.data || this.readonly)            // view_details.jsxi:366
 						return;
 					
-					var w = (_selected.data.specs.weight || '').match(/\d+/),      // view_details.jsxi:364
-						p = (_selected.data.specs.bhp || '').match(/\d+/);         // view_details.jsxi:365
+					var w = (_selected.data.specs.weight || '').match(/\d+/),      // view_details.jsxi:367
+						p = (_selected.data.specs.bhp || '').match(/\d+/);         // view_details.jsxi:368
 					
-					if (w && p){                                                   // view_details.jsxi:366
+					if (w && p){                                                   // view_details.jsxi:369
 						Cars.changeDataSpecs(_selected, 'pwratio', + (+ w / + p).toFixed(2) + 'kg/cv');
 					}
 				}
 				
-				if (e.type === 'dblclick'){                                        // view_details.jsxi:371
-					r();                                                           // view_details.jsxi:372
+				if (e.type === 'dblclick'){                                        // view_details.jsxi:374
+					r();                                                           // view_details.jsxi:375
 				} else {
 					var menu = new gui.Menu();
 					
 					menu.append(new gui.MenuItem({ label: 'Recalculate', key: 'R', click: r }));
-					menu.popup(e.clientX, e.clientY);                              // view_details.jsxi:376
+					menu.popup(e.clientX, e.clientY);                              // view_details.jsxi:379
 					return false;
 				}
 			});
-		$('#selected-car-upgrade').on('click',                                     // view_details.jsxi:381
-			function (){                                                           // view_details.jsxi:382
-				if (!_selected)                                                    // view_details.jsxi:383
+		$('#selected-car-upgrade').on('click',                                     // view_details.jsxi:384
+			function (){                                                           // view_details.jsxi:385
+				if (!_selected)                                                    // view_details.jsxi:386
 					return;
 				
-				UpgradeEditor.start(_selected);                                    // view_details.jsxi:384
+				UpgradeEditor.start(_selected);                                    // view_details.jsxi:387
 			});
-		$('#selected-car-skins-article').dblclick(function (e){                    // view_details.jsxi:388
-			if (!_selected)                                                        // view_details.jsxi:390
+		$('#selected-car-skins-article').dblclick(function (e){                    // view_details.jsxi:391
+			if (!_selected)                                                        // view_details.jsxi:393
 				return;
 			
-			AcShowroom.start(_selected);                                           // view_details.jsxi:391
-		}).on('contextmenu',                                                       // view_details.jsxi:393
-			function (e){                                                          // view_details.jsxi:393
-				if (!_selected)                                                    // view_details.jsxi:394
+			AcShowroom.start(_selected);                                           // view_details.jsxi:394
+		}).on('contextmenu',                                                       // view_details.jsxi:396
+			function (e){                                                          // view_details.jsxi:396
+				if (!_selected)                                                    // view_details.jsxi:397
 					return;
 				
 				var id = e.target.getAttribute('data-id');
 				
-				if (!id)                                                           // view_details.jsxi:397
+				if (!id)                                                           // view_details.jsxi:400
 					return;
 				
 				var menu = new gui.Menu();
 				
-				menu.append(new gui.MenuItem({                                     // view_details.jsxi:400
-					label: 'Open in Showroom',                                     // view_details.jsxi:400
-					key: 'S',                                                      // view_details.jsxi:400
-					click: (function (){                                           // view_details.jsxi:400
-						if (!_selected)                                            // view_details.jsxi:401
+				menu.append(new gui.MenuItem({                                     // view_details.jsxi:403
+					label: 'Open in Showroom',                                     // view_details.jsxi:403
+					key: 'S',                                                      // view_details.jsxi:403
+					click: (function (){                                           // view_details.jsxi:403
+						if (!_selected)                                            // view_details.jsxi:404
 							return;
 						
-						AcShowroom.start(_selected, id);                           // view_details.jsxi:402
+						AcShowroom.start(_selected, id);                           // view_details.jsxi:405
 					})
 				}));
-				menu.append(new gui.MenuItem({                                     // view_details.jsxi:404
-					label: 'Start Practice',                                       // view_details.jsxi:404
-					key: 'P',                                                      // view_details.jsxi:404
-					click: (function (){                                           // view_details.jsxi:404
-						if (!_selected)                                            // view_details.jsxi:405
+				menu.append(new gui.MenuItem({                                     // view_details.jsxi:407
+					label: 'Start Practice',                                       // view_details.jsxi:407
+					key: 'P',                                                      // view_details.jsxi:407
+					click: (function (){                                           // view_details.jsxi:407
+						if (!_selected)                                            // view_details.jsxi:408
 							return;
 						
-						AcPractice.start(_selected, id);                           // view_details.jsxi:406
+						AcPractice.start(_selected, id);                           // view_details.jsxi:409
 					})
 				}));
-				menu.popup(e.clientX, e.clientY);                                  // view_details.jsxi:413
+				menu.popup(e.clientX, e.clientY);                                  // view_details.jsxi:416
 				return false;
 			});
-		$('#selected-car-skins').on('click',                                       // view_details.jsxi:418
-			function (e){                                                          // view_details.jsxi:419
-				if (!_selected)                                                    // view_details.jsxi:420
+		$('#selected-car-skins').on('click',                                       // view_details.jsxi:421
+			function (e){                                                          // view_details.jsxi:422
+				if (!_selected)                                                    // view_details.jsxi:423
 					return;
 				
 				var id = e.target.getAttribute('data-id');
 				
-				if (!id)                                                           // view_details.jsxi:423
+				if (!id)                                                           // view_details.jsxi:426
 					return;
 				
-				Cars.selectSkin(_selected, id);                                    // view_details.jsxi:425
+				Cars.selectSkin(_selected, id);                                    // view_details.jsxi:428
 			});
-		$('#selected-car-error').click(function (e){                               // view_details.jsxi:429
-			if (!_selected)                                                        // view_details.jsxi:430
+		$('#selected-car-error').click(function (e){                               // view_details.jsxi:432
+			if (!_selected)                                                        // view_details.jsxi:433
 				return;
 			
 			var id = e.target.getAttribute('data-error-id');
 			
-			if (id){                                                               // view_details.jsxi:432
-				RestorationWizard.fix(_selected, id);                              // view_details.jsxi:433
+			if (id){                                                               // view_details.jsxi:435
+				RestorationWizard.fix(_selected, id);                              // view_details.jsxi:436
 			}
 		});
-		$(window).on('keydown',                                                    // view_details.jsxi:438
-			function (e){                                                          // view_details.jsxi:439
-				if (!_selected)                                                    // view_details.jsxi:440
+		$(window).on('keydown',                                                    // view_details.jsxi:441
+			function (e){                                                          // view_details.jsxi:442
+				if (!_selected)                                                    // view_details.jsxi:443
 					return;
 				
-				if (e.keyCode == 83 && e.ctrlKey){                                 // view_details.jsxi:442
-					Cars.save(_selected);                                          // view_details.jsxi:444
+				if (e.keyCode == 83 && e.ctrlKey){                                 // view_details.jsxi:445
+					Cars.save(_selected);                                          // view_details.jsxi:447
 					return false;
 				}
 			});
 		
 		var cmIgnore = false;
 		
-		$('main').on('contextmenu',                                                // view_details.jsxi:451
-			function (){                                                           // view_details.jsxi:452
-				this.querySelector('footer').classList.toggle('active');           // view_details.jsxi:453
-				cmIgnore = true;                                                   // view_details.jsxi:454
+		$('main').on('contextmenu',                                                // view_details.jsxi:454
+			function (){                                                           // view_details.jsxi:455
+				this.querySelector('footer').classList.toggle('active');           // view_details.jsxi:456
+				cmIgnore = true;                                                   // view_details.jsxi:457
 			});
-		$(window).on('click contextmenu',                                          // view_details.jsxi:457
-			(function (e){                                                         // view_details.jsxi:458
-				if (cmIgnore){                                                     // view_details.jsxi:459
-					cmIgnore = false;                                              // view_details.jsxi:460
-				} else if (e.target !== this){                                     // view_details.jsxi:461
-					this.classList.remove('active');                               // view_details.jsxi:462
+		$(window).on('click contextmenu',                                          // view_details.jsxi:460
+			(function (e){                                                         // view_details.jsxi:461
+				if (cmIgnore){                                                     // view_details.jsxi:462
+					cmIgnore = false;                                              // view_details.jsxi:463
+				} else if (e.target !== this){                                     // view_details.jsxi:464
+					this.classList.remove('active');                               // view_details.jsxi:465
 				}
-			}).bind($('main footer')[0]));                                         // view_details.jsxi:464
-		$('#selected-car-open-directory').click(function (){                       // view_details.jsxi:467
-			if (!_selected)                                                        // view_details.jsxi:468
+			}).bind($('main footer')[0]));                                         // view_details.jsxi:467
+		$('#selected-car-open-directory').click(function (){                       // view_details.jsxi:470
+			if (!_selected)                                                        // view_details.jsxi:471
 				return;
 			
-			Shell.openItem(_selected.path);                                        // view_details.jsxi:469
+			Shell.openItem(_selected.path);                                        // view_details.jsxi:472
 		});
-		$('#selected-car-showroom').click(function (){                             // view_details.jsxi:472
-			if (!_selected)                                                        // view_details.jsxi:473
+		$('#selected-car-showroom').click(function (){                             // view_details.jsxi:475
+			if (!_selected)                                                        // view_details.jsxi:476
 				return;
 			
-			AcShowroom.start(_selected);                                           // view_details.jsxi:474
+			AcShowroom.start(_selected);                                           // view_details.jsxi:477
 		});
-		$('#selected-car-showroom-select').click(function (){                      // view_details.jsxi:477
-			if (!_selected)                                                        // view_details.jsxi:478
+		$('#selected-car-showroom-select').click(function (){                      // view_details.jsxi:480
+			if (!_selected)                                                        // view_details.jsxi:481
 				return;
 			
-			AcShowroom.select(_selected);                                          // view_details.jsxi:479
+			AcShowroom.select(_selected);                                          // view_details.jsxi:482
 		});
-		$('#selected-car-practice').click(function (){                             // view_details.jsxi:482
-			if (!_selected)                                                        // view_details.jsxi:483
+		$('#selected-car-practice').click(function (){                             // view_details.jsxi:485
+			if (!_selected)                                                        // view_details.jsxi:486
 				return;
 			
-			AcPractice.start(_selected);                                           // view_details.jsxi:484
+			AcPractice.start(_selected);                                           // view_details.jsxi:487
 		});
-		$('#selected-car-practice-select').click(function (){                      // view_details.jsxi:487
-			if (!_selected)                                                        // view_details.jsxi:488
+		$('#selected-car-practice-select').click(function (){                      // view_details.jsxi:490
+			if (!_selected)                                                        // view_details.jsxi:491
 				return;
 			
-			AcPractice.select(_selected);                                          // view_details.jsxi:489
+			AcPractice.select(_selected);                                          // view_details.jsxi:492
 		});
-		$('#selected-car-reload').click(function (){                               // view_details.jsxi:492
-			if (!_selected)                                                        // view_details.jsxi:493
+		$('#selected-car-reload').click(function (){                               // view_details.jsxi:495
+			if (!_selected)                                                        // view_details.jsxi:496
 				return;
 			
-			if (_selected.changed){                                                // view_details.jsxi:495
-				new Dialog('Reload',                                               // view_details.jsxi:496
+			if (_selected.changed){                                                // view_details.jsxi:498
+				new Dialog('Reload',                                               // view_details.jsxi:499
 					[ 'Your changes will be lost. Are you sure?' ], 
-					reload);                                                       // view_details.jsxi:498
+					reload);                                                       // view_details.jsxi:501
 			} else {
-				reload();                                                          // view_details.jsxi:500
+				reload();                                                          // view_details.jsxi:503
 			}
 			
-			function reload(){                                                     // view_details.jsxi:503
-				Cars.reload(_selected);                                            // view_details.jsxi:504
+			function reload(){                                                     // view_details.jsxi:506
+				Cars.reload(_selected);                                            // view_details.jsxi:507
 			}
 		});
-		$('#selected-car-disable').click(function (){                              // view_details.jsxi:509
-			if (!_selected)                                                        // view_details.jsxi:510
+		$('#selected-car-disable').click(function (){                              // view_details.jsxi:512
+			if (!_selected)                                                        // view_details.jsxi:513
 				return;
 			
-			Cars.toggle(_selected);                                                // view_details.jsxi:511
+			Cars.toggle(_selected);                                                // view_details.jsxi:514
 		});
-		$('#selected-car-update-previews').click(function (){                      // view_details.jsxi:514
-			if (!_selected)                                                        // view_details.jsxi:515
+		$('#selected-car-update-previews').click(function (){                      // view_details.jsxi:517
+			if (!_selected)                                                        // view_details.jsxi:518
 				return;
 			
-			AcShowroom.shot(_selected);                                            // view_details.jsxi:516
+			AcShowroom.shot(_selected);                                            // view_details.jsxi:519
 		});
-		$('#selected-car-update-previews-manual').click(function (){               // view_details.jsxi:519
-			if (!_selected)                                                        // view_details.jsxi:520
+		$('#selected-car-update-previews-manual').click(function (){               // view_details.jsxi:522
+			if (!_selected)                                                        // view_details.jsxi:523
 				return;
 			
-			AcShowroom.shot(_selected, true);                                      // view_details.jsxi:521
+			AcShowroom.shot(_selected, true);                                      // view_details.jsxi:524
 		});
-		$('#selected-car-update-description').click(function (){                   // view_details.jsxi:524
-			if (!_selected)                                                        // view_details.jsxi:525
+		$('#selected-car-update-description').click(function (){                   // view_details.jsxi:527
+			if (!_selected)                                                        // view_details.jsxi:528
 				return;
 			
-			UpdateDescription.update(_selected);                                   // view_details.jsxi:526
+			UpdateDescription.update(_selected);                                   // view_details.jsxi:529
 		});
-		$('#selected-car-save').click(function (){                                 // view_details.jsxi:529
-			if (!_selected)                                                        // view_details.jsxi:530
+		$('#selected-car-save').click(function (){                                 // view_details.jsxi:532
+			if (!_selected)                                                        // view_details.jsxi:533
 				return;
 			
-			Cars.save(_selected);                                                  // view_details.jsxi:531
+			Cars.save(_selected);                                                  // view_details.jsxi:534
 		});
 	}
 	
-	(function (){                                                                  // view_details.jsxi:535
-		$(init);                                                                   // view_details.jsxi:536
+	(function (){                                                                  // view_details.jsxi:538
+		$(init);                                                                   // view_details.jsxi:539
 	})();
 	return ViewDetails;
 })();

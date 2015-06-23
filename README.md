@@ -66,6 +66,8 @@ This feature allows to collect huge database with correct information (descripti
 * 0.3.11
     * Introducing: Data Collection
     * Introducing: Restoration Wizard
+        * Renamed ui_car.json
+        * Missing or incorrent parent
         * Missing name/brand
         * Missing upgrade.png
         * Missing or empty skins folder

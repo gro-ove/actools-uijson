@@ -1,0 +1,20 @@
+class MissingBadgeIconFixer extends AbstractFixer {
+    newIcon(c){
+        BadgeEditor.start(car, lambda {
+            if (fs.existsSync(car.badge)){
+                c();
+            }
+        });
+    }
+
+    protected get title 'Badge icon missing',
+        solutions [
+            // { name: 'Select badge', fn: newIcon }
+        ].concat(tryToRestoreFile(car.badge, 
+            lambda arg.isFile() && arg.size > 1e3 && arg.size < 1e5,
+            function (c){
+                car.updateUpgrade();
+            }));
+}
+
+RestorationWizard.register('badge-missing', MissingBadgeIconFixer);
