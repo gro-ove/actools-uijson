@@ -1,6 +1,6 @@
 static class ErrorHandler {
     private _details(e){
-        return ''.replace.call(e.stack, /file:\/{3}[A-Z]:\/.+?(?=\/app\/)/g, '…')
+        return e.stack ? ('' + e.stack).replace(/file:\/{3}[A-Z]:\/.+?(?=\/app\/)/g, '…') : e;
     }
 
     public handled(msg, err){

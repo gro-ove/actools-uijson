@@ -658,8 +658,7 @@ var ErrorHandler = (function (){                                                
 	var ErrorHandler = function (){};
 	
 	function _details(e){                                                          // error_handler.jsxi:2
-		return ''.replace.call(e.stack, /file:\/{3}[A-Z]:\/.+?(?=\/app\/)/g, 
-			'…');                                                                  // error_handler.jsxi:3
+		return e.stack ? ('' + e.stack).replace(/file:\/{3}[A-Z]:\/.+?(?=\/app\/)/g, '…') : e;
 	}
 	
 	ErrorHandler.handled = function (msg, err){                                    // error_handler.jsxi:6
@@ -1157,12 +1156,18 @@ var AcShowroom = (function (){                                                  
 				return;
 			} 
 			
-			shotOutputPreview(c,                                                   // ac_showroom.jsxi:171
-				output,                                                            // ac_showroom.jsxi:171
-				function (){                                                       // ac_showroom.jsxi:171
+			if (!fs.existsSync(output)){                                           // ac_showroom.jsxi:171
+				console.log(output);                                               // ac_showroom.jsxi:172
+				ErrorHandler.handled('Cannot get previews.', output);              // ac_showroom.jsxi:173
+				return;
+			}
+			
+			shotOutputPreview(c,                                                   // ac_showroom.jsxi:177
+				output,                                                            // ac_showroom.jsxi:177
+				function (){                                                       // ac_showroom.jsxi:177
 					AcTools.Utils.ImageUtils.ApplyPreviews(AcDir.root, c.id, output, Settings.get('aptResize'));
-					c.updateSkins();                                               // ac_showroom.jsxi:173
-					fs.rmdirSync(output);                                          // ac_showroom.jsxi:174
+					c.updateSkins();                                               // ac_showroom.jsxi:179
+					fs.rmdirSync(output);                                          // ac_showroom.jsxi:180
 				});
 		}
 	};

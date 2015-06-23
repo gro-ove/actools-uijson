@@ -8,6 +8,7 @@ output/*.tmp
 output/*.upx
 output/download.txt
 output/locales
+output/debug.log
 
 *.bat
 

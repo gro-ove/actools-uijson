@@ -6,8 +6,8 @@ Small utility for easy editing *ui_car.json* files. Written using [NW.js](http:/
 * [Visual C++ Redistributable 2013 (x86)](https://www.microsoft.com/en-us/download/details.aspx?id=40784)
 
 #### Download
-* [Last (0.3.15)](https://yadi.sk/d/R8s6W_59hSBTC)
-* [Stable (0.3.15)](http://www.racedepartment.com/downloads/actools-cars-manager.6518/)
+* [Last (0.3.18)](https://yadi.sk/d/ThhqnZ3uhSKrV)
+* [Stable (0.3.18)](http://www.racedepartment.com/downloads/actools-cars-manager.6518/)
 
 #### Features
 * Enable/disable vehicles
@@ -39,28 +39,29 @@ This feature allows to collect huge database with correct information (descripti
     *Warning!* This thing could be pretty buggy. Sometimes you'll have to terminate updating (by press Esc) and try again.
 
 #### Known bugs
-* Sometimes Auto-updated Previews aren't able to detect new screenshot
 * Auto-update wasn't tested
 * Practice: if Steam isn't running, default launcher will be opened instead
 
 #### TODO
 * Brand logo select
-* Switchable & custom search providers
 * New mods installation
+* New custom fields: year, country
+* Data Application part
 * More hotkeys
 * Optional sorting, sorting by brand/id/…
 * Detect broken cars
-* New custom fields: year, country
-* Data Application part
-* Batch name processing (add/remove brand, add/remove year)
+* Skins Editor
 * View/edit torque & powes curves, load from data/power.lut
-* Edit mode for livery.png
+* Switchable & custom search providers (?)
 * Custom Batch Processing (?)
 * Fix body_shadow.png, custom auto-previews generator (?)
-* Manage skins (?)
 * Clone cars, modify in-game specs (?)
 
 #### Changelog
+* 0.3.18
+    * Auto-update Previews camera rotation fixed
+* 0.3.17
+    * Bugfixes
 * 0.3.12
     * Introducing: Data Collection
     * Introducing: Restoration Wizard
