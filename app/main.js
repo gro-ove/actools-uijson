@@ -4954,6 +4954,7 @@ if (!localStorage.dataCollection){                                              
 			Settings.set('uploadData', true);                                      // app.jsxi:41
 			new Dialog('Data Collection Enabled', 'Thank you.');                   // app.jsxi:42
 		});
+	localStorage.dataCollection = true;                                            // app.jsxi:45
 }
 
 AppWindow.on('close',                                                              // app.jsxi:48

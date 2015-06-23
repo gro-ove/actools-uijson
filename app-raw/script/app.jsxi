@@ -42,7 +42,7 @@ if (!localStorage.dataCollection){
         new Dialog('Data Collection Enabled', 'Thank you.');
     });
 
-    // localStorage.dataCollection = true;
+    localStorage.dataCollection = true;
 }
 
 AppWindow

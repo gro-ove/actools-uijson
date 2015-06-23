@@ -6,8 +6,8 @@ Small utility for easy editing *ui_car.json* files. Written using [NW.js](http:/
 * [Visual C++ Redistributable 2013 (x86)](https://www.microsoft.com/en-us/download/details.aspx?id=40784)
 
 #### Download
-* [Last (0.3.11)](https://yadi.sk/d/Sq4hOs6PhMweN)
-* [Stable (0.2.23)](http://www.racedepartment.com/downloads/actools-cars-manager.6518/)
+* [Last (0.3.15)](https://yadi.sk/d/R8s6W_59hSBTC)
+* [Stable (0.3.15)](http://www.racedepartment.com/downloads/actools-cars-manager.6518/)
 
 #### Features
 * Enable/disable vehicles
