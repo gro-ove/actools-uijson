@@ -71,10 +71,10 @@ static partial class Cars {
             }
 
             if (parent){
-                parent = null;
-                mediator.dispatch('update.car.parent', this);
                 parent.children.splice(parent.children.indexOf(this), 1);
                 mediator.dispatch('update.car.children', parent);
+                parent = null;
+                mediator.dispatch('update.car.parent', this);
             }
 
             clearErrors('data');

@@ -6,8 +6,9 @@ Small utility for easy editing *ui_car.json* files. Written using [NW.js](http:/
 * [Visual C++ Redistributable 2013 (x86)](https://www.microsoft.com/en-us/download/details.aspx?id=40784)
 
 #### Download
-* [Last (0.3.18)](https://yadi.sk/d/ThhqnZ3uhSKrV)
-* [Stable (0.3.18)](http://www.racedepartment.com/downloads/actools-cars-manager.6518/)
+* [Last (0.3.19)](https://yadi.sk/d/SFDdgdyWhSsNL)
+* [Stable (0.3.19)](http://www.racedepartment.com/downloads/actools-cars-manager.6518/)
+* [Previous](http://www.racedepartment.com/downloads/actools-cars-manager.6518/history) [builds](https://yadi.sk/d/eHr0NCP4hSAfq)
 
 #### Features
 * Enable/disable vehicles
@@ -21,10 +22,16 @@ Small utility for easy editing *ui_car.json* files. Written using [NW.js](http:/
 * Batch Processing
 
 #### Tips
-* Double click on preview to launch acShowroom.
+* Double click on preview to launch acShowroom
 * Press RMB to open controls bar
 * Select found text in built-in browser and press “OK”
 * Don't forget to save changes (Ctrl+S)
+
+#### Troubleshooting
+* Error “App doesn't have access to this folder”
+    You have to grant access to Assetto Corsa root folder. Overwise app won't be able to edit files, and it's its main purpose! To grand access you can run app as Administrator, but it's a worst way. Much better way is to change Security Properties of the folder. When app get access to game files and nothing else.
+* Error “Cannot get previews. Process exited.”
+    If AC Showroom closes on launch, maybe there is a problem with the car. Open log file and check last lines.
 
 #### Data Collection
 This feature allows to collect huge database with correct information (description, tags and etc.) about every car! All you have to do is open Settings, enable option “Upload some changes” (it's disabled by default because of privacy and stuff) and then some of your fixes will be uploaded on server! After that everybody will have access to clean, right and actual information!
@@ -42,6 +49,15 @@ This feature allows to collect huge database with correct information (descripti
 * Auto-update wasn't tested
 * Practice: if Steam isn't running, default launcher will be opened instead
 
+#### Screenshots
+![Screenshot](http://i.imgur.com/kGJCn2L.png)
+![Upgrade Icon Editor](http://i.imgur.com/qhYp3Mp.png)
+
+#### Auto-updated Previews
+![Porsche 944 Turbo S](https://pp.vk.me/c621730/v621730892/2e1e7/LO25pCMqvpg.jpg)
+![Aston Martin Vanquish V12](https://pp.vk.me/c621730/v621730048/29d84/Yzk1DN_rUI0.jpg)
+![Volvo S60R](https://pp.vk.me/c621730/v621730107/33687/j-n4apx1GA8.jpg)
+
 #### TODO
 * Brand logo select
 * New mods installation
@@ -58,6 +74,10 @@ This feature allows to collect huge database with correct information (descripti
 * Clone cars, modify in-game specs (?)
 
 #### Changelog
+* 0.3.19
+    * Auto-update Previews:
+        * Options: camera distance
+    * Bugfixes
 * 0.3.18
     * Auto-update Previews camera rotation fixed
 * 0.3.17
@@ -140,13 +160,4 @@ This feature allows to collect huge database with correct information (descripti
     * Improved skins view (livery.png & stuff)
     * Auto-update skins previews fixed and improved
     * Added manual mode
-
-#### Screenshots
-![Screenshot](http://i.imgur.com/kGJCn2L.png)
-![Upgrade Icon Editor](http://i.imgur.com/qhYp3Mp.png)
-
-#### Auto-updated Previews
-![Porsche 944 Turbo S](https://pp.vk.me/c621730/v621730892/2e1e7/LO25pCMqvpg.jpg)
-![Aston Martin Vanquish V12](https://pp.vk.me/c621730/v621730048/29d84/Yzk1DN_rUI0.jpg)
-![Volvo S60R](https://pp.vk.me/c621730/v621730107/33687/j-n4apx1GA8.jpg)
 

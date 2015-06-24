@@ -47,7 +47,7 @@ if (!localStorage.dataCollection){
 
 AppWindow
     .on('close', function (){
-        if (Cars.list.filter(function (e){
+        if (Cars.list && Cars.list.filter(function (e){
             return e.changed;
         }).length > 0){
             new Dialog('Close', [

@@ -11,6 +11,14 @@ static class AcDir {
         if (!fs.existsSync(path.join(d, 'content', 'cars'))){
             return 'Folder content/cars not found';
         }
+
+        try {
+            var tmpFile = d + '/__test.at~tmp';
+            fs.writeFileSync(tmpFile, 'test');
+            fs.unlinkSync(tmpFile);
+        } catch (e){
+            return 'App doesn\'t have access to this folder.';
+        }
     }
 
     public set(d){

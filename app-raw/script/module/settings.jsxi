@@ -14,6 +14,7 @@ static class Settings {
         aptDisableSweetFx:  true,
         aptCameraX:         -140,
         aptCameraY:         36,
+        aptCameraDistance:  5.5,
         aptIncreaseDelays:  false,
     };
 

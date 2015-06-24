@@ -96,6 +96,12 @@ static class ViewDetails {
     }
 
     function outSkins(car){
+        if (!car.skins || !car.skins[0]) return;
+        if (!car.skins.selected){
+            car.selectSkin(car.skins[0].id);
+            return;
+        }
+
         setTimeout(function (){
             if (car !== _selected) return;
             var sa = $('#selected-car-skins-article'),
@@ -429,7 +435,7 @@ static class ViewDetails {
                 var id = e.target.getAttribute('data-id');
                 if (!id) return;
 
-                Cars.selectSkin(_selected, id);
+                _selected.selectSkin(id);
             });
 
         /* errors */
@@ -448,7 +454,7 @@ static class ViewDetails {
 
                 if (e.keyCode == 83 && e.ctrlKey){
                     /* Ctrl+S */
-                    Cars.save(_selected);
+                    _selected.save();
                     return false;
                 }
             });

@@ -122,12 +122,14 @@ static class AcShowroom {
         var showroom = Settings.get('aptShowroom') || _blackShowroom;
         var x = -Settings.get('aptCameraX');
         var y = -Settings.get('aptCameraY');
+        var distance = -Settings.get('aptCameraDistance');
         var filter = Settings.get('aptFilter') || null;
         var disableSweetFx = !!Settings.get('aptDisableSweetFx');
         var delays = !!Settings.get('aptIncreaseDelays');
 
         if (Number.isNaN(x)) x = Settings.defaults.aptCameraX;
         if (Number.isNaN(y)) y = Settings.defaults.aptCameraY;
+        if (Number.isNaN(distance)) distance = Settings.defaults.aptCameraY;
 
         showroomTest();
 
@@ -162,9 +164,9 @@ static class AcShowroom {
         function proceed(){
             var output;
             try {
-                output = AcTools.Processes.Showroom.Shot(AcDir.root, c.id, showroom, !!m, x, y, filter, disableSweetFx, delays);
+                output = AcTools.Processes.Showroom.Shot(AcDir.root, c.id, showroom, !!m, x, y, distance, filter, disableSweetFx, delays);
             } catch (err){
-                ErrorHandler.handled('Cannot get previews. Maybe process was terminated, there is not enough rights or the car is broken.');
+                ErrorHandler.handled('Cannot get previews. Maybe process was terminated, there is not enough rights or the car is broken.', err);
                 return;
             }
 
