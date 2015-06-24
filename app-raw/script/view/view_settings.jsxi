@@ -103,9 +103,9 @@ static class ViewSettings {
             '<label><input id="apt-resize" type="checkbox">Change size to default 1024×576 (Recommended)</label>',
 
             '<h6>Camera Position</h6>',
-            '<label>X: <input id="apt-camera-x" type="number" step="1"></label>',
-            '<label>Y: <input id="apt-camera-y" type="number" step="1"></label>',
-            '<label>Distance: <input id="apt-camera-distance" type="number" step="0.1"></label>',
+            '<label style="display:inline-block;width:160px;line-height:24px" title="Actually, just simulate mouse move">Rotate X: <input id="apt-camera-x" type="number" step="1" style="width: 80px;float: right;margin-right: 20px;"></label>',
+            '<label style="display:inline-block;width:160px;line-height:24px" title="Actually, just simulate mouse move">Rotate Y: <input id="apt-camera-y" type="number" step="1" style="width: 80px;float: right;margin-right: 20px;"></label>',
+            '<label style="display:inline-block;width:160px;line-height:24px">Distance: <input id="apt-camera-distance" type="number" step="0.1" style="width: 80px;float: right;margin-right: 20px;"></label>',
 
             '<h6>Delays</h6>',
             '<label><input id="apt-increase-delays" type="checkbox">Increased delays</label>',
@@ -177,11 +177,6 @@ static class ViewSettings {
             });
             return false;
         });
-    }
-
-    var _list;
-    private filtersList(){
-
     }
 
     private feedbackForm(){

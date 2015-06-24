@@ -5,7 +5,7 @@ class Dialog {
     public header, content, buttons;
     public tabs;
 
-    private _callback, _closeCallback;
+    private _callback, _closeCallback, _endCallback;
     private _closeOnEnter = true;
 
     private _prepareContent(elements){
@@ -61,6 +61,11 @@ class Dialog {
         return this;
     }
 
+    public onEnd(callback){
+        _endCallback = callback.bind(this);
+        return this;
+    }
+
     public setButton(a, c){
         buttons.find('[data-id="dialog-ok"]').toggle(a != null).text(a);
         if (c != null){ _callback = c; }
@@ -87,6 +92,7 @@ class Dialog {
     }
 
     public close(){
+        if (_endCallback) _endCallback();
         el.remove();
     }
 

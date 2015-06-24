@@ -741,10 +741,8 @@ dialog > article {
   height: 100%;
   padding: 10px;
 }
-dialog.dark {
-  border-color: #333;
-}
 dialog.dark article {
+  border-color: #333;
   background: #000;
   color: #fff;
 }

@@ -1,3 +1,5 @@
+You could use Drag'n'Drop while select new upgrade icon or badge.
+
 Use double click on skin preview to view it in showroom. If launch failed, maybe car is broken.
 
 Press RMB to open controls bar. Some buttons have additional options.

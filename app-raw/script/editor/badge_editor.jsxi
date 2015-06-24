@@ -10,8 +10,12 @@ static class BadgeEditor {
         fs.writeFile(file, fs.readFileSync(library), callback);
     }
 
-    public autoupdate(car){
-        if (!Settings.get('badgeAutoupdate')) return;
+    public saveFromFile(filename, file, callback){
+        fs.writeFile(file, fs.readFileSync(filename), callback);
+    }
+
+    public autoupdate(car, force){
+        if (!force && !Settings.get('badgeAutoupdate')) return;
 
         var image = logos[car.data.brand];
         if (image){
@@ -40,15 +44,27 @@ static class BadgeEditor {
             '<div style="max-height:70vh;overflow-y:auto;line-height:0">%0</div>'(logosHtml)
         ], function (){
             saveFromLibrary(this.content.find('.selected').data('file'), car.badge, cb);
-        }).setButton('Save').addButton('Add New Icon', function (){
+        }).addButton('Select File', function (){
             var a = document.createElement('input');
             a.type = 'file';
             a.setAttribute('accept', '.png');
             a.onchange = function (){
-                console.log(a.files[0]);
+                if (a.files[0]){
+                    saveFromFile(a.files[0].path, car.badge, cb);
+                    d.close();
+                }
             };
             a.click();
             return false;
+        }).onEnd(lambda {
+            DragDestination.unregister(ddId);
+        });
+
+        var ddId = DragDestination.register('New Badge', function (files){
+            if (files[0]){
+                saveFromFile(files[0], car.badge, cb);
+                d.close();
+            }
         });
 
         d.el.addClass('dark');

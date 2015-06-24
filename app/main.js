@@ -74,67 +74,74 @@ Dialog.prototype.closeOnEnter = function (v){                                   
 	this.__Dialog__closeOnEnter = v;                                               // dialog.jsxi:60
 	return this;                                                                   // dialog.jsxi:61
 };
-Dialog.prototype.setButton = function (a, c){                                      // dialog.jsxi:64
-	this.buttons.find('[data-id="dialog-ok"]').toggle(a != null).text(a);          // dialog.jsxi:65
-	
-	if (c != null){                                                                // dialog.jsxi:66
-		this.__Dialog__callback = c;                                               // dialog.jsxi:66
-	}
-	return this;                                                                   // dialog.jsxi:67
+Dialog.prototype.onEnd = function (callback){                                      // dialog.jsxi:64
+	this.__Dialog__endCallback = callback.bind(this);                              // dialog.jsxi:65
+	return this;                                                                   // dialog.jsxi:66
 };
-Dialog.prototype.setContent = function (content){                                  // dialog.jsxi:70
-	content.html(this.__Dialog__prepareContent(content));                          // dialog.jsxi:71
+Dialog.prototype.setButton = function (a, c){                                      // dialog.jsxi:69
+	this.buttons.find('[data-id="dialog-ok"]').toggle(a != null).text(a);          // dialog.jsxi:70
+	
+	if (c != null){                                                                // dialog.jsxi:71
+		this.__Dialog__callback = c;                                               // dialog.jsxi:71
+	}
 	return this;                                                                   // dialog.jsxi:72
 };
-Dialog.prototype.addButton = function (text, fn){                                  // dialog.jsxi:75
+Dialog.prototype.setContent = function (content){                                  // dialog.jsxi:75
+	content.html(this.__Dialog__prepareContent(content));                          // dialog.jsxi:76
+	return this;                                                                   // dialog.jsxi:77
+};
+Dialog.prototype.addButton = function (text, fn){                                  // dialog.jsxi:80
 	var __that = this;
 	
-	fn = fn && fn.bind(this);                                                      // dialog.jsxi:76
+	fn = fn && fn.bind(this);                                                      // dialog.jsxi:81
 	$('<button>' + text + '</button>').appendTo(this.buttons).click(function (e){
-		if (!fn || fn() !== false){                                                // dialog.jsxi:78
+		if (!fn || fn() !== false){                                                // dialog.jsxi:83
 			__that.close();
 		}
 	});
-	return this;                                                                   // dialog.jsxi:82
+	return this;                                                                   // dialog.jsxi:87
 };
-Dialog.prototype.find = function (a){                                              // dialog.jsxi:85
-	return this.el.find(a);                                                        // dialog.jsxi:86
+Dialog.prototype.find = function (a){                                              // dialog.jsxi:90
+	return this.el.find(a);                                                        // dialog.jsxi:91
 };
-Dialog.prototype.close = function (){                                              // dialog.jsxi:89
-	this.el.remove();                                                              // dialog.jsxi:90
+Dialog.prototype.close = function (){                                              // dialog.jsxi:94
+	if (this.__Dialog__endCallback)
+		this.__Dialog__endCallback();
+	
+	this.el.remove();                                                              // dialog.jsxi:96
 };
-Dialog.prototype.addTab = function (title, content, callback, closeCallback){      // dialog.jsxi:93
+Dialog.prototype.addTab = function (title, content, callback, closeCallback){      // dialog.jsxi:99
 	var __that = this;
 	
 	if (!this.tabs){
 		this.tabs = [ this ];
-		this.header.parent().addClass('tabs').click(function (e){                  // dialog.jsxi:96
+		this.header.parent().addClass('tabs').click(function (e){                  // dialog.jsxi:102
 			if (e.target.tagName === 'H4' && !e.target.classList.contains('active')){
 				__that.el.find('.dialog-header h4.active').removeClass('active');
-				e.target.classList.add('active');                                  // dialog.jsxi:99
+				e.target.classList.add('active');                                  // dialog.jsxi:105
 				
 				var i = Array.prototype.indexOf.call(e.target.parentNode.childNodes, e.target);
 				
 				var l = __that.el.find('.dialog-content')[0];
 				
-				l.parentNode.removeChild(l);                                       // dialog.jsxi:103
+				l.parentNode.removeChild(l);                                       // dialog.jsxi:109
 				
 				var l = __that.el.find('.dialog-buttons')[0];
 				
-				l.parentNode.removeChild(l);                                       // dialog.jsxi:105
-				__that.tabs[i].content.appendTo(__that.el.children());             // dialog.jsxi:106
-				__that.tabs[i].buttons.appendTo(__that.el.children());             // dialog.jsxi:107
+				l.parentNode.removeChild(l);                                       // dialog.jsxi:111
+				__that.tabs[i].content.appendTo(__that.el.children());             // dialog.jsxi:112
+				__that.tabs[i].buttons.appendTo(__that.el.children());             // dialog.jsxi:113
 			}
 		});
 	}
 	
 	var n = new Dialog(title, content, callback, closeCallback);
 	
-	this.tabs.push(n);                                                             // dialog.jsxi:113
-	document.body.removeChild(n.el[0]);                                            // dialog.jsxi:115
-	n.header.appendTo(this.header.addClass('active').parent());                    // dialog.jsxi:116
-	n.close = __bindOnce(this, 'close').bind(this);                                // dialog.jsxi:117
-	return n;                                                                      // dialog.jsxi:119
+	this.tabs.push(n);                                                             // dialog.jsxi:119
+	document.body.removeChild(n.el[0]);                                            // dialog.jsxi:121
+	n.header.appendTo(this.header.addClass('active').parent());                    // dialog.jsxi:122
+	n.close = __bindOnce(this, 'close').bind(this);                                // dialog.jsxi:123
+	return n;                                                                      // dialog.jsxi:125
 };
 
 var Mediator = (function (){                                                       // mediator.jsxi:1
@@ -1739,48 +1746,51 @@ var Cars = (function (){                                                        
 			mediator.dispatch('update.car.changed', this);                         // cars_car.jsxi:195
 		};
 		Car.prototype.selectSkin = function (skinId){                              // cars_car.jsxi:198
-			var newSkin = this.skins.filter(function (e){                          // cars_car.jsxi:199
-				return e.id == skinId;                                             // cars_car.jsxi:200
-			})[0];
-			
-			if (newSkin == this.skins.selected)                                    // cars_car.jsxi:203
+			if (!this.skins)
 				return;
 			
-			this.skins.selected = newSkin;                                         // cars_car.jsxi:205
-			mediator.dispatch('update.car.skins', this);                           // cars_car.jsxi:206
+			var newSkin = this.skins.filter(function (e){                          // cars_car.jsxi:201
+				return e.id == skinId;                                             // cars_car.jsxi:202
+			})[0];
+			
+			if (newSkin == this.skins.selected)                                    // cars_car.jsxi:205
+				return;
+			
+			this.skins.selected = newSkin;                                         // cars_car.jsxi:207
+			mediator.dispatch('update.car.skins', this);                           // cars_car.jsxi:208
 		};
-		Car.prototype.updateSkins = function (){                                   // cars_car.jsxi:209
-			gui.App.clearCache();                                                  // cars_car.jsxi:210
-			setTimeout((function (){                                               // cars_car.jsxi:211
-				mediator.dispatch('update.car.skins', this);                       // cars_car.jsxi:212
-			}).bind(this),                                                         // cars_car.jsxi:213
+		Car.prototype.updateSkins = function (){                                   // cars_car.jsxi:211
+			gui.App.clearCache();                                                  // cars_car.jsxi:212
+			setTimeout((function (){                                               // cars_car.jsxi:213
+				mediator.dispatch('update.car.skins', this);                       // cars_car.jsxi:214
+			}).bind(this),                                                         // cars_car.jsxi:215
 			100);
 		};
-		Car.prototype.updateBadge = function (){                                   // cars_car.jsxi:216
-			gui.App.clearCache();                                                  // cars_car.jsxi:217
-			setTimeout((function (){                                               // cars_car.jsxi:218
-				mediator.dispatch('update.car.badge', this);                       // cars_car.jsxi:219
-			}).bind(this),                                                         // cars_car.jsxi:220
+		Car.prototype.updateBadge = function (){                                   // cars_car.jsxi:218
+			gui.App.clearCache();                                                  // cars_car.jsxi:219
+			setTimeout((function (){                                               // cars_car.jsxi:220
+				mediator.dispatch('update.car.badge', this);                       // cars_car.jsxi:221
+			}).bind(this),                                                         // cars_car.jsxi:222
 			100);
 		};
-		Car.prototype.updateUpgrade = function (){                                 // cars_car.jsxi:223
-			gui.App.clearCache();                                                  // cars_car.jsxi:224
-			setTimeout((function (){                                               // cars_car.jsxi:225
-				mediator.dispatch('update.car.data', this);                        // cars_car.jsxi:226
-			}).bind(this),                                                         // cars_car.jsxi:227
+		Car.prototype.updateUpgrade = function (){                                 // cars_car.jsxi:225
+			gui.App.clearCache();                                                  // cars_car.jsxi:226
+			setTimeout((function (){                                               // cars_car.jsxi:227
+				mediator.dispatch('update.car.data', this);                        // cars_car.jsxi:228
+			}).bind(this),                                                         // cars_car.jsxi:229
 			100);
 		};
-		Car.prototype.save = function (){                                          // cars_car.jsxi:230
+		Car.prototype.save = function (){                                          // cars_car.jsxi:232
 			if (this.data){
 				var p = Object.clone(this.data);
 				
-				p.description = p.description.replace(/\n/g, '<br>');              // cars_car.jsxi:233
-				p.class = p.class.toLowerCase();                                   // cars_car.jsxi:234
-				fs.writeFileSync(this.json,                                        // cars_car.jsxi:235
+				p.description = p.description.replace(/\n/g, '<br>');              // cars_car.jsxi:235
+				p.class = p.class.toLowerCase();                                   // cars_car.jsxi:236
+				fs.writeFileSync(this.json,                                        // cars_car.jsxi:237
 					JSON.stringify(p, null, 
-						4));                                                       // cars_car.jsxi:235
+						4));                                                       // cars_car.jsxi:237
 				this.changed = false;
-				mediator.dispatch('update.car.changed', this);                     // cars_car.jsxi:237
+				mediator.dispatch('update.car.changed', this);                     // cars_car.jsxi:239
 			}
 		};
 		Car.prototype.loadBadge = function (callback){                             // cars_car_load.jsxi:3
@@ -2242,31 +2252,31 @@ var CheckUpdate = (function (){                                                 
 		if (_updateInProcess.abort)                                                // check_update.jsxi:169
 			_updateInProcess.abort();                                              // check_update.jsxi:169
 		
-		_updateInProcess = null;                                                   // check_update.jsxi:170
-		mediator.dispatch('install:interrupt');                                    // check_update.jsxi:171
-		setTimeout(function (arg){                                                 // check_update.jsxi:173
+		_updateInProcess = null;                                                   // check_update.jsxi:171
+		mediator.dispatch('install:interrupt');                                    // check_update.jsxi:172
+		setTimeout(function (arg){                                                 // check_update.jsxi:174
 			try {
-				fs.unlinkSync(_updateFile + '~tmp');                               // check_update.jsxi:174
+				fs.unlinkSync(_updateFile + '~tmp');                               // check_update.jsxi:175
 			} catch (e){} 
 		}, 
 		500);
 	};
-	CheckUpdate.autoupdate = function (){                                          // check_update.jsxi:178
-		function clearDir(dirPath){                                                // check_update.jsxi:179
+	CheckUpdate.autoupdate = function (){                                          // check_update.jsxi:179
+		function clearDir(dirPath){                                                // check_update.jsxi:180
 			try {
 				var files = fs.readdirSync(dirPath);
 			} catch (e){
 				return;
 			} 
 			
-			for (var i = 0; i < files.length; i ++){                               // check_update.jsxi:183
+			for (var i = 0; i < files.length; i ++){                               // check_update.jsxi:184
 				var filePath = dirPath + '/' + files[i];
 				
-				if (fs.statSync(filePath).isFile()){                               // check_update.jsxi:185
-					fs.unlinkSync(filePath);                                       // check_update.jsxi:186
+				if (fs.statSync(filePath).isFile()){                               // check_update.jsxi:186
+					fs.unlinkSync(filePath);                                       // check_update.jsxi:187
 				} else {
-					clearDir(filePath);                                            // check_update.jsxi:188
-					fs.rmdirSync(filePath);                                        // check_update.jsxi:189
+					clearDir(filePath);                                            // check_update.jsxi:189
+					fs.rmdirSync(filePath);                                        // check_update.jsxi:190
 				}
 			}
 		}
@@ -2274,54 +2284,54 @@ var CheckUpdate = (function (){                                                 
 		;
 		
 		try {
-			if (fs.existsSync(_updateFile)){                                       // check_update.jsxi:195
+			if (fs.existsSync(_updateFile)){                                       // check_update.jsxi:196
 				var d = path.join(path.dirname(process.execPath), 'carsmgr_update~next');
 				
-				if (fs.existsSync(d)){                                             // check_update.jsxi:197
-					clearDir(d);                                                   // check_update.jsxi:198
+				if (fs.existsSync(d)){                                             // check_update.jsxi:198
+					clearDir(d);                                                   // check_update.jsxi:199
 				} else {
-					fs.mkdirSync(d);                                               // check_update.jsxi:200
+					fs.mkdirSync(d);                                               // check_update.jsxi:201
 				}
 				
-				AcTools.Utils.FileUtils.Unzip(_updateFile, d);                     // check_update.jsxi:203
+				AcTools.Utils.FileUtils.Unzip(_updateFile, d);                     // check_update.jsxi:204
 				
 				var b = path.join(path.dirname(process.execPath), 'carsmgr_update.bat');
 				
-				fs.writeFileSync(b,                                                // check_update.jsxi:206
+				fs.writeFileSync(b,                                                // check_update.jsxi:207
 					"\t\t\t\t \n@ECHO OFF\n\nCD %~dp0\nTASKKILL /F /IM carsmgr.exe\n\n:CHECK_EXECUTABLE\nIF NOT EXIST carsmgr.exe GOTO EXECUTABLE_REMOVED\n\nDEL carsmgr.exe\nTIMEOUT /T 1 >nul\n\nGOTO CHECK_EXECUTABLE\n:EXECUTABLE_REMOVED\n\nDEL carsmgr.exe\n\nfor /r %%i in (carsmgr_update~next\\*) do MOVE /Y \"%%i\" %%~nxi\nRMDIR /S /Q carsmgr_update~next\n\nstart carsmgr.exe\n\nDEL %0 carsmgr_update.next".replace(/\n/g, '\r\n'));
-				Shell.openItem(b);                                                 // check_update.jsxi:229
-				gui.App.quit();                                                    // check_update.jsxi:230
+				Shell.openItem(b);                                                 // check_update.jsxi:230
+				gui.App.quit();                                                    // check_update.jsxi:231
 			}
-		} catch (e){                                                               // check_update.jsxi:232
-			mediator.dispatch('autoupdate:failed', e);                             // check_update.jsxi:233
+		} catch (e){                                                               // check_update.jsxi:233
+			mediator.dispatch('autoupdate:failed', e);                             // check_update.jsxi:234
 			
 			try {
-				if (fs.existsSync(_updateFile)){                                   // check_update.jsxi:235
-					fs.unlinkSync(_updateFile);                                    // check_update.jsxi:236
+				if (fs.existsSync(_updateFile)){                                   // check_update.jsxi:236
+					fs.unlinkSync(_updateFile);                                    // check_update.jsxi:237
 				}
 			} catch (e){} 
 			
 			try {
 				var d = path.join(path.dirname(process.execPath), 'carsmgr_update~next');
 				
-				if (fs.existsSync(d)){                                             // check_update.jsxi:241
-					clearDir(d);                                                   // check_update.jsxi:242
-					fs.rmdirSync(d);                                               // check_update.jsxi:243
+				if (fs.existsSync(d)){                                             // check_update.jsxi:242
+					clearDir(d);                                                   // check_update.jsxi:243
+					fs.rmdirSync(d);                                               // check_update.jsxi:244
 				}
 			} catch (e){} 
 			
 			try {
 				var b = path.join(path.dirname(process.execPath), 'carsmgr_update.bat');
 				
-				if (fs.existsSync(b)){                                             // check_update.jsxi:249
-					fs.unlinkSync(b);                                              // check_update.jsxi:250
+				if (fs.existsSync(b)){                                             // check_update.jsxi:250
+					fs.unlinkSync(b);                                              // check_update.jsxi:251
 				}
 			} catch (e){} 
 		} 
 	};
-	(function (){                                                                  // check_update.jsxi:256
+	(function (){                                                                  // check_update.jsxi:257
 		CheckUpdate.autoupdate();
-		mediator.extend(CheckUpdate);                                              // check_update.jsxi:258
+		mediator.extend(CheckUpdate);                                              // check_update.jsxi:259
 	})();
 	return CheckUpdate;
 })();
@@ -2361,34 +2371,50 @@ var DragDestination = (function (){                                             
 		_registered.push({ text: text, callback: callback, id: _lastId });         // drag_destination.jsxi:8
 		return _lastId ++;                                                         // drag_destination.jsxi:9
 	};
-	(function (){                                                                  // drag_destination.jsxi:12
-		_node = document.body.appendChild(document.createElement('div'));          // drag_destination.jsxi:13
-		_node.id = 'drop-target';                                                  // drag_destination.jsxi:14
-		_node.appendChild(document.createElement('h4'));                           // drag_destination.jsxi:16
-		_node.children[0].textContent = 'New Badge';                               // drag_destination.jsxi:17
-		_node.style.display = 'none';                                              // drag_destination.jsxi:18
-		_node.ondrop = function (arg){                                             // drag_destination.jsxi:20
-			arg.preventDefault();                                                  // drag_destination.jsxi:21
-			_node.style.display = 'none';                                          // drag_destination.jsxi:22
+	DragDestination.unregister = function (id){                                    // drag_destination.jsxi:12
+		for (var i = 0; i < _registered.length; i ++){                             // drag_destination.jsxi:13
+			var entry = _registered[i];
 			
-			for (var i = 0; i < arg.dataTransfer.files.length; ++ i){              // drag_destination.jsxi:24
-				console.log(arg.dataTransfer.files[i].path);                       // drag_destination.jsxi:25
+			if (entry.id === id){                                                  // drag_destination.jsxi:14
+				_registered.splice(i, 1);                                          // drag_destination.jsxi:15
+				return;
+			}
+		}
+	};
+	(function (){                                                                  // drag_destination.jsxi:21
+		_node = document.body.appendChild(document.createElement('div'));          // drag_destination.jsxi:22
+		_node.id = 'drop-target';                                                  // drag_destination.jsxi:23
+		_node.appendChild(document.createElement('h4'));                           // drag_destination.jsxi:25
+		_node.style.display = 'none';                                              // drag_destination.jsxi:26
+		_node.ondrop = function (arg){                                             // drag_destination.jsxi:28
+			arg.preventDefault();                                                  // drag_destination.jsxi:29
+			_node.style.display = 'none';                                          // drag_destination.jsxi:30
+			
+			var entry = _registered[_registered.length - 1];
+			
+			if (entry){                                                            // drag_destination.jsxi:33
+				entry.callback(Array.prototype.map.call(arg.dataTransfer.files,    // drag_destination.jsxi:34
+					function (arg){                                                // drag_destination.jsxi:34
+						return arg.path;                                           // drag_destination.jsxi:34
+					}));
 			}
 			return false;
 		};
-		$(window).on('dragover drop',                                              // drag_destination.jsxi:31
-			_node.ondragover = function (arg){                                     // drag_destination.jsxi:32
-				arg.preventDefault();                                              // drag_destination.jsxi:33
-				_node.style.display = null;                                        // drag_destination.jsxi:34
+		$(window).on('dragover drop',                                              // drag_destination.jsxi:40
+			_node.ondragover = function (arg){                                     // drag_destination.jsxi:41
+				arg.preventDefault();                                              // drag_destination.jsxi:42
 				
-				for (var i = 0; i < arg.dataTransfer.files.length; ++ i){          // drag_destination.jsxi:36
-					console.log(arg.dataTransfer.files[i].path);                   // drag_destination.jsxi:37
+				var entry = _registered[_registered.length - 1];
+				
+				if (entry){                                                        // drag_destination.jsxi:45
+					_node.children[0].textContent = entry.name;                    // drag_destination.jsxi:46
+					_node.style.display = null;                                    // drag_destination.jsxi:47
 				}
 				return false;
 			});
-		_node.ondragleave = function (arg){                                        // drag_destination.jsxi:43
-			arg.preventDefault();                                                  // drag_destination.jsxi:44
-			_node.style.display = 'none';                                          // drag_destination.jsxi:45
+		_node.ondragleave = function (arg){                                        // drag_destination.jsxi:53
+			arg.preventDefault();                                                  // drag_destination.jsxi:54
+			_node.style.display = 'none';                                          // drag_destination.jsxi:55
 			return false;
 		};
 	})();
@@ -2459,6 +2485,7 @@ var Settings = (function (){                                                    
 var Tips = (function (){                                                           // tips.jsxi:1
 	var Tips = function (){}, 
 		_t = [                                                                     // tips.jsxi:2
+			"You could use Drag'n'Drop while select new upgrade icon or badge.", 
 			"Use double click on skin preview to view it in showroom. If launch failed, maybe car is broken.", 
 			"Press RMB to open controls bar. Some buttons have additional options.", 
 			"Select found text in built-in browser and press “OK” to apply it as new description.", 
@@ -2542,76 +2569,92 @@ var BadgeEditor = (function (){                                                 
 		fs.writeFile(file, fs.readFileSync(library), callback);                    // badge_editor.jsxi:5
 	}
 	
-	BadgeEditor.autoupdate = function (car){                                       // badge_editor.jsxi:8
-		if (!Settings.get('badgeAutoupdate'))                                      // badge_editor.jsxi:9
+	BadgeEditor.saveFromFile = function (filename, file, callback){                // badge_editor.jsxi:8
+		fs.writeFile(file, fs.readFileSync(filename), callback);                   // badge_editor.jsxi:9
+	};
+	BadgeEditor.autoupdate = function (car, force){                                // badge_editor.jsxi:12
+		if (!force && !Settings.get('badgeAutoupdate'))                            // badge_editor.jsxi:13
 			return;
 		
 		var image = logos[car.data.brand];
 		
-		if (image){                                                                // badge_editor.jsxi:12
-			saveFromLibrary(image,                                                 // badge_editor.jsxi:13
-				car.badge,                                                         // badge_editor.jsxi:13
-				function (arg){                                                    // badge_editor.jsxi:13
-					return arg || car.updateBadge();                               // badge_editor.jsxi:13
+		if (image){                                                                // badge_editor.jsxi:16
+			saveFromLibrary(image,                                                 // badge_editor.jsxi:17
+				car.badge,                                                         // badge_editor.jsxi:17
+				function (arg){                                                    // badge_editor.jsxi:17
+					return arg || car.updateBadge();                               // badge_editor.jsxi:17
 				});
 		}
 	};
-	BadgeEditor.start = function (car, callback){                                  // badge_editor.jsxi:17
-		function cb(e){                                                            // badge_editor.jsxi:18
-			if (e){                                                                // badge_editor.jsxi:19
-				ErrorHandler.handled('Cannot save badge icon.', e);                // badge_editor.jsxi:20
+	BadgeEditor.start = function (car, callback){                                  // badge_editor.jsxi:21
+		function cb(e){                                                            // badge_editor.jsxi:22
+			if (e){                                                                // badge_editor.jsxi:23
+				ErrorHandler.handled('Cannot save badge icon.', e);                // badge_editor.jsxi:24
 			} else {
-				car.updateBadge();                                                 // badge_editor.jsxi:22
+				car.updateBadge();                                                 // badge_editor.jsxi:26
 			}
 			
-			if (callback)                                                          // badge_editor.jsxi:24
-				callback();                                                        // badge_editor.jsxi:24
+			if (callback)                                                          // badge_editor.jsxi:28
+				callback();                                                        // badge_editor.jsxi:28
 		}
 		
 		var logosHtml = '', carBrand = car.data && car.data.brand;
 		
-		for (var brand in logos)                                                   // badge_editor.jsxi:28
-			if (logos.hasOwnProperty(brand)){                                      // badge_editor.jsxi:28
+		for (var brand in logos)                                                   // badge_editor.jsxi:32
+			if (logos.hasOwnProperty(brand)){                                      // badge_editor.jsxi:32
 				var file = logos[brand];
 				
 				logosHtml += '<span class="car-library-element' + (!logos[carBrand] && !logosHtml.length || carBrand === brand ? ' selected' : '') + '" data-file="' + file + '" title="' + brand + '" style=\'display:inline-block;width:64px;height:64px;\
                 background:center url("' + file + '") no-repeat;background-size:54px\'></span>';
 			}
 		
-		var d = new Dialog('Change Badge',                                         // badge_editor.jsxi:34
+		var d = new Dialog('Change Badge',                                         // badge_editor.jsxi:38
 			[
 				'<div style="max-height:70vh;overflow-y:auto;line-height:0">' + logosHtml + '</div>'
 			], 
-			function (){                                                           // badge_editor.jsxi:36
+			function (){                                                           // badge_editor.jsxi:40
 				saveFromLibrary(this.content.find('.selected').data('file'), car.badge, cb);
-			}).setButton('Save').addButton('Add New Icon',                         // badge_editor.jsxi:38
-			function (){                                                           // badge_editor.jsxi:38
+			}).addButton('Select File',                                            // badge_editor.jsxi:42
+			function (){                                                           // badge_editor.jsxi:42
 				var a = document.createElement('input');
 				
-				a.type = 'file';                                                   // badge_editor.jsxi:40
-				a.setAttribute('accept', '.png');                                  // badge_editor.jsxi:41
-				a.onchange = function (){                                          // badge_editor.jsxi:42
-					console.log(a.files[0]);                                       // badge_editor.jsxi:43
+				a.type = 'file';                                                   // badge_editor.jsxi:44
+				a.setAttribute('accept', '.png');                                  // badge_editor.jsxi:45
+				a.onchange = function (){                                          // badge_editor.jsxi:46
+					if (a.files[0]){                                               // badge_editor.jsxi:47
+						BadgeEditor.saveFromFile(a.files[0].path, car.badge, cb);
+						d.close();                                                 // badge_editor.jsxi:49
+					}
 				};
-				a.click();                                                         // badge_editor.jsxi:45
+				a.click();                                                         // badge_editor.jsxi:52
 				return false;
+			}).onEnd(function (arg){                                               // badge_editor.jsxi:54
+			DragDestination.unregister(ddId);                                      // badge_editor.jsxi:55
+		});
+		
+		var ddId = DragDestination.register('New Badge',                           // badge_editor.jsxi:58
+			function (files){                                                      // badge_editor.jsxi:58
+				if (files[0]){                                                     // badge_editor.jsxi:59
+					BadgeEditor.saveFromFile(files[0], car.badge, cb);
+					d.close();                                                     // badge_editor.jsxi:61
+				}
 			});
 		
-		d.el.addClass('dark');                                                     // badge_editor.jsxi:49
-		d.content.find('.car-library-element').click(function (){                  // badge_editor.jsxi:50
-			$(this.parentNode).find('.selected').removeClass('selected');          // badge_editor.jsxi:51
-			this.classList.add('selected');                                        // badge_editor.jsxi:52
-		}).dblclick(function (){                                                   // badge_editor.jsxi:53
-			d.buttons.find('[data-id="dialog-ok"]')[0].click();                    // badge_editor.jsxi:54
+		d.el.addClass('dark');                                                     // badge_editor.jsxi:65
+		d.content.find('.car-library-element').click(function (){                  // badge_editor.jsxi:66
+			$(this.parentNode).find('.selected').removeClass('selected');          // badge_editor.jsxi:67
+			this.classList.add('selected');                                        // badge_editor.jsxi:68
+		}).dblclick(function (){                                                   // badge_editor.jsxi:69
+			d.buttons.find('[data-id="dialog-ok"]')[0].click();                    // badge_editor.jsxi:70
 		});
 	};
 	
-	function init(){                                                               // badge_editor.jsxi:58
-		Cars.on('update.car.data:brand', BadgeEditor.autoupdate);                  // badge_editor.jsxi:59
+	function init(){                                                               // badge_editor.jsxi:74
+		Cars.on('update.car.data:brand', BadgeEditor.autoupdate);                  // badge_editor.jsxi:75
 	}
 	
-	(function (){                                                                  // badge_editor.jsxi:63
-		$(init);                                                                   // badge_editor.jsxi:64
+	(function (){                                                                  // badge_editor.jsxi:79
+		$(init);                                                                   // badge_editor.jsxi:80
 	})();
 	return BadgeEditor;
 })();
@@ -2708,7 +2751,7 @@ var BatchProcessing = (function (){                                             
 	};
 	
 	function init(){                                                               // batch_processing.jsxi:77
-		BatchProcessing.add('Add Missing Brand Names to Car Names',                // batch_processing.jsxi:78
+		BatchProcessing.add('Add missing brand names to car names',                // batch_processing.jsxi:78
 			new JsBatchProcessor(function (car){                                   // batch_processing.jsxi:78
 				if (!car.data || !car.data.name || !car.data.brand)                // batch_processing.jsxi:79
 					return;
@@ -2733,7 +2776,7 @@ var BatchProcessing = (function (){                                             
 				
 				car.changeData('name', brand + ' ' + name);                        // batch_processing.jsxi:92
 			}));
-		BatchProcessing.add('Remove Brand Names from Car Names',                   // batch_processing.jsxi:95
+		BatchProcessing.add('Remove brand names from car names',                   // batch_processing.jsxi:95
 			new JsBatchProcessor(function (car){                                   // batch_processing.jsxi:95
 				if (!car.data || !car.data.name || !car.data.brand)                // batch_processing.jsxi:96
 					return;
@@ -2756,14 +2799,14 @@ var BatchProcessing = (function (){                                             
 				
 				car.changeData('name', name.substr(brand.length + 1));             // batch_processing.jsxi:108
 			}));
-		BatchProcessing.add('Lowercase Classes',                                   // batch_processing.jsxi:111
+		BatchProcessing.add('Lowercase classes',                                   // batch_processing.jsxi:111
 			new JsBatchProcessor(function (car){                                   // batch_processing.jsxi:111
 				if (!car.data || !car.data.class)                                  // batch_processing.jsxi:112
 					return;
 				
 				car.changeData('class', car.data.class.toLowerCase());             // batch_processing.jsxi:113
 			}));
-		BatchProcessing.add('Lowercase & Fix Tags',                                // batch_processing.jsxi:116
+		BatchProcessing.add('Lowercase & fix tags',                                // batch_processing.jsxi:116
 			new JsBatchProcessor(function (car){                                   // batch_processing.jsxi:116
 				if (!car.data || !car.data.tags)                                   // batch_processing.jsxi:117
 					return;
@@ -2817,6 +2860,10 @@ var BatchProcessing = (function (){                                             
 					return;
 				
 				fs.writeFileSync(car.path + '/logo.png', fs.readFileSync(car.badge));
+			}));
+		BatchProcessing.add('Set default badges',                                  // batch_processing.jsxi:162
+			new JsBatchProcessor(function (car){                                   // batch_processing.jsxi:162
+				BadgeEditor.autoupdate(car, true);                                 // batch_processing.jsxi:163
 			}));
 	}
 	return BatchProcessing;
@@ -3026,59 +3073,86 @@ var UpgradeEditor = (function (){                                               
 		fs.writeFile(file, fs.readFileSync(library), callback);                    // upgrade_editor.jsxi:88
 	}
 	
-	UpgradeEditor.start = function (car, callback){                                // upgrade_editor.jsxi:91
-		function cb(e){                                                            // upgrade_editor.jsxi:92
-			if (e){                                                                // upgrade_editor.jsxi:93
-				ErrorHandler.handled('Cannot save upgrade icon.', e);              // upgrade_editor.jsxi:94
+	UpgradeEditor.saveFromFile = function (filename, file, callback){              // upgrade_editor.jsxi:91
+		fs.writeFile(file, fs.readFileSync(filename), callback);                   // upgrade_editor.jsxi:92
+	};
+	UpgradeEditor.start = function (car, callback){                                // upgrade_editor.jsxi:95
+		function cb(e){                                                            // upgrade_editor.jsxi:96
+			if (e){                                                                // upgrade_editor.jsxi:97
+				ErrorHandler.handled('Cannot save upgrade icon.', e);              // upgrade_editor.jsxi:98
 			} else {
-				car.updateUpgrade();                                               // upgrade_editor.jsxi:96
+				car.updateUpgrade();                                               // upgrade_editor.jsxi:100
 			}
 			
-			if (callback)                                                          // upgrade_editor.jsxi:98
-				callback();                                                        // upgrade_editor.jsxi:98
+			if (callback)                                                          // upgrade_editor.jsxi:102
+				callback();                                                        // upgrade_editor.jsxi:102
 		}
 		
-		var d = new Dialog('Upgrade Editor',                                       // upgrade_editor.jsxi:101
+		var d = new Dialog('Upgrade Icon Editor',                                  // upgrade_editor.jsxi:105
 			[
 				'<div class="left"><h6>Current</h6><img class="car-upgrade"></div>', 
 				'<div class="right"><h6>New</h6><div id="car-upgrade-editor"></div></div>', 
 				'<p><i>Ctrl+I: Italic, Ctrl+B: Bold</i></p>'
 			], 
-			function (){                                                           // upgrade_editor.jsxi:105
+			function (){                                                           // upgrade_editor.jsxi:109
 				var label = this.content.find('#car-upgrade-editor')[0].innerHTML;
 				
-				car.data.upgradeLabel = $('#editable-focus').html();               // upgrade_editor.jsxi:107
+				car.data.upgradeLabel = $('#editable-focus').html();               // upgrade_editor.jsxi:111
 				
-				if (!car.changed){                                                 // upgrade_editor.jsxi:108
-					car.save();                                                    // upgrade_editor.jsxi:109
+				if (!car.changed){                                                 // upgrade_editor.jsxi:112
+					car.save();                                                    // upgrade_editor.jsxi:113
 				}
 				
-				saveFromHtml(label, car.upgrade, cb);                              // upgrade_editor.jsxi:111
-			}).setButton('Save');                                                  // upgrade_editor.jsxi:112
+				saveFromHtml(label, car.upgrade, cb);                              // upgrade_editor.jsxi:115
+			}).addButton('Select File',                                            // upgrade_editor.jsxi:116
+			function (){                                                           // upgrade_editor.jsxi:116
+				var a = document.createElement('input');
+				
+				a.type = 'file';                                                   // upgrade_editor.jsxi:118
+				a.setAttribute('accept', '.png');                                  // upgrade_editor.jsxi:119
+				a.onchange = function (){                                          // upgrade_editor.jsxi:120
+					if (a.files[0]){                                               // upgrade_editor.jsxi:121
+						UpgradeEditor.saveFromFile(a.files[0].path, car.upgrade, cb);
+						d.close();                                                 // upgrade_editor.jsxi:123
+					}
+				};
+				a.click();                                                         // upgrade_editor.jsxi:126
+				return false;
+			}).onEnd(function (arg){                                               // upgrade_editor.jsxi:128
+			DragDestination.unregister(ddId);                                      // upgrade_editor.jsxi:129
+		});
 		
-		d.el.addClass('dark');                                                     // upgrade_editor.jsxi:114
+		var ddId = DragDestination.register('New Upgrade Icon',                    // upgrade_editor.jsxi:132
+			function (files){                                                      // upgrade_editor.jsxi:132
+				if (files[0]){                                                     // upgrade_editor.jsxi:133
+					UpgradeEditor.saveFromFile(files[0], car.upgrade, cb);
+					d.close();                                                     // upgrade_editor.jsxi:135
+				}
+			});
 		
-		if (fs.existsSync(car.upgrade)){                                           // upgrade_editor.jsxi:115
-			d.content.find('img').attr('src', car.upgrade);                        // upgrade_editor.jsxi:116
+		d.el.addClass('dark');                                                     // upgrade_editor.jsxi:139
+		
+		if (fs.existsSync(car.upgrade)){                                           // upgrade_editor.jsxi:140
+			d.content.find('img').attr('src', car.upgrade);                        // upgrade_editor.jsxi:141
 		} else {
-			d.content.find('.left').remove();                                      // upgrade_editor.jsxi:118
+			d.content.find('.left').remove();                                      // upgrade_editor.jsxi:143
 		}
 		
 		d.content.find('#car-upgrade-editor').append(editable(car.data.upgradeLabel || 'S1'));
-		focus(d.content.find('#editable-focus')[0]);                               // upgrade_editor.jsxi:122
+		focus(d.content.find('#editable-focus')[0]);                               // upgrade_editor.jsxi:147
 		
-		var t = d.addTab('Library',                                                // upgrade_editor.jsxi:124
+		var t = d.addTab('Library',                                                // upgrade_editor.jsxi:149
 			"<img class=\"car-library-element selected\" src=\"data/upgrade-lib/D.png\"></img><img class=\"car-library-element\" src=\"data/upgrade-lib/Race.png\"></img><img class=\"car-library-element\" src=\"data/upgrade-lib/S1.png\"></img><img class=\"car-library-element\" src=\"data/upgrade-lib/S2.png\"></img><img class=\"car-library-element\" src=\"data/upgrade-lib/S3.png\"></img><img class=\"car-library-element\" src=\"data/upgrade-lib/Turbo.png\"></img>", 
-			function (){                                                           // upgrade_editor.jsxi:124
+			function (){                                                           // upgrade_editor.jsxi:149
 				saveFromLibrary(t.content.find('.selected').attr('src'), car.upgrade, cb);
-			}).setButton('Select').addButton('Cancel');                            // upgrade_editor.jsxi:126
+			}).setButton('Select').addButton('Cancel');                            // upgrade_editor.jsxi:151
 		
-		t.content.css('margin', '10px 0');                                         // upgrade_editor.jsxi:127
-		t.find('.car-library-element').click(function (){                          // upgrade_editor.jsxi:128
-			$(this.parentNode).find('.selected').removeClass('selected');          // upgrade_editor.jsxi:129
-			this.classList.add('selected');                                        // upgrade_editor.jsxi:130
-		}).dblclick(function (){                                                   // upgrade_editor.jsxi:131
-			t.buttons.find('[data-id="dialog-ok"]')[0].click();                    // upgrade_editor.jsxi:132
+		t.content.css('margin', '10px 0');                                         // upgrade_editor.jsxi:152
+		t.find('.car-library-element').click(function (){                          // upgrade_editor.jsxi:153
+			$(this.parentNode).find('.selected').removeClass('selected');          // upgrade_editor.jsxi:154
+			this.classList.add('selected');                                        // upgrade_editor.jsxi:155
+		}).dblclick(function (){                                                   // upgrade_editor.jsxi:156
+			t.buttons.find('[data-id="dialog-ok"]')[0].click();                    // upgrade_editor.jsxi:157
 		});
 	};
 	return UpgradeEditor;
@@ -4957,7 +5031,7 @@ var ViewNewVersion = (function (){                                              
 /* Class "ViewSettings" declaration */
 var ViewSettings = (function (){                                                   // view_settings.jsxi:1
 	var ViewSettings = function (){}, 
-		_prevFeedback, _list;
+		_prevFeedback;
 	
 	function openDialog(){                                                         // view_settings.jsxi:4
 		function save(){                                                           // view_settings.jsxi:5
@@ -5066,9 +5140,9 @@ var ViewSettings = (function (){                                                
 				'<h6>Resize</h6>',                                                 // view_settings.jsxi:102
 				'<label><input id="apt-resize" type="checkbox">Change size to default 1024×576 (Recommended)</label>', 
 				'<h6>Camera Position</h6>',                                        // view_settings.jsxi:105
-				'<label>X: <input id="apt-camera-x" type="number" step="1"></label>', 
-				'<label>Y: <input id="apt-camera-y" type="number" step="1"></label>', 
-				'<label>Distance: <input id="apt-camera-distance" type="number" step="0.1"></label>', 
+				'<label style="display:inline-block;width:160px;line-height:24px" title="Actually, just simulate mouse move">Rotate X: <input id="apt-camera-x" type="number" step="1" style="width: 80px;float: right;margin-right: 20px;"></label>', 
+				'<label style="display:inline-block;width:160px;line-height:24px" title="Actually, just simulate mouse move">Rotate Y: <input id="apt-camera-y" type="number" step="1" style="width: 80px;float: right;margin-right: 20px;"></label>', 
+				'<label style="display:inline-block;width:160px;line-height:24px">Distance: <input id="apt-camera-distance" type="number" step="0.1" style="width: 80px;float: right;margin-right: 20px;"></label>', 
 				'<h6>Delays</h6>',                                                 // view_settings.jsxi:110
 				'<label><input id="apt-increase-delays" type="checkbox">Increased delays</label>'
 			], 
@@ -5173,43 +5247,41 @@ var ViewSettings = (function (){                                                
 			});
 	}
 	
-	function filtersList(){}
-	
-	function feedbackForm(){                                                       // view_settings.jsxi:187
-		function sendFeedback(v){                                                  // view_settings.jsxi:188
+	function feedbackForm(){                                                       // view_settings.jsxi:182
+		function sendFeedback(v){                                                  // view_settings.jsxi:183
 			d.buttons.find('button:first-child').text('Please wait...').attr('disabled', true);
-			AppServerRequest.sendFeedback(v,                                       // view_settings.jsxi:191
-				function (arg){                                                    // view_settings.jsxi:191
-					d.close();                                                     // view_settings.jsxi:192
+			AppServerRequest.sendFeedback(v,                                       // view_settings.jsxi:186
+				function (arg){                                                    // view_settings.jsxi:186
+					d.close();                                                     // view_settings.jsxi:187
 					
-					if (arg){                                                      // view_settings.jsxi:193
-						new Dialog('Cannot Send Feedback', 'Sorry about that.');   // view_settings.jsxi:194
+					if (arg){                                                      // view_settings.jsxi:188
+						new Dialog('Cannot Send Feedback', 'Sorry about that.');   // view_settings.jsxi:189
 					} else {
-						_prevFeedback = null;                                      // view_settings.jsxi:196
-						new Dialog('Feedback Sent', 'Thank you.');                 // view_settings.jsxi:197
+						_prevFeedback = null;                                      // view_settings.jsxi:191
+						new Dialog('Feedback Sent', 'Thank you.');                 // view_settings.jsxi:192
 					}
 				});
 		}
 		
-		var d = new Dialog('Feedback',                                             // view_settings.jsxi:202
+		var d = new Dialog('Feedback',                                             // view_settings.jsxi:197
 			'<textarea style="width:350px;height:200px;resize:none" maxlength="5000"\
                 placeholder="If you have any ideas or suggestions please let me know"></textarea>', 
-			function (){                                                           // view_settings.jsxi:203
+			function (){                                                           // view_settings.jsxi:198
 				var v = this.content.find('textarea').val().trim();
 				
-				if (v)                                                             // view_settings.jsxi:205
-					sendFeedback(v);                                               // view_settings.jsxi:205
+				if (v)                                                             // view_settings.jsxi:200
+					sendFeedback(v);                                               // view_settings.jsxi:200
 				return false;
 			}, 
-			false).setButton('Send').addButton('Cancel').closeOnEnter(false);      // view_settings.jsxi:207
+			false).setButton('Send').addButton('Cancel').closeOnEnter(false);      // view_settings.jsxi:202
 		
 		d.content.find('textarea').val(_prevFeedback || '').change(function (arg){
-			return _prevFeedback = this.value;                                     // view_settings.jsxi:208
+			return _prevFeedback = this.value;                                     // view_settings.jsxi:203
 		});
 	}
 	
-	(function (){                                                                  // view_settings.jsxi:211
-		$('#settings-open').click(openDialog);                                     // view_settings.jsxi:212
+	(function (){                                                                  // view_settings.jsxi:206
+		$('#settings-open').click(openDialog);                                     // view_settings.jsxi:207
 	})();
 	return ViewSettings;
 })();

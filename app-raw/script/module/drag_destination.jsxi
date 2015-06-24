@@ -23,7 +23,6 @@ static class DragDestination {
         _node.id = 'drop-target';
 
         _node.appendChild(document.createElement('h4'));
-        _node.children[0].textContent = 'New Badge';
         _node.style.display = 'none';
 
         _node.ondrop = lambda {
@@ -32,7 +31,7 @@ static class DragDestination {
 
             var entry = _registered[_registered.length - 1];
             if (entry){
-                entry.callback(arg.dataTransfer.files[i].map(lambda arg.path));
+                entry.callback([].map.call(arg.dataTransfer.files, lambda arg.path));
             }
 
             return false;
@@ -41,7 +40,13 @@ static class DragDestination {
         $(window)
             .on('dragover drop', _node.ondragover = lambda {
                 arg.preventDefault();
-                if (_registered.length) _node.style.display = null;
+
+                var entry = _registered[_registered.length - 1];
+                if (entry){
+                    _node.children[0].textContent = entry.name;
+                    _node.style.display = null;
+                }
+
                 return false;
             });
 

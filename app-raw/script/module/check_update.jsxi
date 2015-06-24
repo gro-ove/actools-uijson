@@ -167,6 +167,7 @@ static class CheckUpdate {
     public abort(){
         if (!_updateInProcess) return;
         if (_updateInProcess.abort) _updateInProcess.abort();
+        
         _updateInProcess = null;
         mediator.dispatch('install:interrupt');
 

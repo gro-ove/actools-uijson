@@ -75,7 +75,7 @@ static class BatchProcessing {
     }
 
     private init(){
-        add('Add Missing Brand Names to Car Names', new JsBatchProcessor(function (car){
+        add('Add missing brand names to car names', new JsBatchProcessor(function (car){
             if (!car.data || !car.data.name || !car.data.brand) return;
             var brand  = car.data.brand;
             var name = car.data.name;
@@ -92,7 +92,7 @@ static class BatchProcessing {
             car.changeData('name', brand + ' ' + name);
         }));
 
-        add('Remove Brand Names from Car Names', new JsBatchProcessor(function (car){
+        add('Remove brand names from car names', new JsBatchProcessor(function (car){
             if (!car.data || !car.data.name || !car.data.brand) return;
             var brand  = car.data.brand;
             var name = car.data.name;
@@ -108,12 +108,12 @@ static class BatchProcessing {
             car.changeData('name', name.substr(brand.length + 1));
         }));
 
-        add('Lowercase Classes', new JsBatchProcessor(function (car){
+        add('Lowercase classes', new JsBatchProcessor(function (car){
             if (!car.data || !car.data.class) return;
             car.changeData('class', car.data.class.toLowerCase());
         }));
 
-        add('Lowercase & Fix Tags', new JsBatchProcessor(function (car){
+        add('Lowercase & fix tags', new JsBatchProcessor(function (car){
             if (!car.data || !car.data.tags) return;
             var temp = 0,
                 tags = car.data.tags.map(function (raw){
@@ -157,6 +157,10 @@ static class BatchProcessing {
         add('Replace logo.png by ui/badge.png', new JsBatchProcessor(function (car){
             if (!fs.existsSync(car.badge)) return;
             fs.writeFileSync(car.path + '/logo.png', fs.readFileSync(car.badge));
+        }));
+
+        add('Set default badges', new JsBatchProcessor(function (car){
+            BadgeEditor.autoupdate(car, true);
         }));
     }
 }

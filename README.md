@@ -6,7 +6,7 @@ Small utility for easy editing *ui_car.json* files. Written using [NW.js](http:/
 * [Visual C++ Redistributable 2013 (x86)](https://www.microsoft.com/en-us/download/details.aspx?id=40784)
 
 #### Download
-* [Last (0.3.33)](https://yadi.sk/d/a9PxzVKFhT7v4)
+* [Last (0.3.34)](https://yadi.sk/d/dPdSBScphTaLD)
 * [Stable (0.3.20)](http://www.racedepartment.com/downloads/actools-cars-manager.6518/)
 * [Previous](http://www.racedepartment.com/downloads/actools-cars-manager.6518/history) [builds](https://yadi.sk/d/eHr0NCP4hSAfq)
 
@@ -59,7 +59,6 @@ This feature allows to collect huge database with correct information (descripti
 ![Volvo S60R](https://pp.vk.me/c621730/v621730107/33687/j-n4apx1GA8.jpg)
 
 #### TODO
-* Brand logo select
 * New mods installation
 * New custom fields: year, country
 * Data Application part
@@ -74,6 +73,10 @@ This feature allows to collect huge database with correct information (descripti
 * Clone cars, modify in-game specs (?)
 
 #### Changelog
+* 0.3.34
+    * Badge changing
+    * Regular file selection for upgrade icon or badge
+        * Or Drag'n'Drop
 * 0.3.33
     * App packed in one executable file
     * Now without UPX, app is bigger, but faster and requires less RAM

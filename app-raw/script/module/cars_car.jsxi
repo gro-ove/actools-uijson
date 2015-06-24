@@ -196,6 +196,8 @@ static partial class Cars {
         }
 
         public selectSkin(skinId){
+            if (!skins) return;
+            
             var newSkin = skins.filter(function (e){
                 return e.id == skinId;
             })[0];

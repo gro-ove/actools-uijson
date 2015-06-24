@@ -92,6 +92,10 @@ static class UpgradeEditor {
         fs.writeFile(file, fs.readFileSync(library), callback);
     }
 
+    public saveFromFile(filename, file, callback){
+        fs.writeFile(file, fs.readFileSync(filename), callback);
+    }
+
     public start(car, callback){
         function cb(e){
             if (e){
@@ -102,7 +106,7 @@ static class UpgradeEditor {
             if (callback) callback();
         }
 
-        var d = new Dialog('Upgrade Editor', [
+        var d = new Dialog('Upgrade Icon Editor', [
             '<div class="left"><h6>Current</h6><img class="car-upgrade"></div>',
             '<div class="right"><h6>New</h6><div id="car-upgrade-editor"></div></div>',
             '<p><i>Ctrl+I: Italic, Ctrl+B: Bold</i></p>',
@@ -113,7 +117,28 @@ static class UpgradeEditor {
                 car.save();
             }
             saveFromHtml(label, car.upgrade, cb);
-        }).setButton('Save');
+        }).addButton('Select File', function (){
+            var a = document.createElement('input');
+            a.type = 'file';
+            a.setAttribute('accept', '.png');
+            a.onchange = function (){
+                if (a.files[0]){
+                    saveFromFile(a.files[0].path, car.upgrade, cb);
+                    d.close();
+                }
+            };
+            a.click();
+            return false;
+        }).onEnd(lambda {
+            DragDestination.unregister(ddId);
+        });
+
+        var ddId = DragDestination.register('New Upgrade Icon', function (files){
+            if (files[0]){
+                saveFromFile(files[0], car.upgrade, cb);
+                d.close();
+            }
+        });
 
         d.el.addClass('dark');
         if (fs.existsSync(car.upgrade)){
