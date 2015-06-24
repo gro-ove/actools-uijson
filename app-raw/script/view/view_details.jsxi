@@ -288,7 +288,19 @@ static class ViewDetails {
             })
             .on('change', function (e){
                 if (!_selected || this.readonly || !this.value) return;
+                var name = _selected.data.name;
+
+                if (name.indexOf(_selected.data.brand + ' ') === 0){
+                    name = name.substr(_selected.data.brand.length + 1);
+                } else {
+                    name = null;
+                }
+
                 Cars.changeData(_selected, 'brand', this.value);
+
+                if (name){
+                    Cars.changeData(_selected, 'name', this.value + ' ' + name);
+                }
             })
             .on('contextmenu', function (e){
                 if (!_selected || !_selected.data) return;

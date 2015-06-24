@@ -109,8 +109,21 @@ static partial class Cars {
             });
         }
 
+        static clearStr(str){
+            if (typeof str !== 'string') return;
+            return str.trim().replace(/\s+/g, ' ');
+        }
+
         public changeData(key, value){
             if (!data || data[key] == value) return;
+
+            if (key === 'name' || key === 'brand' || key === 'class' || key === 'year' || key === 'country'){
+                value = clearStr(value);
+            }
+
+            if (key === 'year'){
+                value = value.replace(/[^\d]+/g, '');
+            }
 
             data[key] = value;
             changed = true;
@@ -137,6 +150,8 @@ static partial class Cars {
 
         public changeDataSpecs(key, value){
             if (!data || data.specs[key] == value) return;
+
+            value = clearStr(value);
 
             data.specs[key] = value;
             changed = true;

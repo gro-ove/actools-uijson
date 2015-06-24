@@ -19,7 +19,7 @@ static class ErrorHandler {
             console.warn(_details(err));
 
             if (window.AppServerRequest && AppServerRequest.sendFeedback){
-                AppServerRequest.sendFeedback('UNCAUGHTEXCEPTION:' + _details(err));
+                AppServerRequest.sendFeedback('UNCAUGHTEXCEPTION:%0:%1'(gui.App.manifest.version, _details(err)));
             }
 
             show();

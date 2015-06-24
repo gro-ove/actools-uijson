@@ -6,8 +6,8 @@ Small utility for easy editing *ui_car.json* files. Written using [NW.js](http:/
 * [Visual C++ Redistributable 2013 (x86)](https://www.microsoft.com/en-us/download/details.aspx?id=40784)
 
 #### Download
-* [Last (0.3.19)](https://yadi.sk/d/SFDdgdyWhSsNL)
-* [Stable (0.3.19)](http://www.racedepartment.com/downloads/actools-cars-manager.6518/)
+* [Last (0.3.20)](https://yadi.sk/d/zPsUO976hSzPZ)
+* [Stable (0.3.20)](http://www.racedepartment.com/downloads/actools-cars-manager.6518/)
 * [Previous](http://www.racedepartment.com/downloads/actools-cars-manager.6518/history) [builds](https://yadi.sk/d/eHr0NCP4hSAfq)
 
 #### Features
@@ -74,6 +74,9 @@ This feature allows to collect huge database with correct information (descripti
 * Clone cars, modify in-game specs (?)
 
 #### Changelog
+* 0.3.20
+    * Auto-change name on brand's change is some cases
+    * Bugfixes (sorry)
 * 0.3.19
     * Auto-update Previews:
         * Options: camera distance

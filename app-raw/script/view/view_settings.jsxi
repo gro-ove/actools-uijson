@@ -112,7 +112,7 @@ static class ViewSettings {
 
         ], save).setButton('Save').addButton('Defaults', function (){
             apt.content.find('#apt-showroom')[0].value = aptShowroom = Settings.defaults.aptShowroom;
-            apt.content.find('#apt-filter')[0].value = aptFilter = Settings.defaults.aptFilter;
+            if (AcFilters.list.length) apt.content.find('#apt-filter')[0].value = aptFilter = Settings.defaults.aptFilter;
             apt.content.find('#apt-disable-sweetfx')[0].checked = aptDisableSweetFx = Settings.defaults.aptDisableSweetFx;
             apt.content.find('#apt-resize')[0].checked = aptResize = Settings.defaults.aptResize;
             apt.content.find('#apt-camera-x')[0].value = aptCameraX = Settings.defaults.aptCameraX;
@@ -129,7 +129,7 @@ static class ViewSettings {
         if (AcFilters.list.length){
             apt.content.find('#apt-filter').change(lambda { aptFilter = this.value })[0].value = aptFilter;
             var recFilter = apt.content.find('#apt-filter [value="%0"]'(Settings.defaults.aptFilter))[0];
-            if (recFilter) recFilter[0].textContent += ' (Recommended)';
+            if (recFilter) recFilter.textContent += ' (Recommended)';
         } else {
             apt.content.find('#apt-filter').attr({
                 disabled: true,

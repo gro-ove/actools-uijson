@@ -1,0 +1,24 @@
+static class BadgeEditor {
+    var logos = @macro :object {
+        var r = {};
+        var d = 'data/brand-lib';
+        fs.readdirSync('app/' + d).forEach(lambda r[arg.split('.')[0]] = d + '/' + arg);
+        return r;
+    }();
+
+    public function autoupdate(car){
+        // if (!Settings.get('badgeAutoupdate')) return;
+
+        var image = logos[car.data.brand];
+        //alert(image);
+    }
+
+    function init(){
+        Cars
+            .on('update.car.data:brand', autoupdate);
+    }
+
+    {
+        $(init);
+    }
+}
