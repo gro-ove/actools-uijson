@@ -1,5 +1,7 @@
 @echo off
 
+taskkill /f /im carsmgr.exe 2>nul
+
 rem type app-raw\lib\*.js > app-raw\libs.js 2>nul 
 rem call yuicompressor app-raw\libs.js -o app\libs.js
 rem del app-raw\libs.js

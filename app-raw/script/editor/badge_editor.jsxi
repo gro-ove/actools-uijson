@@ -6,11 +6,58 @@ static class BadgeEditor {
         return r;
     }();
 
-    public function autoupdate(car){
-        // if (!Settings.get('badgeAutoupdate')) return;
+    private saveFromLibrary(library, file, callback){
+        fs.writeFile(file, fs.readFileSync(library), callback);
+    }
+
+    public autoupdate(car){
+        if (!Settings.get('badgeAutoupdate')) return;
 
         var image = logos[car.data.brand];
-        //alert(image);
+        if (image){
+            saveFromLibrary(image, car.badge, lambda arg || car.updateBadge());
+        }
+    }
+
+    public start(car, callback){
+        function cb(e){
+            if (e){
+                ErrorHandler.handled('Cannot save badge icon.', e);
+            } else {
+                car.updateBadge();
+            }
+            if (callback) callback();
+        }
+
+        var logosHtml = '', carBrand = car.data && car.data.brand;
+        for (var brand, file in-object logos){
+            logosHtml += '<span class="car-library-element%0" data-file="%2" title="%1" style=\'display:inline-block;width:64px;height:64px;\
+                background:center url("%2") no-repeat;background-size:54px\'></span>'(
+                (!logos[carBrand] && !logosHtml.length || carBrand === brand) ? ' selected' : '', brand, file);
+        }
+
+        var d = new Dialog('Change Badge', [
+            '<div style="max-height:70vh;overflow-y:auto;line-height:0">%0</div>'(logosHtml)
+        ], function (){
+            saveFromLibrary(this.content.find('.selected').data('file'), car.badge, cb);
+        }).setButton('Save').addButton('Add New Icon', function (){
+            var a = document.createElement('input');
+            a.type = 'file';
+            a.setAttribute('accept', '.png');
+            a.onchange = function (){
+                console.log(a.files[0]);
+            };
+            a.click();
+            return false;
+        });
+
+        d.el.addClass('dark');
+        d.content.find('.car-library-element').click(function (){
+            $(this.parentNode).find('.selected').removeClass('selected');
+            this.classList.add('selected');
+        }).dblclick(function (){
+            d.buttons.find('[data-id="dialog-ok"]')[0].click();
+        });
     }
 
     function init(){

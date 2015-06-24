@@ -7,6 +7,8 @@ static class Settings {
         uploadData:         false,
         updatesCheck:       true,
         updatesSource:      'stable',
+        
+        badgeAutoupdate:    true,
 
         aptShowroom:        '',
         aptFilter:          'S1-Dynamic',

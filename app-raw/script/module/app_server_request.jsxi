@@ -17,12 +17,40 @@ static class AppServerRequest {
         });
     }
 
+    public sendBinary(car, file, buf, callback){
+        var req = new XMLHttpRequest();
+        req.open('POST', 'http://ascobash.comuf.com/api.php?0=binary&c=%0&f=%1'(car, file), true);
+        req.setRequestHeader('Content-Type', 'application/octet-stream');
+        
+        req.onreadystatechange = function() {
+            if (req.readyState == 4) {
+                if (callback) callback(null);
+            }
+        };
+
+        req.send(buf.toArrayBuffer());
+    }
+
     public sendFeedback(feedback, callback){
         $.ajax({
             url: 'http://ascobash.comuf.com/api.php?0=feedback',
             type: 'POST',
             contentType: 'text/plain',
             data: feedback,
+            processData: false,
+        }).fail(function() {
+            if (callback) callback('error:request');
+        }).done(function (data){
+            if (callback) callback(null);
+        });
+    }
+
+    public sendError(version, details, callback){
+        $.ajax({
+            url: 'http://ascobash.comuf.com/api.php?0=error',
+            type: 'POST',
+            contentType: 'text/plain',
+            data: version + ':' + details,
             processData: false,
         }).fail(function() {
             if (callback) callback('error:request');

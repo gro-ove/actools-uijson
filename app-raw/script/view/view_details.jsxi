@@ -403,6 +403,13 @@ static class ViewDetails {
                 }
             });
 
+        /* bagde, upgrade */
+        $('#selected-car-logo')
+            .on('click', function (){
+                if (!_selected) return;
+                BadgeEditor.start(_selected);
+            });
+            
         $('#selected-car-upgrade')
             .on('click', function (){
                 if (!_selected) return;

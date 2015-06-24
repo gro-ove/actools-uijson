@@ -47,8 +47,11 @@ class Dialog {
 
         el.find('*').keydown(function (e){
             if (e.keyCode == 13 && _closeOnEnter){
-                el.find('[data-id="dialog-ok"]')[0].click();
-                return false;
+                var okButton = el[0].querySelector('[data-id="dialog-ok"]');
+                if (okButton){
+                    el[0].querySelector('[data-id="dialog-ok"]').click();
+                    return false;
+                }
             }
         });
     }

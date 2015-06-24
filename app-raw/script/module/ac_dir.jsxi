@@ -12,6 +12,14 @@ static class AcDir {
             return 'Folder content/cars not found';
         }
 
+        if (!fs.existsSync(path.join(d, 'content', 'tracks'))){
+            return 'Folder content/tracks not found';
+        }
+
+        if (!fs.existsSync(path.join(d, 'content', 'showroom'))){
+            return 'Folder content/showroom not found';
+        }
+
         try {
             var tmpFile = d + '/__test.at~tmp';
             fs.writeFileSync(tmpFile, 'test');

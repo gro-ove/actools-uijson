@@ -868,11 +868,36 @@ iframe {
   width: calc(100vw - 100px);
   height: calc(100vh - 200px);
 }
-.car-upgrade-library-element:hover {
-  background-color: #333;
+.car-library-element:hover {
+  background-color: #eee !important;
 }
-.car-upgrade-library-element.selected {
-  background-color: #59f;
+.car-library-element.selected {
+  background-color: #59f !important;
+}
+.dark .car-library-element:hover {
+  background-color: #333 !important;
+}
+#drop-target {
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: rgba(0, 0, 0, 0.24);
+  z-index: 91;
+}
+#drop-target h4 {
+  position: absolute;
+  top: 60px;
+  bottom: 60px;
+  left: 60px;
+  right: 60px;
+  background: rgba(255, 255, 255, 0.91);
+  padding-top: calc(50vh - 90px);
+  text-align: center;
+}
+#drop-target h4:before {
+  content: "Drop Here ";
 }
 footer {
   position: fixed;

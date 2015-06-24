@@ -1,7 +1,7 @@
 @macro upgradeLib:string(){
     var d = 'app/data/upgrade-lib';
     return fs.readdirSync(d).map(lambda (a, i)
-        '<img class="car-upgrade-library-element%0" src="data/upgrade-lib/%1"></img>'(i ? '' : ' selected', a)).join('');
+        '<img class="car-library-element%0" src="data/upgrade-lib/%1"></img>'(i ? '' : ' selected', a)).join('');
 }
 
 static class UpgradeEditor {
@@ -113,7 +113,7 @@ static class UpgradeEditor {
                 car.save();
             }
             saveFromHtml(label, car.upgrade, cb);
-        }, false).setButton('Save').addButton('Cancel');
+        }).setButton('Save');
 
         d.el.addClass('dark');
         if (fs.existsSync(car.upgrade)){
@@ -129,9 +129,11 @@ static class UpgradeEditor {
             saveFromLibrary(t.content.find('.selected').attr('src'), car.upgrade, cb);
         }).setButton('Select').addButton('Cancel');
         t.content.css('margin', '10px 0');
-        t.find('.car-upgrade-library-element').click(function (){
+        t.find('.car-library-element').click(function (){
             $(this.parentNode).find('.selected').removeClass('selected');
             this.classList.add('selected');
+        }).dblclick(function (){
+            t.buttons.find('[data-id="dialog-ok"]')[0].click();
         });
     }
 }

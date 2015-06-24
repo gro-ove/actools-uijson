@@ -1,0 +1,54 @@
+static class DragDestination {
+    var _node;
+
+    var _registered = [];
+    var _lastId = 0;
+
+    public register(text, callback){
+        _registered.push({ text: text, callback: callback, id: _lastId });
+        return _lastId++;
+    }
+
+    public unregister(id){
+        for (var i, entry in-array _registered){
+            if (entry.id === id){
+                _registered.splice(i, 1);
+                return;
+            }
+        }
+    }
+
+    {
+        _node = document.body.appendChild(document.createElement('div'));
+        _node.id = 'drop-target';
+
+        _node.appendChild(document.createElement('h4'));
+        _node.children[0].textContent = 'New Badge';
+        _node.style.display = 'none';
+
+        _node.ondrop = lambda {
+            arg.preventDefault();
+            _node.style.display = 'none';
+
+            var entry = _registered[_registered.length - 1];
+            if (entry){
+                entry.callback(arg.dataTransfer.files[i].map(lambda arg.path));
+            }
+
+            return false;
+        };
+
+        $(window)
+            .on('dragover drop', _node.ondragover = lambda {
+                arg.preventDefault();
+                if (_registered.length) _node.style.display = null;
+                return false;
+            });
+
+        _node.ondragleave = lambda {
+            arg.preventDefault();
+            _node.style.display = 'none';
+            return false;
+        };
+    }
+}
