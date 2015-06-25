@@ -184,7 +184,7 @@ static class ViewDetails {
         Cars
             .on('scan:ready', function (list){
                 if (list.length == 0){
-                    outMsg('Hmm', 'Cars not found');
+                    outMsg('Hmm...', 'Cars not found');
                 }
 
                 $('main').show();
@@ -538,9 +538,14 @@ static class ViewDetails {
         });
 
         /* second row */
-        $('#selected-car-disable').click(function (){
+        $('#selected-car-save').click(function (){
             if (!_selected) return;
-            Cars.toggle(_selected);
+            _selected.save();
+        });
+
+        $('#selected-car-update-description').click(function (){
+            if (!_selected) return;
+            UpdateDescription.update(_selected);
         });
 
         $('#selected-car-update-previews').click(function (){
@@ -553,14 +558,47 @@ static class ViewDetails {
             AcShowroom.shot(_selected, true);
         });
 
-        $('#selected-car-update-description').click(function (){
+        $('#selected-car-disable').click(function (){
             if (!_selected) return;
-            UpdateDescription.update(_selected);
+            _selected.toggle();
         });
 
-        $('#selected-car-save').click(function (){
+        $('#selected-car-additional').on('click contextmenu', function (e){
             if (!_selected) return;
-            Cars.save(_selected);
+
+            var menu = new gui.Menu();
+            menu.append(new gui.MenuItem({ label: 'Fix SUSP_XX error', click: function (){
+                $('main footer').removeClass('active');
+                if (!_selected) return;
+                AcTools;
+
+                try {
+                    var res = AcTools.Utils.Kn5Fixer.FixSuspensionWrapper(AcDir.root, _selected.id);
+                } catch (err){
+                    ErrorHandler.handled('Cannot fix car.', err);
+                    return;
+                }
+
+                if (res){
+                    ErrorHandler.handled('Cannot fix car.', res);
+                    return;
+                }
+
+                new Dialog('Done', 'Successfully fixed.');
+            } }));
+
+            menu.append(new gui.MenuItem({ label: 'Delete car', click: function (){
+                $('main footer').removeClass('active');
+                if (!_selected) return;
+
+                new Dialog('Delete %0'(_selected.displayName), 'Folder will be removed to the Recycle Bin. Are you sure?', lambda {
+                    if (!_selected) return;
+                    Cars.remove(_selected);
+                });
+            } }));
+
+            menu.popup(e.clientX, e.clientY);
+            return false;
         });
     }
 

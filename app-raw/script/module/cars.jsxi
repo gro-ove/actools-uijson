@@ -54,6 +54,10 @@ static partial class Cars {
     public scan(){
         mediator.dispatch('scan:start');
 
+        if (!fs.existsSync(AcDir.carsOff)){
+            fs.mkdirSync(AcDir.carsOff);
+        }
+
         var names = {};
         _list = fs.readdirSync(AcDir.cars).map(function (e){
             return path.join(AcDir.cars, e);
@@ -136,6 +140,27 @@ static partial class Cars {
                 car.save();
             }
         });
+    }
+
+    public remove(car){
+        for (var i, c in-array _list){
+            if (c === car){
+                AcTools.Utils.FileUtils.Recycle(car.path);
+
+                if (car.parent){
+                    car.parent.children.splice(car.parent.children.indexOf(car), 1);
+                    mediator.dispatch('update.car.children', car.parent);
+                }
+
+                for (var child in-array car.children){
+                    Cars.remove(child);
+                }
+
+                _list.splice(i, 1);
+                mediator.dispatch('remove.car', car);
+                return;
+            }
+        }
     }
 
     public get list _list,

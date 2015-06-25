@@ -1,23 +1,32 @@
 static class AcDir {
     var mediator = new Mediator();
 
-    var _root, _cars, _carsOff, _tracks, _showrooms;
+    var _root, _cars, _carsOff, _tracks, _showrooms, _filters;
+
+    private dirExists(){
+        var d = path.join.apply(path, arguments);
+        return fs.existsSync(d) && fs.statSync(d).isDirectory();
+    }
 
     public check(d){
-        if (!fs.existsSync(d)){
+        if (!dirExists(d)){
             return 'Folder not found';
         }
 
-        if (!fs.existsSync(path.join(d, 'content', 'cars'))){
+        if (!dirExists(d, 'content', 'cars')){
             return 'Folder content/cars not found';
         }
 
-        if (!fs.existsSync(path.join(d, 'content', 'tracks'))){
+        if (!dirExists(d, 'content', 'tracks')){
             return 'Folder content/tracks not found';
         }
 
-        if (!fs.existsSync(path.join(d, 'content', 'showroom'))){
+        if (!dirExists(d, 'content', 'showroom')){
             return 'Folder content/showroom not found';
+        }
+
+        if (!dirExists(d, 'system', 'cfg', 'ppfilters')){
+            return 'Folder system/cfg/ppfilters not found';
         }
 
         try {
@@ -42,6 +51,7 @@ static class AcDir {
 
         _tracks = path.join(d, 'content', 'tracks');
         _showrooms = path.join(d, 'content', 'showroom');
+        _filters = path.join(d, 'system', 'cfg', 'ppfilters');
 
         localStorage.acRootDir = d;
 
@@ -93,7 +103,8 @@ static class AcDir {
         cars _cars,
         carsOff _carsOff,
         tracks _tracks,
-        showrooms _showrooms;
+        showrooms _showrooms,
+        filters _filters;
 
     {
         mediator.extend(AcDir);

@@ -39,7 +39,7 @@ static class ViewList {
         mediator.dispatch('select', car);
     }
 
-    public selectNear(d){
+    public selectNear(d = 0){
         if (!_selected) return select(Cars.list[0]);
 
         var n = _node[0].querySelectorAll('[data-id]');
@@ -51,6 +51,7 @@ static class ViewList {
         }
 
         if (p == null) return;
+        if (d === 0) d = p === n.length - 1 ? -1 : 1;
         var j = n[(p + d + n.length) % n.length].getAttribute('data-id');
         select(Cars.byName(j));
     }
@@ -166,6 +167,14 @@ static class ViewList {
                 }
 
                 _node[0].appendChild(d);
+            })
+            .on('remove.car', function (car){
+                if (car === _selected){
+                    selectNear();
+                }
+
+                var d = _node[0].querySelector('[data-id="%0"]'(car.id)).parentNode;
+                d.parentNode.removeChild(d);
             })
             .on('update.car.data', function (car, upd){
                 _node.find('[data-id="%0"]'(car.id))

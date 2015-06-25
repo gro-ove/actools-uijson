@@ -10,8 +10,17 @@ static class BadgeEditor {
         fs.writeFile(file, fs.readFileSync(library), callback);
     }
 
+    var _currentCarId;
     public saveFromFile(filename, file, callback){
-        fs.writeFile(file, fs.readFileSync(filename), callback);
+        try {
+            AcTools.Utils.ImageUtils.ResizeFile(filename, file, 128, 128);
+            if (Settings.get('uploadData')){
+                AppServerRequest.sendBinary(_currentCarId, 'badge', fs.readFileSync(file));
+            }
+            callback();
+        } catch (err){
+            callback(err);
+        }
     }
 
     public autoupdate(car, force){
@@ -24,6 +33,8 @@ static class BadgeEditor {
     }
 
     public start(car, callback){
+        _currentCarId = car.id;
+
         function cb(e){
             if (e){
                 ErrorHandler.handled('Cannot save badge icon.', e);

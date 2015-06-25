@@ -28,7 +28,7 @@ static class AppServerRequest {
             }
         };
 
-        req.send(buf.toArrayBuffer());
+        req.send(new Uint8Array(buf).buffer);
     }
 
     public sendFeedback(feedback, callback){

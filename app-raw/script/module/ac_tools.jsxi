@@ -1,6 +1,10 @@
 __defineGetter__('AcTools', function (){
-    return AcTools = require('clr').init({
-        assemblies: [ 'native/AcTools.dll' ],
-        global: false
-    }).AcTools;
+    try {
+        return AcTools = require('clr').init({
+            assemblies: [ 'native/AcTools.dll' ],
+            global: false
+        }).AcTools;
+    } catch (err){
+        throw new Error('Cannot load native module. Make sure you have .NET Framework 4.5 and Visual C++ Redistributable 2013 (x86) installed.');
+    }
 });

@@ -166,6 +166,7 @@ static partial class Cars {
 
         public changeParent(parentId){
             if (!data || parent && parent.id == parentId || !parent && parentId == null) return;
+            if (children.length > 0) throw new Error('Children car cannot have childrens');
 
             if (parent){
                 parent.children.splice(parent.children.indexOf(this), 1);

@@ -42,6 +42,7 @@ static class AcPractice {
         r = r || localStorage.lastTrack || 'spa';
         localStorage.lastTrack = r;
 
+        AcTools;
         try {
             AcTools.Processes.Game.StartPractice(AcDir.root, c.id, s, r.split('/')[0], r.split('/')[1] || '');
         } catch (e){

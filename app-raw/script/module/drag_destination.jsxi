@@ -27,11 +27,13 @@ static class DragDestination {
 
         _node.ondrop = lambda {
             arg.preventDefault();
+            arg.stopPropagation();
+            
             _node.style.display = 'none';
 
             var entry = _registered[_registered.length - 1];
             if (entry){
-                entry.callback([].map.call(arg.dataTransfer.files, lambda arg.path));
+                setTimeout(entry.callback.bind(null, [].map.call(arg.dataTransfer.files, lambda arg.path)));
             }
 
             return false;

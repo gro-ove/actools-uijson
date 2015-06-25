@@ -6,13 +6,13 @@ static class AcShowroom {
 
     public get list {
         if (!_showrooms){
-            loadShowrooms();
+            load();
         }
 
         return _showrooms;
     };
 
-    function loadShowrooms(){
+    public load(){
         _showrooms = fs.readdirSync(AcDir.showrooms).map(function (e){
             var p = path.join(AcDir.showrooms, e);
             var d = null;
@@ -30,46 +30,84 @@ static class AcShowroom {
                 path: p,
                 json: j,
             }
-        }).filter(function (e){
-            return e;
-        });
+        }).filter(lambda arg);
     }
 
-    public start(c, s, r){
+    public exists(id){
+        return fs.existsSync(AcDir.showrooms + '/' + id);
+    }
+
+    private handleError(err){
+        try {
+            var logFile = fs.readFileSync(AcTools.Utils.FileUtils.GetLogFile()).toString();
+            if (/\bCOULD NOT FIND SUSPENSION OBJECT SUSP_[LR][FR]\b/.test(logFile)){
+                ErrorHandler.handled('Car doesn\'t have a proper suspension. \
+                    You could try to use option “Fix SUSP_XX error” in additional edit tools menu.', err);
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private get lastShowroom localStorage.lastShowroom || 'showroom',
+        lastShowroomFilter localStorage.lastShowroomFilter || '';
+
+    public start(c, s, room){
         if (c.path.indexOf(AcDir.cars)) return;
 
         if (s == null){
             s = c.skins.selected.id;
         }
 
-        r = r || localStorage.lastShowroom || 'showroom';
+        room = room || lastShowroom;
+        var filter = lastShowroomFilter || null;
+
+        if (!exists(room)){
+            ErrorHandler.handled('Showroom “%0” is missing.'(room));
+            return;
+        } 
+
+        if (filter && !AcFilters.exists(filter)){
+            ErrorHandler.handled('Filter “%0” is missing.'(filter));
+            return;
+        } 
+
+        AcTools;
         try {
-            AcTools.Processes.Showroom.Start(AcDir.root, c.id, s, r);
+            AcTools.Processes.Showroom.Start(AcDir.root, c.id, s, room, filter);
         } catch (err){
-            ErrorHandler.handled('Cannot start showroom. Maybe there is not enough rights or the car is broken.');
+            ErrorHandler.handled('Cannot start showroom. Maybe the car is broken.', err);
             return;
         }
-        localStorage.lastShowroom = r;
+        
+        handleError();
     }
 
     public select(c, s){
-        if (!_showrooms){
-            loadShowrooms();
-        }
-
-        new Dialog('Showroom', [
-            '<select>{0}</select>'.format(_showrooms.map(function (e){
+        var d = new Dialog('Showroom', [
+            '<h6>Select showroom</h6>'
+            '<select id="showroom-select-showroom">{0}</select>'.format(list.map(function (e){
                 return '<option value="{0}">{1}</option>'.format(e.id, e.data ? e.data.name : e.id);
             }).join(''))
+            '<h6>Select filter</h6>'
+            '<select id="showroom-select-filter"><option value="">Don\'t change</option>{0}</select>'.format(AcFilters.list.map(function (e){
+                return '<option value="{0}">{1}</option>'.format(e.id, e.id);
+            }).join(''))
         ], function (){
-            start(c, s, this.find('select').val());
+            start(c, s);
         }).addButton('Reload List', function (){
             setTimeout(function (){
-                loadShowrooms();
+                load();
+                AcFilters.load();
                 select(c, s);
             });
-        }).find('select').val(localStorage.lastShowroom || 'showroom').change(function (){
+        });
+        d.find('#showroom-select-showroom').val(lastShowroom).change(function (){
             localStorage.lastShowroom = this.value;
+        });
+        d.find('#showroom-select-filter').val(lastShowroomFilter).change(function (){
+            localStorage.lastShowroomFilter = this.value;
         });
     }
 
@@ -151,7 +189,7 @@ static class AcShowroom {
                         if (blackShowroomTest()){
                             setTimeout(proceed);
                         } else {
-                            new Dialog('Are You Sure?', 'Because showroom is still missing.');
+                            new Dialog('Black Showroom Installation', 'Showroom is still missing. Are you sure?');
                             this.buttons.find('button:last-child').text('Really Done');
                             return false;
                         }                        
@@ -164,15 +202,17 @@ static class AcShowroom {
         function proceed(){
             var output;
             try {
-                output = AcTools.Processes.Showroom.Shot(AcDir.root, c.id, showroom, !!m, x, y, distance, filter, disableSweetFx, delays);
+                output = AcTools.Processes.Showroom.ShotWrapper(AcDir.root, c.id, showroom, !!m, x, y, distance, filter, disableSweetFx, delays);
             } catch (err){
-                ErrorHandler.handled('Cannot get previews. Maybe process was terminated, there is not enough rights or the car is broken.', err);
-                return;
+                if (!handleError(err)){
+                    ErrorHandler.handled('Cannot start showroom. Maybe the car is broken.', err);
+                }
             }
 
             if (!fs.existsSync(output)){
-                console.log(output);
-                ErrorHandler.handled('Cannot get previews.', output);
+                if (!handleError()){
+                    ErrorHandler.handled('Cannot get previews.', output);
+                }
                 return;
             }
 

@@ -11,18 +11,17 @@ Small utility for easy editing *ui_car.json* files. Written using [NW.js](http:/
 * [Previous](http://www.racedepartment.com/downloads/actools-cars-manager.6518/history) [builds](https://yadi.sk/d/eHr0NCP4hSAfq)
 
 #### Features
-* Enable/disable vehicles
-* Edit name, brand, tags, description, class & specs
+* Enable/disable cars; edit name, brand, class, tags, description & specs
 * Search for description online
-* Preview cars
-* Auto-update Previews
-* Quick Practive
-* Upgrade Icon Editor
-* Restoration Wizard
-* Batch Processing
+* Reassign parents, change and create new upgrade icons
+* View skins & liveries
+* Auto-update Previews to Kunos-style or something else
+* Open showroom, start quick practive
+* Restoration Wizard, Batch Processing
+* Delete cars to Recycle Bin
 
 #### Tips
-* Double click on preview to launch acShowroom
+* Double click on preview to launch showroom
 * Press RMB to open controls bar
 * Select found text in built-in browser and press “OK”
 * Don't forget to save changes (Ctrl+S)
@@ -60,12 +59,14 @@ This feature allows to collect huge database with correct information (descripti
 
 #### TODO
 * New mods installation
-* New custom fields: year, country
+* New custom fields: year, country, version, author
 * Data Application part
 * More hotkeys
 * Optional sorting, sorting by brand/id/…
 * Detect broken cars
 * Skins Editor
+    * Drag'n'Drop textures
+    * Extend selected skins with selected files
 * View/edit torque & powes curves, load from data/power.lut
 * Switchable & custom search providers (?)
 * Custom Batch Processing (?)
@@ -73,6 +74,10 @@ This feature allows to collect huge database with correct information (descripti
 * Clone cars, modify in-game specs (?)
 
 #### Changelog
+* 0.3.35
+    * Car deleting
+    * Added a lot of missing brand's icons
+    * Fixer for SUSP_XX error
 * 0.3.34
     * Badge changing
     * Regular file selection for upgrade icon or badge

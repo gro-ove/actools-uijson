@@ -3,14 +3,18 @@ static class AcFilters {
 
     public get list {
         if (!_filters){
-            loadFilters();
+            load();
         }
 
         return _filters;
     };
 
-    function loadFilters(){
-        var path = AcTools.Utils.FileUtils.GetDocumentsFiltersFolder();
+    public exists(id){
+        return fs.existsSync(AcDir.filters + '/' + id + '.ini');
+    }
+
+    public load(){
+        var path = AcDir.filters;
 
         try {
             _filters = fs.readdirSync(path).map(function (e){

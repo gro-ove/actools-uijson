@@ -93,7 +93,15 @@ static class UpgradeEditor {
     }
 
     public saveFromFile(filename, file, callback){
-        fs.writeFile(file, fs.readFileSync(filename), callback);
+        try {
+            AcTools.Utils.ImageUtils.ResizeFile(filename, file, 64, 64);
+            if (Settings.get('uploadData')){
+                AppServerRequest.sendBinary(_currentCarId, 'upgrade', fs.readFileSync(file));
+            }
+            callback();
+        } catch (err){
+            callback(err);
+        }
     }
 
     public start(car, callback){
