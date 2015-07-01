@@ -21,7 +21,7 @@ class MissingDataNameFixer extends AbstractFixer {
         c();
     }
 
-    protected get title 'Car name is missing',
+    public get title 'Car name is missing',
         solutions [
             { name: 'Enter a new name', fn: createNew }
             { name: 'Use id as a name', fn: useId }
@@ -56,7 +56,7 @@ class MissingDataBrandFixer extends AbstractFixer {
         return br = Cars.brands.filter(lambda car.id.indexOf(arg.toLowerCase()) === 0)[0];
     }
 
-    protected get title 'Car brand is missing',
+    public get title 'Car brand is missing',
         solutions [
             extractBrand() && { name: 'Use “%0” as a brand'(br), fn: useBr }
             { name: 'Select a new brand', fn: createNew }
@@ -100,7 +100,7 @@ class WrongDataParentFixer extends AbstractFixer {
         c();
     }
 
-    protected get title 'Parent id is incorrect',
+    public get title 'Parent id is incorrect',
         solutions [
             { name: 'Make independent', fn: makeInd }
             car.children.length == 0 && { name: 'Select a new parent', fn: createNew }

@@ -17,6 +17,7 @@ static class ViewSettings {
                 s.updatesSource = updatesSource;
 
                 s.aptShowroom = aptShowroom;
+                s.aptMode = aptMode;
                 s.aptFilter = aptFilter;
                 s.aptDisableSweetFx = aptDisableSweetFx;
                 s.aptResize = aptResize;
@@ -45,7 +46,7 @@ static class ViewSettings {
 
             /*'<h6>Search Provider</h6>',
             '<label><select id="settings-search-provider"><option value="google"></option></select>',*/
-        ], save, false).setButton('Save').addButton('Cancel');
+        ], save, false).setButton('Save').addButton('Cancel'), c = 0;
 
         /* acdir */
         var acdirVal;
@@ -88,29 +89,36 @@ static class ViewSettings {
 
         /* auto-preview tab */
         var apt = d.addTab('Auto-Preview', [
-            '<h6>Showroom</h6>',
-            '<select id="apt-showroom"><option value="">Black Showroom (Recommended)</option>{0}</select>'.format(AcShowroom.list.map(function (e){
-                return '<option value="{0}">{1}</option>'.format(e.id, e.data ? e.data.name : e.id);
-            }).join('')),
+            '<h6>Mode</h6>'
+            '<select id="apt-mode">%0</select>'(AcShowroom.modes.map(function (e){
+                return '<option value="%0">%1</option>'(e.id, e.name);
+            }).join(''))
 
-            '<h6>Filter</h6>',
-            '<select id="apt-filter"><option value="">Don\'t change</option>{0}</select>'.format(AcFilters.list.map(function (e){
-                return '<option value="{0}">{1}</option>'.format(e.id, e.id);
-            }).join('')),
-            '<label><input id="apt-disable-sweetfx" type="checkbox">Disable SweetFX (Recommended)</label>',
+            '<h6>Showroom</h6>'
+            '<select id="apt-showroom"><option value="">Black Showroom (Recommended)</option>%0</select>'(AcShowroom.list.map(function (e){
+                return '<option value="%0">%1</option>'(e.id, e.data ? e.data.name : e.id);
+            }).join(''))
 
-            '<h6>Resize</h6>',
-            '<label><input id="apt-resize" type="checkbox">Change size to default 1024×576 (Recommended)</label>',
+            '<h6>Filter</h6>'
+            '<select id="apt-filter"><option value="">Don\'t change</option>%0</select>'(AcFilters.list.map(function (e){
+                return '<option value="%0">%1</option>'(e.id, e.id);
+            }).join(''))
+            '<label><input id="apt-disable-sweetfx" type="checkbox">Disable SweetFX (Recommended)</label>'
 
-            '<h6>Camera Position</h6>',
-            '<label style="display:inline-block;width:160px;line-height:24px" title="Actually, just simulate mouse move">Rotate X: <input id="apt-camera-x" type="number" step="1" style="width: 80px;float: right;margin-right: 20px;"></label>',
-            '<label style="display:inline-block;width:160px;line-height:24px" title="Actually, just simulate mouse move">Rotate Y: <input id="apt-camera-y" type="number" step="1" style="width: 80px;float: right;margin-right: 20px;"></label>',
-            '<label style="display:inline-block;width:160px;line-height:24px">Distance: <input id="apt-camera-distance" type="number" step="0.1" style="width: 80px;float: right;margin-right: 20px;"></label>',
+            '<h6>Resize</h6>'
+            '<label><input id="apt-resize" type="checkbox">Change size to default 1024×576 (Recommended)</label>'
 
-            '<h6>Delays</h6>',
-            '<label><input id="apt-increase-delays" type="checkbox">Increased delays</label>',
+            '<h6>Camera Position</h6>'
+            '<label style="display:inline-block;width:160px;line-height:24px" title="Actually, just simulate mouse move">Rotate X: <input id="apt-camera-x" type="number" step="1" style="width: 80px;float: right;margin-right: 20px;"></label>'
+            '<label style="display:inline-block;width:160px;line-height:24px" title="Actually, just simulate mouse move">Rotate Y: <input id="apt-camera-y" type="number" step="1" style="width: 80px;float: right;margin-right: 20px;"></label>'
+            '<label style="display:inline-block;width:160px;line-height:24px">Distance: <input id="apt-camera-distance" type="number" step="0.1" style="width: 80px;float: right;margin-right: 20px;"></label>'
 
+            '<h6>Delays</h6>'
+            '<label><input id="apt-increase-delays" type="checkbox">Increased delays</label>'
         ], save).setButton('Save').addButton('Defaults', function (){
+            apt.content.find('#apt-mode')[0].value = aptMode = Settings.defaults.aptMode;
+            apt.content.toggleClass('apt-nondefmode', aptMode !== 'default');
+
             apt.content.find('#apt-showroom')[0].value = aptShowroom = Settings.defaults.aptShowroom;
             if (AcFilters.list.length) apt.content.find('#apt-filter')[0].value = aptFilter = Settings.defaults.aptFilter;
             apt.content.find('#apt-disable-sweetfx')[0].checked = aptDisableSweetFx = Settings.defaults.aptDisableSweetFx;
@@ -121,6 +129,13 @@ static class ViewSettings {
             apt.content.find('#apt-increase-delays')[0].checked = aptIncreaseDelays = Settings.defaults.aptIncreaseDelays;
             return false;
         }).addButton('Cancel');
+
+        var aptMode = Settings.get('aptMode');
+        apt.content.find('#apt-mode').change(lambda {
+            aptMode = this.value;
+            apt.content.toggleClass('apt-nondefmode', aptMode !== 'default');
+        })[0].value = aptMode;
+        apt.content.toggleClass('apt-nondefmode', aptMode !== 'default');
 
         var aptShowroom = Settings.get('aptShowroom');
         apt.content.find('#apt-showroom').change(lambda { aptShowroom = this.value })[0].value = aptShowroom;
@@ -157,10 +172,12 @@ static class ViewSettings {
 
         /* about tab */
         d.addTab('About', [
-            '<h6>Version</h6>',
-            gui.App.manifest.version,
-            '<h6>Author</h6>',
-            'x4fab',
+            '<h6>Version</h6>'
+            '<p id="version">%0</p>'(gui.App.manifest.version)
+            '<h6>Details</h6>'
+            `<p><a href="#" onclick="Shell.openItem('https://ascobash.wordpress.com/2015/06/14/actools-uijson/')">https://ascobash.wordpress.com/…/actools-uijson/</a></p>`
+            '<h6>Author</h6>'
+            'x4fab'
         ]).addButton('Feedback', function (){
             feedbackForm();
             return false;
@@ -176,6 +193,11 @@ static class ViewSettings {
                 }
             });
             return false;
+        }).content.find('#version').click(function (){
+            if (++c > 10 && !localStorage.developerMode){
+                new Dialog('Developer Mode Enabled', 'Don\'t spread it around, ok?', lambda, false);
+                localStorage.developerMode = true;
+            }
         });
     }
 

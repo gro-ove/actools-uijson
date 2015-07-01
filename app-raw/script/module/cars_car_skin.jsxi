@@ -1,0 +1,48 @@
+static partial class Cars {
+    class CarSkin {
+        private _car;
+        public id;
+
+        public get path '%0/skins/%1'(_car.path, id),
+            json '%0/skins/%1/ui_skin.json'(_car.path, id),
+            livery '%0/skins/%1/livery.png'(_car.path, id),
+            preview '%0/skins/%1/preview.jpg'(_car.path, id);
+
+        public data;
+        public get displayName data && data.skinname || id;
+
+        (car, id){
+            this._car = car;
+            this.id = id;
+        }
+
+        public loadData(callback){
+            if (!fs.existsSync(json)){
+                data = false;
+                // _car.addError('skin-data-missing:%0'(id), 'Missing skins/%0/ui_skin.json'(id), null, this);
+                if (callback) callback();
+                return;
+            } else
+                data = null;
+
+            fs.readFile(json, function (err, result){
+                if (err){
+                    data = false;
+                    _car.addError('skin-data-access:%0'(id), 'Unavailable skins/%0/ui_skin.json'(id), err, this);
+                } else {
+                    var dat = parseLoadedData(result.toString()),
+                        err = dat instanceof Error && dat;
+
+                    data = false;
+                    if (err || !dat || dat.skinname == null || dat.drivername == null || dat.country == null || dat.number == null){
+                        _car.addError('skin-data-damaged:%0'(id), 'Damaged skins/%0/ui_skin.json'(id), err, this);
+                    } else {
+                        data = dat;
+                    }
+                }
+
+                if (callback) callback();
+            }.bind(this));
+        }
+    }
+}

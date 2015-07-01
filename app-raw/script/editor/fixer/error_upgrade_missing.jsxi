@@ -12,7 +12,7 @@ class MissingUpgradeIconFixer extends AbstractFixer {
         c();
     }
 
-    protected get title 'Upgrade icon missing',
+    public get title 'Upgrade icon missing',
         solutions [
             { name: 'Create new', fn: newIcon }
             { name: 'Make independent', fn: makeIndependent }

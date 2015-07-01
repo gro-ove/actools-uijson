@@ -1,9 +1,14 @@
 class AbstractFixer {
-    protected car, errorId;
+    protected car, object, errorId, simularErrors;
 
     (c, e){
         car = c;
-        errorId = e;
+        errorId = e.id;
+        object = e.object;
+    }
+
+    public simular(arg){
+        simularErrors = arg;
     }
 
     public run(){
@@ -38,7 +43,8 @@ class AbstractFixer {
             new Dialog(title, [ '<h6>Available solutions:</h6>', 'Sorry, but none of solutions is available.' ]);
             return;
         }
-        new Dialog(title, [
+
+        var d = new Dialog(title, [
             '<h6>Available solutions:</h6>',
             s.map(lambda (e, i) '<label><input name="solution" data-solution-id="%0" type="radio">%1</label>'(i, e.name)).join('<br>'),
         ], function (){
@@ -48,10 +54,46 @@ class AbstractFixer {
             } catch (err){
                 error(err);
             }
-        }).addButton('Cancel').find('input[name="solution"]')[0].checked = true;
+        });
+
+        if (simularErrors){
+            d.addButton('Apply to all', function (){
+                var id = this.find('input[name="solution"]:checked').data('solution-id');
+                try {
+                    var fns = [ s[id].fn ];
+                    s[id].fn(c);
+
+                    for (var simularError in-array simularErrors){
+                        var fixer = RestorationWizard.createFixer(car, simularError);
+                        var simularSolution = fixer.solutions.filter(lambda arg && arg.name == s[id].name)[0];
+                        if (simularSolution){
+                            fns.push(simularSolution.fn);
+                        }
+                    }
+
+                    var i = 0;
+                    function next(){
+                        if (i < fns.length){
+                            fns[i++](next);
+                        } else {
+                            c();
+                        }
+                    }
+
+                    next();
+                } catch (err){
+                    error(err);
+                }
+
+                console.log(id);
+            });
+        }
+
+        d.addButton('Cancel');
+        d.find('input[name="solution"]')[0].checked = true;
     }
 
-    abstract protected get title,
+    public abstract get title,
         solutions;
 
     protected fixJsonFile(filename, fn){
@@ -76,13 +118,13 @@ class AbstractFixer {
         return false;
     }
 
-    protected static simularFiles(filename, filter = lambda true, deep = true){
+    protected static simularFiles(filename, filter = lambda true, deep = true, rec = false){
         var dir = path.dirname(filename);
         var basename = path.basename(filename);
 
         if (fs.existsSync(dir)){
             if (fs.statSync(dir).isDirectory()){
-                return fs.readdirSync(dir).filter(lambda simularFile(basename, arg) && (arg != basename || !deep)).map(function (e){
+                return fs.readdirSync(dir).filter(lambda simularFile(basename, arg) && (arg != basename || rec)).map(function (e){
                     return dir + '/' + e;
                 }).filter(lambda filter(fs.statSync(arg)));
             } else {
@@ -90,9 +132,9 @@ class AbstractFixer {
             }
         } else if (deep){
             var r = [];
-            var s = simularFiles(dir, lambda arg.isDirectory(), false);
+            var s = simularFiles(dir, lambda arg.isDirectory(), false, true);
             for (var d in-array s){
-                r.push.call(r, simularFiles(d + '/' + basename, filter, false));
+                r.push.call(r, simularFiles(d + '/' + basename, filter, false, true));
             }
             return r;
         } else {
@@ -136,8 +178,8 @@ class AbstractFixer {
         }
     }
 
-    protected static tryToRestoreFile(filename, filter, callback){
-        return simularFiles(filename, filter).map(function (e){
+    protected static tryToRestoreFile(filename, filter, callback, deep){
+        return simularFiles(filename, filter, deep).map(function (e){
             return {
                 name: 'Restore from …%0'(path.normalize(e).slice(AcDir.root.length)),
                 fn: function (c){
@@ -149,6 +191,10 @@ class AbstractFixer {
                 }
             };
         });
+    }
+
+    protected static tryToRestoreFileHere(filename, filter, callback){
+        return tryToRestoreFile(filename, filter, callback, false);
     }
 }
 

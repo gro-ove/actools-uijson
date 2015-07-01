@@ -11,7 +11,7 @@
         <div id="window-border"></div>
         <span id="window-drag"></span>
         <div id="window-buttons">
-            <button onclick="require('nw.gui').Window.get().showDevTools();" style="opacity:0"> </button>
+            <button onclick="if(localStorage.developerMode)require('nw.gui').Window.get().showDevTools();" style="opacity:0"> </button>
             <button id="window-minimize">_</button>
             <button id="window-maximize">□</button>
             <button id="window-close">✖</button>
@@ -25,13 +25,15 @@
             <div id="loading-grab"></div>
         </div>
         <aside>
-            <h4>Total cars: <output id="total-cars"></output>
+            <h4>Cars: <span id="total-cars"></span>
                 <button id="settings-open" title="Open settings"></button>
                 <button id="cars-list-filter-focus" title="Filter cars list"></button>
             </h4>
             <input id="cars-list-filter" type="search" title="Available filters: brand:…, class:…">
             <span id="window-drag-left"></span>
             <div id="cars-list"></div>
+
+            <progress indeterminate></progress>
 
             <footer>
                 <button id="cars-list-open-directory" title="Open cars folder">Folder</button>
@@ -62,12 +64,24 @@
                             <input id="selected-car-brand" class="property-value" autocomplete list="brands" required></input>    
                         </li>
                         <li>
+                            <span class="property">Year</span>
+                            <input id="selected-car-year" class="property-value" placeholder="?"></input>    
+                        </li>
+                        <li>
+                            <span class="property">Country</span>
+                            <input id="selected-car-country" class="property-value" placeholder="?"></input>    
+                        </li>
+                        <li>
                             <span class="property">Class</span>
                             <input id="selected-car-class" class="property-value" autocomplete list="classes" placeholder="?"></input>    
                         </li>
                         <li>
                             <span class="property">Parent</span>
                             <select id="selected-car-parent" class="property-value"></select>
+                        </li>
+                        <li>
+                            <span class="property">Author</span>
+                            <input id="selected-car-author" class="property-value" placeholder="?" readonly></input>    
                         </li>
                         <details>
                             <summary>

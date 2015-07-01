@@ -451,7 +451,7 @@ input,
 button,
 select,
 textarea {
-  font-family: "Roboto", sans-serif;
+  font-family: "Calibri", sans-serif;
 }
 button,
 h1,
@@ -830,7 +830,7 @@ tbody tr:hover {
   position: fixed;
   line-height: 0;
   top: 1px;
-  right: 0;
+  right: 2px;
   height: 18px;
   z-index: 21;
 }
@@ -897,6 +897,9 @@ iframe {
 #drop-target h4:before {
   content: "Drop Here ";
 }
+.apt-nondefmode #apt-mode ~ * {
+  display: none !important;
+}
 footer {
   position: fixed;
   bottom: -100px;
@@ -951,6 +954,16 @@ aside > h4 {
   margin: 0;
   padding: 10px;
 }
+aside progress {
+  position: absolute;
+  bottom: 10px;
+  left: 10px;
+  width: 230px;
+  background: #fff;
+}
+aside progress::-webkit-progress-bar {
+  background: #fff;
+}
 #cars-list {
   position: absolute;
   top: 40px;
@@ -965,6 +978,7 @@ aside > h4 {
   display: block;
   padding: 3px 15px 3px 15px;
   box-sizing: border-box;
+  /*min-height: 19px;*/
 }
 #cars-list span:not(.error) {
   font-weight: 400;
@@ -1078,7 +1092,7 @@ main > div > h4 {
   content: "*";
 }
 #selected-car {
-  width: calc(100vw - 350px);
+  width: calc(100vw - 400px);
 }
 #selected-car-logo {
   float: left;

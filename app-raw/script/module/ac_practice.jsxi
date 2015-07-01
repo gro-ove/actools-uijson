@@ -36,7 +36,7 @@ static class AcPractice {
         if (c.path.indexOf(AcDir.cars)) return;
 
         if (s == null){
-            s = c.skins.selected.id;
+            s = c.selectedSkin.id;
         }
 
         r = r || localStorage.lastTrack || 'spa';

@@ -9,9 +9,8 @@ class Dialog {
     private _closeOnEnter = true;
 
     private _prepareContent(elements){
-        if (typeof elements == 'string'){
-            elements = [ elements ];
-        }
+        if (!elements) elements = []; else
+        if (typeof elements == 'string') elements = [ elements ];
 
         return elements.map(function (e){
             return e ? e[0] == '<' && e[e.length - 1] == '>' ? e : '<p>' + e + '</p>' : '';

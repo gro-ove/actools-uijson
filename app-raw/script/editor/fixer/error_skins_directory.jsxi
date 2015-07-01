@@ -1,18 +1,18 @@
 class MissingSkinsDirectoryFixer extends AbstractFixer {
+    protected reloadAfter(){
+        car.loadSkins();
+    }
+
     createNew(c){
         fs.mkdirSync(car.skinsDir);
         fs.mkdirSync(car.skinsDir + '/default');
         c();
     }
 
-    protected get title 'Skins folder is missing',
+    public get title 'Skins folder is missing',
         solutions [
             { name: 'Create new with empty skin', fn: createNew }
         ].concat(tryToRestoreFile(car.skinsDir, lambda arg.isDirectory()));
-
-    protected reloadAfter(){
-        car.loadSkins();
-    }
 }
 
 class EmptySkinsDirectoryFixer extends AbstractFixer {
@@ -25,7 +25,7 @@ class EmptySkinsDirectoryFixer extends AbstractFixer {
         c();
     }
 
-    protected get title 'Skins folder is empty',
+    public get title 'Skins folder is empty',
         solutions [
             { name: 'Create new empty skin', fn: createNew }
         ];
@@ -43,7 +43,7 @@ class FileSkinsDirectoryFixer extends AbstractFixer {
         c();
     }
 
-    protected get title 'There is a file instead of skins folder',
+    public get title 'There is a file instead of skins folder',
         solutions [
             { name: 'Rename file to “skins.bak” and create new skins directory with empty skin', fn: fix }
         ];

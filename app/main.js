@@ -35,113 +35,114 @@ function Dialog(title, elements, callback, closeCallback){                      
 		if (e.target.tagName == 'DIALOG' && (__that.__Dialog__closeCallback == null || __that.__Dialog__closeCallback !== false && __that.__Dialog__closeCallback() !== false)){
 			__that.close();
 		}
-	}).appendTo('body');                                                           // dialog.jsxi:29
-	this.header = this.el.find('.dialog-header > h4');                             // dialog.jsxi:31
-	this.content = this.el.find('.dialog-content');                                // dialog.jsxi:32
-	this.buttons = this.el.find('.dialog-buttons');                                // dialog.jsxi:33
-	this.__Dialog__callback = callback && callback.bind(this);                     // dialog.jsxi:35
-	this.__Dialog__closeCallback = closeCallback && closeCallback.bind(this);      // dialog.jsxi:36
+	}).appendTo('body');                                                           // dialog.jsxi:28
+	this.header = this.el.find('.dialog-header > h4');                             // dialog.jsxi:30
+	this.content = this.el.find('.dialog-content');                                // dialog.jsxi:31
+	this.buttons = this.el.find('.dialog-buttons');                                // dialog.jsxi:32
+	this.__Dialog__callback = callback && callback.bind(this);                     // dialog.jsxi:34
+	this.__Dialog__closeCallback = closeCallback && closeCallback.bind(this);      // dialog.jsxi:35
 	
 	if (this.__Dialog__callback === false){
-		this.el.find('[data-id="dialog-ok"]').hide();                              // dialog.jsxi:39
+		this.el.find('[data-id="dialog-ok"]').hide();                              // dialog.jsxi:38
 	}
 	
-	this.el.find('[data-id="dialog-ok"]').click(function (e){                      // dialog.jsxi:42
+	this.el.find('[data-id="dialog-ok"]').click(function (e){                      // dialog.jsxi:41
 		if (!__that.__Dialog__callback || __that.__Dialog__callback() !== false){
 			__that.close();
 		}
 	});
-	this.el.find('*').keydown(function (e){                                        // dialog.jsxi:48
-		if (e.keyCode == 13 && __that.__Dialog__closeOnEnter){                     // dialog.jsxi:49
-			var okButton = __that.el[0].querySelector('[data-id="dialog-ok"]');    // dialog.jsxi:50
+	this.el.find('*').keydown(function (e){                                        // dialog.jsxi:47
+		if (e.keyCode == 13 && __that.__Dialog__closeOnEnter){                     // dialog.jsxi:48
+			var okButton = __that.el[0].querySelector('[data-id="dialog-ok"]');    // dialog.jsxi:49
 			
-			if (okButton){                                                         // dialog.jsxi:51
-				__that.el[0].querySelector('[data-id="dialog-ok"]').click();       // dialog.jsxi:52
+			if (okButton){                                                         // dialog.jsxi:50
+				__that.el[0].querySelector('[data-id="dialog-ok"]').click();       // dialog.jsxi:51
 				return false;
 			}
 		}
 	});
 }
 Dialog.prototype.__Dialog__prepareContent = function (elements){                   // dialog.jsxi:11
-	if (typeof elements == 'string'){                                              // dialog.jsxi:12
+	if (!elements)                                                                 // dialog.jsxi:12
+		elements = [];                                                             // dialog.jsxi:12
+	else if (typeof elements == 'string')                                          // dialog.jsxi:13
 		elements = [ elements ];                                                   // dialog.jsxi:13
-	}
-	return elements.map(function (e){                                              // dialog.jsxi:16
+	return elements.map(function (e){                                              // dialog.jsxi:15
 		return e ? e[0] == '<' && e[e.length - 1] == '>' ? e : '<p>' + e + '</p>' : '';
-	}).join('');                                                                   // dialog.jsxi:18
+	}).join('');                                                                   // dialog.jsxi:17
 };
-Dialog.prototype.closeOnEnter = function (v){                                      // dialog.jsxi:59
-	this.__Dialog__closeOnEnter = v;                                               // dialog.jsxi:60
-	return this;                                                                   // dialog.jsxi:61
+Dialog.prototype.closeOnEnter = function (v){                                      // dialog.jsxi:58
+	this.__Dialog__closeOnEnter = v;                                               // dialog.jsxi:59
+	return this;                                                                   // dialog.jsxi:60
 };
-Dialog.prototype.onEnd = function (callback){                                      // dialog.jsxi:64
-	this.__Dialog__endCallback = callback.bind(this);                              // dialog.jsxi:65
-	return this;                                                                   // dialog.jsxi:66
+Dialog.prototype.onEnd = function (callback){                                      // dialog.jsxi:63
+	this.__Dialog__endCallback = callback.bind(this);                              // dialog.jsxi:64
+	return this;                                                                   // dialog.jsxi:65
 };
-Dialog.prototype.setButton = function (a, c){                                      // dialog.jsxi:69
-	this.buttons.find('[data-id="dialog-ok"]').toggle(a != null).text(a);          // dialog.jsxi:70
+Dialog.prototype.setButton = function (a, c){                                      // dialog.jsxi:68
+	this.buttons.find('[data-id="dialog-ok"]').toggle(a != null).text(a);          // dialog.jsxi:69
 	
-	if (c != null){                                                                // dialog.jsxi:71
-		this.__Dialog__callback = c;                                               // dialog.jsxi:71
+	if (c != null){                                                                // dialog.jsxi:70
+		this.__Dialog__callback = c;                                               // dialog.jsxi:70
 	}
-	return this;                                                                   // dialog.jsxi:72
+	return this;                                                                   // dialog.jsxi:71
 };
-Dialog.prototype.setContent = function (content){                                  // dialog.jsxi:75
-	content.html(this.__Dialog__prepareContent(content));                          // dialog.jsxi:76
-	return this;                                                                   // dialog.jsxi:77
+Dialog.prototype.setContent = function (content){                                  // dialog.jsxi:74
+	content.html(this.__Dialog__prepareContent(content));                          // dialog.jsxi:75
+	return this;                                                                   // dialog.jsxi:76
 };
-Dialog.prototype.addButton = function (text, fn){                                  // dialog.jsxi:80
+Dialog.prototype.addButton = function (text, fn){                                  // dialog.jsxi:79
 	var __that = this;
 	
-	fn = fn && fn.bind(this);                                                      // dialog.jsxi:81
+	fn = fn && fn.bind(this);                                                      // dialog.jsxi:80
 	$('<button>' + text + '</button>').appendTo(this.buttons).click(function (e){
-		if (!fn || fn() !== false){                                                // dialog.jsxi:83
+		if (!fn || fn() !== false){                                                // dialog.jsxi:82
 			__that.close();
 		}
 	});
-	return this;                                                                   // dialog.jsxi:87
+	return this;                                                                   // dialog.jsxi:86
 };
-Dialog.prototype.find = function (a){                                              // dialog.jsxi:90
-	return this.el.find(a);                                                        // dialog.jsxi:91
+Dialog.prototype.find = function (a){                                              // dialog.jsxi:89
+	return this.el.find(a);                                                        // dialog.jsxi:90
 };
-Dialog.prototype.close = function (){                                              // dialog.jsxi:94
+Dialog.prototype.close = function (){                                              // dialog.jsxi:93
 	if (this.__Dialog__endCallback)
 		this.__Dialog__endCallback();
 	
-	this.el.remove();                                                              // dialog.jsxi:96
+	this.el.remove();                                                              // dialog.jsxi:95
 };
-Dialog.prototype.addTab = function (title, content, callback, closeCallback){      // dialog.jsxi:99
+Dialog.prototype.addTab = function (title, content, callback, closeCallback){      // dialog.jsxi:98
 	var __that = this;
 	
 	if (!this.tabs){
 		this.tabs = [ this ];
-		this.header.parent().addClass('tabs').click(function (e){                  // dialog.jsxi:102
+		this.header.parent().addClass('tabs').click(function (e){                  // dialog.jsxi:101
 			if (e.target.tagName === 'H4' && !e.target.classList.contains('active')){
 				__that.el.find('.dialog-header h4.active').removeClass('active');
-				e.target.classList.add('active');                                  // dialog.jsxi:105
+				e.target.classList.add('active');                                  // dialog.jsxi:104
 				
 				var i = Array.prototype.indexOf.call(e.target.parentNode.childNodes, e.target);
 				
 				var l = __that.el.find('.dialog-content')[0];
 				
-				l.parentNode.removeChild(l);                                       // dialog.jsxi:109
+				l.parentNode.removeChild(l);                                       // dialog.jsxi:108
 				
 				var l = __that.el.find('.dialog-buttons')[0];
 				
-				l.parentNode.removeChild(l);                                       // dialog.jsxi:111
-				__that.tabs[i].content.appendTo(__that.el.children());             // dialog.jsxi:112
-				__that.tabs[i].buttons.appendTo(__that.el.children());             // dialog.jsxi:113
+				l.parentNode.removeChild(l);                                       // dialog.jsxi:110
+				__that.tabs[i].content.appendTo(__that.el.children());             // dialog.jsxi:111
+				__that.tabs[i].buttons.appendTo(__that.el.children());             // dialog.jsxi:112
 			}
 		});
 	}
 	
 	var n = new Dialog(title, content, callback, closeCallback);
 	
-	this.tabs.push(n);                                                             // dialog.jsxi:119
-	document.body.removeChild(n.el[0]);                                            // dialog.jsxi:121
-	n.header.appendTo(this.header.addClass('active').parent());                    // dialog.jsxi:122
-	n.close = __bindOnce(this, 'close').bind(this);                                // dialog.jsxi:123
-	return n;                                                                      // dialog.jsxi:125
+	this.tabs.push(n);                                                             // dialog.jsxi:118
+	document.body.removeChild(n.el[0]);                                            // dialog.jsxi:120
+	n.header.appendTo(this.header.addClass('active').parent());                    // dialog.jsxi:121
+	n.close = __bindOnce(this, 'close').bind(this);                                // dialog.jsxi:122
+	return n;                                                                      // dialog.jsxi:124
 };
 
 var Mediator = (function (){                                                       // mediator.jsxi:1
@@ -649,7 +650,7 @@ JSON.restoreDamaged = function (data, fields){                                  
 			
 			if (fields[key] === 'number'){                                         // helpers.jsxi:94
 				value = value.replace(/^['"]/, '').replace(/['"]$/, '');           // helpers.jsxi:95
-				value = value.replace(/[oO]/g, '0');                               // helpers.jsxi:97
+				value = value.replace(/[liI]/g, '1').replace(/[oO]/g, '0');        // helpers.jsxi:97
 				result[key] = + value;                                             // helpers.jsxi:98
 				
 				if (Number.isNaN(result[key])){                                    // helpers.jsxi:100
@@ -722,47 +723,53 @@ UiJsonDamaged.parseSkinFile = function (filename){                              
 			drivername: 'string',                                                  // ui_json_damaged.jsxi:5
 			country: 'string',                                                     // ui_json_damaged.jsxi:6
 			team: 'string',                                                        // ui_json_damaged.jsxi:7
-			number: 'number'
+			number: 'number',                                                      // ui_json_damaged.jsxi:8
+			author: 'string',                                                      // ui_json_damaged.jsxi:10
+			version: 'string',                                                     // ui_json_damaged.jsxi:11
+			url: 'string'
 		});
-	return result;                                                                 // ui_json_damaged.jsxi:11
+	return result;                                                                 // ui_json_damaged.jsxi:15
 };
-UiJsonDamaged.parseCarFile = function (filename){                                  // ui_json_damaged.jsxi:14
-	var result = JSON.restoreDamaged(fs.readFileSync(filename),                    // ui_json_damaged.jsxi:15
+UiJsonDamaged.parseCarFile = function (filename){                                  // ui_json_damaged.jsxi:18
+	var result = JSON.restoreDamaged(fs.readFileSync(filename),                    // ui_json_damaged.jsxi:19
 		{
-			name: 'string',                                                        // ui_json_damaged.jsxi:16
-			brand: 'string',                                                       // ui_json_damaged.jsxi:17
-			parent: 'string',                                                      // ui_json_damaged.jsxi:18
-			description: 'multiline',                                              // ui_json_damaged.jsxi:19
-			class: 'string',                                                       // ui_json_damaged.jsxi:20
-			tags: 'array',                                                         // ui_json_damaged.jsxi:21
-			year: 'number',                                                        // ui_json_damaged.jsxi:22
-			country: 'string',                                                     // ui_json_damaged.jsxi:23
-			bhp: 'string',                                                         // ui_json_damaged.jsxi:24
-			torque: 'string',                                                      // ui_json_damaged.jsxi:25
-			weight: 'string',                                                      // ui_json_damaged.jsxi:26
-			topspeed: 'string',                                                    // ui_json_damaged.jsxi:27
-			acceleration: 'string',                                                // ui_json_damaged.jsxi:28
-			pwratio: 'string',                                                     // ui_json_damaged.jsxi:29
-			range: 'number',                                                       // ui_json_damaged.jsxi:30
-			torqueCurve: 'pairsArray',                                             // ui_json_damaged.jsxi:31
-			powerCurve: 'pairsArray'
+			name: 'string',                                                        // ui_json_damaged.jsxi:20
+			brand: 'string',                                                       // ui_json_damaged.jsxi:21
+			parent: 'string',                                                      // ui_json_damaged.jsxi:22
+			description: 'multiline',                                              // ui_json_damaged.jsxi:23
+			class: 'string',                                                       // ui_json_damaged.jsxi:24
+			tags: 'array',                                                         // ui_json_damaged.jsxi:25
+			bhp: 'string',                                                         // ui_json_damaged.jsxi:26
+			torque: 'string',                                                      // ui_json_damaged.jsxi:27
+			weight: 'string',                                                      // ui_json_damaged.jsxi:28
+			topspeed: 'string',                                                    // ui_json_damaged.jsxi:29
+			acceleration: 'string',                                                // ui_json_damaged.jsxi:30
+			pwratio: 'string',                                                     // ui_json_damaged.jsxi:31
+			range: 'number',                                                       // ui_json_damaged.jsxi:32
+			torqueCurve: 'pairsArray',                                             // ui_json_damaged.jsxi:33
+			powerCurve: 'pairsArray',                                              // ui_json_damaged.jsxi:34
+			year: 'number',                                                        // ui_json_damaged.jsxi:36
+			country: 'string',                                                     // ui_json_damaged.jsxi:37
+			author: 'string',                                                      // ui_json_damaged.jsxi:39
+			version: 'string',                                                     // ui_json_damaged.jsxi:40
+			url: 'string'
 		});
 	
-	result.specs = {};                                                             // ui_json_damaged.jsxi:35
+	result.specs = {};                                                             // ui_json_damaged.jsxi:44
 	[
-		'bhp',                                                                     // ui_json_damaged.jsxi:37
-		'torque',                                                                  // ui_json_damaged.jsxi:37
-		'weight',                                                                  // ui_json_damaged.jsxi:37
-		'topspeed',                                                                // ui_json_damaged.jsxi:37
-		'acceleration',                                                            // ui_json_damaged.jsxi:37
+		'bhp',                                                                     // ui_json_damaged.jsxi:46
+		'torque',                                                                  // ui_json_damaged.jsxi:46
+		'weight',                                                                  // ui_json_damaged.jsxi:46
+		'topspeed',                                                                // ui_json_damaged.jsxi:46
+		'acceleration',                                                            // ui_json_damaged.jsxi:46
 		'pwratio'
-	].forEach(function (arg){                                                      // ui_json_damaged.jsxi:37
-		if (result.hasOwnProperty(arg)){                                           // ui_json_damaged.jsxi:38
-			result.specs[arg] = result[arg];                                       // ui_json_damaged.jsxi:39
-			delete result[arg];                                                    // ui_json_damaged.jsxi:40
+	].forEach(function (arg){                                                      // ui_json_damaged.jsxi:46
+		if (result.hasOwnProperty(arg)){                                           // ui_json_damaged.jsxi:47
+			result.specs[arg] = result[arg];                                       // ui_json_damaged.jsxi:48
+			delete result[arg];                                                    // ui_json_damaged.jsxi:49
 		}
 	});
-	return result;                                                                 // ui_json_damaged.jsxi:44
+	return result;                                                                 // ui_json_damaged.jsxi:53
 };
 
 /* Class "AcDir" declaration */
@@ -984,7 +991,7 @@ var AcPractice = (function (){                                                  
 			return;
 		
 		if (s == null){                                                            // ac_practice.jsxi:38
-			s = c.skins.selected.id;                                               // ac_practice.jsxi:39
+			s = c.selectedSkin.id;                                                 // ac_practice.jsxi:39
 		}
 		
 		r = r || localStorage.lastTrack || 'spa';                                  // ac_practice.jsxi:42
@@ -1036,238 +1043,254 @@ var AcPractice = (function (){                                                  
 /* Class "AcShowroom" declaration */
 var AcShowroom = (function (){                                                     // ac_showroom.jsxi:1
 	var AcShowroom = function (){}, 
-		_showrooms = null,                                                         // ac_showroom.jsxi:2
-		_blackShowroom = 'studio_black',                                           // ac_showroom.jsxi:4
+		_showrooms = null,                                                         // ac_showroom.jsxi:10
+		_blackShowroom = 'studio_black',                                           // ac_showroom.jsxi:12
 		_blackShowroomUrl = 'http://www.racedepartment.com/downloads/studio-black-showroom.4353/';
 	
-	AcShowroom.load = function (){                                                 // ac_showroom.jsxi:15
-		_showrooms = fs.readdirSync(AcDir.showrooms).map(function (e){             // ac_showroom.jsxi:16
+	AcShowroom.modes = [                                                           // ac_showroom.jsxi:2
+		{ id: 'default', name: 'Regular Showroom (Recommended)' },                 // ac_showroom.jsxi:2
+		{ id: 'kunos', name: 'Kunos Style (Dark Room)' }, 
+		{ id: 'seatleon', name: 'Seat Leon Eurocup Style' }, 
+		{ id: 'gt5', name: 'GT5-style' }, 
+		{ id: 'gt6', name: 'GT6-style' }
+	];
+	AcShowroom.load = function (){                                                 // ac_showroom.jsxi:23
+		_showrooms = fs.readdirSync(AcDir.showrooms).map(function (e){             // ac_showroom.jsxi:24
 			var p = path.join(AcDir.showrooms, e);
 			
 			var d = null;
 			
 			var j = path.join(p, 'ui', 'ui_showroom.json');
 			
-			if (fs.existsSync(j)){                                                 // ac_showroom.jsxi:21
+			if (fs.existsSync(j)){                                                 // ac_showroom.jsxi:29
 				try {
-					d = JSON.parse(fs.readFileSync(j));                            // ac_showroom.jsxi:23
+					d = JSON.parse(fs.readFileSync(j));                            // ac_showroom.jsxi:31
 				} catch (e){} 
 			}
 			return { id: e, data: d, path: p, json: j };
-		}).filter(function (arg){                                                  // ac_showroom.jsxi:33
-			return arg;                                                            // ac_showroom.jsxi:33
+		}).filter(function (arg){                                                  // ac_showroom.jsxi:41
+			return arg;                                                            // ac_showroom.jsxi:41
 		});
 	};
-	AcShowroom.exists = function (id){                                             // ac_showroom.jsxi:36
-		return fs.existsSync(AcDir.showrooms + '/' + id);                          // ac_showroom.jsxi:37
+	AcShowroom.exists = function (id){                                             // ac_showroom.jsxi:44
+		return fs.existsSync(AcDir.showrooms + '/' + id);                          // ac_showroom.jsxi:45
 	};
 	
-	function handleError(err){                                                     // ac_showroom.jsxi:40
+	function handleError(err){                                                     // ac_showroom.jsxi:48
 		try {
 			var logFile = fs.readFileSync(AcTools.Utils.FileUtils.GetLogFile()).toString();
 			
 			if (/\bCOULD NOT FIND SUSPENSION OBJECT SUSP_[LR][FR]\b/.test(logFile)){
 				ErrorHandler.handled('Car doesn\'t have a proper suspension. \
                     You could try to use option “Fix SUSP_XX error” in additional edit tools menu.', 
-					err);                                                          // ac_showroom.jsxi:45
+					err);                                                          // ac_showroom.jsxi:53
 				return true;
 			}
 		} catch (e){} 
+		
+		if (err && err.message === 'Process exited'){                              // ac_showroom.jsxi:58
+			ErrorHandler.handled('Showroom was terminated too soon.');             // ac_showroom.jsxi:59
+			return true;
+		}
 		return false;
 	}
 	
-	AcShowroom.start = function (c, s, room){                                      // ac_showroom.jsxi:56
-		if (c.path.indexOf(AcDir.cars))                                            // ac_showroom.jsxi:57
+	AcShowroom.start = function (c, s, room){                                      // ac_showroom.jsxi:69
+		if (c.path.indexOf(AcDir.cars))                                            // ac_showroom.jsxi:70
 			return;
 		
-		if (s == null){                                                            // ac_showroom.jsxi:59
-			s = c.skins.selected.id;                                               // ac_showroom.jsxi:60
+		if (s == null){                                                            // ac_showroom.jsxi:72
+			s = c.selectedSkin.id;                                                 // ac_showroom.jsxi:73
 		}
 		
-		room = room || AcShowroom.__AcShowroom_lastShowroom;                       // ac_showroom.jsxi:63
+		room = room || AcShowroom.__AcShowroom_lastShowroom;                       // ac_showroom.jsxi:76
 		
 		var filter = AcShowroom.__AcShowroom_lastShowroomFilter || null;
 		
 		if (!AcShowroom.exists(room)){
-			ErrorHandler.handled('Showroom “' + room + '” is missing.');           // ac_showroom.jsxi:67
+			ErrorHandler.handled('Showroom “' + room + '” is missing.');           // ac_showroom.jsxi:80
 			return;
 		}
 		
-		if (filter && !AcFilters.exists(filter)){                                  // ac_showroom.jsxi:71
-			ErrorHandler.handled('Filter “' + filter + '” is missing.');           // ac_showroom.jsxi:72
+		if (filter && !AcFilters.exists(filter)){                                  // ac_showroom.jsxi:84
+			ErrorHandler.handled('Filter “' + filter + '” is missing.');           // ac_showroom.jsxi:85
 			return;
 		}
 		
-		AcTools;                                                                   // ac_showroom.jsxi:76
+		AcTools;                                                                   // ac_showroom.jsxi:89
 		
 		try {
-			AcTools.Processes.Showroom.Start(AcDir.root, c.id, s, room, filter);   // ac_showroom.jsxi:78
-		} catch (err){                                                             // ac_showroom.jsxi:79
+			AcTools.Processes.Showroom.Start(AcDir.root, c.id, s, room, filter);   // ac_showroom.jsxi:91
+		} catch (err){                                                             // ac_showroom.jsxi:92
 			ErrorHandler.handled('Cannot start showroom. Maybe the car is broken.', err);
 			return;
 		} 
 		
-		handleError();                                                             // ac_showroom.jsxi:84
+		handleError();                                                             // ac_showroom.jsxi:97
 	};
-	AcShowroom.select = function (c, s){                                           // ac_showroom.jsxi:87
-		var d = new Dialog('Showroom',                                             // ac_showroom.jsxi:88
+	AcShowroom.select = function (c, s){                                           // ac_showroom.jsxi:100
+		var d = new Dialog('Showroom',                                             // ac_showroom.jsxi:101
 			[
-				'<h6>Select showroom</h6>',                                        // ac_showroom.jsxi:89
+				'<h6>Select showroom</h6>',                                        // ac_showroom.jsxi:102
 				'<select id="showroom-select-showroom">{0}</select>'.format(AcShowroom.list.map(function (e){
 					return '<option value="{0}">{1}</option>'.format(e.id, e.data ? e.data.name : e.id);
-				}).join('')),                                                      // ac_showroom.jsxi:92
-				'<h6>Select filter</h6>',                                          // ac_showroom.jsxi:93
+				}).join('')),                                                      // ac_showroom.jsxi:105
+				'<h6>Select filter</h6>',                                          // ac_showroom.jsxi:106
 				'<select id="showroom-select-filter"><option value="">Don\'t change</option>{0}</select>'.format(AcFilters.list.map(function (e){
 					return '<option value="{0}">{1}</option>'.format(e.id, e.id);
 				}).join(''))
 			], 
-			function (){                                                           // ac_showroom.jsxi:97
+			function (){                                                           // ac_showroom.jsxi:110
 				AcShowroom.start(c, s);
-			}).addButton('Reload List',                                            // ac_showroom.jsxi:99
-			function (){                                                           // ac_showroom.jsxi:99
-				setTimeout(function (){                                            // ac_showroom.jsxi:100
+			}).addButton('Reload List',                                            // ac_showroom.jsxi:112
+			function (){                                                           // ac_showroom.jsxi:112
+				setTimeout(function (){                                            // ac_showroom.jsxi:113
 					AcShowroom.load();
-					AcFilters.load();                                              // ac_showroom.jsxi:102
+					AcFilters.load();                                              // ac_showroom.jsxi:115
 					AcShowroom.select(c, s);
 				});
 			});
 		
 		d.find('#showroom-select-showroom').val(AcShowroom.__AcShowroom_lastShowroom).change(function (){
-			localStorage.lastShowroom = this.value;                                // ac_showroom.jsxi:107
+			localStorage.lastShowroom = this.value;                                // ac_showroom.jsxi:120
 		});
 		d.find('#showroom-select-filter').val(AcShowroom.__AcShowroom_lastShowroomFilter).change(function (){
-			localStorage.lastShowroomFilter = this.value;                          // ac_showroom.jsxi:110
+			localStorage.lastShowroomFilter = this.value;                          // ac_showroom.jsxi:123
 		});
 	};
 	
-	function shotOutputPreview(car, output, callback){                             // ac_showroom.jsxi:114
-		var d = new Dialog('Update Previews',                                      // ac_showroom.jsxi:116
+	function shotOutputPreview(car, output, callback){                             // ac_showroom.jsxi:127
+		var d = new Dialog('Update Previews',                                      // ac_showroom.jsxi:129
 			[
 				'<div class="left"><h6>Current</h6><img id="current-preview"></div>', 
 				'<div class="right"><h6>New</h6><img id="new-preview"></div>'
 			], 
-			function (){                                                           // ac_showroom.jsxi:119
-				callback();                                                        // ac_showroom.jsxi:120
+			function (){                                                           // ac_showroom.jsxi:132
+				callback();                                                        // ac_showroom.jsxi:133
 			}, 
-			false).setButton('Apply').addButton('Cancel');                         // ac_showroom.jsxi:121
+			false).setButton('Apply').addButton('Cancel');                         // ac_showroom.jsxi:134
 		
 		var t = $('<div>' + '<button data-action="prev" id="button-prev" disabled>←</button> ' + '<button data-action="next" id="button-next">→</button>' + '</div>').insertBefore(d.header);
 		
-		t.find('#button-prev').click(function (){                                  // ac_showroom.jsxi:128
-			pos --;                                                                // ac_showroom.jsxi:129
-			out();                                                                 // ac_showroom.jsxi:130
+		t.find('#button-prev').click(function (){                                  // ac_showroom.jsxi:141
+			pos --;                                                                // ac_showroom.jsxi:142
+			out();                                                                 // ac_showroom.jsxi:143
 		});
-		t.find('#button-next').click(function (){                                  // ac_showroom.jsxi:133
-			pos ++;                                                                // ac_showroom.jsxi:134
-			out();                                                                 // ac_showroom.jsxi:135
+		t.find('#button-next').click(function (){                                  // ac_showroom.jsxi:146
+			pos ++;                                                                // ac_showroom.jsxi:147
+			out();                                                                 // ac_showroom.jsxi:148
 		});
 		d.content.css({ maxWidth: 'calc(100vw - 100px)', paddingBottom: '10px' }).find('img').css({ width: '100%', verticalAlign: 'top' });
 		
 		var pos = 0;
 		
-		function out(){                                                            // ac_showroom.jsxi:147
-			t.find('#button-prev').attr('disabled', pos > 0 ? null : true);        // ac_showroom.jsxi:148
+		function out(){                                                            // ac_showroom.jsxi:160
+			t.find('#button-prev').attr('disabled', pos > 0 ? null : true);        // ac_showroom.jsxi:161
 			t.find('#button-next').attr('disabled', pos < car.skins.length - 1 ? null : true);
 			d.content.find('#current-preview').prop('src', car.skins[pos].preview.cssUrl());
 			d.content.find('#new-preview').prop('src', (output + '/' + car.skins[pos].id + '.jpg').cssUrl());
 		}
 		
-		out();                                                                     // ac_showroom.jsxi:154
+		out();                                                                     // ac_showroom.jsxi:167
 	}
 	
-	AcShowroom.shot = function (c, m){                                             // ac_showroom.jsxi:157
-		if (c.path.indexOf(AcDir.cars))                                            // ac_showroom.jsxi:158
+	AcShowroom.shot = function (c, m){                                             // ac_showroom.jsxi:170
+		if (c.path.indexOf(AcDir.cars))                                            // ac_showroom.jsxi:171
 			return;
 		
-		var showroom = Settings.get('aptShowroom') || _blackShowroom;
+		var mode = Settings.get('aptMode');
 		
-		var x = - Settings.get('aptCameraX');
-		
-		var y = - Settings.get('aptCameraY');
-		
-		var distance = - Settings.get('aptCameraDistance');
-		
-		var filter = Settings.get('aptFilter') || null;
-		
-		var disableSweetFx = !!Settings.get('aptDisableSweetFx');
-		
-		var delays = !!Settings.get('aptIncreaseDelays');
-		
-		if (Number.isNaN(x))                                                       // ac_showroom.jsxi:168
-			x = Settings.defaults.aptCameraX;                                      // ac_showroom.jsxi:168
-		
-		if (Number.isNaN(y))                                                       // ac_showroom.jsxi:169
-			y = Settings.defaults.aptCameraY;                                      // ac_showroom.jsxi:169
-		
-		if (Number.isNaN(distance))                                                // ac_showroom.jsxi:170
-			distance = Settings.defaults.aptCameraY;                               // ac_showroom.jsxi:170
-		
-		showroomTest();                                                            // ac_showroom.jsxi:172
-		
-		function showroomTest(){                                                   // ac_showroom.jsxi:174
-			function blackShowroomTest(){                                          // ac_showroom.jsxi:175
-				return fs.existsSync(AcTools.Utils.FileUtils.GetShowroomFolder(AcDir.root, showroom));
-			}
+		if (mode === 'default'){                                                   // ac_showroom.jsxi:175
+			var showroom = Settings.get('aptShowroom') || _blackShowroom;
 			
-			if (showroom == _blackShowroom && !blackShowroomTest()){               // ac_showroom.jsxi:179
-				new Dialog('One More Thing',                                       // ac_showroom.jsxi:180
-					'Please, install <a href="#" onclick="Shell.openItem(\'' + _blackShowroomUrl + '\')">Black Showroom</a> first.', 
-					function (){                                                   // ac_showroom.jsxi:182
-						Shell.openItem(_blackShowroomUrl);                         // ac_showroom.jsxi:183
-						return false;
-					}).setButton('From Here').addButton('Right Here',              // ac_showroom.jsxi:185
-					function (){                                                   // ac_showroom.jsxi:185
-						Shell.openItem(AcTools.Utils.FileUtils.GetShowroomsFolder(AcDir.root));
-						return false;
-					}).addButton('Done',                                           // ac_showroom.jsxi:188
-					function (){                                                   // ac_showroom.jsxi:188
-						if (blackShowroomTest()){                                  // ac_showroom.jsxi:189
-							setTimeout(proceed);                                   // ac_showroom.jsxi:190
-						} else {
-							new Dialog('Black Showroom Installation',              // ac_showroom.jsxi:192
-								'Showroom is still missing. Are you sure?');       // ac_showroom.jsxi:192
-							this.buttons.find('button:last-child').text('Really Done');
+			var x = - Settings.get('aptCameraX');
+			
+			var y = - Settings.get('aptCameraY');
+			
+			var distance = - Settings.get('aptCameraDistance');
+			
+			var filter = Settings.get('aptFilter') || null;
+			
+			var disableSweetFx = !!Settings.get('aptDisableSweetFx');
+			
+			var delays = !!Settings.get('aptIncreaseDelays');
+			
+			if (Number.isNaN(x))                                                   // ac_showroom.jsxi:184
+				x = Settings.defaults.aptCameraX;                                  // ac_showroom.jsxi:184
+			
+			if (Number.isNaN(y))                                                   // ac_showroom.jsxi:185
+				y = Settings.defaults.aptCameraY;                                  // ac_showroom.jsxi:185
+			
+			if (Number.isNaN(distance))                                            // ac_showroom.jsxi:186
+				distance = Settings.defaults.aptCameraY;                           // ac_showroom.jsxi:186
+			
+			showroomTest();                                                        // ac_showroom.jsxi:188
+			
+			function showroomTest(){                                               // ac_showroom.jsxi:189
+				function blackShowroomTest(){                                      // ac_showroom.jsxi:190
+					return fs.existsSync(AcTools.Utils.FileUtils.GetShowroomFolder(AcDir.root, showroom));
+				}
+				
+				if (showroom == _blackShowroom && !blackShowroomTest()){           // ac_showroom.jsxi:194
+					new Dialog('One More Thing',                                   // ac_showroom.jsxi:195
+						'Please, install <a href="#" onclick="Shell.openItem(\'' + _blackShowroomUrl + '\')">Black Showroom</a> first.', 
+						function (){                                               // ac_showroom.jsxi:197
+							Shell.openItem(_blackShowroomUrl);                     // ac_showroom.jsxi:198
 							return false;
-						}
-					});
-			} else {
-				proceed();                                                         // ac_showroom.jsxi:198
+						}).setButton('From Here').addButton('Right Here',          // ac_showroom.jsxi:200
+						function (){                                               // ac_showroom.jsxi:200
+							Shell.openItem(AcTools.Utils.FileUtils.GetShowroomsFolder(AcDir.root));
+							return false;
+						}).addButton('Done',                                       // ac_showroom.jsxi:203
+						function (){                                               // ac_showroom.jsxi:203
+							if (blackShowroomTest()){                              // ac_showroom.jsxi:204
+								setTimeout(proceed);                               // ac_showroom.jsxi:205
+							} else {
+								new Dialog('Black Showroom Installation',          // ac_showroom.jsxi:207
+									'Showroom is still missing. Are you sure?');   // ac_showroom.jsxi:207
+								this.buttons.find('button:last-child').text('Really Done');
+								return false;
+							}
+						});
+				} else {
+					proceed();                                                     // ac_showroom.jsxi:213
+				}
 			}
+		} else {
+			proceed();                                                             // ac_showroom.jsxi:217
 		}
 		
-		function proceed(){                                                        // ac_showroom.jsxi:202
+		function proceed(){                                                        // ac_showroom.jsxi:220
 			var output;
 			
 			try {
-				output = AcTools.Processes.Showroom.ShotWrapper(AcDir.root,        // ac_showroom.jsxi:205
-					c.id,                                                          // ac_showroom.jsxi:205
-					showroom,                                                      // ac_showroom.jsxi:205
-					!!m,                                                           // ac_showroom.jsxi:205
-					x,                                                             // ac_showroom.jsxi:205
-					y,                                                             // ac_showroom.jsxi:205
-					distance,                                                      // ac_showroom.jsxi:205
-					filter,                                                        // ac_showroom.jsxi:205
-					disableSweetFx,                                                // ac_showroom.jsxi:205
-					delays);                                                       // ac_showroom.jsxi:205
-			} catch (err){                                                         // ac_showroom.jsxi:206
-				if (!handleError(err)){                                            // ac_showroom.jsxi:207
+				if (mode === 'default'){                                           // ac_showroom.jsxi:223
+					output = AcTools.Processes.Showroom.Shot(AcDir.root,           // ac_showroom.jsxi:224
+						c.id,                                                      // ac_showroom.jsxi:224
+						showroom,                                                  // ac_showroom.jsxi:224
+						!!m,                                                       // ac_showroom.jsxi:224
+						x,                                                         // ac_showroom.jsxi:224
+						y,                                                         // ac_showroom.jsxi:224
+						distance,                                                  // ac_showroom.jsxi:224
+						filter,                                                    // ac_showroom.jsxi:224
+						disableSweetFx,                                            // ac_showroom.jsxi:224
+						delays);                                                   // ac_showroom.jsxi:224
+				} else {
+					output = AcTools.Utils.Kn5RenderWrapper.Shot(c.path, mode);    // ac_showroom.jsxi:226
+				}
+			} catch (err){                                                         // ac_showroom.jsxi:228
+				if (!handleError(err)){                                            // ac_showroom.jsxi:229
 					ErrorHandler.handled('Cannot start showroom. Maybe the car is broken.', err);
 				}
+				return;
 			} 
 			
-			if (!fs.existsSync(output)){                                           // ac_showroom.jsxi:212
-				if (!handleError()){                                               // ac_showroom.jsxi:213
-					ErrorHandler.handled('Cannot get previews.', output);          // ac_showroom.jsxi:214
-				}
-				return;
-			}
-			
-			shotOutputPreview(c,                                                   // ac_showroom.jsxi:219
-				output,                                                            // ac_showroom.jsxi:219
-				function (){                                                       // ac_showroom.jsxi:219
+			shotOutputPreview(c,                                                   // ac_showroom.jsxi:236
+				output,                                                            // ac_showroom.jsxi:236
+				function (){                                                       // ac_showroom.jsxi:236
 					AcTools.Utils.ImageUtils.ApplyPreviews(AcDir.root, c.id, output, Settings.get('aptResize'));
-					c.updateSkins();                                               // ac_showroom.jsxi:221
-					fs.rmdirSync(output);                                          // ac_showroom.jsxi:222
+					c.updateSkins();                                               // ac_showroom.jsxi:238
+					fs.rmdirSync(output);                                          // ac_showroom.jsxi:239
 				});
 		}
 	};
@@ -1275,24 +1298,24 @@ var AcShowroom = (function (){                                                  
 		'list', 
 		{
 			get: (function (){
-				if (!_showrooms){                                                  // ac_showroom.jsxi:8
+				if (!_showrooms){                                                  // ac_showroom.jsxi:16
 					AcShowroom.load();
 				}
-				return _showrooms;                                                 // ac_showroom.jsxi:12
+				return _showrooms;                                                 // ac_showroom.jsxi:20
 			})
 		});
 	Object.defineProperty(AcShowroom,                                              // ac_showroom.jsxi:1
 		'__AcShowroom_lastShowroom', 
 		{
 			get: (function (){
-				return localStorage.lastShowroom || 'showroom';                    // ac_showroom.jsxi:53
+				return localStorage.lastShowroom || 'showroom';                    // ac_showroom.jsxi:66
 			})
 		});
 	Object.defineProperty(AcShowroom,                                              // ac_showroom.jsxi:1
 		'__AcShowroom_lastShowroomFilter', 
 		{
 			get: (function (){
-				return localStorage.lastShowroomFilter || '';                      // ac_showroom.jsxi:54
+				return localStorage.lastShowroomFilter || '';                      // ac_showroom.jsxi:67
 			})
 		});
 	return AcShowroom;
@@ -1301,7 +1324,10 @@ var AcShowroom = (function (){                                                  
 __defineGetter__('AcTools',                                                        // ac_tools.jsxi:1
 	function (){                                                                   // ac_tools.jsxi:1
 		try {
-			return AcTools = require('clr').init({ assemblies: [ 'native/AcTools.dll' ], global: false }).AcTools;
+			return AcTools = require('clr').init({                                 // ac_tools.jsxi:3
+				assemblies: [ 'native/AcTools.dll', 'native/AcToolsKn5Render.dll' ], 
+				global: false
+			}).AcTools;                                                            // ac_tools.jsxi:6
 		} catch (err){                                                             // ac_tools.jsxi:7
 			throw new Error('Cannot load native module. Make sure you have .NET Framework 4.5 and Visual C++ Redistributable 2013 (x86) installed.');
 		} 
@@ -1582,74 +1608,95 @@ var Cars = (function (){                                                        
 		}).filter(function (e){                                                    // cars.jsxi:73
 			return e;                                                              // cars.jsxi:74
 		});
-		mediator.dispatch('scan:list', _list);                                     // cars.jsxi:77
-		asyncLoad();                                                               // cars.jsxi:78
+		asyncLoad();                                                               // cars.jsxi:77
 	};
 	
-	function asyncLoad(){                                                          // cars.jsxi:81
-		var a = _list, i = 0;
+	function asyncLoad(){                                                          // cars.jsxi:80
+		var a = _list,                                                             // cars.jsxi:81
+			i = 0,                                                                 // cars.jsxi:81
+			step = function (arg){                                                 // cars.jsxi:82
+				if (a != _list){                                                   // cars.jsxi:83
+					mediator.dispatch('scan:interrupt', a);                        // cars.jsxi:84
+				} else if (i >= a.length){                                         // cars.jsxi:85
+					mediator.dispatch('scan:ready', a);                            // cars.jsxi:86
+					lasyAsyncLoad();                                               // cars.jsxi:87
+				} else {
+					mediator.dispatch('scan:progress', i, a.length);               // cars.jsxi:89
+					a[i ++].loadData(step);                                        // cars.jsxi:90
+				}
+			};
 		
-		step();                                                                    // cars.jsxi:83
-		
-		function step(){                                                           // cars.jsxi:85
-			if (a != _list){                                                       // cars.jsxi:86
-				mediator.dispatch('scan:interrupt', a);                            // cars.jsxi:87
-			} else if (i >= a.length){                                             // cars.jsxi:88
-				mediator.dispatch('scan:ready', a);                                // cars.jsxi:89
-			} else {
-				mediator.dispatch('scan:progress', i, a.length);                   // cars.jsxi:91
-				a[i ++].load(step);                                                // cars.jsxi:92
-			}
-		}
+		mediator.dispatch('scan:list', a);                                         // cars.jsxi:94
+		step();                                                                    // cars.jsxi:95
 	}
 	
-	Cars.toggle = function (car, state){                                           // cars.jsxi:97
-		car.toggle(state);                                                         // cars.jsxi:98
+	function lasyAsyncLoad(){                                                      // cars.jsxi:98
+		var a = _list,                                                             // cars.jsxi:99
+			i = 0,                                                                 // cars.jsxi:99
+			step = setTimeout.bind(window,                                         // cars.jsxi:100
+				function (arg){                                                    // cars.jsxi:100
+					if (a != _list){                                               // cars.jsxi:101
+						mediator.dispatch('lazyscan:interrupt', a);                // cars.jsxi:102
+					} else if (i >= a.length){                                     // cars.jsxi:103
+						mediator.dispatch('lazyscan:ready', a);                    // cars.jsxi:104
+					} else {
+						mediator.dispatch('lazyscan:progress', i, a.length);       // cars.jsxi:106
+						a[i ++].loadEnsure(step);                                  // cars.jsxi:107
+					}
+				}, 
+				20);
+		
+		mediator.dispatch('lazyscan:start', a);                                    // cars.jsxi:111
+		step();                                                                    // cars.jsxi:112
+	}
+	
+	Cars.toggle = function (car, state){                                           // cars.jsxi:115
+		car.toggle(state);                                                         // cars.jsxi:116
 	};
-	Cars.changeData = function (car, key, value){                                  // cars.jsxi:101
-		car.changeData(key, value);                                                // cars.jsxi:102
+	Cars.changeData = function (car, key, value){                                  // cars.jsxi:119
+		car.changeData(key, value);                                                // cars.jsxi:120
 	};
-	Cars.changeDataSpecs = function (car, key, value){                             // cars.jsxi:105
-		car.changeDataSpecs(key, value);                                           // cars.jsxi:106
+	Cars.changeDataSpecs = function (car, key, value){                             // cars.jsxi:123
+		car.changeDataSpecs(key, value);                                           // cars.jsxi:124
 	};
-	Cars.changeParent = function (car, parentId){                                  // cars.jsxi:109
-		car.changeParent(parentId);                                                // cars.jsxi:110
+	Cars.changeParent = function (car, parentId){                                  // cars.jsxi:127
+		car.changeParent(parentId);                                                // cars.jsxi:128
 	};
-	Cars.selectSkin = function (car, skinId){                                      // cars.jsxi:113
-		car.selectSkin(skinId);                                                    // cars.jsxi:114
+	Cars.selectSkin = function (car, skinId){                                      // cars.jsxi:131
+		car.selectSkin(skinId);                                                    // cars.jsxi:132
 	};
-	Cars.updateSkins = function (car){                                             // cars.jsxi:117
-		car.updateSkins();                                                         // cars.jsxi:118
+	Cars.updateSkins = function (car){                                             // cars.jsxi:135
+		car.updateSkins();                                                         // cars.jsxi:136
 	};
-	Cars.updateUpgrade = function (car){                                           // cars.jsxi:121
-		car.updateUpgrade();                                                       // cars.jsxi:122
+	Cars.updateUpgrade = function (car){                                           // cars.jsxi:139
+		car.updateUpgrade();                                                       // cars.jsxi:140
 	};
-	Cars.reload = function (car){                                                  // cars.jsxi:125
-		car.load();                                                                // cars.jsxi:126
+	Cars.reload = function (car){                                                  // cars.jsxi:143
+		car.load();                                                                // cars.jsxi:144
 	};
-	Cars.reloadAll = function (){                                                  // cars.jsxi:129
+	Cars.reloadAll = function (){                                                  // cars.jsxi:147
 		Cars.scan();
 	};
-	Cars.save = function (car){                                                    // cars.jsxi:133
-		car.save();                                                                // cars.jsxi:134
+	Cars.save = function (car){                                                    // cars.jsxi:151
+		car.save();                                                                // cars.jsxi:152
 	};
-	Cars.saveAll = function (){                                                    // cars.jsxi:137
-		_list.forEach(function (car){                                              // cars.jsxi:138
-			if (car.changed){                                                      // cars.jsxi:139
-				car.save();                                                        // cars.jsxi:140
+	Cars.saveAll = function (){                                                    // cars.jsxi:155
+		_list.forEach(function (car){                                              // cars.jsxi:156
+			if (car.changed){                                                      // cars.jsxi:157
+				car.save();                                                        // cars.jsxi:158
 			}
 		});
 	};
-	Cars.remove = function (car){                                                  // cars.jsxi:145
-		for (var i = 0; i < _list.length; i ++){                                   // cars.jsxi:146
+	Cars.remove = function (car){                                                  // cars.jsxi:163
+		for (var i = 0; i < _list.length; i ++){                                   // cars.jsxi:164
 			var c = _list[i];
 			
-			if (c === car){                                                        // cars.jsxi:147
-				AcTools.Utils.FileUtils.Recycle(car.path);                         // cars.jsxi:148
+			if (c === car){                                                        // cars.jsxi:165
+				AcTools.Utils.FileUtils.Recycle(car.path);                         // cars.jsxi:166
 				
-				if (car.parent){                                                   // cars.jsxi:150
+				if (car.parent){                                                   // cars.jsxi:168
 					car.parent.children.splice(car.parent.children.indexOf(car), 1);
-					mediator.dispatch('update.car.children', car.parent);          // cars.jsxi:152
+					mediator.dispatch('update.car.children', car.parent);          // cars.jsxi:170
 				}
 				
 				{
@@ -1658,18 +1705,30 @@ var Cars = (function (){                                                        
 					for (var __0 = 0; __0 < __1.length; __0 ++){
 						var child = __1[__0];
 						
-						Cars.remove(child);                                        // cars.jsxi:156
+						Cars.remove(child);                                        // cars.jsxi:174
 					}
 					
 					__1 = undefined;
 				}
 				
-				_list.splice(i, 1);                                                // cars.jsxi:159
-				mediator.dispatch('remove.car', car);                              // cars.jsxi:160
+				_list.splice(i, 1);                                                // cars.jsxi:177
+				mediator.dispatch('remove.car', car);                              // cars.jsxi:178
 				return;
 			}
 		}
 	};
+	
+	function parseLoadedData(data){                                                // cars_car_load.jsxi:193
+		try {
+			return JSON.parse(data);                                               // cars_car_load.jsxi:195
+		} catch (e){
+			try {
+				return JSON.flexibleParse(data);                                   // cars_car_load.jsxi:197
+			} catch (er){                                                          // cars_car_load.jsxi:198
+				return er;                                                         // cars_car_load.jsxi:199
+			} 
+		} 
+	}
 	
 	/* Class "Car" declaration */
 	var Car = (function (){                                                        // cars_car.jsxi:2
@@ -1683,11 +1742,11 @@ var Cars = (function (){                                                        
 			this.disabled = carPath.indexOf(AcDir.carsOff) != - 1;                 // cars_car.jsxi:27
 		};
 		
-		Car.prototype.addError = function (id, msg, details){                      // cars_car.jsxi:30
+		Car.prototype.addError = function (id, msg, details, object){              // cars_car.jsxi:30
 			if (this.hasError(id))
 				return;
 			
-			this.error.push({ id: id, msg: msg, details: details });               // cars_car.jsxi:32
+			this.error.push({ id: id, msg: msg, details: details, object: object });
 			mediator.dispatch('error:add', this);                                  // cars_car.jsxi:33
 		};
 		Car.prototype.removeError = function (id){                                 // cars_car.jsxi:36
@@ -1719,25 +1778,34 @@ var Cars = (function (){                                                        
 				mediator.dispatch('error:remove', this);                           // cars_car.jsxi:56
 			}
 		};
-		Car.prototype.hasError = function (id){                                    // cars_car.jsxi:60
+		Car.prototype.getError = function (id){                                    // cars_car.jsxi:60
 			for (var __2 = 0; __2 < this.error.length; __2 ++){
 				var e = this.error[__2];
 				
 				if (e.id === id)                                                   // cars_car.jsxi:62
+					return e;                                                      // cars_car.jsxi:62
+			}
+			return null;
+		};
+		Car.prototype.hasError = function (id){                                    // cars_car.jsxi:68
+			for (var __3 = 0; __3 < this.error.length; __3 ++){
+				var e = this.error[__3];
+				
+				if (e.id === id)                                                   // cars_car.jsxi:70
 					return true;
 			}
 			return false;
 		};
-		Car.prototype.toggle = function (state){                                   // cars_car.jsxi:68
+		Car.prototype.toggle = function (state){                                   // cars_car.jsxi:76
 			var __that = this, 
-				d = state == null ? !this.disabled : !state;                       // cars_car.jsxi:69
+				d = state == null ? !this.disabled : !state;                       // cars_car.jsxi:77
 			
-			if (this.disabled == d)                                                // cars_car.jsxi:70
+			if (this.disabled == d)                                                // cars_car.jsxi:78
 				return;
 			
 			var a, b;
 			
-			if (d){                                                                // cars_car.jsxi:73
+			if (d){                                                                // cars_car.jsxi:81
 				a = AcDir.cars, b = AcDir.carsOff;
 			} else {
 				a = AcDir.carsOff, b = AcDir.cars;
@@ -1746,358 +1814,389 @@ var Cars = (function (){                                                        
 			var newPath = this.path.replace(a, b);
 			
 			try {
-				fs.renameSync(this.path, newPath);                                 // cars_car.jsxi:81
-			} catch (err){                                                         // cars_car.jsxi:82
-				ErrorHandler.handled('Cannot change car state.', err);             // cars_car.jsxi:83
+				fs.renameSync(this.path, newPath);                                 // cars_car.jsxi:89
+			} catch (err){                                                         // cars_car.jsxi:90
+				ErrorHandler.handled('Cannot change car state.', err);             // cars_car.jsxi:91
 				return;
 			} 
 			
-			this.disabled = d;                                                     // cars_car.jsxi:87
-			this.path = newPath;                                                   // cars_car.jsxi:88
+			this.disabled = d;                                                     // cars_car.jsxi:95
+			this.path = newPath;                                                   // cars_car.jsxi:96
+			mediator.dispatch('update.car.disabled', this);                        // cars_car.jsxi:98
+			mediator.dispatch('update.car.path', this);                            // cars_car.jsxi:99
 			
-			if (this.skins){
-				this.skins.forEach(function (e){                                   // cars_car.jsxi:90
-					for (var n in e){                                              // cars_car.jsxi:91
-						if (typeof e[n] === 'string'){                             // cars_car.jsxi:92
-							e[n] = e[n].replace(a, b);                             // cars_car.jsxi:93
-						}
-					}
-				});
-			}
+			if (this.skins)
+				mediator.dispatch('update.car.skins', this);                       // cars_car.jsxi:100
 			
-			mediator.dispatch('update.car.disabled', this);                        // cars_car.jsxi:99
-			mediator.dispatch('update.car.path', this);                            // cars_car.jsxi:100
-			mediator.dispatch('update.car.skins', this);                           // cars_car.jsxi:101
-			
-			if (this.parent && !this.disabled && this.parent.disabled){            // cars_car.jsxi:103
+			if (this.parent && !this.disabled && this.parent.disabled){            // cars_car.jsxi:102
 				Cars.toggle(this.parent, 
 					true);
 			}
 			
-			this.children.forEach(function (e){                                    // cars_car.jsxi:107
+			this.children.forEach(function (e){                                    // cars_car.jsxi:106
 				Cars.toggle(e, !__that.disabled);
 			});
 		};
-		Car.prototype.changeData = function (key, value){                          // cars_car.jsxi:117
-			if (!this.data || this.data[key] == value)                             // cars_car.jsxi:118
+		Car.prototype.changeData = function (key, value){                          // cars_car.jsxi:116
+			if (!this.data || this.data[key] == value)                             // cars_car.jsxi:117
 				return;
 			
 			if (key === 'name' || key === 'brand' || key === 'class' || key === 'year' || key === 'country'){
-				value = clearStr(value);                                           // cars_car.jsxi:121
+				value = clearStr(value);                                           // cars_car.jsxi:120
 			}
 			
-			if (key === 'year'){                                                   // cars_car.jsxi:124
-				value = value.replace(/[^\d]+/g, '');                              // cars_car.jsxi:125
+			if (key === 'year'){                                                   // cars_car.jsxi:123
+				value = value.replace(/[^\d]+/g, '');                              // cars_car.jsxi:124
 			}
 			
-			this.data[key] = value;                                                // cars_car.jsxi:128
+			this.data[key] = value;                                                // cars_car.jsxi:127
 			this.changed = true;
 			
-			if (key === 'tags'){                                                   // cars_car.jsxi:131
-				registerTags(value);                                               // cars_car.jsxi:132
+			if (key === 'tags'){                                                   // cars_car.jsxi:130
+				registerTags(value);                                               // cars_car.jsxi:131
 			}
 			
-			if (key === 'brand'){                                                  // cars_car.jsxi:135
-				registerBrand(value);                                              // cars_car.jsxi:136
+			if (key === 'brand'){                                                  // cars_car.jsxi:134
+				registerBrand(value);                                              // cars_car.jsxi:135
 			}
 			
-			if (key === 'class'){                                                  // cars_car.jsxi:139
-				registerClass(value);                                              // cars_car.jsxi:140
+			if (key === 'class'){                                                  // cars_car.jsxi:138
+				registerClass(value);                                              // cars_car.jsxi:139
 			}
 			
-			if (Settings.get('uploadData')){                                       // cars_car.jsxi:143
-				AppServerRequest.sendData(this.id, key, value);                    // cars_car.jsxi:144
+			if (Settings.get('uploadData')){                                       // cars_car.jsxi:142
+				AppServerRequest.sendData(this.id, key, value);                    // cars_car.jsxi:143
 			}
 			
-			mediator.dispatch('update.car.data:' + key, this);                     // cars_car.jsxi:147
-			mediator.dispatch('update.car.changed', this);                         // cars_car.jsxi:148
+			mediator.dispatch('update.car.data:' + key, this);                     // cars_car.jsxi:146
+			mediator.dispatch('update.car.changed', this);                         // cars_car.jsxi:147
 		};
-		Car.prototype.changeDataSpecs = function (key, value){                     // cars_car.jsxi:151
-			if (!this.data || this.data.specs[key] == value)                       // cars_car.jsxi:152
+		Car.prototype.changeDataSpecs = function (key, value){                     // cars_car.jsxi:150
+			if (!this.data || this.data.specs[key] == value)                       // cars_car.jsxi:151
 				return;
 			
-			value = clearStr(value);                                               // cars_car.jsxi:154
-			this.data.specs[key] = value;                                          // cars_car.jsxi:156
+			value = clearStr(value);                                               // cars_car.jsxi:153
+			this.data.specs[key] = value;                                          // cars_car.jsxi:155
 			this.changed = true;
 			
-			if (Settings.get('uploadData')){                                       // cars_car.jsxi:159
-				AppServerRequest.sendData(this.id, 'specs:' + key, value);         // cars_car.jsxi:160
+			if (Settings.get('uploadData')){                                       // cars_car.jsxi:158
+				AppServerRequest.sendData(this.id, 'specs:' + key, value);         // cars_car.jsxi:159
 			}
 			
-			mediator.dispatch('update.car.data', this);                            // cars_car.jsxi:163
-			mediator.dispatch('update.car.changed', this);                         // cars_car.jsxi:164
+			mediator.dispatch('update.car.data', this);                            // cars_car.jsxi:162
+			mediator.dispatch('update.car.changed', this);                         // cars_car.jsxi:163
 		};
-		Car.prototype.changeParent = function (parentId){                          // cars_car.jsxi:167
+		Car.prototype.changeParent = function (parentId){                          // cars_car.jsxi:166
 			if (!this.data || this.parent && this.parent.id == parentId || !this.parent && parentId == null)
 				return;
 			
-			if (this.children.length > 0)                                          // cars_car.jsxi:169
-				throw new Error('Children car cannot have childrens');             // cars_car.jsxi:169
+			if (this.children.length > 0)                                          // cars_car.jsxi:168
+				throw new Error('Children car cannot have childrens');             // cars_car.jsxi:168
 			
 			if (this.parent){
 				this.parent.children.splice(this.parent.children.indexOf(this), 1);
-				mediator.dispatch('update.car.children', this.parent);             // cars_car.jsxi:173
+				mediator.dispatch('update.car.children', this.parent);             // cars_car.jsxi:172
 			}
 			
-			if (parentId){                                                         // cars_car.jsxi:176
+			if (parentId){                                                         // cars_car.jsxi:175
 				var par = Cars.byName(parentId);
 				
-				if (!par)                                                          // cars_car.jsxi:178
-					throw new Error('Parent car "' + parentId + '" not found');    // cars_car.jsxi:178
+				if (!par)                                                          // cars_car.jsxi:177
+					throw new Error('Parent car "' + parentId + '" not found');    // cars_car.jsxi:177
 				
-				this.parent = par;                                                 // cars_car.jsxi:180
-				this.parent.children.push(this);                                   // cars_car.jsxi:181
-				mediator.dispatch('update.car.parent', this);                      // cars_car.jsxi:182
-				mediator.dispatch('update.car.children', this.parent);             // cars_car.jsxi:183
-				this.data.parent = this.parent.id;                                 // cars_car.jsxi:185
-				mediator.dispatch('update.car.data', this);                        // cars_car.jsxi:186
+				this.parent = par;                                                 // cars_car.jsxi:179
+				this.parent.children.push(this);                                   // cars_car.jsxi:180
+				mediator.dispatch('update.car.parent', this);                      // cars_car.jsxi:181
+				mediator.dispatch('update.car.children', this.parent);             // cars_car.jsxi:182
+				this.data.parent = this.parent.id;                                 // cars_car.jsxi:184
+				mediator.dispatch('update.car.data', this);                        // cars_car.jsxi:185
 			} else {
 				this.parent = null;
-				mediator.dispatch('update.car.parent', this);                      // cars_car.jsxi:189
-				delete this.data.parent;                                           // cars_car.jsxi:191
-				mediator.dispatch('update.car.data', this);                        // cars_car.jsxi:192
+				mediator.dispatch('update.car.parent', this);                      // cars_car.jsxi:188
+				delete this.data.parent;                                           // cars_car.jsxi:190
+				mediator.dispatch('update.car.data', this);                        // cars_car.jsxi:191
 			}
 			
 			this.changed = true;
-			mediator.dispatch('update.car.changed', this);                         // cars_car.jsxi:196
+			mediator.dispatch('update.car.changed', this);                         // cars_car.jsxi:195
 		};
-		Car.prototype.selectSkin = function (skinId){                              // cars_car.jsxi:199
+		Car.prototype.selectSkin = function (skinId){                              // cars_car.jsxi:198
 			if (!this.skins)
 				return;
 			
-			var newSkin = this.skins.filter(function (e){                          // cars_car.jsxi:202
-				return e.id == skinId;                                             // cars_car.jsxi:203
+			var newSkin = this.skins.filter(function (e){                          // cars_car.jsxi:201
+				return e.id == skinId;                                             // cars_car.jsxi:202
 			})[0];
 			
-			if (newSkin == this.skins.selected)                                    // cars_car.jsxi:206
+			if (newSkin == this.selectedSkin)                                      // cars_car.jsxi:205
 				return;
 			
-			this.skins.selected = newSkin;                                         // cars_car.jsxi:208
-			mediator.dispatch('update.car.skins', this);                           // cars_car.jsxi:209
+			this.selectedSkin = newSkin;                                           // cars_car.jsxi:207
+			mediator.dispatch('update.car.skins', this);                           // cars_car.jsxi:208
 		};
-		Car.prototype.updateSkins = function (){                                   // cars_car.jsxi:212
-			gui.App.clearCache();                                                  // cars_car.jsxi:213
-			setTimeout((function (){                                               // cars_car.jsxi:214
-				mediator.dispatch('update.car.skins', this);                       // cars_car.jsxi:215
-			}).bind(this),                                                         // cars_car.jsxi:216
+		Car.prototype.updateSkins = function (){                                   // cars_car.jsxi:211
+			gui.App.clearCache();                                                  // cars_car.jsxi:212
+			setTimeout((function (){                                               // cars_car.jsxi:213
+				mediator.dispatch('update.car.skins', this);                       // cars_car.jsxi:214
+			}).bind(this),                                                         // cars_car.jsxi:215
 			100);
 		};
-		Car.prototype.updateBadge = function (){                                   // cars_car.jsxi:219
-			gui.App.clearCache();                                                  // cars_car.jsxi:220
-			setTimeout((function (){                                               // cars_car.jsxi:221
-				mediator.dispatch('update.car.badge', this);                       // cars_car.jsxi:222
-			}).bind(this),                                                         // cars_car.jsxi:223
+		Car.prototype.updateBadge = function (){                                   // cars_car.jsxi:218
+			gui.App.clearCache();                                                  // cars_car.jsxi:219
+			setTimeout((function (){                                               // cars_car.jsxi:220
+				mediator.dispatch('update.car.badge', this);                       // cars_car.jsxi:221
+			}).bind(this),                                                         // cars_car.jsxi:222
 			100);
 		};
-		Car.prototype.updateUpgrade = function (){                                 // cars_car.jsxi:226
-			gui.App.clearCache();                                                  // cars_car.jsxi:227
-			setTimeout((function (){                                               // cars_car.jsxi:228
-				mediator.dispatch('update.car.data', this);                        // cars_car.jsxi:229
-			}).bind(this),                                                         // cars_car.jsxi:230
+		Car.prototype.updateUpgrade = function (){                                 // cars_car.jsxi:225
+			gui.App.clearCache();                                                  // cars_car.jsxi:226
+			setTimeout((function (){                                               // cars_car.jsxi:227
+				mediator.dispatch('update.car.data', this);                        // cars_car.jsxi:228
+			}).bind(this),                                                         // cars_car.jsxi:229
 			100);
 		};
-		Car.prototype.save = function (){                                          // cars_car.jsxi:233
+		Car.prototype.save = function (){                                          // cars_car.jsxi:232
 			if (this.data){
 				var p = Object.clone(this.data);
 				
-				p.description = p.description.replace(/\n/g, '<br>');              // cars_car.jsxi:236
-				p.class = p.class.toLowerCase();                                   // cars_car.jsxi:237
-				fs.writeFileSync(this.json,                                        // cars_car.jsxi:238
+				p.description = p.description.replace(/\n/g, '<br>');              // cars_car.jsxi:235
+				p.class = p.class.toLowerCase();                                   // cars_car.jsxi:236
+				fs.writeFileSync(this.json,                                        // cars_car.jsxi:237
 					JSON.stringify(p, null, 
-						4));                                                       // cars_car.jsxi:238
+						4));                                                       // cars_car.jsxi:237
 				this.changed = false;
-				mediator.dispatch('update.car.changed', this);                     // cars_car.jsxi:240
+				mediator.dispatch('update.car.changed', this);                     // cars_car.jsxi:239
 			}
 		};
-		Car.prototype.loadBadge = function (callback){                             // cars_car_load.jsxi:3
+		Car.prototype.loadBadge = function (callback){                             // cars_car_load.jsxi:4
 			var __that = this;
 			
 			this.clearErrors('badge');
-			fs.exists(this.badge,                                                  // cars_car_load.jsxi:6
-				(function (result){                                                // cars_car_load.jsxi:6
-					if (!result){                                                  // cars_car_load.jsxi:7
+			fs.exists(this.badge,                                                  // cars_car_load.jsxi:7
+				(function (result){                                                // cars_car_load.jsxi:7
+					if (!result){                                                  // cars_car_load.jsxi:8
 						__that.addError('badge-missing', 'Missing badge.png');
 					}
 					
-					if (callback)                                                  // cars_car_load.jsxi:11
-						callback();                                                // cars_car_load.jsxi:11
-				}).bind(this));                                                    // cars_car_load.jsxi:12
+					__that.__Car__badgeLoaded = true;
+					
+					if (callback)                                                  // cars_car_load.jsxi:13
+						callback();                                                // cars_car_load.jsxi:13
+				}).bind(this));                                                    // cars_car_load.jsxi:14
 		};
-		Car.prototype.loadSkins = function (callback){                             // cars_car_load.jsxi:15
+		Car.prototype.loadSkins_data = function (callback){                        // cars_car_load.jsxi:17
+			var __that = this, 
+				a = this.skins, i = 0;
+			
+			step();                                                                // cars_car_load.jsxi:19
+			
+			function step(){                                                       // cars_car_load.jsxi:21
+				if (a != __that.skins){                                            // cars_car_load.jsxi:22
+					if (callback)                                                  // cars_car_load.jsxi:23
+						callback();                                                // cars_car_load.jsxi:23
+				} else if (i >= a.length){                                         // cars_car_load.jsxi:24
+					if (callback)                                                  // cars_car_load.jsxi:25
+						callback();                                                // cars_car_load.jsxi:25
+					
+					mediator.dispatch('update.car.skins:data', this);              // cars_car_load.jsxi:26
+				} else {
+					a[i ++].loadData(step);                                        // cars_car_load.jsxi:28
+				}
+			}
+		};
+		Car.prototype.loadSkins = function (callback){                             // cars_car_load.jsxi:33
 			var __that = this;
 			
 			if (this.skins){
 				this.skins = null;
-				mediator.dispatch('update.car.skins', this);                       // cars_car_load.jsxi:18
+				mediator.dispatch('update.car.skins', this);                       // cars_car_load.jsxi:36
 			}
 			
+			this.clearErrors('skin');
 			this.clearErrors('skins');
 			
-			if (!fs.existsSync(this.skinsDir)){                                    // cars_car_load.jsxi:23
+			if (!fs.existsSync(this.skinsDir)){                                    // cars_car_load.jsxi:42
 				this.addError('skins-missing', 'Skins folder is missing');
 				
-				if (callback)                                                      // cars_car_load.jsxi:25
-					callback();                                                    // cars_car_load.jsxi:25
+				if (callback)                                                      // cars_car_load.jsxi:44
+					callback();                                                    // cars_car_load.jsxi:44
 				return;
 			}
 			
-			if (!fs.statSync(this.skinsDir).isDirectory()){                        // cars_car_load.jsxi:29
+			if (!fs.statSync(this.skinsDir).isDirectory()){                        // cars_car_load.jsxi:48
 				this.addError('skins-file', 'There is a file instead of skins folder', err);
 				
-				if (callback)                                                      // cars_car_load.jsxi:31
-					callback();                                                    // cars_car_load.jsxi:31
+				if (callback)                                                      // cars_car_load.jsxi:50
+					callback();                                                    // cars_car_load.jsxi:50
 				return;
 			}
 			
-			fs.readdir(this.skinsDir,                                              // cars_car_load.jsxi:35
-				(function (err, result){                                           // cars_car_load.jsxi:35
+			fs.readdir(this.skinsDir,                                              // cars_car_load.jsxi:54
+				(function (err, result){                                           // cars_car_load.jsxi:54
 					__that.skins = false;
 					
-					if (err){                                                      // cars_car_load.jsxi:38
+					if (err){                                                      // cars_car_load.jsxi:57
 						__that.addError('skins-access', 'Cannot access skins', err);
 					} else {
-						result = result.filter(function (e){                       // cars_car_load.jsxi:41
+						result = result.filter(function (e){                       // cars_car_load.jsxi:60
 							return fs.statSync(__that.path + '/skins/' + e).isDirectory();
 						});
 						
-						if (__that.skins.length === 0){                            // cars_car_load.jsxi:45
+						if (__that.skins.length === 0){                            // cars_car_load.jsxi:64
 							__that.addError('skins-empty', 'Skins folder is empty');
 						} else {
-							__that.skins = result.map(function (e){                // cars_car_load.jsxi:48
-								var p = __that.path + '/skins/' + e;
-								return {
-									id: e,                                         // cars_car_load.jsxi:51
-									path: p,                                       // cars_car_load.jsxi:52
-									livery: p + '/livery.png',                     // cars_car_load.jsxi:53
-									preview: p + '/preview.jpg'
-								};
-							});
-							__that.skins.selected = __that.skins[0];               // cars_car_load.jsxi:58
-							mediator.dispatch('update.car.skins', this);           // cars_car_load.jsxi:59
+							__that.skins = result.map((function (e){               // cars_car_load.jsxi:67
+								return new CarSkin(this, e);                       // cars_car_load.jsxi:68
+							}).bind(this));                                        // cars_car_load.jsxi:69
+							__that.selectedSkin = __that.skins[0];
+							mediator.dispatch('update.car.skins', this);           // cars_car_load.jsxi:72
+							__that.loadSkins_data(callback);
+							return;
 						}
 					}
 					
-					if (callback)                                                  // cars_car_load.jsxi:63
-						callback();                                                // cars_car_load.jsxi:63
-				}).bind(this));                                                    // cars_car_load.jsxi:64
+					if (callback)                                                  // cars_car_load.jsxi:78
+						callback();                                                // cars_car_load.jsxi:78
+				}).bind(this));                                                    // cars_car_load.jsxi:79
 		};
-		Car.prototype.loadData = function (callback){                              // cars_car_load.jsxi:67
+		Car.prototype.loadData = function (callback){                              // cars_car_load.jsxi:82
 			var __that = this;
 			
 			if (this.data){
 				this.data = null;
-				mediator.dispatch('update.car.data', this);                        // cars_car_load.jsxi:70
+				mediator.dispatch('update.car.data', this);                        // cars_car_load.jsxi:85
 			}
 			
 			if (this.parent){
 				this.parent.children.splice(this.parent.children.indexOf(this), 1);
-				mediator.dispatch('update.car.children', this.parent);             // cars_car_load.jsxi:75
+				mediator.dispatch('update.car.children', this.parent);             // cars_car_load.jsxi:90
 				this.parent = null;
-				mediator.dispatch('update.car.parent', this);                      // cars_car_load.jsxi:77
+				mediator.dispatch('update.car.parent', this);                      // cars_car_load.jsxi:92
 			}
 			
 			this.clearErrors('data');
 			this.clearErrors('parent');
 			
-			if (!fs.existsSync(this.json)){                                        // cars_car_load.jsxi:83
-				if (fs.existsSync(this.json + '.disabled')){                       // cars_car_load.jsxi:84
-					fs.renameSync(this.json + '.disabled', this.json);             // cars_car_load.jsxi:85
+			if (!fs.existsSync(this.json)){                                        // cars_car_load.jsxi:98
+				if (fs.existsSync(this.json + '.disabled')){                       // cars_car_load.jsxi:99
+					fs.renameSync(this.json + '.disabled', this.json);             // cars_car_load.jsxi:100
 				} else {
 					if (this.changed){
 						this.changed = false;
-						mediator.dispatch('update.car.changed', this);             // cars_car_load.jsxi:89
+						mediator.dispatch('update.car.changed', this);             // cars_car_load.jsxi:104
 					}
 					
 					this.data = false;
 					this.addError('data-missing', 'Missing ui_car.json');
-					mediator.dispatch('update.car.data', this);                    // cars_car_load.jsxi:94
+					mediator.dispatch('update.car.data', this);                    // cars_car_load.jsxi:109
 					
-					if (callback)                                                  // cars_car_load.jsxi:95
-						callback();                                                // cars_car_load.jsxi:95
+					if (callback)                                                  // cars_car_load.jsxi:110
+						callback();                                                // cars_car_load.jsxi:110
 					return;
 				}
 			}
 			
-			fs.readFile(this.json,                                                 // cars_car_load.jsxi:100
-				(function (err, result){                                           // cars_car_load.jsxi:100
+			fs.readFile(this.json,                                                 // cars_car_load.jsxi:115
+				(function (err, result){                                           // cars_car_load.jsxi:115
 					if (__that.changed){
 						__that.changed = false;
-						mediator.dispatch('update.car.changed', this);             // cars_car_load.jsxi:103
+						mediator.dispatch('update.car.changed', this);             // cars_car_load.jsxi:118
 					}
 					
-					if (err){                                                      // cars_car_load.jsxi:106
+					if (err){                                                      // cars_car_load.jsxi:121
 						__that.data = false;
 						__that.addError('data-access', 'Unavailable ui_car.json', err);
 					} else {
-						var dat;
-						
-						try {
-							dat = JSON.flexibleParse(result);                      // cars_car_load.jsxi:112
-						} catch (er){                                              // cars_car_load.jsxi:113
-							err = er;                                              // cars_car_load.jsxi:114
-						} 
+						var dat = parseLoadedData(result.toString()),              // cars_car_load.jsxi:125
+							err = dat instanceof Error && dat;                     // cars_car_load.jsxi:126
 						
 						__that.data = false;
 						
-						if (err || !dat){                                          // cars_car_load.jsxi:118
+						if (err || !dat){                                          // cars_car_load.jsxi:129
 							__that.addError('data-damaged', 'Damaged ui_car.json', err);
-						} else if (!dat.name){                                     // cars_car_load.jsxi:120
+						} else if (!dat.name){                                     // cars_car_load.jsxi:131
 							__that.addError('data-name-missing', 'Name is missing');
-						} else if (!dat.brand){                                    // cars_car_load.jsxi:122
+						} else if (!dat.brand){                                    // cars_car_load.jsxi:133
 							__that.addError('data-brand-missing', 'Brand is missing');
 						} else {
-							__that.data = dat;                                     // cars_car_load.jsxi:125
+							__that.data = dat;                                     // cars_car_load.jsxi:136
 							
-							if (!__that.data.description)                          // cars_car_load.jsxi:126
-								__that.data.description = '';                      // cars_car_load.jsxi:126
+							if (!__that.data.description)                          // cars_car_load.jsxi:137
+								__that.data.description = '';                      // cars_car_load.jsxi:137
 							
-							if (!__that.data.tags)                                 // cars_car_load.jsxi:127
-								__that.data.tags = [];                             // cars_car_load.jsxi:127
+							if (!__that.data.tags)                                 // cars_car_load.jsxi:138
+								__that.data.tags = [];                             // cars_car_load.jsxi:138
 							
-							if (!__that.data.specs)                                // cars_car_load.jsxi:128
-								__that.data.specs = {};                            // cars_car_load.jsxi:128
+							if (!__that.data.specs)                                // cars_car_load.jsxi:139
+								__that.data.specs = {};                            // cars_car_load.jsxi:139
 							
-							__that.data.class = __that.data.class || '';           // cars_car_load.jsxi:130
+							__that.data.class = __that.data.class || '';           // cars_car_load.jsxi:141
 							__that.data.description = __that.data.description.replace(/\n/g, ' ').replace(/<\/?br\/?>[ \t]*|\n[ \t]+/g, '\n').replace(/<\s*\/?\s*\w+\s*>/g, '').replace(/[\t ]+/g, ' ');
 							
-							if (__that.data.parent != null){                       // cars_car_load.jsxi:134
-								if (__that.data.parent == __that.id){              // cars_car_load.jsxi:135
+							if (__that.data.parent != null){                       // cars_car_load.jsxi:145
+								if (__that.data.parent == __that.id){              // cars_car_load.jsxi:146
 									__that.addError('parent-wrong', 'Parent is child');
 								} else {
 									var par = Cars.byName(__that.data.parent);
 									
-									if (par == null){                              // cars_car_load.jsxi:140
+									if (par == null){                              // cars_car_load.jsxi:151
 										__that.addError('parent-missing', 'Parent is missing');
 									} else {
-										__that.parent = par;                       // cars_car_load.jsxi:143
-										__that.parent.children.push(this);         // cars_car_load.jsxi:144
+										__that.parent = par;                       // cars_car_load.jsxi:154
+										__that.parent.children.push(this);         // cars_car_load.jsxi:155
 										mediator.dispatch('update.car.parent', this);
 										mediator.dispatch('update.car.children', __that.parent);
 									}
 									
-									if (!fs.existsSync(__that.upgrade)){           // cars_car_load.jsxi:150
+									if (!fs.existsSync(__that.upgrade)){           // cars_car_load.jsxi:161
 										__that.addError('parent-upgrade-missing', 'Missing upgrade.png');
 									}
 								}
 							}
 							
-							registerTags(__that.data.tags);                        // cars_car_load.jsxi:156
-							registerClass(__that.data.class);                      // cars_car_load.jsxi:157
-							registerBrand(__that.data.brand);                      // cars_car_load.jsxi:158
+							registerTags(__that.data.tags);                        // cars_car_load.jsxi:167
+							registerClass(__that.data.class);                      // cars_car_load.jsxi:168
+							registerBrand(__that.data.brand);                      // cars_car_load.jsxi:169
 						}
 					}
 					
-					mediator.dispatch('update.car.data', this);                    // cars_car_load.jsxi:162
+					mediator.dispatch('update.car.data', this);                    // cars_car_load.jsxi:173
 					
-					if (callback)                                                  // cars_car_load.jsxi:163
-						callback();                                                // cars_car_load.jsxi:163
-				}).bind(this));                                                    // cars_car_load.jsxi:164
+					if (callback)                                                  // cars_car_load.jsxi:174
+						callback();                                                // cars_car_load.jsxi:174
+				}).bind(this));                                                    // cars_car_load.jsxi:175
 		};
-		Car.prototype.load = function (callback){                                  // cars_car_load.jsxi:167
+		Car.prototype.load = function (callback){                                  // cars_car_load.jsxi:178
 			this.clearErrors();
 			this.loadBadge();
 			this.loadSkins();
 			this.loadData(callback);
+		};
+		Car.prototype.loadEnsure = function (callback){                            // cars_car_load.jsxi:185
+			var __that = this;
+			
+			function s1(){                                                         // cars_car_load.jsxi:186
+				if (!__that.__Car__badgeLoaded)
+					__that.loadBadge(s2);
+				else
+					s2();                                                          // cars_car_load.jsxi:186
+			}
+			
+			function s2(){                                                         // cars_car_load.jsxi:187
+				if (__that.skins == null)
+					__that.loadSkins(s3);
+				else
+					s3();                                                          // cars_car_load.jsxi:187
+			}
+			
+			function s3(){                                                         // cars_car_load.jsxi:188
+				if (__that.data == null)
+					__that.loadData(callback);
+				else if (callback)                                                 // cars_car_load.jsxi:188
+					callback();                                                    // cars_car_load.jsxi:188
+			}
+			
+			s1();                                                                  // cars_car_load.jsxi:189
 		};
 		Object.defineProperty(Car.prototype, 
 			'json', 
@@ -2131,51 +2230,134 @@ var Cars = (function (){                                                        
 			'displayName', 
 			{
 				get: (function (){
-					return this.data && this.data.name || this.id;                 // cars_car.jsxi:12
+					return this.data && this.data.name || this.id;                 // cars_car.jsxi:13
 				})
 			});
 		
-		function clearStr(str){                                                    // cars_car.jsxi:112
-			if (typeof str !== 'string')                                           // cars_car.jsxi:113
+		function clearStr(str){                                                    // cars_car.jsxi:111
+			if (typeof str !== 'string')                                           // cars_car.jsxi:112
 				return;
-			return str.trim().replace(/\s+/g, ' ');                                // cars_car.jsxi:114
+			return str.trim().replace(/\s+/g, ' ');                                // cars_car.jsxi:113
 		}
 		return Car;
 	})();
+	
+	/* Class "CarSkin" declaration */
+	function CarSkin(car, id){                                                     // cars_car_skin.jsxi:2
+		this.__CarSkin__car = car;                                                 // cars_car_skin.jsxi:15
+		this.id = id;                                                              // cars_car_skin.jsxi:16
+	}
+	CarSkin.prototype.loadData = function (callback){                              // cars_car_skin.jsxi:19
+		var __that = this;
+		
+		if (!fs.existsSync(this.json)){                                            // cars_car_skin.jsxi:20
+			this.data = false;
+			
+			if (callback)                                                          // cars_car_skin.jsxi:23
+				callback();                                                        // cars_car_skin.jsxi:23
+			return;
+		} else
+			this.data = null;
+		
+		fs.readFile(this.json,                                                     // cars_car_skin.jsxi:28
+			(function (err, result){                                               // cars_car_skin.jsxi:28
+				if (err){                                                          // cars_car_skin.jsxi:29
+					__that.data = false;
+					__that.__CarSkin__car.addError('skin-data-access:' + __that.id, 
+						'Unavailable skins/' + __that.id + '/ui_skin.json', 
+						err,                                                       // cars_car_skin.jsxi:31
+						this);                                                     // cars_car_skin.jsxi:31
+				} else {
+					var dat = parseLoadedData(result.toString()),                  // cars_car_skin.jsxi:33
+						err = dat instanceof Error && dat;                         // cars_car_skin.jsxi:34
+					
+					__that.data = false;
+					
+					if (err || !dat || dat.skinname == null || dat.drivername == null || dat.country == null || dat.number == null){
+						__that.__CarSkin__car.addError('skin-data-damaged:' + __that.id, 
+							'Damaged skins/' + __that.id + '/ui_skin.json', 
+							err,                                                   // cars_car_skin.jsxi:38
+							this);                                                 // cars_car_skin.jsxi:38
+					} else {
+						__that.data = dat;                                         // cars_car_skin.jsxi:40
+					}
+				}
+				
+				if (callback)                                                      // cars_car_skin.jsxi:44
+					callback();                                                    // cars_car_skin.jsxi:44
+			}).bind(this));                                                        // cars_car_skin.jsxi:45
+	};
+	Object.defineProperty(CarSkin.prototype, 
+		'path', 
+		{
+			get: (function (){
+				return this.__CarSkin__car.path + '/skins/' + this.id;             // cars_car_skin.jsxi:6
+			})
+		});
+	Object.defineProperty(CarSkin.prototype, 
+		'json', 
+		{
+			get: (function (){
+				return this.__CarSkin__car.path + '/skins/' + this.id + '/ui_skin.json';
+			})
+		});
+	Object.defineProperty(CarSkin.prototype, 
+		'livery', 
+		{
+			get: (function (){
+				return this.__CarSkin__car.path + '/skins/' + this.id + '/livery.png';
+			})
+		});
+	Object.defineProperty(CarSkin.prototype, 
+		'preview', 
+		{
+			get: (function (){
+				return this.__CarSkin__car.path + '/skins/' + this.id + '/preview.jpg';
+			})
+		});
+	Object.defineProperty(CarSkin.prototype, 
+		'displayName', 
+		{
+			get: (function (){
+				return this.data && this.data.skinname || this.id;                 // cars_car_skin.jsxi:12
+			})
+		});
 	
 	Object.defineProperty(Cars,                                                    // cars.jsxi:1
 		'list', 
 		{
 			get: (function (){
-				return _list;                                                      // cars.jsxi:166
+				return _list;                                                      // cars.jsxi:184
 			})
 		});
 	Object.defineProperty(Cars,                                                    // cars.jsxi:1
 		'brands', 
 		{
 			get: (function (){
-				return _brands;                                                    // cars.jsxi:167
+				return _brands;                                                    // cars.jsxi:185
 			})
 		});
 	Object.defineProperty(Cars,                                                    // cars.jsxi:1
 		'classes', 
 		{
 			get: (function (){
-				return _classes;                                                   // cars.jsxi:168
+				return _classes;                                                   // cars.jsxi:186
 			})
 		});
 	Object.defineProperty(Cars,                                                    // cars.jsxi:1
 		'tags', 
 		{
 			get: (function (){
-				return _tags;                                                      // cars.jsxi:169
+				return _tags;                                                      // cars.jsxi:187
 			})
 		});
-	(function (){                                                                  // cars.jsxi:171
-		mediator.extend(Cars);                                                     // cars.jsxi:172
+	(function (){                                                                  // cars.jsxi:189
+		mediator.extend(Cars);                                                     // cars.jsxi:190
 	})();
 	return Cars;
 })();
+
+;
 
 ;
 
@@ -2550,50 +2732,51 @@ var Settings = (function (){                                                    
 			updatesCheck: true,                                                    // settings.jsxi:8
 			updatesSource: 'stable',                                               // settings.jsxi:9
 			badgeAutoupdate: true,                                                 // settings.jsxi:11
-			aptShowroom: '',                                                       // settings.jsxi:13
-			aptFilter: 'S1-Dynamic',                                               // settings.jsxi:14
-			aptResize: true,                                                       // settings.jsxi:15
-			aptDisableSweetFx: true,                                               // settings.jsxi:16
-			aptCameraX: - 140,                                                     // settings.jsxi:17
-			aptCameraY: 36,                                                        // settings.jsxi:18
-			aptCameraDistance: 5.5,                                                // settings.jsxi:19
+			aptMode: 'default',                                                    // settings.jsxi:13
+			aptShowroom: '',                                                       // settings.jsxi:14
+			aptFilter: 'S1-Dynamic',                                               // settings.jsxi:15
+			aptResize: true,                                                       // settings.jsxi:16
+			aptDisableSweetFx: true,                                               // settings.jsxi:17
+			aptCameraX: - 140,                                                     // settings.jsxi:18
+			aptCameraY: 36,                                                        // settings.jsxi:19
+			aptCameraDistance: 5.5,                                                // settings.jsxi:20
 			aptIncreaseDelays: false
 		};
 	
-	function save(){                                                               // settings.jsxi:25
-		localStorage.settings = JSON.stringify(_settings);                         // settings.jsxi:26
+	function save(){                                                               // settings.jsxi:26
+		localStorage.settings = JSON.stringify(_settings);                         // settings.jsxi:27
 	}
 	
-	Settings.get = function (k){                                                   // settings.jsxi:29
-		return _settings.hasOwnProperty(k) ? _settings[k] : _defaults[k];          // settings.jsxi:30
+	Settings.get = function (k){                                                   // settings.jsxi:30
+		return _settings.hasOwnProperty(k) ? _settings[k] : _defaults[k];          // settings.jsxi:31
 	};
-	Settings.set = function (k, val){                                              // settings.jsxi:33
-		if (typeof k == 'object'){                                                 // settings.jsxi:34
-			for (var n in k){                                                      // settings.jsxi:35
-				_settings[n] = k[n];                                               // settings.jsxi:36
+	Settings.set = function (k, val){                                              // settings.jsxi:34
+		if (typeof k == 'object'){                                                 // settings.jsxi:35
+			for (var n in k){                                                      // settings.jsxi:36
+				_settings[n] = k[n];                                               // settings.jsxi:37
 			}
 		} else {
-			_settings[k] = val;                                                    // settings.jsxi:39
+			_settings[k] = val;                                                    // settings.jsxi:40
 		}
 		
-		save();                                                                    // settings.jsxi:42
+		save();                                                                    // settings.jsxi:43
 	};
-	Settings.update = function (f){                                                // settings.jsxi:45
-		f(_settings);                                                              // settings.jsxi:46
-		save();                                                                    // settings.jsxi:47
+	Settings.update = function (f){                                                // settings.jsxi:46
+		f(_settings);                                                              // settings.jsxi:47
+		save();                                                                    // settings.jsxi:48
 	};
 	Object.defineProperty(Settings,                                                // settings.jsxi:1
 		'defaults', 
 		{
 			get: (function (){
-				return _defaults;                                                  // settings.jsxi:23
+				return _defaults;                                                  // settings.jsxi:24
 			})
 		});
-	(function (){                                                                  // settings.jsxi:50
-		_settings = {};                                                            // settings.jsxi:51
+	(function (){                                                                  // settings.jsxi:51
+		_settings = {};                                                            // settings.jsxi:52
 		
 		try {
-			_settings = JSON.parse(localStorage.settings) || {};                   // settings.jsxi:54
+			_settings = JSON.parse(localStorage.settings) || {};                   // settings.jsxi:55
 		} catch (e){} 
 	})();
 	return Settings;
@@ -2642,6 +2825,7 @@ var BadgeEditor = (function (){                                                 
 			"Audi": "data/brand-lib/Audi.png",                                     // badge_editor.jsxi:2
 			"Bentley": "data/brand-lib/Bentley.png",                               // badge_editor.jsxi:2
 			"BMW": "data/brand-lib/BMW.png",                                       // badge_editor.jsxi:2
+			"Bugatti": "data/brand-lib/Bugatti.png",                               // badge_editor.jsxi:2
 			"Buick": "data/brand-lib/Buick.png",                                   // badge_editor.jsxi:2
 			"Cadillac": "data/brand-lib/Cadillac.png",                             // badge_editor.jsxi:2
 			"Chevrolet": "data/brand-lib/Chevrolet.png",                           // badge_editor.jsxi:2
@@ -3026,15 +3210,32 @@ var RestorationWizard = (function (){                                           
 	var RestorationWizard = function (){}, 
 		_fixers = {};
 	
-	RestorationWizard.fix = function (car, errorId){                               // restoration_wizard.jsxi:4
-		if (_fixers.hasOwnProperty(errorId)){                                      // restoration_wizard.jsxi:5
-			new _fixers[errorId](car, errorId).run();                              // restoration_wizard.jsxi:6
+	RestorationWizard.fix = function (car, fullErrorId){                           // restoration_wizard.jsxi:4
+		var errorId = fullErrorId.split(':')[0];
+		
+		if (_fixers.hasOwnProperty(errorId)){                                      // restoration_wizard.jsxi:7
+			var fixer = RestorationWizard.createFixer(car, car.getError(fullErrorId));
+			
+			if (errorId !== fullErrorId){                                          // restoration_wizard.jsxi:10
+				var simular = car.error.filter(function (e){                       // restoration_wizard.jsxi:11
+					return e.id !== fullErrorId && e.id.indexOf(errorId + ':') === 0;
+				});
+				
+				if (simular.length > 0){                                           // restoration_wizard.jsxi:14
+					fixer.simular();                                               // restoration_wizard.jsxi:15
+				}
+			}
+			
+			fixer.run();                                                           // restoration_wizard.jsxi:19
 		} else {
-			ErrorHandler.handled('Not supported error: ' + errorId);               // restoration_wizard.jsxi:8
+			ErrorHandler.handled('Not supported error: ' + errorId);               // restoration_wizard.jsxi:21
 		}
 	};
-	RestorationWizard.register = function (id, classObj){                          // restoration_wizard.jsxi:12
-		_fixers[id] = classObj;                                                    // restoration_wizard.jsxi:13
+	RestorationWizard.createFixer = function (car, error){                         // restoration_wizard.jsxi:25
+		return new _fixers[error.id.split(':')[0]](car, error);                    // restoration_wizard.jsxi:26
+	};
+	RestorationWizard.register = function (id, classObj){                          // restoration_wizard.jsxi:29
+		_fixers[id] = classObj;                                                    // restoration_wizard.jsxi:30
 	};
 	return RestorationWizard;
 })();
@@ -3327,194 +3528,252 @@ function AbstractFixer(c, e){                                                   
 		throw new Error('Trying to instantiate abstract class AbstractFixer');
 	
 	this.__car = c;                                                                // abstract_fixer.jsxi:5
-	this.__errorId = e;                                                            // abstract_fixer.jsxi:6
+	this.__errorId = e.id;                                                         // abstract_fixer.jsxi:6
+	this.__object = e[e instanceof AbstractFixer ? '__object' : 'object'];         // abstract_fixer.jsxi:7
 }
-AbstractFixer.prototype.run = function (){                                         // abstract_fixer.jsxi:9
+AbstractFixer.prototype.simular = function (arg){                                  // abstract_fixer.jsxi:10
+	this.__simularErrors = arg;                                                    // abstract_fixer.jsxi:11
+};
+AbstractFixer.prototype.run = function (){                                         // abstract_fixer.jsxi:14
 	var __that = this;
 	
 	try {
-		this.__AbstractFixer_work(function (err){                                  // abstract_fixer.jsxi:11
+		this.__AbstractFixer_work(function (err){                                  // abstract_fixer.jsxi:16
 			if (__that.__AbstractFixer__error)
 				return;
 			
-			if (err){                                                              // abstract_fixer.jsxi:14
+			if (err){                                                              // abstract_fixer.jsxi:19
 				__that.__AbstractFixer_error(err === true ? null : err);
 			} else {
-				__that.__car.removeError(__that.__errorId);                        // abstract_fixer.jsxi:17
-				setTimeout(__bindOnce(__that, '__reloadAfter'));                   // abstract_fixer.jsxi:18
+				__that.__car.removeError(__that.__errorId);                        // abstract_fixer.jsxi:22
+				setTimeout(__bindOnce(__that, '__reloadAfter'));                   // abstract_fixer.jsxi:23
 			}
 		});
-	} catch (err){                                                                 // abstract_fixer.jsxi:21
+	} catch (err){                                                                 // abstract_fixer.jsxi:26
 		this.__AbstractFixer_error(err);
 	} 
 };
 AbstractFixer.prototype.__reloadAfter = function (){};
-AbstractFixer.prototype.__AbstractFixer_error = function (err){                    // abstract_fixer.jsxi:30
+AbstractFixer.prototype.__AbstractFixer_error = function (err){                    // abstract_fixer.jsxi:35
 	this.__AbstractFixer__error = true;
-	ErrorHandler.handled('Cannot fix error: ' + this.__errorId, err);              // abstract_fixer.jsxi:32
+	ErrorHandler.handled('Cannot fix error: ' + this.__errorId, err);              // abstract_fixer.jsxi:37
 };
-AbstractFixer.prototype.__AbstractFixer_work = function (c){                       // abstract_fixer.jsxi:35
+AbstractFixer.prototype.__AbstractFixer_work = function (c){                       // abstract_fixer.jsxi:40
 	var __that = this, 
-		s = this.__solutions.filter(function (arg){                                // abstract_fixer.jsxi:36
-			return arg;                                                            // abstract_fixer.jsxi:36
+		s = this.solutions.filter(function (arg){                                  // abstract_fixer.jsxi:41
+			return arg;                                                            // abstract_fixer.jsxi:41
 		});
 	
-	if (s.length == 0){                                                            // abstract_fixer.jsxi:37
-		new Dialog(this.__title,                                                   // abstract_fixer.jsxi:38
+	if (s.length == 0){                                                            // abstract_fixer.jsxi:42
+		new Dialog(this.title,                                                     // abstract_fixer.jsxi:43
 			[
-				'<h6>Available solutions:</h6>',                                   // abstract_fixer.jsxi:38
+				'<h6>Available solutions:</h6>',                                   // abstract_fixer.jsxi:43
 				'Sorry, but none of solutions is available.'
 			]);
 		return;
 	}
 	
-	new Dialog(this.__title,                                                       // abstract_fixer.jsxi:41
+	var d = new Dialog(this.title,                                                 // abstract_fixer.jsxi:47
 		[
-			'<h6>Available solutions:</h6>',                                       // abstract_fixer.jsxi:42
-			s.map(function (e, i){                                                 // abstract_fixer.jsxi:43
+			'<h6>Available solutions:</h6>',                                       // abstract_fixer.jsxi:48
+			s.map(function (e, i){                                                 // abstract_fixer.jsxi:49
 				return '<label><input name="solution" data-solution-id="' + i + '" type="radio">' + e.name + '</label>';
 			}).join('<br>')
 		], 
-		function (){                                                               // abstract_fixer.jsxi:44
+		function (){                                                               // abstract_fixer.jsxi:50
 			var id = this.find('input[name="solution"]:checked').data('solution-id');
 			
 			try {
-				s[id].fn(c);                                                       // abstract_fixer.jsxi:47
-			} catch (err){                                                         // abstract_fixer.jsxi:48
+				s[id].fn(c);                                                       // abstract_fixer.jsxi:53
+			} catch (err){                                                         // abstract_fixer.jsxi:54
 				__that.__AbstractFixer_error(err);
 			} 
-		}).addButton('Cancel').find('input[name="solution"]')[0].checked = true;   // abstract_fixer.jsxi:51
+		});
+	
+	if (this.__simularErrors){
+		d.addButton('Apply to all',                                                // abstract_fixer.jsxi:60
+			function (){                                                           // abstract_fixer.jsxi:60
+				var id = this.find('input[name="solution"]:checked').data('solution-id');
+				
+				try {
+					var fns = [ s[id].fn ];
+					
+					s[id].fn(c);                                                   // abstract_fixer.jsxi:64
+					
+					for (var __4 = 0; __4 < __that.__simularErrors.length; __4 ++){
+						var simularError = __that.__simularErrors[__4];
+						
+						var fixer = RestorationWizard.createFixer(__that.__car, simularError);
+						
+						var simularSolution = fixer.solutions.filter(function (arg){
+							return arg && arg.name == s[id].name;                  // abstract_fixer.jsxi:68
+						})[0];
+						
+						if (simularSolution){                                      // abstract_fixer.jsxi:69
+							fns.push(simularSolution.fn);                          // abstract_fixer.jsxi:70
+						}
+					}
+					
+					var i = 0;
+					
+					function next(){                                               // abstract_fixer.jsxi:75
+						if (i < fns.length){                                       // abstract_fixer.jsxi:76
+							fns[i ++](next);                                       // abstract_fixer.jsxi:77
+						} else {
+							c();                                                   // abstract_fixer.jsxi:79
+						}
+					}
+					
+					next();                                                        // abstract_fixer.jsxi:83
+				} catch (err){                                                     // abstract_fixer.jsxi:84
+					__that.__AbstractFixer_error(err);
+				} 
+				
+				console.log(id);                                                   // abstract_fixer.jsxi:88
+			});
+	}
+	
+	d.addButton('Cancel');                                                         // abstract_fixer.jsxi:92
+	d.find('input[name="solution"]')[0].checked = true;                            // abstract_fixer.jsxi:93
 };
-AbstractFixer.prototype.__fixJsonFile = function (filename, fn){                   // abstract_fixer.jsxi:57
+AbstractFixer.prototype.__fixJsonFile = function (filename, fn){                   // abstract_fixer.jsxi:99
 	try {
 		var dat = JSON.flexibleParse(fs.readFileSync(filename));
 		
-		fn(dat);                                                                   // abstract_fixer.jsxi:60
-		fs.writeFileSync(filename,                                                 // abstract_fixer.jsxi:61
+		fn(dat);                                                                   // abstract_fixer.jsxi:102
+		fs.writeFileSync(filename,                                                 // abstract_fixer.jsxi:103
 			JSON.stringify(dat, false, 
-				4));                                                               // abstract_fixer.jsxi:61
-	} catch (err){                                                                 // abstract_fixer.jsxi:62
+				4));                                                               // abstract_fixer.jsxi:103
+	} catch (err){                                                                 // abstract_fixer.jsxi:104
 		this.__AbstractFixer_error(err);
 	} 
 };
-AbstractFixer.__simularFile = function (a, b){                                     // abstract_fixer.jsxi:67
-	a = a.toLowerCase();                                                           // abstract_fixer.jsxi:69
-	b = b.toLowerCase();                                                           // abstract_fixer.jsxi:70
+AbstractFixer.__simularFile = function (a, b){                                     // abstract_fixer.jsxi:109
+	a = a.toLowerCase();                                                           // abstract_fixer.jsxi:111
+	b = b.toLowerCase();                                                           // abstract_fixer.jsxi:112
 	
-	if (b.indexOf(a) !== - 1)                                                      // abstract_fixer.jsxi:71
+	if (b.indexOf(a) !== - 1)                                                      // abstract_fixer.jsxi:113
 		return true;
 	
-	for (var i = a.length - 1; i > a.length / 2; i --)                             // abstract_fixer.jsxi:73
-		if (b.indexOf(a.substr(0, i)) !== - 1)                                     // abstract_fixer.jsxi:74
+	for (var i = a.length - 1; i > a.length / 2; i --)                             // abstract_fixer.jsxi:115
+		if (b.indexOf(a.substr(0, i)) !== - 1)                                     // abstract_fixer.jsxi:116
 			return true;
 	return false;
 };
-AbstractFixer.__simularFiles = function (filename, filter, deep){                  // abstract_fixer.jsxi:79
-	if (filter === undefined)                                                      // abstract_fixer.jsxi:79
-		filter = (function (arg){                                                  // abstract_fixer.jsxi:79
+AbstractFixer.__simularFiles = function (filename, filter, deep, rec){             // abstract_fixer.jsxi:121
+	if (filter === undefined)                                                      // abstract_fixer.jsxi:121
+		filter = (function (arg){                                                  // abstract_fixer.jsxi:121
 	return true;
 });
 
-	if (deep === undefined)                                                        // abstract_fixer.jsxi:79
-		deep = true;                                                               // abstract_fixer.jsxi:79
+	if (deep === undefined)                                                        // abstract_fixer.jsxi:121
+		deep = true;                                                               // abstract_fixer.jsxi:121
+
+	if (rec === undefined)                                                         // abstract_fixer.jsxi:121
+		rec = false;                                                               // abstract_fixer.jsxi:121
 
 	var dir = path.dirname(filename);
 	
 	var basename = path.basename(filename);
 	
-	if (fs.existsSync(dir)){                                                       // abstract_fixer.jsxi:83
-		if (fs.statSync(dir).isDirectory()){                                       // abstract_fixer.jsxi:84
-			return fs.readdirSync(dir).filter(function (arg){                      // abstract_fixer.jsxi:85
-				return AbstractFixer.__simularFile(basename, arg) && (arg != basename || !deep);
-			}).map(function (e){                                                   // abstract_fixer.jsxi:85
-				return dir + '/' + e;                                              // abstract_fixer.jsxi:86
-			}).filter(function (arg){                                              // abstract_fixer.jsxi:87
-				return filter(fs.statSync(arg));                                   // abstract_fixer.jsxi:87
+	if (fs.existsSync(dir)){                                                       // abstract_fixer.jsxi:125
+		if (fs.statSync(dir).isDirectory()){                                       // abstract_fixer.jsxi:126
+			return fs.readdirSync(dir).filter(function (arg){                      // abstract_fixer.jsxi:127
+				return AbstractFixer.__simularFile(basename, arg) && (arg != basename || rec);
+			}).map(function (e){                                                   // abstract_fixer.jsxi:127
+				return dir + '/' + e;                                              // abstract_fixer.jsxi:128
+			}).filter(function (arg){                                              // abstract_fixer.jsxi:129
+				return filter(fs.statSync(arg));                                   // abstract_fixer.jsxi:129
 			});
 		} else {
 			return [];
 		}
-	} else if (deep){                                                              // abstract_fixer.jsxi:91
+	} else if (deep){                                                              // abstract_fixer.jsxi:133
 		var r = [];
 		
-		var s = AbstractFixer.__simularFiles(dir,                                  // abstract_fixer.jsxi:93
-			function (arg){                                                        // abstract_fixer.jsxi:93
-				return arg.isDirectory();                                          // abstract_fixer.jsxi:93
+		var s = AbstractFixer.__simularFiles(dir,                                  // abstract_fixer.jsxi:135
+			function (arg){                                                        // abstract_fixer.jsxi:135
+				return arg.isDirectory();                                          // abstract_fixer.jsxi:135
 			}, 
-			false);
+			false, 
+			true);
 		
-		for (var __3 = 0; __3 < s.length; __3 ++){                                 // abstract_fixer.jsxi:94
-			var d = s[__3];
+		for (var __5 = 0; __5 < s.length; __5 ++){                                 // abstract_fixer.jsxi:136
+			var d = s[__5];
 			
-			r.push.call(r,                                                         // abstract_fixer.jsxi:95
-				AbstractFixer.__simularFiles(d + '/' + basename, filter, false));
+			r.push.call(r,                                                         // abstract_fixer.jsxi:137
+				AbstractFixer.__simularFiles(d + '/' + basename, filter, false, 
+					true));
 		}
-		return r;                                                                  // abstract_fixer.jsxi:97
+		return r;                                                                  // abstract_fixer.jsxi:139
 	} else {
 		return [];
 	}
 };
-AbstractFixer.__restoreFile = function (filename, from, c){                        // abstract_fixer.jsxi:103
-	if (fs.existsSync(filename))                                                   // abstract_fixer.jsxi:104
-		fs.unlinkSync(filename);                                                   // abstract_fixer.jsxi:105
+AbstractFixer.__restoreFile = function (filename, from, c){                        // abstract_fixer.jsxi:145
+	if (fs.existsSync(filename))                                                   // abstract_fixer.jsxi:146
+		fs.unlinkSync(filename);                                                   // abstract_fixer.jsxi:147
 	
-	function mkdirp(d){                                                            // abstract_fixer.jsxi:107
-		if (fs.existsSync(d))                                                      // abstract_fixer.jsxi:108
+	function mkdirp(d){                                                            // abstract_fixer.jsxi:149
+		if (fs.existsSync(d))                                                      // abstract_fixer.jsxi:150
 			return;
 		
-		mkdirp(path.dirname(d));                                                   // abstract_fixer.jsxi:109
-		fs.mkdirSync(d);                                                           // abstract_fixer.jsxi:110
+		mkdirp(path.dirname(d));                                                   // abstract_fixer.jsxi:151
+		fs.mkdirSync(d);                                                           // abstract_fixer.jsxi:152
 	}
 	
-	mkdirp(path.dirname(filename));                                                // abstract_fixer.jsxi:113
-	fs.rename(from,                                                                // abstract_fixer.jsxi:114
-		filename,                                                                  // abstract_fixer.jsxi:114
-		function (err){                                                            // abstract_fixer.jsxi:114
-			if (err){                                                              // abstract_fixer.jsxi:115
-				if (err.code === 'EXDEV'){                                         // abstract_fixer.jsxi:116
-					copy();                                                        // abstract_fixer.jsxi:117
+	mkdirp(path.dirname(filename));                                                // abstract_fixer.jsxi:155
+	fs.rename(from,                                                                // abstract_fixer.jsxi:156
+		filename,                                                                  // abstract_fixer.jsxi:156
+		function (err){                                                            // abstract_fixer.jsxi:156
+			if (err){                                                              // abstract_fixer.jsxi:157
+				if (err.code === 'EXDEV'){                                         // abstract_fixer.jsxi:158
+					copy();                                                        // abstract_fixer.jsxi:159
 				} else {
-					c(err);                                                        // abstract_fixer.jsxi:119
+					c(err);                                                        // abstract_fixer.jsxi:161
 				}
 			} else {
-				c();                                                               // abstract_fixer.jsxi:122
+				c();                                                               // abstract_fixer.jsxi:164
 			}
 		});
 	
-	function copy(){                                                               // abstract_fixer.jsxi:126
+	function copy(){                                                               // abstract_fixer.jsxi:168
 		var rs = fs.createReadStream(from);
 		
 		var ws = fs.createWriteStream(filename);
 		
-		rs.on('error', c);                                                         // abstract_fixer.jsxi:129
-		ws.on('error', c);                                                         // abstract_fixer.jsxi:130
-		rs.on('close',                                                             // abstract_fixer.jsxi:131
-			function (){                                                           // abstract_fixer.jsxi:131
-				c();                                                               // abstract_fixer.jsxi:132
-				fs.unlink(from);                                                   // abstract_fixer.jsxi:133
+		rs.on('error', c);                                                         // abstract_fixer.jsxi:171
+		ws.on('error', c);                                                         // abstract_fixer.jsxi:172
+		rs.on('close',                                                             // abstract_fixer.jsxi:173
+			function (){                                                           // abstract_fixer.jsxi:173
+				c();                                                               // abstract_fixer.jsxi:174
+				fs.unlink(from);                                                   // abstract_fixer.jsxi:175
 			});
-		rs.pipe(ws);                                                               // abstract_fixer.jsxi:135
+		rs.pipe(ws);                                                               // abstract_fixer.jsxi:177
 	}
 };
-AbstractFixer.__tryToRestoreFile = function (filename, filter, callback){          // abstract_fixer.jsxi:139
-	return AbstractFixer.__simularFiles(filename, filter).map(function (e){        // abstract_fixer.jsxi:140
+AbstractFixer.__tryToRestoreFile = function (filename, filter, callback, deep){    // abstract_fixer.jsxi:181
+	return AbstractFixer.__simularFiles(filename, filter, deep).map(function (e){
 		return {
 			name: 'Restore from …' + path.normalize(e).slice(AcDir.root.length), 
-			fn: (function (c){                                                     // abstract_fixer.jsxi:143
-				AbstractFixer.__restoreFile(filename,                              // abstract_fixer.jsxi:144
-					e,                                                             // abstract_fixer.jsxi:144
-					function (err){                                                // abstract_fixer.jsxi:144
-						if (err)                                                   // abstract_fixer.jsxi:145
-							return c(err);                                         // abstract_fixer.jsxi:145
+			fn: (function (c){                                                     // abstract_fixer.jsxi:185
+				AbstractFixer.__restoreFile(filename,                              // abstract_fixer.jsxi:186
+					e,                                                             // abstract_fixer.jsxi:186
+					function (err){                                                // abstract_fixer.jsxi:186
+						if (err)                                                   // abstract_fixer.jsxi:187
+							return c(err);                                         // abstract_fixer.jsxi:187
 						
-						if (callback)                                              // abstract_fixer.jsxi:146
-							callback();                                            // abstract_fixer.jsxi:146
+						if (callback)                                              // abstract_fixer.jsxi:188
+							callback();                                            // abstract_fixer.jsxi:188
 						
-						c();                                                       // abstract_fixer.jsxi:147
+						c();                                                       // abstract_fixer.jsxi:189
 					});
 			})
 		};
 	});
+};
+AbstractFixer.__tryToRestoreFileHere = function (filename, filter, callback){      // abstract_fixer.jsxi:196
+	return AbstractFixer.__tryToRestoreFile(filename, filter, callback, false);
 };
 
 /* Class "MissingBadgeIconFixer" declaration */
@@ -3535,14 +3794,14 @@ MissingBadgeIconFixer.prototype.__MissingBadgeIconFixer_newIcon = function (c){ 
 		});
 };
 Object.defineProperty(MissingBadgeIconFixer.prototype, 
-	'__title', 
+	'title', 
 	{
 		get: (function (){
 			return 'Badge icon missing';                                           // error_badge_missing.jsxi:10
 		})
 	});
 Object.defineProperty(MissingBadgeIconFixer.prototype, 
-	'__solutions', 
+	'solutions', 
 	{
 		get: (function (){
 			var __that = this;
@@ -3589,14 +3848,14 @@ MissingDataNameFixer.prototype.__MissingDataNameFixer_useId = function (c){     
 	c();                                                                           // error_data_fields.jsxi:21
 };
 Object.defineProperty(MissingDataNameFixer.prototype, 
-	'__title', 
+	'title', 
 	{
 		get: (function (){
 			return 'Car name is missing';                                          // error_data_fields.jsxi:24
 		})
 	});
 Object.defineProperty(MissingDataNameFixer.prototype, 
-	'__solutions', 
+	'solutions', 
 	{
 		get: (function (){
 			return [
@@ -3649,14 +3908,14 @@ MissingDataBrandFixer.prototype.__MissingDataBrandFixer_extractBrand = function 
 	})[0];
 };
 Object.defineProperty(MissingDataBrandFixer.prototype, 
-	'__title', 
+	'title', 
 	{
 		get: (function (){
 			return 'Car brand is missing';                                         // error_data_fields.jsxi:59
 		})
 	});
 Object.defineProperty(MissingDataBrandFixer.prototype, 
-	'__solutions', 
+	'solutions', 
 	{
 		get: (function (){
 			return [
@@ -3718,14 +3977,14 @@ WrongDataParentFixer.prototype.__WrongDataParentFixer_makeInd = function (c){   
 	c();                                                                           // error_data_fields.jsxi:100
 };
 Object.defineProperty(WrongDataParentFixer.prototype, 
-	'__title', 
+	'title', 
 	{
 		get: (function (){
 			return 'Parent id is incorrect';                                       // error_data_fields.jsxi:103
 		})
 	});
 Object.defineProperty(WrongDataParentFixer.prototype, 
-	'__solutions', 
+	'solutions', 
 	{
 		get: (function (){
 			return [
@@ -3755,14 +4014,14 @@ MissingDataFileFixer.prototype.__reloadAfter = function (){                     
 	this.__car.loadData();                                                         // error_data_file.jsxi:3
 };
 Object.defineProperty(MissingDataFileFixer.prototype, 
-	'__title', 
+	'title', 
 	{
 		get: (function (){
 			return 'File ui/ui_car.json is missing';                               // error_data_file.jsxi:6
 		})
 	});
 Object.defineProperty(MissingDataFileFixer.prototype, 
-	'__solutions', 
+	'solutions', 
 	{
 		get: (function (){
 			return AbstractFixer.__tryToRestoreFile(this.__car.json,               // error_data_file.jsxi:7
@@ -3784,7 +4043,7 @@ __prototypeExtend(DamagedDataFileFixer,
 DamagedDataFileFixer.prototype.__reloadAfter = function (){                        // error_data_file.jsxi:14
 	this.__car.loadData();                                                         // error_data_file.jsxi:15
 };
-DamagedDataFileFixer.prototype.__restore = function (c){                           // error_data_file.jsxi:18
+DamagedDataFileFixer.prototype.__DamagedDataFileFixer_restore = function (c){      // error_data_file.jsxi:18
 	var parsed = UiJsonDamaged.parseCarFile(this.__car.json);
 	
 	if (!fs.existsSync(this.__car.json + '~at_bak')){                              // error_data_file.jsxi:20
@@ -3797,18 +4056,21 @@ DamagedDataFileFixer.prototype.__restore = function (c){                        
 	c();                                                                           // error_data_file.jsxi:24
 };
 Object.defineProperty(DamagedDataFileFixer.prototype, 
-	'__title', 
+	'title', 
 	{
 		get: (function (){
 			return 'File ui/ui_car.json is damaged';                               // error_data_file.jsxi:27
 		})
 	});
 Object.defineProperty(DamagedDataFileFixer.prototype, 
-	'__solutions', 
+	'solutions', 
 	{
 		get: (function (){
 			return [
-				{ name: 'Try to restore', fn: __bindOnce(this, '__restore') }
+				{
+					name: 'Try to restore',                                        // error_data_file.jsxi:29
+					fn: __bindOnce(this, '__DamagedDataFileFixer_restore')
+				}
 			].concat(AbstractFixer.__tryToRestoreFile(this.__car.json,             // error_data_file.jsxi:30
 				function (arg){                                                    // error_data_file.jsxi:31
 					return arg.isFile() && arg.size > 10 && arg.size < 1e5;        // error_data_file.jsxi:31
@@ -3825,33 +4087,33 @@ function MissingSkinsDirectoryFixer(){                                          
 }
 __prototypeExtend(MissingSkinsDirectoryFixer, 
 	AbstractFixer);
-MissingSkinsDirectoryFixer.prototype.__MissingSkinsDirectoryFixer_createNew = function (c){
-	fs.mkdirSync(this.__car.skinsDir);                                             // error_skins_directory.jsxi:3
-	fs.mkdirSync(this.__car.skinsDir + '/default');                                // error_skins_directory.jsxi:4
-	c();                                                                           // error_skins_directory.jsxi:5
+MissingSkinsDirectoryFixer.prototype.__reloadAfter = function (){                  // error_skins_directory.jsxi:2
+	this.__car.loadSkins();                                                        // error_skins_directory.jsxi:3
 };
-MissingSkinsDirectoryFixer.prototype.__reloadAfter = function (){                  // error_skins_directory.jsxi:13
-	this.__car.loadSkins();                                                        // error_skins_directory.jsxi:14
+MissingSkinsDirectoryFixer.prototype.__MissingSkinsDirectoryFixer_createNew = function (c){
+	fs.mkdirSync(this.__car.skinsDir);                                             // error_skins_directory.jsxi:7
+	fs.mkdirSync(this.__car.skinsDir + '/default');                                // error_skins_directory.jsxi:8
+	c();                                                                           // error_skins_directory.jsxi:9
 };
 Object.defineProperty(MissingSkinsDirectoryFixer.prototype, 
-	'__title', 
+	'title', 
 	{
 		get: (function (){
-			return 'Skins folder is missing';                                      // error_skins_directory.jsxi:8
+			return 'Skins folder is missing';                                      // error_skins_directory.jsxi:12
 		})
 	});
 Object.defineProperty(MissingSkinsDirectoryFixer.prototype, 
-	'__solutions', 
+	'solutions', 
 	{
 		get: (function (){
 			return [
 				{
-					name: 'Create new with empty skin',                            // error_skins_directory.jsxi:10
+					name: 'Create new with empty skin',                            // error_skins_directory.jsxi:14
 					fn: __bindOnce(this, '__MissingSkinsDirectoryFixer_createNew')
 				}
-			].concat(AbstractFixer.__tryToRestoreFile(this.__car.skinsDir,         // error_skins_directory.jsxi:11
-				function (arg){                                                    // error_skins_directory.jsxi:11
-					return arg.isDirectory();                                      // error_skins_directory.jsxi:11
+			].concat(AbstractFixer.__tryToRestoreFile(this.__car.skinsDir,         // error_skins_directory.jsxi:15
+				function (arg){                                                    // error_skins_directory.jsxi:15
+					return arg.isDirectory();                                      // error_skins_directory.jsxi:15
 				}));
 		})
 	});
@@ -3871,14 +4133,14 @@ EmptySkinsDirectoryFixer.prototype.__EmptySkinsDirectoryFixer_createNew = functi
 	c();                                                                           // error_skins_directory.jsxi:25
 };
 Object.defineProperty(EmptySkinsDirectoryFixer.prototype, 
-	'__title', 
+	'title', 
 	{
 		get: (function (){
 			return 'Skins folder is empty';                                        // error_skins_directory.jsxi:28
 		})
 	});
 Object.defineProperty(EmptySkinsDirectoryFixer.prototype, 
-	'__solutions', 
+	'solutions', 
 	{
 		get: (function (){
 			return [
@@ -3907,14 +4169,14 @@ FileSkinsDirectoryFixer.prototype.__FileSkinsDirectoryFixer_fix = function (c){ 
 	c();                                                                           // error_skins_directory.jsxi:43
 };
 Object.defineProperty(FileSkinsDirectoryFixer.prototype, 
-	'__title', 
+	'title', 
 	{
 		get: (function (){
 			return 'There is a file instead of skins folder';                      // error_skins_directory.jsxi:46
 		})
 	});
 Object.defineProperty(FileSkinsDirectoryFixer.prototype, 
-	'__solutions', 
+	'solutions', 
 	{
 		get: (function (){
 			return [
@@ -3929,6 +4191,99 @@ Object.defineProperty(FileSkinsDirectoryFixer.prototype,
 RestorationWizard.register('skins-missing', MissingSkinsDirectoryFixer);           // error_skins_directory.jsxi:52
 RestorationWizard.register('skins-empty', EmptySkinsDirectoryFixer);               // error_skins_directory.jsxi:53
 RestorationWizard.register('skins-file', FileSkinsDirectoryFixer);                 // error_skins_directory.jsxi:54
+
+/* Class "DamagedSkinDataFixer" declaration */
+var DamagedSkinDataFixer = (function (){                                           // error_skin_data.jsxi:1
+	var DamagedSkinDataFixer = function (){                                        // error_skin_data.jsxi:1
+			AbstractFixer.apply(this, 
+				arguments);
+		}, 
+		defaultSkinData = {                                                        // error_skin_data.jsxi:2
+			skinname: "Undefined",                                                 // error_skin_data.jsxi:2
+			drivername: "",                                                        // error_skin_data.jsxi:4
+			country: "",                                                           // error_skin_data.jsxi:5
+			team: "",                                                              // error_skin_data.jsxi:6
+			number: 0
+		};
+	
+	__prototypeExtend(DamagedSkinDataFixer, 
+		AbstractFixer);
+	DamagedSkinDataFixer.prototype.__reloadAfter = function (){                    // error_skin_data.jsxi:10
+		this.__car.loadSkins();                                                    // error_skin_data.jsxi:11
+	};
+	DamagedSkinDataFixer.prototype.__DamagedSkinDataFixer_remove = function (c){   // error_skin_data.jsxi:14
+		if (!fs.existsSync(this.__object.json + '~at_bak')){                       // error_skin_data.jsxi:15
+			fs.renameSync(this.__object.json, this.__object.json + '~at_bak');     // error_skin_data.jsxi:16
+		} else {
+			fs.unlinkSync(this.__object.json);                                     // error_skin_data.jsxi:18
+		}
+		
+		c();                                                                       // error_skin_data.jsxi:20
+	};
+	DamagedSkinDataFixer.prototype.__DamagedSkinDataFixer_blank = function (c){    // error_skin_data.jsxi:23
+		if (!fs.existsSync(this.__object.json + '~at_bak')){                       // error_skin_data.jsxi:24
+			fs.renameSync(this.__object.json, this.__object.json + '~at_bak');     // error_skin_data.jsxi:25
+		}
+		
+		fs.writeFileSync(this.__object.json,                                       // error_skin_data.jsxi:27
+			JSON.stringify(defaultSkinData, null, 
+				4));                                                               // error_skin_data.jsxi:27
+		c();                                                                       // error_skin_data.jsxi:28
+	};
+	DamagedSkinDataFixer.prototype.__DamagedSkinDataFixer_restore = function (c){
+		var parsed = UiJsonDamaged.parseSkinFile(this.__object.json);
+		
+		for (var k in defaultSkinData)                                             // error_skin_data.jsxi:33
+			if (defaultSkinData.hasOwnProperty(k)){                                // error_skin_data.jsxi:33
+				var v = defaultSkinData[k];
+				
+				if (parsed[k] == null)                                             // error_skin_data.jsxi:34
+					parsed[k] = v;                                                 // error_skin_data.jsxi:34
+			}
+		
+		if (!fs.existsSync(this.__object.json + '~at_bak')){                       // error_skin_data.jsxi:36
+			fs.renameSync(this.__object.json, this.__object.json + '~at_bak');     // error_skin_data.jsxi:37
+		}
+		
+		fs.writeFileSync(this.__object.json,                                       // error_skin_data.jsxi:39
+			JSON.stringify(parsed, null, 
+				4));                                                               // error_skin_data.jsxi:39
+		c();                                                                       // error_skin_data.jsxi:40
+	};
+	Object.defineProperty(DamagedSkinDataFixer.prototype, 
+		'title', 
+		{
+			get: (function (){
+				return 'File skins/' + this.__object.id + '/ui_skin.json is damaged';
+			})
+		});
+	Object.defineProperty(DamagedSkinDataFixer.prototype, 
+		'solutions', 
+		{
+			get: (function (){
+				return [
+					{
+						name: 'Try to restore',                                    // error_skin_data.jsxi:45
+						fn: __bindOnce(this, '__DamagedSkinDataFixer_restore')
+					}, 
+					{
+						name: 'Just remove damaged file',                          // error_skin_data.jsxi:46
+						fn: __bindOnce(this, '__DamagedSkinDataFixer_remove')
+					}, 
+					{
+						name: 'Replace with the new one',                          // error_skin_data.jsxi:47
+						fn: __bindOnce(this, '__DamagedSkinDataFixer_blank')
+					}
+				].concat(AbstractFixer.__tryToRestoreFileHere(this.__object.json, 
+					function (arg){                                                // error_skin_data.jsxi:49
+						return arg.isFile() && arg.size > 10 && arg.size < 1e5;    // error_skin_data.jsxi:49
+					}));
+			})
+		});
+	return DamagedSkinDataFixer;
+})();
+
+RestorationWizard.register('skin-data-damaged', DamagedSkinDataFixer);             // error_skin_data.jsxi:52
 
 /* Class "MissingUpgradeIconFixer" declaration */
 function MissingUpgradeIconFixer(){                                                // error_upgrade_missing.jsxi:1
@@ -3952,14 +4307,14 @@ MissingUpgradeIconFixer.prototype.__MissingUpgradeIconFixer_makeIndependent = fu
 	c();                                                                           // error_upgrade_missing.jsxi:12
 };
 Object.defineProperty(MissingUpgradeIconFixer.prototype, 
-	'__title', 
+	'title', 
 	{
 		get: (function (){
 			return 'Upgrade icon missing';                                         // error_upgrade_missing.jsxi:15
 		})
 	});
 Object.defineProperty(MissingUpgradeIconFixer.prototype, 
-	'__solutions', 
+	'solutions', 
 	{
 		get: (function (){
 			var __that = this;
@@ -4092,7 +4447,7 @@ var ViewDetails = (function (){                                                 
 		if (!car.skins || !car.skins[0])                                           // view_details.jsxi:99
 			return;
 		
-		if (!car.skins.selected){                                                  // view_details.jsxi:100
+		if (!car.selectedSkin){                                                    // view_details.jsxi:100
 			car.selectSkin(car.skins[0].id);                                       // view_details.jsxi:101
 			return;
 		}
@@ -4109,13 +4464,17 @@ var ViewDetails = (function (){                                                 
 				sa.show();                                                         // view_details.jsxi:111
 				ss.empty();                                                        // view_details.jsxi:112
 				sp.attr({                                                          // view_details.jsxi:114
-					'data-id': car.skins.selected.id,                              // view_details.jsxi:114
-					'src': (car.skins.selected.preview + '?' + Math.random()).cssUrl()
+					'data-id': car.selectedSkin.id,                                // view_details.jsxi:114
+					'src': (car.selectedSkin.preview + '?' + Math.random()).cssUrl()
 				});
 				car.skins.forEach(function (e){                                    // view_details.jsxi:119
-					var i = $('<img>').attr({ 'data-id': e.id, 'title': e.id, 'src': e.livery.cssUrl() }).appendTo(ss);
+					var i = $('<img>').attr({                                      // view_details.jsxi:120
+						'data-id': e.id,                                           // view_details.jsxi:120
+						'title': e.displayName,                                    // view_details.jsxi:122
+						'src': e.livery.cssUrl()
+					}).appendTo(ss);                                               // view_details.jsxi:124
 					
-					if (e === car.skins.selected){                                 // view_details.jsxi:125
+					if (e === car.selectedSkin){                                   // view_details.jsxi:125
 						i.addClass('selected');                                    // view_details.jsxi:126
 					}
 				});
@@ -4228,457 +4587,640 @@ var ViewDetails = (function (){                                                 
 			function (car){                                                        // view_details.jsxi:218
 				$('main').show();                                                  // view_details.jsxi:219
 				_selected = car;                                                   // view_details.jsxi:221
+				car.loadEnsure();                                                  // view_details.jsxi:222
 				
-				if (car){                                                          // view_details.jsxi:223
-					outMsg(null);                                                  // view_details.jsxi:224
+				if (car){                                                          // view_details.jsxi:224
+					outMsg(null);                                                  // view_details.jsxi:225
 				} else {
 					return;
 				}
 				
-				outData(car);                                                      // view_details.jsxi:229
-				outBadge(car);                                                     // view_details.jsxi:230
-				outDisabled(car);                                                  // view_details.jsxi:231
-				outChanged(car);                                                   // view_details.jsxi:232
-				outErrors(car);                                                    // view_details.jsxi:233
-				outSkins(car);                                                     // view_details.jsxi:234
+				outData(car);                                                      // view_details.jsxi:230
+				outBadge(car);                                                     // view_details.jsxi:231
+				outDisabled(car);                                                  // view_details.jsxi:232
+				outChanged(car);                                                   // view_details.jsxi:233
+				outErrors(car);                                                    // view_details.jsxi:234
+				outSkins(car);                                                     // view_details.jsxi:235
 			});
-		$('#selected-car').on('keydown',                                           // view_details.jsxi:238
-			function (e){                                                          // view_details.jsxi:239
-				if (e.keyCode == 13){                                              // view_details.jsxi:240
-					this.blur();                                                   // view_details.jsxi:241
+		$('#selected-car').on('keydown',                                           // view_details.jsxi:239
+			function (e){                                                          // view_details.jsxi:240
+				if (e.keyCode == 13){                                              // view_details.jsxi:241
+					this.blur();                                                   // view_details.jsxi:242
 					return false;
 				}
-			}).on('change',                                                        // view_details.jsxi:245
-			function (){                                                           // view_details.jsxi:245
-				if (!_selected || this.readonly || !this.value)                    // view_details.jsxi:246
+			}).on('change',                                                        // view_details.jsxi:246
+			function (){                                                           // view_details.jsxi:246
+				if (!_selected || this.readonly || !this.value)                    // view_details.jsxi:247
 					return;
 				
-				this.value = this.value.slice(0, 64);                              // view_details.jsxi:247
-				Cars.changeData(_selected, 'name', this.value);                    // view_details.jsxi:248
+				this.value = this.value.slice(0, 64);                              // view_details.jsxi:248
+				Cars.changeData(_selected, 'name', this.value);                    // view_details.jsxi:249
 			});
-		$('#selected-car-tags').on('click',                                        // view_details.jsxi:251
-			function (e){                                                          // view_details.jsxi:252
+		$('#selected-car-tags').on('click',                                        // view_details.jsxi:252
+			function (e){                                                          // view_details.jsxi:253
 				if (e.target.tagName === 'LI' && e.target.offsetWidth - e.offsetX < 20){
-					e.target.parentNode.removeChild(e.target);                     // view_details.jsxi:254
-					applyTags();                                                   // view_details.jsxi:255
+					e.target.parentNode.removeChild(e.target);                     // view_details.jsxi:255
+					applyTags();                                                   // view_details.jsxi:256
 				} else {
-					this.querySelector('input').focus();                           // view_details.jsxi:257
+					this.querySelector('input').focus();                           // view_details.jsxi:258
 				}
 			});
-		$('#selected-car-tags input').on('change',                                 // view_details.jsxi:261
-			function (){                                                           // view_details.jsxi:262
-				if (this.value){                                                   // view_details.jsxi:263
+		$('#selected-car-tags input').on('change',                                 // view_details.jsxi:262
+			function (){                                                           // view_details.jsxi:263
+				if (this.value){                                                   // view_details.jsxi:264
 					this.parentNode.insertBefore(document.createElement('li'), this).textContent = this.value;
-					this.value = '';                                               // view_details.jsxi:265
-					applyTags();                                                   // view_details.jsxi:266
+					this.value = '';                                               // view_details.jsxi:266
+					applyTags();                                                   // view_details.jsxi:267
 				}
-			}).on('keydown',                                                       // view_details.jsxi:269
-			function (e){                                                          // view_details.jsxi:269
-				if (e.keyCode == 8 && this.value == ''){                           // view_details.jsxi:270
+			}).on('keydown',                                                       // view_details.jsxi:270
+			function (e){                                                          // view_details.jsxi:270
+				if (e.keyCode == 8 && this.value == ''){                           // view_details.jsxi:271
 					this.parentNode.removeChild(this.parentNode.querySelector('li:last-of-type'));
-					applyTags();                                                   // view_details.jsxi:272
+					applyTags();                                                   // view_details.jsxi:273
 				}
 			});
-		$('#selected-car-desc').elastic().on('change',                             // view_details.jsxi:276
-			function (){                                                           // view_details.jsxi:277
-				if (!_selected || this.readonly)                                   // view_details.jsxi:278
+		$('#selected-car-desc').elastic().on('change',                             // view_details.jsxi:277
+			function (){                                                           // view_details.jsxi:278
+				if (!_selected || this.readonly)                                   // view_details.jsxi:279
 					return;
 				
-				Cars.changeData(_selected, 'description', this.value);             // view_details.jsxi:279
+				Cars.changeData(_selected, 'description', this.value);             // view_details.jsxi:280
 			});
-		$('#selected-car-brand').on('keydown',                                     // view_details.jsxi:282
-			function (e){                                                          // view_details.jsxi:283
-				if (e.keyCode == 13){                                              // view_details.jsxi:284
-					this.blur();                                                   // view_details.jsxi:285
+		$('#selected-car-brand').on('keydown',                                     // view_details.jsxi:283
+			function (e){                                                          // view_details.jsxi:284
+				if (e.keyCode == 13){                                              // view_details.jsxi:285
+					this.blur();                                                   // view_details.jsxi:286
 					return false;
 				}
-			}).on('change',                                                        // view_details.jsxi:289
-			function (e){                                                          // view_details.jsxi:289
-				if (!_selected || this.readonly || !this.value)                    // view_details.jsxi:290
+			}).on('change',                                                        // view_details.jsxi:290
+			function (e){                                                          // view_details.jsxi:290
+				if (!_selected || this.readonly || !this.value)                    // view_details.jsxi:291
 					return;
 				
 				var name = _selected.data.name;
 				
-				if (name.indexOf(_selected.data.brand + ' ') === 0){               // view_details.jsxi:293
-					name = name.substr(_selected.data.brand.length + 1);           // view_details.jsxi:294
+				if (name.indexOf(_selected.data.brand + ' ') === 0){               // view_details.jsxi:294
+					name = name.substr(_selected.data.brand.length + 1);           // view_details.jsxi:295
 				} else {
-					name = null;                                                   // view_details.jsxi:296
+					name = null;                                                   // view_details.jsxi:297
 				}
 				
-				Cars.changeData(_selected, 'brand', this.value);                   // view_details.jsxi:299
+				Cars.changeData(_selected, 'brand', this.value);                   // view_details.jsxi:300
 				
-				if (name){                                                         // view_details.jsxi:301
-					Cars.changeData(_selected, 'name', this.value + ' ' + name);   // view_details.jsxi:302
+				if (name){                                                         // view_details.jsxi:302
+					Cars.changeData(_selected, 'name', this.value + ' ' + name);   // view_details.jsxi:303
 				}
-			}).on('contextmenu',                                                   // view_details.jsxi:305
-			function (e){                                                          // view_details.jsxi:305
-				if (!_selected || !_selected.data)                                 // view_details.jsxi:306
+			}).on('contextmenu',                                                   // view_details.jsxi:306
+			function (e){                                                          // view_details.jsxi:306
+				if (!_selected || !_selected.data)                                 // view_details.jsxi:307
 					return;
 				
 				var menu = new gui.Menu();
 				
-				menu.append(new gui.MenuItem({                                     // view_details.jsxi:309
-					label: 'Filter Brand',                                         // view_details.jsxi:309
-					key: 'F',                                                      // view_details.jsxi:309
-					click: (function (){                                           // view_details.jsxi:309
-						if (!_selected)                                            // view_details.jsxi:310
+				menu.append(new gui.MenuItem({                                     // view_details.jsxi:310
+					label: 'Filter Brand',                                         // view_details.jsxi:310
+					key: 'F',                                                      // view_details.jsxi:310
+					click: (function (){                                           // view_details.jsxi:310
+						if (!_selected)                                            // view_details.jsxi:311
 							return;
 						
-						ViewList.addFilter('brand:' + _selected.data.brand);       // view_details.jsxi:311
+						ViewList.addFilter('brand:' + _selected.data.brand);       // view_details.jsxi:312
 					})
 				}));
-				menu.popup(e.clientX, e.clientY);                                  // view_details.jsxi:314
+				menu.popup(e.clientX, e.clientY);                                  // view_details.jsxi:315
 				return false;
 			});
-		$('#selected-car-class').on('keydown',                                     // view_details.jsxi:318
-			function (e){                                                          // view_details.jsxi:319
-				if (e.keyCode == 13){                                              // view_details.jsxi:320
-					this.blur();                                                   // view_details.jsxi:321
+		$('#selected-car-class').on('keydown',                                     // view_details.jsxi:319
+			function (e){                                                          // view_details.jsxi:320
+				if (e.keyCode == 13){                                              // view_details.jsxi:321
+					this.blur();                                                   // view_details.jsxi:322
 					return false;
 				}
-			}).on('change',                                                        // view_details.jsxi:325
-			function (){                                                           // view_details.jsxi:325
-				if (!_selected || this.readonly)                                   // view_details.jsxi:326
+			}).on('change',                                                        // view_details.jsxi:326
+			function (){                                                           // view_details.jsxi:326
+				if (!_selected || this.readonly)                                   // view_details.jsxi:327
 					return;
 				
-				Cars.changeData(_selected, 'class', this.value);                   // view_details.jsxi:327
-			}).on('contextmenu',                                                   // view_details.jsxi:329
-			function (e){                                                          // view_details.jsxi:329
-				if (!_selected || !_selected.data)                                 // view_details.jsxi:330
+				Cars.changeData(_selected, 'class', this.value);                   // view_details.jsxi:328
+			}).on('contextmenu',                                                   // view_details.jsxi:330
+			function (e){                                                          // view_details.jsxi:330
+				if (!_selected || !_selected.data)                                 // view_details.jsxi:331
 					return;
 				
 				var menu = new gui.Menu();
 				
-				menu.append(new gui.MenuItem({                                     // view_details.jsxi:333
-					label: 'Filter Class',                                         // view_details.jsxi:333
-					key: 'F',                                                      // view_details.jsxi:333
-					click: (function (){                                           // view_details.jsxi:333
-						if (!_selected)                                            // view_details.jsxi:334
+				menu.append(new gui.MenuItem({                                     // view_details.jsxi:334
+					label: 'Filter Class',                                         // view_details.jsxi:334
+					key: 'F',                                                      // view_details.jsxi:334
+					click: (function (){                                           // view_details.jsxi:334
+						if (!_selected)                                            // view_details.jsxi:335
 							return;
 						
-						ViewList.addFilter('class:' + _selected.data.class);       // view_details.jsxi:335
+						ViewList.addFilter('class:' + _selected.data.class);       // view_details.jsxi:336
 					})
 				}));
-				menu.popup(e.clientX, e.clientY);                                  // view_details.jsxi:338
+				menu.popup(e.clientX, e.clientY);                                  // view_details.jsxi:339
 				return false;
 			});
-		$('#selected-car-parent').on('change',                                     // view_details.jsxi:342
-			function (e){                                                          // view_details.jsxi:343
-				if (!_selected)                                                    // view_details.jsxi:344
+		$('#selected-car-parent').on('change',                                     // view_details.jsxi:343
+			function (e){                                                          // view_details.jsxi:344
+				if (!_selected)                                                    // view_details.jsxi:345
 					return;
 				
 				var t = this, v = this.value || null;
 				
-				if (v && !fs.existsSync(_selected.upgrade)){                       // view_details.jsxi:347
-					UpgradeEditor.start(_selected,                                 // view_details.jsxi:348
-						function (arg){                                            // view_details.jsxi:348
-							if (fs.existsSync(_selected.upgrade)){                 // view_details.jsxi:349
-								fn();                                              // view_details.jsxi:350
+				if (v && !fs.existsSync(_selected.upgrade)){                       // view_details.jsxi:348
+					UpgradeEditor.start(_selected,                                 // view_details.jsxi:349
+						function (arg){                                            // view_details.jsxi:349
+							if (fs.existsSync(_selected.upgrade)){                 // view_details.jsxi:350
+								fn();                                              // view_details.jsxi:351
 							} else {
-								t.value = '';                                      // view_details.jsxi:352
+								t.value = '';                                      // view_details.jsxi:353
 							}
 						});
 				} else {
-					fn();                                                          // view_details.jsxi:356
+					fn();                                                          // view_details.jsxi:357
 				}
 				
-				function fn(){                                                     // view_details.jsxi:359
-					_selected.changeParent(v);                                     // view_details.jsxi:360
+				function fn(){                                                     // view_details.jsxi:360
+					_selected.changeParent(v);                                     // view_details.jsxi:361
 				}
 			});
 		[
-			'bhp',                                                                 // view_details.jsxi:364
-			'torque',                                                              // view_details.jsxi:364
-			'weight',                                                              // view_details.jsxi:364
-			'topspeed',                                                            // view_details.jsxi:364
-			'acceleration',                                                        // view_details.jsxi:364
+			'bhp',                                                                 // view_details.jsxi:365
+			'torque',                                                              // view_details.jsxi:365
+			'weight',                                                              // view_details.jsxi:365
+			'topspeed',                                                            // view_details.jsxi:365
+			'acceleration',                                                        // view_details.jsxi:365
 			'pwratio'
-		].forEach(function (e){                                                    // view_details.jsxi:364
-			$('#selected-car-' + e).on('keydown',                                  // view_details.jsxi:365
-				function (e){                                                      // view_details.jsxi:365
-					if (e.keyCode == 13){                                          // view_details.jsxi:366
-						this.blur();                                               // view_details.jsxi:367
+		].forEach(function (e){                                                    // view_details.jsxi:365
+			$('#selected-car-' + e).on('keydown',                                  // view_details.jsxi:366
+				function (e){                                                      // view_details.jsxi:366
+					if (e.keyCode == 13){                                          // view_details.jsxi:367
+						this.blur();                                               // view_details.jsxi:368
 						return false;
 					}
-				}).on('keyup keydown keypress',                                    // view_details.jsxi:370
-				function (e){                                                      // view_details.jsxi:370
-					if (e.keyCode == 32){                                          // view_details.jsxi:371
-						e.stopPropagation();                                       // view_details.jsxi:372
+				}).on('keyup keydown keypress',                                    // view_details.jsxi:371
+				function (e){                                                      // view_details.jsxi:371
+					if (e.keyCode == 32){                                          // view_details.jsxi:372
+						e.stopPropagation();                                       // view_details.jsxi:373
 						
-						if (e.type === 'keyup'){                                   // view_details.jsxi:373
+						if (e.type === 'keyup'){                                   // view_details.jsxi:374
 							return false;
 						}
 					}
-				}).on('change',                                                    // view_details.jsxi:377
-				function (){                                                       // view_details.jsxi:377
-					if (!_selected || this.readonly)                               // view_details.jsxi:378
+				}).on('change',                                                    // view_details.jsxi:378
+				function (){                                                       // view_details.jsxi:378
+					if (!_selected || this.readonly)                               // view_details.jsxi:379
 						return;
 					
-					Cars.changeDataSpecs(_selected, e, this.value);                // view_details.jsxi:379
+					Cars.changeDataSpecs(_selected, e, this.value);                // view_details.jsxi:380
 				});
 		});
-		$('#selected-car-pwratio').on('dblclick contextmenu',                      // view_details.jsxi:383
-			function (e){                                                          // view_details.jsxi:384
-				if (!_selected || !_selected.data || this.readonly)                // view_details.jsxi:385
+		$('#selected-car-pwratio').on('dblclick contextmenu',                      // view_details.jsxi:384
+			function (e){                                                          // view_details.jsxi:385
+				if (!_selected || !_selected.data || this.readonly)                // view_details.jsxi:386
 					return;
 				
-				function r(){                                                      // view_details.jsxi:387
-					if (!_selected || !_selected.data || this.readonly)            // view_details.jsxi:388
+				function r(){                                                      // view_details.jsxi:388
+					if (!_selected || !_selected.data || this.readonly)            // view_details.jsxi:389
 						return;
 					
-					var w = (_selected.data.specs.weight || '').match(/\d+/),      // view_details.jsxi:389
-						p = (_selected.data.specs.bhp || '').match(/\d+/);         // view_details.jsxi:390
+					var w = (_selected.data.specs.weight || '').match(/\d+/),      // view_details.jsxi:390
+						p = (_selected.data.specs.bhp || '').match(/\d+/);         // view_details.jsxi:391
 					
-					if (w && p){                                                   // view_details.jsxi:391
+					if (w && p){                                                   // view_details.jsxi:392
 						Cars.changeDataSpecs(_selected, 'pwratio', + (+ w / + p).toFixed(2) + 'kg/cv');
 					}
 				}
 				
-				if (e.type === 'dblclick'){                                        // view_details.jsxi:396
-					r();                                                           // view_details.jsxi:397
+				if (e.type === 'dblclick'){                                        // view_details.jsxi:397
+					r();                                                           // view_details.jsxi:398
 				} else {
 					var menu = new gui.Menu();
 					
 					menu.append(new gui.MenuItem({ label: 'Recalculate', key: 'R', click: r }));
-					menu.popup(e.clientX, e.clientY);                              // view_details.jsxi:401
+					menu.popup(e.clientX, e.clientY);                              // view_details.jsxi:402
 					return false;
 				}
 			});
-		$('#selected-car-logo').on('click',                                        // view_details.jsxi:407
-			function (){                                                           // view_details.jsxi:408
-				if (!_selected)                                                    // view_details.jsxi:409
+		$('#selected-car-logo').on('click',                                        // view_details.jsxi:408
+			function (){                                                           // view_details.jsxi:409
+				if (!_selected)                                                    // view_details.jsxi:410
 					return;
 				
-				BadgeEditor.start(_selected);                                      // view_details.jsxi:410
+				BadgeEditor.start(_selected);                                      // view_details.jsxi:411
 			});
-		$('#selected-car-upgrade').on('click',                                     // view_details.jsxi:413
-			function (){                                                           // view_details.jsxi:414
-				if (!_selected)                                                    // view_details.jsxi:415
+		$('#selected-car-upgrade').on('click',                                     // view_details.jsxi:414
+			function (){                                                           // view_details.jsxi:415
+				if (!_selected)                                                    // view_details.jsxi:416
 					return;
 				
-				UpgradeEditor.start(_selected);                                    // view_details.jsxi:416
+				UpgradeEditor.start(_selected);                                    // view_details.jsxi:417
 			});
-		$('#selected-car-skins-article').dblclick(function (e){                    // view_details.jsxi:420
-			if (!_selected)                                                        // view_details.jsxi:422
+		$('#selected-car-skins-article').dblclick(function (e){                    // view_details.jsxi:421
+			if (!_selected)                                                        // view_details.jsxi:423
 				return;
 			
-			AcShowroom.start(_selected);                                           // view_details.jsxi:423
-		}).on('contextmenu',                                                       // view_details.jsxi:425
-			function (e){                                                          // view_details.jsxi:425
-				if (!_selected)                                                    // view_details.jsxi:426
+			AcShowroom.start(_selected);                                           // view_details.jsxi:424
+		}).on('contextmenu',                                                       // view_details.jsxi:426
+			function (e){                                                          // view_details.jsxi:426
+				if (!_selected)                                                    // view_details.jsxi:427
 					return;
 				
 				var id = e.target.getAttribute('data-id');
 				
-				if (!id)                                                           // view_details.jsxi:429
+				if (!id)                                                           // view_details.jsxi:430
 					return;
 				
 				var menu = new gui.Menu();
 				
-				menu.append(new gui.MenuItem({                                     // view_details.jsxi:432
-					label: 'Open in Showroom',                                     // view_details.jsxi:432
-					key: 'S',                                                      // view_details.jsxi:432
-					click: (function (){                                           // view_details.jsxi:432
-						if (!_selected)                                            // view_details.jsxi:433
+				menu.append(new gui.MenuItem({                                     // view_details.jsxi:433
+					label: 'Open in Showroom',                                     // view_details.jsxi:433
+					key: 'S',                                                      // view_details.jsxi:433
+					click: (function (){                                           // view_details.jsxi:433
+						if (!_selected)                                            // view_details.jsxi:434
 							return;
 						
-						AcShowroom.start(_selected, id);                           // view_details.jsxi:434
+						AcShowroom.start(_selected, id);                           // view_details.jsxi:435
 					})
 				}));
-				menu.append(new gui.MenuItem({                                     // view_details.jsxi:436
-					label: 'Start Practice',                                       // view_details.jsxi:436
-					key: 'P',                                                      // view_details.jsxi:436
-					click: (function (){                                           // view_details.jsxi:436
-						if (!_selected)                                            // view_details.jsxi:437
+				menu.append(new gui.MenuItem({                                     // view_details.jsxi:437
+					label: 'Open in Custom Showroom (Experimental)',               // view_details.jsxi:437
+					click: (function (){                                           // view_details.jsxi:437
+						if (!_selected)                                            // view_details.jsxi:438
 							return;
 						
-						AcPractice.start(_selected, id);                           // view_details.jsxi:438
+						try {
+							AcTools.Utils.Kn5RenderWrapper.StartDarkRoomPreview(AcDir.root, _selected.id, id);
+						} catch (err){                                             // view_details.jsxi:441
+							ErrorHandler.handled('Cannot start Custom Showroom.', err);
+							return;
+						} 
 					})
 				}));
-				menu.popup(e.clientX, e.clientY);                                  // view_details.jsxi:445
+				menu.append(new gui.MenuItem({                                     // view_details.jsxi:446
+					label: 'Start Practice',                                       // view_details.jsxi:446
+					key: 'P',                                                      // view_details.jsxi:446
+					click: (function (){                                           // view_details.jsxi:446
+						if (!_selected)                                            // view_details.jsxi:447
+							return;
+						
+						AcPractice.start(_selected, id);                           // view_details.jsxi:448
+					})
+				}));
+				menu.popup(e.clientX, e.clientY);                                  // view_details.jsxi:456
 				return false;
 			});
-		$('#selected-car-skins').on('click',                                       // view_details.jsxi:450
-			function (e){                                                          // view_details.jsxi:451
-				if (!_selected)                                                    // view_details.jsxi:452
+		$('#selected-car-skins').on('click',                                       // view_details.jsxi:461
+			function (e){                                                          // view_details.jsxi:462
+				if (!_selected)                                                    // view_details.jsxi:463
 					return;
 				
 				var id = e.target.getAttribute('data-id');
 				
-				if (!id)                                                           // view_details.jsxi:455
+				if (!id)                                                           // view_details.jsxi:466
 					return;
 				
-				_selected.selectSkin(id);                                          // view_details.jsxi:457
+				_selected.selectSkin(id);                                          // view_details.jsxi:468
 			});
-		$('#selected-car-error').click(function (e){                               // view_details.jsxi:461
-			if (!_selected)                                                        // view_details.jsxi:462
+		$('#selected-car-error').click(function (e){                               // view_details.jsxi:472
+			if (!_selected)                                                        // view_details.jsxi:473
 				return;
 			
 			var id = e.target.getAttribute('data-error-id');
 			
-			if (id){                                                               // view_details.jsxi:464
-				RestorationWizard.fix(_selected, id);                              // view_details.jsxi:465
+			if (id){                                                               // view_details.jsxi:475
+				RestorationWizard.fix(_selected, id);                              // view_details.jsxi:476
 			}
 		});
-		$(window).on('keydown',                                                    // view_details.jsxi:470
-			function (e){                                                          // view_details.jsxi:471
-				if (!_selected)                                                    // view_details.jsxi:472
+		$(window).on('keydown',                                                    // view_details.jsxi:481
+			function (e){                                                          // view_details.jsxi:482
+				if (!_selected)                                                    // view_details.jsxi:483
 					return;
 				
-				if (e.keyCode == 83 && e.ctrlKey){                                 // view_details.jsxi:474
-					_selected.save();                                              // view_details.jsxi:476
+				if (e.keyCode == 83 && e.ctrlKey){                                 // view_details.jsxi:485
+					_selected.save();                                              // view_details.jsxi:487
 					return false;
 				}
 			});
 		
 		var cmIgnore = false;
 		
-		$('main').on('contextmenu',                                                // view_details.jsxi:483
-			function (){                                                           // view_details.jsxi:484
-				this.querySelector('footer').classList.toggle('active');           // view_details.jsxi:485
-				cmIgnore = true;                                                   // view_details.jsxi:486
+		$('main').on('contextmenu',                                                // view_details.jsxi:494
+			function (){                                                           // view_details.jsxi:495
+				this.querySelector('footer').classList.toggle('active');           // view_details.jsxi:496
+				cmIgnore = true;                                                   // view_details.jsxi:497
 			});
-		$(window).on('click contextmenu',                                          // view_details.jsxi:489
-			(function (e){                                                         // view_details.jsxi:490
-				if (cmIgnore){                                                     // view_details.jsxi:491
-					cmIgnore = false;                                              // view_details.jsxi:492
-				} else if (e.target !== this){                                     // view_details.jsxi:493
-					this.classList.remove('active');                               // view_details.jsxi:494
+		$(window).on('click contextmenu',                                          // view_details.jsxi:500
+			(function (e){                                                         // view_details.jsxi:501
+				if (cmIgnore){                                                     // view_details.jsxi:502
+					cmIgnore = false;                                              // view_details.jsxi:503
+				} else if (e.target !== this){                                     // view_details.jsxi:504
+					this.classList.remove('active');                               // view_details.jsxi:505
 				}
-			}).bind($('main footer')[0]));                                         // view_details.jsxi:496
-		$('#selected-car-open-directory').click(function (){                       // view_details.jsxi:499
-			if (!_selected)                                                        // view_details.jsxi:500
+			}).bind($('main footer')[0]));                                         // view_details.jsxi:507
+		$('#selected-car-open-directory').click(function (){                       // view_details.jsxi:510
+			if (!_selected)                                                        // view_details.jsxi:511
 				return;
 			
-			Shell.openItem(_selected.path);                                        // view_details.jsxi:501
+			Shell.openItem(_selected.path);                                        // view_details.jsxi:512
 		});
-		$('#selected-car-showroom').click(function (){                             // view_details.jsxi:504
-			if (!_selected)                                                        // view_details.jsxi:505
+		$('#selected-car-showroom').click(function (){                             // view_details.jsxi:515
+			if (!_selected)                                                        // view_details.jsxi:516
 				return;
 			
-			AcShowroom.start(_selected);                                           // view_details.jsxi:506
+			AcShowroom.start(_selected);                                           // view_details.jsxi:517
 		});
-		$('#selected-car-showroom-select').click(function (){                      // view_details.jsxi:509
-			if (!_selected)                                                        // view_details.jsxi:510
+		$('#selected-car-showroom-select').click(function (){                      // view_details.jsxi:520
+			if (!_selected)                                                        // view_details.jsxi:521
 				return;
 			
-			AcShowroom.select(_selected);                                          // view_details.jsxi:511
+			AcShowroom.select(_selected);                                          // view_details.jsxi:522
 		});
-		$('#selected-car-practice').click(function (){                             // view_details.jsxi:514
-			if (!_selected)                                                        // view_details.jsxi:515
+		$('#selected-car-showroom-select').click(function (){                      // view_details.jsxi:525
+			if (!_selected)                                                        // view_details.jsxi:526
 				return;
 			
-			AcPractice.start(_selected);                                           // view_details.jsxi:516
+			AcShowroom.select(_selected);                                          // view_details.jsxi:527
 		});
-		$('#selected-car-practice-select').click(function (){                      // view_details.jsxi:519
-			if (!_selected)                                                        // view_details.jsxi:520
+		$('#selected-car-showroom-select').click(function (){                      // view_details.jsxi:530
+			if (!_selected)                                                        // view_details.jsxi:531
 				return;
 			
-			AcPractice.select(_selected);                                          // view_details.jsxi:521
+			AcShowroom.select(_selected);                                          // view_details.jsxi:532
 		});
-		$('#selected-car-reload').click(function (){                               // view_details.jsxi:524
-			if (!_selected)                                                        // view_details.jsxi:525
+		$('#selected-car-practice').click(function (){                             // view_details.jsxi:535
+			if (!_selected)                                                        // view_details.jsxi:536
 				return;
 			
-			if (_selected.changed){                                                // view_details.jsxi:527
-				new Dialog('Reload',                                               // view_details.jsxi:528
+			AcPractice.start(_selected);                                           // view_details.jsxi:537
+		});
+		$('#selected-car-practice-select').click(function (){                      // view_details.jsxi:540
+			if (!_selected)                                                        // view_details.jsxi:541
+				return;
+			
+			AcPractice.select(_selected);                                          // view_details.jsxi:542
+		});
+		$('#selected-car-reload').click(function (){                               // view_details.jsxi:545
+			if (!_selected)                                                        // view_details.jsxi:546
+				return;
+			
+			if (_selected.changed){                                                // view_details.jsxi:548
+				new Dialog('Reload',                                               // view_details.jsxi:549
 					[ 'Your changes will be lost. Are you sure?' ], 
-					reload);                                                       // view_details.jsxi:530
+					reload);                                                       // view_details.jsxi:551
 			} else {
-				reload();                                                          // view_details.jsxi:532
+				reload();                                                          // view_details.jsxi:553
 			}
 			
-			function reload(){                                                     // view_details.jsxi:535
-				Cars.reload(_selected);                                            // view_details.jsxi:536
+			function reload(){                                                     // view_details.jsxi:556
+				Cars.reload(_selected);                                            // view_details.jsxi:557
 			}
 		});
-		$('#selected-car-save').click(function (){                                 // view_details.jsxi:541
-			if (!_selected)                                                        // view_details.jsxi:542
+		$('#selected-car-save').click(function (){                                 // view_details.jsxi:562
+			if (!_selected)                                                        // view_details.jsxi:563
 				return;
 			
-			_selected.save();                                                      // view_details.jsxi:543
+			_selected.save();                                                      // view_details.jsxi:564
 		});
-		$('#selected-car-update-description').click(function (){                   // view_details.jsxi:546
-			if (!_selected)                                                        // view_details.jsxi:547
+		$('#selected-car-update-description').click(function (){                   // view_details.jsxi:567
+			if (!_selected)                                                        // view_details.jsxi:568
 				return;
 			
-			UpdateDescription.update(_selected);                                   // view_details.jsxi:548
+			UpdateDescription.update(_selected);                                   // view_details.jsxi:569
 		});
-		$('#selected-car-update-previews').click(function (){                      // view_details.jsxi:551
-			if (!_selected)                                                        // view_details.jsxi:552
+		$('#selected-car-update-previews').click(function (){                      // view_details.jsxi:572
+			if (!_selected)                                                        // view_details.jsxi:573
 				return;
 			
-			AcShowroom.shot(_selected);                                            // view_details.jsxi:553
+			AcShowroom.shot(_selected);                                            // view_details.jsxi:574
 		});
-		$('#selected-car-update-previews-manual').click(function (){               // view_details.jsxi:556
-			if (!_selected)                                                        // view_details.jsxi:557
+		$('#selected-car-update-previews-manual').click(function (){               // view_details.jsxi:577
+			if (!_selected)                                                        // view_details.jsxi:578
 				return;
 			
-			AcShowroom.shot(_selected, true);                                      // view_details.jsxi:558
+			AcShowroom.shot(_selected, true);                                      // view_details.jsxi:579
 		});
-		$('#selected-car-disable').click(function (){                              // view_details.jsxi:561
-			if (!_selected)                                                        // view_details.jsxi:562
+		$('#selected-car-disable').click(function (){                              // view_details.jsxi:582
+			if (!_selected)                                                        // view_details.jsxi:583
 				return;
 			
-			_selected.toggle();                                                    // view_details.jsxi:563
+			_selected.toggle();                                                    // view_details.jsxi:584
 		});
-		$('#selected-car-additional').on('click contextmenu',                      // view_details.jsxi:566
-			function (e){                                                          // view_details.jsxi:566
-				if (!_selected)                                                    // view_details.jsxi:567
+		$('#selected-car-additional').on('click contextmenu',                      // view_details.jsxi:587
+			function (e){                                                          // view_details.jsxi:587
+				if (!_selected)                                                    // view_details.jsxi:588
 					return;
 				
 				var menu = new gui.Menu();
 				
-				menu.append(new gui.MenuItem({                                     // view_details.jsxi:570
-					label: 'Fix SUSP_XX error',                                    // view_details.jsxi:570
-					click: (function (){                                           // view_details.jsxi:570
-						$('main footer').removeClass('active');                    // view_details.jsxi:571
+				menu.append(new gui.MenuItem({                                     // view_details.jsxi:592
+					label: 'Update Ambient Shadows',                               // view_details.jsxi:592
+					click: (function (){                                           // view_details.jsxi:592
+						$('main footer').removeClass('active');                    // view_details.jsxi:593
 						
-						if (!_selected)                                            // view_details.jsxi:572
+						if (!_selected)                                            // view_details.jsxi:594
 							return;
-						
-						AcTools;                                                   // view_details.jsxi:573
 						
 						try {
-							var res = AcTools.Utils.Kn5Fixer.FixSuspensionWrapper(AcDir.root, _selected.id);
-						} catch (err){                                             // view_details.jsxi:577
-							ErrorHandler.handled('Cannot fix car.', err);          // view_details.jsxi:578
+							AcTools.Utils.Kn5RenderWrapper.UpdateAmbientShadows(AcDir.root, _selected.id);
+						} catch (err){                                             // view_details.jsxi:598
+							ErrorHandler.handled('Cannot update shadows.', err);   // view_details.jsxi:599
 							return;
 						} 
-						
-						if (res){                                                  // view_details.jsxi:582
-							ErrorHandler.handled('Cannot fix car.', res);          // view_details.jsxi:583
-							return;
-						}
-						
-						new Dialog('Done', 'Successfully fixed.');                 // view_details.jsxi:587
 					})
 				}));
-				menu.append(new gui.MenuItem({                                     // view_details.jsxi:590
-					label: 'Delete car',                                           // view_details.jsxi:590
-					click: (function (){                                           // view_details.jsxi:590
-						$('main footer').removeClass('active');                    // view_details.jsxi:591
+				menu.append(new gui.MenuItem({                                     // view_details.jsxi:604
+					label: 'Change Body Ambient Shadow Size',                      // view_details.jsxi:604
+					click: (function (){                                           // view_details.jsxi:604
+						$('main footer').removeClass('active');                    // view_details.jsxi:605
 						
-						if (!_selected)                                            // view_details.jsxi:592
+						if (!_selected)                                            // view_details.jsxi:606
 							return;
 						
-						new Dialog('Delete ' + _selected.displayName,              // view_details.jsxi:594
-							'Folder will be removed to the Recycle Bin. Are you sure?', 
-							function (arg){                                        // view_details.jsxi:594
-								if (!_selected)                                    // view_details.jsxi:595
+						var currentSize = AcTools.Utils.Kn5RenderWrapper.GetBodyAmbientShadowSize(_selected.path).split(',');
+						
+						var d = new Dialog('Body Ambient Shadow',                  // view_details.jsxi:609
+							[
+								'<h6>Size (in meters)</h6>',                       // view_details.jsxi:610
+								'<label style="display:inline-block;width:160px;line-height:24px">Width: <input id="body-ambient-shadow-width" type="number" step="0.1" min="0.8" max="6.0" style="width: 80px;float: right;margin-right: 20px;"></label>', 
+								'<label style="display:inline-block;width:160px;line-height:24px">Length: <input id="body-ambient-shadow-height" type="number" step="0.1" min="0.8" max="6.0" style="width: 80px;float: right;margin-right: 20px;"></label>'
+							], 
+							function (){                                           // view_details.jsxi:613
+								var w = + d.content.find('#body-ambient-shadow-width').val();
+								
+								if (Number.isNaN(w))                               // view_details.jsxi:615
+									w = currentSize[0];                            // view_details.jsxi:615
+								
+								var h = + d.content.find('#body-ambient-shadow-height').val();
+								
+								if (Number.isNaN(h))                               // view_details.jsxi:618
+									h = currentSize[1];                            // view_details.jsxi:618
+								
+								AcTools.Utils.Kn5RenderWrapper.SetBodyAmbientShadowSize(_selected.path, w, h);
+							});
+						
+						d.content.find('#body-ambient-shadow-width').val(currentSize[0]);
+						d.content.find('#body-ambient-shadow-height').val(currentSize[1]);
+					})
+				}));
+				menu.append(new gui.MenuItem({                                     // view_details.jsxi:627
+					label: 'Fix SUSP_XX error',                                    // view_details.jsxi:627
+					click: (function (){                                           // view_details.jsxi:627
+						$('main footer').removeClass('active');                    // view_details.jsxi:628
+						
+						if (!_selected)                                            // view_details.jsxi:629
+							return;
+						
+						try {
+							AcTools.Utils.Kn5Fixer.FixSuspensionWrapper(AcDir.root, _selected.id);
+						} catch (err){                                             // view_details.jsxi:633
+							ErrorHandler.handled('Cannot fix car.', err);          // view_details.jsxi:634
+							return;
+						} 
+					})
+				}));
+				
+				if (localStorage.developerMode){                                   // view_details.jsxi:639
+					var devMenu = new gui.MenuItem({ label: 'Developer Tools', submenu: new gui.Menu() });
+					
+					menu.append(devMenu);                                          // view_details.jsxi:641
+					devMenu = devMenu.submenu;                                     // view_details.jsxi:642
+					devMenu.append(new gui.MenuItem({                              // view_details.jsxi:644
+						label: 'Unpack KN5',                                       // view_details.jsxi:644
+						click: (function (){                                       // view_details.jsxi:644
+							$('main footer').removeClass('active');                // view_details.jsxi:645
+							
+							if (!_selected)                                        // view_details.jsxi:646
+								return;
+							
+							try {
+								var kn5 = AcTools.Kn5File.Kn5.FromFile(AcTools.Utils.FileUtils.GetMainCarFile(AcDir.root, _selected.id));
+								
+								var dest = _selected.path + '/unpacked';
+								
+								if (fs.existsSync(dest))                           // view_details.jsxi:651
+									AcTools.Utils.FileUtils.Recycle(dest);         // view_details.jsxi:651
+								
+								kn5.ExportDirectory(dest, false);                  // view_details.jsxi:652
+								
+								if (kn5.RootNode != null){                         // view_details.jsxi:653
+									kn5.Export(AcTools.Kn5File.Kn5.ExportType.Collada, dest + '/model.dae');
+								}
+								
+								Shell.openItem(dest);                              // view_details.jsxi:656
+							} catch (err){                                         // view_details.jsxi:657
+								ErrorHandler.handled('Failed.', err);              // view_details.jsxi:658
+							} 
+						})
+					}));
+					
+					if (fs.existsSync(_selected.path + '/unpacked'))               // view_details.jsxi:662
+						devMenu.append(new gui.MenuItem({                          // view_details.jsxi:662
+							label: 'Repack KN5',                                   // view_details.jsxi:662
+							click: (function (){                                   // view_details.jsxi:662
+								$('main footer').removeClass('active');            // view_details.jsxi:663
+								
+								if (!_selected)                                    // view_details.jsxi:664
 									return;
 								
-								Cars.remove(_selected);                            // view_details.jsxi:596
+								try {
+									var kn5 = AcTools.Kn5File.Kn5.FromDirectory(_selected.path + '/unpacked');
+									
+									var dest = AcTools.Utils.FileUtils.GetMainCarFile(AcDir.root, _selected.id);
+									
+									if (fs.existsSync(dest))                       // view_details.jsxi:669
+										AcTools.Utils.FileUtils.Recycle(dest);     // view_details.jsxi:669
+									
+									kn5.Save(dest, false);                         // view_details.jsxi:670
+								} catch (err){                                     // view_details.jsxi:671
+									ErrorHandler.handled('Failed.', err);          // view_details.jsxi:672
+								} 
+							})
+						}));
+					
+					if (fs.existsSync(_selected.path + '/data.acd'))               // view_details.jsxi:676
+						devMenu.append(new gui.MenuItem({                          // view_details.jsxi:676
+							label: 'Unpack data',                                  // view_details.jsxi:676
+							click: (function (){                                   // view_details.jsxi:676
+								$('main footer').removeClass('active');            // view_details.jsxi:677
+								
+								if (!_selected)                                    // view_details.jsxi:678
+									return;
+								
+								try {
+									var source = _selected.path + '/data.acd';
+									
+									var acd = AcTools.AcdFile.Acd.FromFile(source);
+									
+									var dest = _selected.path + '/data';
+									
+									if (fs.existsSync(dest))                       // view_details.jsxi:684
+										AcTools.Utils.FileUtils.Recycle(dest);     // view_details.jsxi:684
+									
+									acd.ExportDirectory(dest);                     // view_details.jsxi:685
+									Shell.openItem(dest);                          // view_details.jsxi:686
+									AcTools.Utils.FileUtils.Recycle(source);       // view_details.jsxi:687
+								} catch (err){                                     // view_details.jsxi:688
+									ErrorHandler.handled('Failed.', err);          // view_details.jsxi:689
+								} 
+							})
+						}));
+					
+					if (fs.existsSync(_selected.path + '/data'))                   // view_details.jsxi:693
+						devMenu.append(new gui.MenuItem({                          // view_details.jsxi:693
+							label: 'Pack data',                                    // view_details.jsxi:693
+							click: (function (){                                   // view_details.jsxi:693
+								$('main footer').removeClass('active');            // view_details.jsxi:694
+								
+								if (!_selected)                                    // view_details.jsxi:695
+									return;
+								
+								try {
+									var source = _selected.path + '/data';
+									
+									var acd = AcTools.AcdFile.Acd.FromDirectory(source);
+									
+									var dest = _selected.path + '/data.acd';
+									
+									if (fs.existsSync(dest))                       // view_details.jsxi:701
+										AcTools.Utils.FileUtils.Recycle(dest);     // view_details.jsxi:701
+									
+									acd.Save(dest);                                // view_details.jsxi:702
+									AcTools.Utils.FileUtils.Recycle(source);       // view_details.jsxi:703
+								} catch (err){                                     // view_details.jsxi:704
+									ErrorHandler.handled('Failed.', err);          // view_details.jsxi:705
+								} 
+							})
+						}));
+				}
+				
+				menu.append(new gui.MenuItem({                                     // view_details.jsxi:710
+					label: 'Delete car',                                           // view_details.jsxi:710
+					click: (function (){                                           // view_details.jsxi:710
+						$('main footer').removeClass('active');                    // view_details.jsxi:711
+						
+						if (!_selected)                                            // view_details.jsxi:712
+							return;
+						
+						new Dialog('Delete ' + _selected.displayName,              // view_details.jsxi:714
+							'Folder will be removed to the Recycle Bin. Are you sure?', 
+							function (arg){                                        // view_details.jsxi:714
+								if (!_selected)                                    // view_details.jsxi:715
+									return;
+								
+								Cars.remove(_selected);                            // view_details.jsxi:716
 							});
 					})
 				}));
-				menu.popup(e.clientX, e.clientY);                                  // view_details.jsxi:600
+				menu.popup(e.clientX, e.clientY);                                  // view_details.jsxi:720
 				return false;
 			});
 	}
 	
-	(function (){                                                                  // view_details.jsxi:605
-		$(init);                                                                   // view_details.jsxi:606
+	(function (){                                                                  // view_details.jsxi:725
+		$(init);                                                                   // view_details.jsxi:726
 	})();
 	return ViewDetails;
 })();
@@ -4690,101 +5232,101 @@ var ViewList = (function (){                                                    
 		_selected,                                                                 // view_list.jsxi:4
 		_aside = $(document.getElementsByTagName('aside')[0]),                     // view_list.jsxi:5
 		_node = $(document.getElementById('cars-list')),                           // view_list.jsxi:6
-		_sortFn = {                                                                // view_list.jsxi:109
-			id: (function (a, b){                                                  // view_list.jsxi:109
+		_sortFn = {                                                                // view_list.jsxi:111
+			id: (function (a, b){                                                  // view_list.jsxi:111
 				return !a.disabled && b.disabled ? - 1 : a.disabled && !b.disabled ? 1 : a.id.localeCompare(b.id);
 			}), 
-			displayName: (function (a, b){                                         // view_list.jsxi:113
+			displayName: (function (a, b){                                         // view_list.jsxi:115
 				return !a.disabled && b.disabled ? - 1 : a.disabled && !b.disabled ? 1 : a.displayName.localeCompare(b.displayName);
 			})
 		};
 	
-	function scrollToSelected(){                                                   // view_list.jsxi:8
+	function scrollToSelected(){                                                   // view_list.jsxi:10
 		var n = _node[0].querySelector('.selected');
 		
-		if (!n)                                                                    // view_list.jsxi:10
+		if (!n)                                                                    // view_list.jsxi:12
 			return;
 		
-		while (n && n.parentNode !== _node[0])                                     // view_list.jsxi:12
-			n = n.parentNode;                                                      // view_list.jsxi:13
+		while (n && n.parentNode !== _node[0])                                     // view_list.jsxi:14
+			n = n.parentNode;                                                      // view_list.jsxi:15
 		
 		var p = n.offsetTop - n.parentNode.scrollTop;
 		
-		if (p < 50){                                                               // view_list.jsxi:16
-			n.parentNode.scrollTop += p - 50;                                      // view_list.jsxi:17
-		} else if (p > n.parentNode.offsetHeight - 80){                            // view_list.jsxi:18
-			n.parentNode.scrollTop += p + 80 - n.parentNode.offsetHeight;          // view_list.jsxi:19
+		if (p < 50){                                                               // view_list.jsxi:18
+			n.parentNode.scrollTop += p - 50;                                      // view_list.jsxi:19
+		} else if (p > n.parentNode.offsetHeight - 80){                            // view_list.jsxi:20
+			n.parentNode.scrollTop += p + 80 - n.parentNode.offsetHeight;          // view_list.jsxi:21
 		}
 	}
 	
-	ViewList.select = function (car){                                              // view_list.jsxi:23
-		_selected = car;                                                           // view_list.jsxi:24
-		_node.find('.expand').removeClass('expand');                               // view_list.jsxi:25
-		_node.find('.selected').removeClass('selected');                           // view_list.jsxi:26
+	ViewList.select = function (car){                                              // view_list.jsxi:25
+		_selected = car;                                                           // view_list.jsxi:26
+		_node.find('.expand').removeClass('expand');                               // view_list.jsxi:27
+		_node.find('.selected').removeClass('selected');                           // view_list.jsxi:28
 		
-		if (car){                                                                  // view_list.jsxi:28
-			localStorage.selectedCar = car.id;                                     // view_list.jsxi:29
+		if (car){                                                                  // view_list.jsxi:30
+			localStorage.selectedCar = car.id;                                     // view_list.jsxi:31
 			
 			var n = _node.find('[data-id="' + car.id + '"]').addClass('expand').parent().addClass('selected')[0];
 			
-			if (car.parent){                                                       // view_list.jsxi:32
+			if (car.parent){                                                       // view_list.jsxi:34
 				n = _node.find('[data-id="' + car.parent.id + '"]').addClass('expand')[0];
 			}
 			
-			scrollToSelected();                                                    // view_list.jsxi:36
+			scrollToSelected();                                                    // view_list.jsxi:38
 		}
 		
-		mediator.dispatch('select', car);                                          // view_list.jsxi:39
+		mediator.dispatch('select', car);                                          // view_list.jsxi:41
 	};
-	ViewList.selectNear = function (d){                                            // view_list.jsxi:42
-		if (d === undefined)                                                       // view_list.jsxi:42
-			d = 0;                                                                 // view_list.jsxi:42
+	ViewList.selectNear = function (d){                                            // view_list.jsxi:44
+		if (d === undefined)                                                       // view_list.jsxi:44
+			d = 0;                                                                 // view_list.jsxi:44
 	
-		if (!_selected)                                                            // view_list.jsxi:43
+		if (!_selected)                                                            // view_list.jsxi:45
 			return ViewList.select(Cars.list[0]);
 		
 		var n = _node[0].querySelectorAll('[data-id]');
 		
-		for (var p, i = 0; i < n.length; i ++){                                    // view_list.jsxi:46
-			if (n[i].getAttribute('data-id') === _selected.id){                    // view_list.jsxi:47
-				p = i;                                                             // view_list.jsxi:48
+		for (var p, i = 0; i < n.length; i ++){                                    // view_list.jsxi:48
+			if (n[i].getAttribute('data-id') === _selected.id){                    // view_list.jsxi:49
+				p = i;                                                             // view_list.jsxi:50
 				
 				break;
 			}
 		}
 		
-		if (p == null)                                                             // view_list.jsxi:53
+		if (p == null)                                                             // view_list.jsxi:55
 			return;
 		
-		if (d === 0)                                                               // view_list.jsxi:54
-			d = p === n.length - 1 ? - 1 : 1;                                      // view_list.jsxi:54
+		if (d === 0)                                                               // view_list.jsxi:56
+			d = p === n.length - 1 ? - 1 : 1;                                      // view_list.jsxi:56
 		
 		var j = n[(p + d + n.length) % n.length].getAttribute('data-id');
 		
 		ViewList.select(Cars.byName(j));
 	};
-	ViewList.filter = function (v){                                                // view_list.jsxi:59
+	ViewList.filter = function (v){                                                // view_list.jsxi:61
 		var i = _aside.find('#cars-list-filter')[0];
 		
-		if (i.value != v){                                                         // view_list.jsxi:61
-			i.value = v;                                                           // view_list.jsxi:62
+		if (i.value != v){                                                         // view_list.jsxi:63
+			i.value = v;                                                           // view_list.jsxi:64
 		}
 		
-		if (v){                                                                    // view_list.jsxi:65
-			i.style.display = 'block';                                             // view_list.jsxi:66
+		if (v){                                                                    // view_list.jsxi:67
+			i.style.display = 'block';                                             // view_list.jsxi:68
 			
 			var s = v.trim().split(/\s+/);
 			
 			var bb = '', cc = '';
 			
-			var vv = s.filter(function (e){                                        // view_list.jsxi:71
-				if (/^brand:(.*)/.test(e)){                                        // view_list.jsxi:72
-					bb = (bb && bb + '|') + RegExp.$1;                             // view_list.jsxi:73
+			var vv = s.filter(function (e){                                        // view_list.jsxi:73
+				if (/^brand:(.*)/.test(e)){                                        // view_list.jsxi:74
+					bb = (bb && bb + '|') + RegExp.$1;                             // view_list.jsxi:75
 					return false;
 				}
 				
-				if (/^class:(.*)/.test(e)){                                        // view_list.jsxi:77
-					cc = (cc && cc + '|') + RegExp.$1;                             // view_list.jsxi:78
+				if (/^class:(.*)/.test(e)){                                        // view_list.jsxi:79
+					cc = (cc && cc + '|') + RegExp.$1;                             // view_list.jsxi:80
 					return false;
 				}
 				return true;
@@ -4796,256 +5338,256 @@ var ViewList = (function (){                                                    
 			
 			var c = cc && RegExp.fromQuery(cc, true);
 			
-			var f = function (car){                                                // view_list.jsxi:89
-				if (b && (!car.data || !b.test(car.data.brand)))                   // view_list.jsxi:90
+			var f = function (car){                                                // view_list.jsxi:91
+				if (b && (!car.data || !b.test(car.data.brand)))                   // view_list.jsxi:92
 					return false;
 				
-				if (c && (!car.data || !c.test(car.data.class)))                   // view_list.jsxi:91
+				if (c && (!car.data || !c.test(car.data.class)))                   // view_list.jsxi:93
 					return false;
-				return r.test(car.id) || car.data && r.test(car.data.name);        // view_list.jsxi:92
+				return r.test(car.id) || car.data && r.test(car.data.name);        // view_list.jsxi:94
 			};
 			
-			_aside.find('#cars-list > div > [data-id]').each(function (){          // view_list.jsxi:95
+			_aside.find('#cars-list > div > [data-id]').each(function (){          // view_list.jsxi:97
 				this.parentNode.style.display = f(Cars.byName(this.getAttribute('data-id'))) ? null : 'none';
 			});
 		} else {
-			i.style.display = 'hide';                                              // view_list.jsxi:99
-			_aside.find('#cars-list > div').show();                                // view_list.jsxi:100
+			i.style.display = 'hide';                                              // view_list.jsxi:101
+			_aside.find('#cars-list > div').show();                                // view_list.jsxi:102
 		}
 	};
-	ViewList.addFilter = function (v){                                             // view_list.jsxi:104
+	ViewList.addFilter = function (v){                                             // view_list.jsxi:106
 		var a = _aside.find('#cars-list-filter')[0].value;
 		
 		ViewList.filter((a && a + ' ') + v);
 	};
-	ViewList.sort = function (){                                                   // view_list.jsxi:117
+	ViewList.sort = function (){                                                   // view_list.jsxi:119
 		var c = Cars.list.sort(_sortFn.displayName);
 		
 		var n = _node[0];
 		
 		var a = n.children;
 		
-		c.forEach(function (arg){                                                  // view_list.jsxi:122
-			for (var __4 = 0; __4 < a.length; __4 ++){                             // view_list.jsxi:123
-				var s = a[__4];
+		c.forEach(function (arg){                                                  // view_list.jsxi:124
+			for (var __6 = 0; __6 < a.length; __6 ++){                             // view_list.jsxi:125
+				var s = a[__6];
 				
-				if (s.children[0].getAttribute('data-id') == arg.id){              // view_list.jsxi:124
-					n.appendChild(s);                                              // view_list.jsxi:125
+				if (s.children[0].getAttribute('data-id') == arg.id){              // view_list.jsxi:126
+					n.appendChild(s);                                              // view_list.jsxi:127
 					return;
 				}
 			}
 		});
-		scrollToSelected();                                                        // view_list.jsxi:131
+		scrollToSelected();                                                        // view_list.jsxi:133
 	};
 	
-	function init(){                                                               // view_list.jsxi:134
-		Cars.on('scan:start',                                                      // view_list.jsxi:135
-			function (){                                                           // view_list.jsxi:136
-				_aside.find('#cars-list').empty();                                 // view_list.jsxi:137
-				document.body.removeChild(_aside[0]);                              // view_list.jsxi:138
-			}).on('scan:ready',                                                    // view_list.jsxi:140
-			function (list){                                                       // view_list.jsxi:140
-				$('#total-cars').val(list.filter(function (e){                     // view_list.jsxi:141
-					return e.parent == null;                                       // view_list.jsxi:142
-				}).length).attr('title',                                           // view_list.jsxi:143
-					'Including modded versions: {0}'.format(list.length));         // view_list.jsxi:143
+	function init(){                                                               // view_list.jsxi:136
+		Cars.on('scan:start',                                                      // view_list.jsxi:137
+			function (){                                                           // view_list.jsxi:138
+				_aside.find('#cars-list').empty();                                 // view_list.jsxi:139
+				document.body.removeChild(_aside[0]);                              // view_list.jsxi:140
+			}).on('scan:ready',                                                    // view_list.jsxi:142
+			function (list){                                                       // view_list.jsxi:142
+				_aside.find('#total-cars').text(list.filter(function (e){          // view_list.jsxi:143
+					return e.parent == null;                                       // view_list.jsxi:144
+				}).length).attr('title',                                           // view_list.jsxi:145
+					'Including modded versions: {0}'.format(list.length));         // view_list.jsxi:145
 				ViewList.sort();
-				document.body.appendChild(_aside[0]);                              // view_list.jsxi:146
+				document.body.appendChild(_aside[0]);                              // view_list.jsxi:148
 				
-				if (list.length > 0){                                              // view_list.jsxi:148
+				if (list.length > 0){                                              // view_list.jsxi:150
 					ViewList.select(Cars.byName(localStorage.selectedCar) || list[0]);
 				}
-			}).on('new.car',                                                       // view_list.jsxi:152
-			function (car){                                                        // view_list.jsxi:152
+			}).on('new.car',                                                       // view_list.jsxi:154
+			function (car){                                                        // view_list.jsxi:154
 				var s = document.createElement('span');
 				
-				s.textContent = car.displayName;                                   // view_list.jsxi:154
+				s.textContent = car.displayName;                                   // view_list.jsxi:156
 				
-				if (car.disabled)                                                  // view_list.jsxi:155
-					s.classList.add('disabled');                                   // view_list.jsxi:155
+				if (car.disabled)                                                  // view_list.jsxi:157
+					s.classList.add('disabled');                                   // view_list.jsxi:157
 				
-				s.setAttribute('title', car.path);                                 // view_list.jsxi:157
-				s.setAttribute('data-id', car.id);                                 // view_list.jsxi:158
-				s.setAttribute('data-name', car.id);                               // view_list.jsxi:159
-				s.setAttribute('data-path', car.path);                             // view_list.jsxi:160
+				s.setAttribute('title', car.path);                                 // view_list.jsxi:159
+				s.setAttribute('data-id', car.id);                                 // view_list.jsxi:160
+				s.setAttribute('data-name', car.id);                               // view_list.jsxi:161
+				s.setAttribute('data-path', car.path);                             // view_list.jsxi:162
 				
 				var d = document.createElement('div');
 				
-				d.appendChild(s);                                                  // view_list.jsxi:163
+				d.appendChild(s);                                                  // view_list.jsxi:165
 				
-				if (car.children.length > 0){                                      // view_list.jsxi:165
-					d.setAttribute('data-children', car.children.length + 1);      // view_list.jsxi:166
+				if (car.children.length > 0){                                      // view_list.jsxi:167
+					d.setAttribute('data-children', car.children.length + 1);      // view_list.jsxi:168
 				}
 				
-				_node[0].appendChild(d);                                           // view_list.jsxi:169
-			}).on('remove.car',                                                    // view_list.jsxi:171
-			function (car){                                                        // view_list.jsxi:171
-				if (car === _selected){                                            // view_list.jsxi:172
+				_node[0].appendChild(d);                                           // view_list.jsxi:171
+			}).on('remove.car',                                                    // view_list.jsxi:173
+			function (car){                                                        // view_list.jsxi:173
+				if (car === _selected){                                            // view_list.jsxi:174
 					ViewList.selectNear();
 				}
 				
 				var d = _node[0].querySelector('[data-id="' + car.id + '"]').parentNode;
 				
-				d.parentNode.removeChild(d);                                       // view_list.jsxi:177
-			}).on('update.car.data',                                               // view_list.jsxi:179
-			function (car, upd){                                                   // view_list.jsxi:179
+				d.parentNode.removeChild(d);                                       // view_list.jsxi:179
+			}).on('update.car.data',                                               // view_list.jsxi:181
+			function (car, upd){                                                   // view_list.jsxi:181
 				_node.find('[data-id="' + car.id + '"]').text(car.displayName).attr('data-name', car.displayName.toLowerCase());
 				ViewList.filter(_aside.find('#cars-list-filter').val());
 				
-				if (upd === 'update.car.data:name'){                               // view_list.jsxi:184
+				if (upd === 'update.car.data:name'){                               // view_list.jsxi:186
 					ViewList.sort();
 				}
-			}).on('update.car.parent',                                             // view_list.jsxi:188
-			function (car){                                                        // view_list.jsxi:188
+			}).on('update.car.parent',                                             // view_list.jsxi:190
+			function (car){                                                        // view_list.jsxi:190
 				var d = _node[0].querySelector('[data-id="' + car.id + '"]').parentNode;
 				
-				if (car.error.length > 0){                                         // view_list.jsxi:190
+				if (car.error.length > 0){                                         // view_list.jsxi:192
 					var c = d.parentNode;
 					
 					if (c.tagName === 'DIV' && c.querySelectorAll('.error').length == 1){
-						c.classList.remove('error');                               // view_list.jsxi:193
+						c.classList.remove('error');                               // view_list.jsxi:195
 					}
 				}
 				
-				if (car.parent){                                                   // view_list.jsxi:197
+				if (car.parent){                                                   // view_list.jsxi:199
 					var p = _node[0].querySelector('[data-id="' + car.parent.id + '"]').parentNode;
 					
-					p.appendChild(d);                                              // view_list.jsxi:199
+					p.appendChild(d);                                              // view_list.jsxi:201
 					
-					if (d.classList.contains('error')){                            // view_list.jsxi:200
-						d.classList.remove('error');                               // view_list.jsxi:201
-						p.classList.add('error');                                  // view_list.jsxi:202
+					if (d.classList.contains('error')){                            // view_list.jsxi:202
+						d.classList.remove('error');                               // view_list.jsxi:203
+						p.classList.add('error');                                  // view_list.jsxi:204
 					}
 				} else {
-					_node[0].appendChild(d);                                       // view_list.jsxi:205
+					_node[0].appendChild(d);                                       // view_list.jsxi:207
 					ViewList.sort();
 				}
 				
-				scrollToSelected();                                                // view_list.jsxi:209
-			}).on('update.car.children',                                           // view_list.jsxi:211
-			function (car){                                                        // view_list.jsxi:211
+				scrollToSelected();                                                // view_list.jsxi:211
+			}).on('update.car.children',                                           // view_list.jsxi:213
+			function (car){                                                        // view_list.jsxi:213
 				var e = _node[0].querySelector('[data-id="' + car.id + '"]');
 				
-				if (!e)                                                            // view_list.jsxi:213
+				if (!e)                                                            // view_list.jsxi:215
 					return;
 				
-				if (car.children.length){                                          // view_list.jsxi:214
+				if (car.children.length){                                          // view_list.jsxi:216
 					e.parentNode.setAttribute('data-children', car.children.length + 1);
 				} else {
-					e.parentNode.removeAttribute('data-children');                 // view_list.jsxi:217
+					e.parentNode.removeAttribute('data-children');                 // view_list.jsxi:219
 				}
-			}).on('update.car.path',                                               // view_list.jsxi:220
-			function (car){                                                        // view_list.jsxi:220
+			}).on('update.car.path',                                               // view_list.jsxi:222
+			function (car){                                                        // view_list.jsxi:222
 				var e = _node[0].querySelector('[data-id="' + car.id + '"]');
 				
-				if (!e)                                                            // view_list.jsxi:222
+				if (!e)                                                            // view_list.jsxi:224
 					return;
 				
-				e.setAttribute('data-path', car.path);                             // view_list.jsxi:223
-				e.setAttribute('title', car.path);                                 // view_list.jsxi:224
-			}).on('update.car.disabled',                                           // view_list.jsxi:226
-			function (car){                                                        // view_list.jsxi:226
+				e.setAttribute('data-path', car.path);                             // view_list.jsxi:225
+				e.setAttribute('title', car.path);                                 // view_list.jsxi:226
+			}).on('update.car.disabled',                                           // view_list.jsxi:228
+			function (car){                                                        // view_list.jsxi:228
 				var e = _node[0].querySelector('[data-id="' + car.id + '"]');
 				
-				if (!e)                                                            // view_list.jsxi:228
+				if (!e)                                                            // view_list.jsxi:230
 					return;
 				
-				if (car.disabled){                                                 // view_list.jsxi:229
-					e.classList.add('disabled');                                   // view_list.jsxi:230
+				if (car.disabled){                                                 // view_list.jsxi:231
+					e.classList.add('disabled');                                   // view_list.jsxi:232
 				} else {
-					e.classList.remove('disabled');                                // view_list.jsxi:232
+					e.classList.remove('disabled');                                // view_list.jsxi:234
 				}
 				
 				ViewList.sort();
-			}).on('update.car.changed',                                            // view_list.jsxi:237
-			function (car){                                                        // view_list.jsxi:237
+			}).on('update.car.changed',                                            // view_list.jsxi:239
+			function (car){                                                        // view_list.jsxi:239
 				var e = _node[0].querySelector('[data-id="' + car.id + '"]');
 				
-				if (!e)                                                            // view_list.jsxi:239
+				if (!e)                                                            // view_list.jsxi:241
 					return;
 				
-				if (car.changed){                                                  // view_list.jsxi:240
-					e.classList.add('changed');                                    // view_list.jsxi:241
+				if (car.changed){                                                  // view_list.jsxi:242
+					e.classList.add('changed');                                    // view_list.jsxi:243
 				} else {
-					e.classList.remove('changed');                                 // view_list.jsxi:243
+					e.classList.remove('changed');                                 // view_list.jsxi:245
 				}
-			}).on('error',                                                         // view_list.jsxi:246
-			function (car){                                                        // view_list.jsxi:246
+			}).on('error',                                                         // view_list.jsxi:248
+			function (car){                                                        // view_list.jsxi:248
 				var e = _node[0].querySelector('[data-id="' + car.id + '"]');
 				
-				if (!e)                                                            // view_list.jsxi:248
+				if (!e)                                                            // view_list.jsxi:250
 					return;
 				
-				if (car.error.length > 0){                                         // view_list.jsxi:250
-					e.classList.add('error');                                      // view_list.jsxi:251
+				if (car.error.length > 0){                                         // view_list.jsxi:252
+					e.classList.add('error');                                      // view_list.jsxi:253
 				} else {
-					e.classList.remove('error');                                   // view_list.jsxi:253
+					e.classList.remove('error');                                   // view_list.jsxi:255
 				}
 				
-				while (e.parentNode.id !== 'cars-list'){                           // view_list.jsxi:256
-					e = e.parentNode;                                              // view_list.jsxi:257
+				while (e.parentNode.id !== 'cars-list'){                           // view_list.jsxi:258
+					e = e.parentNode;                                              // view_list.jsxi:259
 				}
 				
-				if (car.error.length > 0){                                         // view_list.jsxi:260
-					e.classList.add('error');                                      // view_list.jsxi:261
+				if (car.error.length > 0){                                         // view_list.jsxi:262
+					e.classList.add('error');                                      // view_list.jsxi:263
 				} else {
-					e.classList.remove('error');                                   // view_list.jsxi:263
+					e.classList.remove('error');                                   // view_list.jsxi:265
 				}
 			});
 		_aside.find('#cars-list-filter').on('change paste keyup keypress search', 
-			function (e){                                                          // view_list.jsxi:268
-				if (e.keyCode == 13){                                              // view_list.jsxi:269
-					this.blur();                                                   // view_list.jsxi:270
+			function (e){                                                          // view_list.jsxi:270
+				if (e.keyCode == 13){                                              // view_list.jsxi:271
+					this.blur();                                                   // view_list.jsxi:272
 				}
 				
-				if (e.keyCode == 27){                                              // view_list.jsxi:273
-					this.value = '';                                               // view_list.jsxi:274
-					this.blur();                                                   // view_list.jsxi:275
+				if (e.keyCode == 27){                                              // view_list.jsxi:275
+					this.value = '';                                               // view_list.jsxi:276
+					this.blur();                                                   // view_list.jsxi:277
 				}
 				
 				ViewList.filter(this.value);
-			}).on('keydown',                                                       // view_list.jsxi:280
-			function (e){                                                          // view_list.jsxi:280
-				if (e.keyCode == 8 && !this.value){                                // view_list.jsxi:281
-					this.blur();                                                   // view_list.jsxi:282
+			}).on('keydown',                                                       // view_list.jsxi:282
+			function (e){                                                          // view_list.jsxi:282
+				if (e.keyCode == 8 && !this.value){                                // view_list.jsxi:283
+					this.blur();                                                   // view_list.jsxi:284
 				}
-			}).on('blur',                                                          // view_list.jsxi:285
-			function (){                                                           // view_list.jsxi:285
-				if (!this.value){                                                  // view_list.jsxi:286
-					$(this).hide();                                                // view_list.jsxi:287
+			}).on('blur',                                                          // view_list.jsxi:287
+			function (){                                                           // view_list.jsxi:287
+				if (!this.value){                                                  // view_list.jsxi:288
+					$(this).hide();                                                // view_list.jsxi:289
 				}
 			});
-		$(window).on('keydown',                                                    // view_list.jsxi:292
-			function (e){                                                          // view_list.jsxi:293
-				if (Event.isSomeInput(e))                                          // view_list.jsxi:294
+		$(window).on('keydown',                                                    // view_list.jsxi:294
+			function (e){                                                          // view_list.jsxi:295
+				if (Event.isSomeInput(e))                                          // view_list.jsxi:296
 					return;
 				
-				if (e.ctrlKey || e.altKey || e.shiftKey)                           // view_list.jsxi:295
+				if (e.ctrlKey || e.altKey || e.shiftKey)                           // view_list.jsxi:297
 					return;
 				
 				var f = _aside.find('#cars-list-filter');
 				
 				if (/[a-zA-Z\d]/.test(String.fromCharCode(e.keyCode)) || e.keyCode == 8 && f.val()){
-					f.show()[0].focus();                                           // view_list.jsxi:299
+					f.show()[0].focus();                                           // view_list.jsxi:301
 				}
 				
-				if (e.keyCode === 38){                                             // view_list.jsxi:302
+				if (e.keyCode === 38){                                             // view_list.jsxi:304
 					ViewList.selectNear(- 1);
 					return false;
 				}
 				
-				if (e.keyCode === 40){                                             // view_list.jsxi:307
+				if (e.keyCode === 40){                                             // view_list.jsxi:309
 					ViewList.selectNear(1);
 					return false;
 				}
 			});
-		_aside.find('#cars-list-filter-focus').click(function (){                  // view_list.jsxi:313
-			_aside.find('#cars-list-filter').show()[0].focus();                    // view_list.jsxi:314
+		_aside.find('#cars-list-filter-focus').click(function (){                  // view_list.jsxi:315
+			_aside.find('#cars-list-filter').show()[0].focus();                    // view_list.jsxi:316
 		});
-		_aside.find('#cars-list').click(function (e){                              // view_list.jsxi:318
+		_aside.find('#cars-list').click(function (e){                              // view_list.jsxi:320
 			var car = Cars.byName(e.target.getAttribute('data-id'));
 			
-			if (!car)                                                              // view_list.jsxi:320
+			if (!car)                                                              // view_list.jsxi:322
 				return;
 			
 			ViewList.select(car);
@@ -5053,72 +5595,90 @@ var ViewList = (function (){                                                    
 		
 		var cmIgnore = false;
 		
-		_aside.on('contextmenu',                                                   // view_list.jsxi:326
-			function (){                                                           // view_list.jsxi:327
-				this.querySelector('footer').classList.toggle('active');           // view_list.jsxi:328
-				cmIgnore = true;                                                   // view_list.jsxi:329
+		_aside.on('contextmenu',                                                   // view_list.jsxi:328
+			function (){                                                           // view_list.jsxi:329
+				this.querySelector('footer').classList.toggle('active');           // view_list.jsxi:330
+				cmIgnore = true;                                                   // view_list.jsxi:331
 			});
-		$(window).on('click contextmenu',                                          // view_list.jsxi:332
-			(function (e){                                                         // view_list.jsxi:333
-				if (cmIgnore){                                                     // view_list.jsxi:334
-					cmIgnore = false;                                              // view_list.jsxi:335
-				} else if (e.target !== this){                                     // view_list.jsxi:336
-					this.classList.remove('active');                               // view_list.jsxi:337
+		$(window).on('click contextmenu',                                          // view_list.jsxi:334
+			(function (e){                                                         // view_list.jsxi:335
+				if (cmIgnore){                                                     // view_list.jsxi:336
+					cmIgnore = false;                                              // view_list.jsxi:337
+				} else if (e.target !== this){                                     // view_list.jsxi:338
+					this.classList.remove('active');                               // view_list.jsxi:339
 				}
-			}).bind(_aside.find('footer')[0]));                                    // view_list.jsxi:339
-		_aside.find('#cars-list-open-directory').click(function (){                // view_list.jsxi:342
-			if (!_selected)                                                        // view_list.jsxi:343
+			}).bind(_aside.find('footer')[0]));                                    // view_list.jsxi:341
+		_aside.find('#cars-list-open-directory').click(function (){                // view_list.jsxi:344
+			if (!_selected)                                                        // view_list.jsxi:345
 				return;
 			
-			Shell.openItem(AcDir.cars);                                            // view_list.jsxi:344
+			Shell.openItem(AcDir.cars);                                            // view_list.jsxi:346
 		});
-		_aside.find('#cars-list-reload').click(function (){                        // view_list.jsxi:347
-			if (Cars.list.some(function (e){                                       // view_list.jsxi:348
-				return e.changed;                                                  // view_list.jsxi:349
+		_aside.find('#cars-list-reload').click(function (){                        // view_list.jsxi:349
+			if (Cars.list.some(function (e){                                       // view_list.jsxi:350
+				return e.changed;                                                  // view_list.jsxi:351
 			})){
-				new Dialog('Reload',                                               // view_list.jsxi:351
+				new Dialog('Reload',                                               // view_list.jsxi:353
 					[
 						'<p>{0}</p>'.format('Your changes will be lost. Are you sure?')
 					], 
-					reload);                                                       // view_list.jsxi:353
+					reload);                                                       // view_list.jsxi:355
 			} else {
-				reload();                                                          // view_list.jsxi:355
+				reload();                                                          // view_list.jsxi:357
 			}
 			
-			function reload(){                                                     // view_list.jsxi:358
-				Cars.reloadAll();                                                  // view_list.jsxi:359
+			function reload(){                                                     // view_list.jsxi:360
+				Cars.reloadAll();                                                  // view_list.jsxi:361
 			}
 		});
-		_aside.find('#cars-list-batch').click(function (){                         // view_list.jsxi:364
-			if (_aside.find('#cars-list-filter').val()){                           // view_list.jsxi:365
+		_aside.find('#cars-list-batch').click(function (){                         // view_list.jsxi:366
+			if (_aside.find('#cars-list-filter').val()){                           // view_list.jsxi:367
 				var filtered = [];
 				
 				var n = _node[0].querySelectorAll('[data-id]');
 				
-				for (var i = 0; i < n.length; i ++){                               // view_list.jsxi:369
-					filtered.push(Cars.byName(n[i].getAttribute('data-id')));      // view_list.jsxi:370
+				for (var i = 0; i < n.length; i ++){                               // view_list.jsxi:371
+					filtered.push(Cars.byName(n[i].getAttribute('data-id')));      // view_list.jsxi:372
 				}
 				
-				BatchProcessing.select(filtered);                                  // view_list.jsxi:373
+				BatchProcessing.select(filtered);                                  // view_list.jsxi:375
 			} else {
-				BatchProcessing.select(Cars.list.slice());                         // view_list.jsxi:375
+				BatchProcessing.select(Cars.list.slice());                         // view_list.jsxi:377
 			}
 		});
-		_aside.find('#cars-list-save').click(function (){                          // view_list.jsxi:379
-			Cars.saveAll();                                                        // view_list.jsxi:380
+		_aside.find('#cars-list-save').click(function (){                          // view_list.jsxi:381
+			Cars.saveAll();                                                        // view_list.jsxi:382
 		});
+	}
+	
+	function lazyLoadingProgressInit(){                                            // view_list.jsxi:386
+		var p;
+		
+		Cars.on('lazyscan:start',                                                  // view_list.jsxi:388
+			function (list){                                                       // view_list.jsxi:389
+				p = _aside.find('progress').show()[0];                             // view_list.jsxi:390
+				p.indeterminate = false;                                           // view_list.jsxi:391
+				p.max = list.length;                                               // view_list.jsxi:392
+			}).on('lazyscan:progress',                                             // view_list.jsxi:394
+			function (i, m){                                                       // view_list.jsxi:394
+				p.value = i;                                                       // view_list.jsxi:395
+			}).on('lazyscan:ready',                                                // view_list.jsxi:397
+			function (list){                                                       // view_list.jsxi:397
+				p.style.display = 'none';                                          // view_list.jsxi:398
+			});
 	}
 	
 	Object.defineProperty(ViewList,                                                // view_list.jsxi:1
 		'selected', 
 		{
 			get: (function (){
-				return _selected;                                                  // view_list.jsxi:384
+				return _selected;                                                  // view_list.jsxi:8
 			})
 		});
-	(function (){                                                                  // view_list.jsxi:386
-		init();                                                                    // view_list.jsxi:387
-		mediator.extend(ViewList);                                                 // view_list.jsxi:388
+	(function (){                                                                  // view_list.jsxi:402
+		init();                                                                    // view_list.jsxi:403
+		lazyLoadingProgressInit();                                                 // view_list.jsxi:404
+		mediator.extend(ViewList);                                                 // view_list.jsxi:405
 	})();
 	return ViewList;
 })();
@@ -5280,108 +5840,116 @@ var ViewSettings = (function (){                                                
 				s.updatesCheck = updatesCheck;                                     // view_settings.jsxi:16
 				s.updatesSource = updatesSource;                                   // view_settings.jsxi:17
 				s.aptShowroom = aptShowroom;                                       // view_settings.jsxi:19
-				s.aptFilter = aptFilter;                                           // view_settings.jsxi:20
-				s.aptDisableSweetFx = aptDisableSweetFx;                           // view_settings.jsxi:21
-				s.aptResize = aptResize;                                           // view_settings.jsxi:22
-				s.aptCameraX = aptCameraX;                                         // view_settings.jsxi:23
-				s.aptCameraY = aptCameraY;                                         // view_settings.jsxi:24
-				s.aptCameraDistance = aptCameraDistance;                           // view_settings.jsxi:25
-				s.aptIncreaseDelays = aptIncreaseDelays;                           // view_settings.jsxi:26
+				s.aptMode = aptMode;                                               // view_settings.jsxi:20
+				s.aptFilter = aptFilter;                                           // view_settings.jsxi:21
+				s.aptDisableSweetFx = aptDisableSweetFx;                           // view_settings.jsxi:22
+				s.aptResize = aptResize;                                           // view_settings.jsxi:23
+				s.aptCameraX = aptCameraX;                                         // view_settings.jsxi:24
+				s.aptCameraY = aptCameraY;                                         // view_settings.jsxi:25
+				s.aptCameraDistance = aptCameraDistance;                           // view_settings.jsxi:26
+				s.aptIncreaseDelays = aptIncreaseDelays;                           // view_settings.jsxi:27
 			});
 		}
 		
-		var d = new Dialog('Settings',                                             // view_settings.jsxi:30
-			[
-				'<h6>Assetto Corsa Folder</h6>',                                   // view_settings.jsxi:31
-				'<button id="settings-acdir-select" style="float:right;width:30px">…</button>', 
-				'<input id="settings-acdir" placeholder="…/Assetto Corsa" style="width:calc(100% - 35px)">', 
-				'<h6>Tips</h6>',                                                   // view_settings.jsxi:35
-				'<label><input id="settings-disable-tips" type="checkbox">Disable tips on launch</label>', 
-				'<h6>Database</h6>',                                               // view_settings.jsxi:38
-				'<label><input id="settings-update-database" type="checkbox" disabled>Update databases</label><br>', 
-				'<label><input id="settings-upload-data" type="checkbox">Upload some changes</label>', 
-				'<h6>Updates</h6>',                                                // view_settings.jsxi:42
-				'<label><input id="settings-updates-check" type="checkbox">Check for new versions on launch</label>', 
-				'<select id="settings-updates-source"><option value="stable">Stable</option><option value="last">Beta</option></select>'
-			], 
-			save,                                                                  // view_settings.jsxi:48
-			false).setButton('Save').addButton('Cancel');                          // view_settings.jsxi:48
+		var d = new Dialog('Settings',                                             // view_settings.jsxi:31
+				[
+					'<h6>Assetto Corsa Folder</h6>',                               // view_settings.jsxi:32
+					'<button id="settings-acdir-select" style="float:right;width:30px">…</button>', 
+					'<input id="settings-acdir" placeholder="…/Assetto Corsa" style="width:calc(100% - 35px)">', 
+					'<h6>Tips</h6>',                                               // view_settings.jsxi:36
+					'<label><input id="settings-disable-tips" type="checkbox">Disable tips on launch</label>', 
+					'<h6>Database</h6>',                                           // view_settings.jsxi:39
+					'<label><input id="settings-update-database" type="checkbox" disabled>Update databases</label><br>', 
+					'<label><input id="settings-upload-data" type="checkbox">Upload some changes</label>', 
+					'<h6>Updates</h6>',                                            // view_settings.jsxi:43
+					'<label><input id="settings-updates-check" type="checkbox">Check for new versions on launch</label>', 
+					'<select id="settings-updates-source"><option value="stable">Stable</option><option value="last">Beta</option></select>'
+				], 
+				save,                                                              // view_settings.jsxi:49
+				false).setButton('Save').addButton('Cancel'),                      // view_settings.jsxi:49
+			c = 0;                                                                 // view_settings.jsxi:49
 		
 		var acdirVal;
 		
-		function acdirChange(){                                                    // view_settings.jsxi:52
-			var err = AcDir.check(acdirVal = d.find('#settings-acdir').val());     // view_settings.jsxi:53
+		function acdirChange(){                                                    // view_settings.jsxi:53
+			var err = AcDir.check(acdirVal = d.find('#settings-acdir').val());     // view_settings.jsxi:54
 			
-			$(this).toggleClass('invalid', !!err).attr('title', err || null);      // view_settings.jsxi:54
+			$(this).toggleClass('invalid', !!err).attr('title', err || null);      // view_settings.jsxi:55
 			
-			if (err){                                                              // view_settings.jsxi:55
-				acdirVal = false;                                                  // view_settings.jsxi:56
+			if (err){                                                              // view_settings.jsxi:56
+				acdirVal = false;                                                  // view_settings.jsxi:57
 			}
 		}
 		
-		d.content.find('#settings-acdir').val(AcDir.root).change(acdirChange);     // view_settings.jsxi:60
-		d.content.find('#settings-acdir-select').click(function (){                // view_settings.jsxi:62
+		d.content.find('#settings-acdir').val(AcDir.root).change(acdirChange);     // view_settings.jsxi:61
+		d.content.find('#settings-acdir-select').click(function (){                // view_settings.jsxi:63
 			$('<input type="file" nwdirectory />').attr({ nwworkingdir: d.content.find('#settings-acdir').val() }).change(function (){
-				d.content.find('#settings-acdir').val(this.value);                 // view_settings.jsxi:66
-				acdirChange();                                                     // view_settings.jsxi:67
-			}).click();                                                            // view_settings.jsxi:68
+				d.content.find('#settings-acdir').val(this.value);                 // view_settings.jsxi:67
+				acdirChange();                                                     // view_settings.jsxi:68
+			}).click();                                                            // view_settings.jsxi:69
 		});
 		
 		var disableTips = Settings.get('disableTips');
 		
-		d.content.find('#settings-disable-tips').change(function (arg){            // view_settings.jsxi:73
-			disableTips = this.checked;                                            // view_settings.jsxi:73
-		})[0].checked = disableTips;                                               // view_settings.jsxi:73
+		d.content.find('#settings-disable-tips').change(function (arg){            // view_settings.jsxi:74
+			disableTips = this.checked;                                            // view_settings.jsxi:74
+		})[0].checked = disableTips;                                               // view_settings.jsxi:74
 		
 		var updateDatabase = Settings.get('updateDatabase');
 		
-		d.content.find('#settings-update-database').change(function (arg){         // view_settings.jsxi:77
-			updateDatabase = this.checked;                                         // view_settings.jsxi:77
-		})[0].checked = updateDatabase;                                            // view_settings.jsxi:77
+		d.content.find('#settings-update-database').change(function (arg){         // view_settings.jsxi:78
+			updateDatabase = this.checked;                                         // view_settings.jsxi:78
+		})[0].checked = updateDatabase;                                            // view_settings.jsxi:78
 		
 		var uploadData = Settings.get('uploadData');
 		
-		d.content.find('#settings-upload-data').change(function (arg){             // view_settings.jsxi:80
-			uploadData = this.checked;                                             // view_settings.jsxi:80
-		})[0].checked = uploadData;                                                // view_settings.jsxi:80
+		d.content.find('#settings-upload-data').change(function (arg){             // view_settings.jsxi:81
+			uploadData = this.checked;                                             // view_settings.jsxi:81
+		})[0].checked = uploadData;                                                // view_settings.jsxi:81
 		
 		var updatesCheck = Settings.get('updatesCheck');
 		
-		d.content.find('#settings-updates-check').change(function (arg){           // view_settings.jsxi:84
-			updatesCheck = this.checked;                                           // view_settings.jsxi:84
-		})[0].checked = updatesCheck;                                              // view_settings.jsxi:84
+		d.content.find('#settings-updates-check').change(function (arg){           // view_settings.jsxi:85
+			updatesCheck = this.checked;                                           // view_settings.jsxi:85
+		})[0].checked = updatesCheck;                                              // view_settings.jsxi:85
 		
 		var updatesSource = Settings.get('updatesSource');
 		
-		d.content.find('#settings-updates-source').change(function (arg){          // view_settings.jsxi:87
-			updatesSource = this.value;                                            // view_settings.jsxi:87
-		})[0].value = updatesSource;                                               // view_settings.jsxi:87
+		d.content.find('#settings-updates-source').change(function (arg){          // view_settings.jsxi:88
+			updatesSource = this.value;                                            // view_settings.jsxi:88
+		})[0].value = updatesSource;                                               // view_settings.jsxi:88
 		
-		var apt = d.addTab('Auto-Preview',                                         // view_settings.jsxi:90
+		var apt = d.addTab('Auto-Preview',                                         // view_settings.jsxi:91
 			[
-				'<h6>Showroom</h6>',                                               // view_settings.jsxi:91
-				'<select id="apt-showroom"><option value="">Black Showroom (Recommended)</option>{0}</select>'.format(AcShowroom.list.map(function (e){
-					return '<option value="{0}">{1}</option>'.format(e.id, e.data ? e.data.name : e.id);
-				}).join('')),                                                      // view_settings.jsxi:94
-				'<h6>Filter</h6>',                                                 // view_settings.jsxi:96
-				'<select id="apt-filter"><option value="">Don\'t change</option>{0}</select>'.format(AcFilters.list.map(function (e){
-					return '<option value="{0}">{1}</option>'.format(e.id, e.id);
-				}).join('')),                                                      // view_settings.jsxi:99
+				'<h6>Mode</h6>',                                                   // view_settings.jsxi:92
+				'<select id="apt-mode">' + AcShowroom.modes.map(function (e){      // view_settings.jsxi:93
+					return '<option value="' + e.id + '">' + e.name + '</option>';
+				}).join('') + '</select>',                                         // view_settings.jsxi:95
+				'<h6>Showroom</h6>',                                               // view_settings.jsxi:97
+				'<select id="apt-showroom"><option value="">Black Showroom (Recommended)</option>' + AcShowroom.list.map(function (e){
+					return '<option value="' + e.id + '">' + (e.data ? e.data.name : e.id) + '</option>';
+				}).join('') + '</select>',                                         // view_settings.jsxi:100
+				'<h6>Filter</h6>',                                                 // view_settings.jsxi:102
+				'<select id="apt-filter"><option value="">Don\'t change</option>' + AcFilters.list.map(function (e){
+					return '<option value="' + e.id + '">' + e.id + '</option>';   // view_settings.jsxi:104
+				}).join('') + '</select>',                                         // view_settings.jsxi:105
 				'<label><input id="apt-disable-sweetfx" type="checkbox">Disable SweetFX (Recommended)</label>', 
-				'<h6>Resize</h6>',                                                 // view_settings.jsxi:102
+				'<h6>Resize</h6>',                                                 // view_settings.jsxi:108
 				'<label><input id="apt-resize" type="checkbox">Change size to default 1024×576 (Recommended)</label>', 
-				'<h6>Camera Position</h6>',                                        // view_settings.jsxi:105
+				'<h6>Camera Position</h6>',                                        // view_settings.jsxi:111
 				'<label style="display:inline-block;width:160px;line-height:24px" title="Actually, just simulate mouse move">Rotate X: <input id="apt-camera-x" type="number" step="1" style="width: 80px;float: right;margin-right: 20px;"></label>', 
 				'<label style="display:inline-block;width:160px;line-height:24px" title="Actually, just simulate mouse move">Rotate Y: <input id="apt-camera-y" type="number" step="1" style="width: 80px;float: right;margin-right: 20px;"></label>', 
 				'<label style="display:inline-block;width:160px;line-height:24px">Distance: <input id="apt-camera-distance" type="number" step="0.1" style="width: 80px;float: right;margin-right: 20px;"></label>', 
-				'<h6>Delays</h6>',                                                 // view_settings.jsxi:110
+				'<h6>Delays</h6>',                                                 // view_settings.jsxi:116
 				'<label><input id="apt-increase-delays" type="checkbox">Increased delays</label>'
 			], 
-			save).setButton('Save').addButton('Defaults',                          // view_settings.jsxi:113
-			function (){                                                           // view_settings.jsxi:113
+			save).setButton('Save').addButton('Defaults',                          // view_settings.jsxi:118
+			function (){                                                           // view_settings.jsxi:118
+				apt.content.find('#apt-mode')[0].value = (aptMode = Settings.defaults.aptMode);
+				apt.content.toggleClass('apt-nondefmode', aptMode !== 'default');
 				apt.content.find('#apt-showroom')[0].value = (aptShowroom = Settings.defaults.aptShowroom);
 				
-				if (AcFilters.list.length)                                         // view_settings.jsxi:115
+				if (AcFilters.list.length)                                         // view_settings.jsxi:123
 					apt.content.find('#apt-filter')[0].value = (aptFilter = Settings.defaults.aptFilter);
 				
 				apt.content.find('#apt-disable-sweetfx')[0].checked = (aptDisableSweetFx = Settings.defaults.aptDisableSweetFx);
@@ -5391,128 +5959,146 @@ var ViewSettings = (function (){                                                
 				apt.content.find('#apt-camera-distance')[0].value = (aptCameraDistance = Settings.defaults.aptCameraDistance);
 				apt.content.find('#apt-increase-delays')[0].checked = (aptIncreaseDelays = Settings.defaults.aptIncreaseDelays);
 				return false;
-			}).addButton('Cancel');                                                // view_settings.jsxi:123
+			}).addButton('Cancel');                                                // view_settings.jsxi:131
+		
+		var aptMode = Settings.get('aptMode');
+		
+		apt.content.find('#apt-mode').change(function (arg){                       // view_settings.jsxi:134
+			aptMode = this.value;                                                  // view_settings.jsxi:135
+			apt.content.toggleClass('apt-nondefmode', aptMode !== 'default');      // view_settings.jsxi:136
+		})[0].value = aptMode;                                                     // view_settings.jsxi:137
+		apt.content.toggleClass('apt-nondefmode', aptMode !== 'default');          // view_settings.jsxi:138
 		
 		var aptShowroom = Settings.get('aptShowroom');
 		
-		apt.content.find('#apt-showroom').change(function (arg){                   // view_settings.jsxi:126
-			aptShowroom = this.value;                                              // view_settings.jsxi:126
-		})[0].value = aptShowroom;                                                 // view_settings.jsxi:126
+		apt.content.find('#apt-showroom').change(function (arg){                   // view_settings.jsxi:141
+			aptShowroom = this.value;                                              // view_settings.jsxi:141
+		})[0].value = aptShowroom;                                                 // view_settings.jsxi:141
 		
 		var aptFilter = Settings.get('aptFilter');
 		
-		if (AcFilters.list.length){                                                // view_settings.jsxi:129
-			apt.content.find('#apt-filter').change(function (arg){                 // view_settings.jsxi:130
-				aptFilter = this.value;                                            // view_settings.jsxi:130
-			})[0].value = aptFilter;                                               // view_settings.jsxi:130
+		if (AcFilters.list.length){                                                // view_settings.jsxi:144
+			apt.content.find('#apt-filter').change(function (arg){                 // view_settings.jsxi:145
+				aptFilter = this.value;                                            // view_settings.jsxi:145
+			})[0].value = aptFilter;                                               // view_settings.jsxi:145
 			
 			var recFilter = apt.content.find('#apt-filter [value="' + Settings.defaults.aptFilter + '"]')[0];
 			
-			if (recFilter)                                                         // view_settings.jsxi:132
-				recFilter.textContent += ' (Recommended)';                         // view_settings.jsxi:132
+			if (recFilter)                                                         // view_settings.jsxi:147
+				recFilter.textContent += ' (Recommended)';                         // view_settings.jsxi:147
 		} else {
 			apt.content.find('#apt-filter').attr({ disabled: true, title: 'Filters not found' });
 		}
 		
 		var aptDisableSweetFx = Settings.get('aptDisableSweetFx');
 		
-		apt.content.find('#apt-disable-sweetfx').change(function (arg){            // view_settings.jsxi:141
-			aptDisableSweetFx = this.checked;                                      // view_settings.jsxi:141
-		})[0].checked = aptDisableSweetFx;                                         // view_settings.jsxi:141
+		apt.content.find('#apt-disable-sweetfx').change(function (arg){            // view_settings.jsxi:156
+			aptDisableSweetFx = this.checked;                                      // view_settings.jsxi:156
+		})[0].checked = aptDisableSweetFx;                                         // view_settings.jsxi:156
 		
 		var aptResize = Settings.get('aptResize');
 		
-		apt.content.find('#apt-resize').change(function (arg){                     // view_settings.jsxi:144
-			aptResize = this.checked;                                              // view_settings.jsxi:144
-		})[0].checked = aptResize;                                                 // view_settings.jsxi:144
+		apt.content.find('#apt-resize').change(function (arg){                     // view_settings.jsxi:159
+			aptResize = this.checked;                                              // view_settings.jsxi:159
+		})[0].checked = aptResize;                                                 // view_settings.jsxi:159
 		
 		var aptCameraX = Settings.get('aptCameraX');
 		
-		apt.content.find('#apt-camera-x').change(function (arg){                   // view_settings.jsxi:147
-			aptCameraX = this.value;                                               // view_settings.jsxi:147
-		})[0].value = aptCameraX;                                                  // view_settings.jsxi:147
+		apt.content.find('#apt-camera-x').change(function (arg){                   // view_settings.jsxi:162
+			aptCameraX = this.value;                                               // view_settings.jsxi:162
+		})[0].value = aptCameraX;                                                  // view_settings.jsxi:162
 		
 		var aptCameraY = Settings.get('aptCameraY');
 		
-		apt.content.find('#apt-camera-y').change(function (arg){                   // view_settings.jsxi:150
-			aptCameraY = this.value;                                               // view_settings.jsxi:150
-		})[0].value = aptCameraY;                                                  // view_settings.jsxi:150
+		apt.content.find('#apt-camera-y').change(function (arg){                   // view_settings.jsxi:165
+			aptCameraY = this.value;                                               // view_settings.jsxi:165
+		})[0].value = aptCameraY;                                                  // view_settings.jsxi:165
 		
 		var aptCameraDistance = Settings.get('aptCameraDistance');
 		
-		apt.content.find('#apt-camera-distance').change(function (arg){            // view_settings.jsxi:153
-			aptCameraDistance = this.value;                                        // view_settings.jsxi:153
-		})[0].value = aptCameraDistance;                                           // view_settings.jsxi:153
+		apt.content.find('#apt-camera-distance').change(function (arg){            // view_settings.jsxi:168
+			aptCameraDistance = this.value;                                        // view_settings.jsxi:168
+		})[0].value = aptCameraDistance;                                           // view_settings.jsxi:168
 		
 		var aptIncreaseDelays = Settings.get('aptIncreaseDelays');
 		
-		apt.content.find('#apt-increase-delays').change(function (arg){            // view_settings.jsxi:156
-			aptIncreaseDelays = this.checked;                                      // view_settings.jsxi:156
-		})[0].checked = aptIncreaseDelays;                                         // view_settings.jsxi:156
-		d.addTab('About',                                                          // view_settings.jsxi:159
+		apt.content.find('#apt-increase-delays').change(function (arg){            // view_settings.jsxi:171
+			aptIncreaseDelays = this.checked;                                      // view_settings.jsxi:171
+		})[0].checked = aptIncreaseDelays;                                         // view_settings.jsxi:171
+		d.addTab('About',                                                          // view_settings.jsxi:174
 			[
-				'<h6>Version</h6>',                                                // view_settings.jsxi:160
-				gui.App.manifest.version,                                          // view_settings.jsxi:161
-				'<h6>Author</h6>',                                                 // view_settings.jsxi:162
+				'<h6>Version</h6>',                                                // view_settings.jsxi:175
+				'<p id="version">' + gui.App.manifest.version + '</p>',            // view_settings.jsxi:176
+				'<h6>Details</h6>',                                                // view_settings.jsxi:177
+				"<p><a href=\"#\" onclick=\"Shell.openItem('https://ascobash.wordpress.com/2015/06/14/actools-uijson/')\">https://ascobash.wordpress.com/…/actools-uijson/</a></p>", 
+				'<h6>Author</h6>',                                                 // view_settings.jsxi:179
 				'x4fab'
-			]).addButton('Feedback',                                               // view_settings.jsxi:164
-			function (){                                                           // view_settings.jsxi:164
-				feedbackForm();                                                    // view_settings.jsxi:165
+			]).addButton('Feedback',                                               // view_settings.jsxi:181
+			function (){                                                           // view_settings.jsxi:181
+				feedbackForm();                                                    // view_settings.jsxi:182
 				return false;
-			}).addButton('Check for update',                                       // view_settings.jsxi:167
-			function (){                                                           // view_settings.jsxi:167
+			}).addButton('Check for update',                                       // view_settings.jsxi:184
+			function (){                                                           // view_settings.jsxi:184
 				var b = this.buttons.find('button:last-child').text('Please wait...').attr('disabled', true);
 				
-				CheckUpdate.check();                                               // view_settings.jsxi:169
-				CheckUpdate.one('check',                                           // view_settings.jsxi:170
-					function (arg){                                                // view_settings.jsxi:170
-						b.text('Check again').attr('disabled', null);              // view_settings.jsxi:171
+				CheckUpdate.check();                                               // view_settings.jsxi:186
+				CheckUpdate.one('check',                                           // view_settings.jsxi:187
+					function (arg){                                                // view_settings.jsxi:187
+						b.text('Check again').attr('disabled', null);              // view_settings.jsxi:188
 						
-						if (arg === 'check:failed'){                               // view_settings.jsxi:172
+						if (arg === 'check:failed'){                               // view_settings.jsxi:189
 							new Dialog('Check For Update', 'Cannot check for update.');
-						} else if (arg !== 'check:done:found'){                    // view_settings.jsxi:174
+						} else if (arg !== 'check:done:found'){                    // view_settings.jsxi:191
 							new Dialog('Check For Update', 'New version not found.');
 						}
 					});
 				return false;
-			});
+			}).content.find('#version').click(function (){                         // view_settings.jsxi:196
+			if (++ c > 10 && !localStorage.developerMode){                         // view_settings.jsxi:197
+				new Dialog('Developer Mode Enabled',                               // view_settings.jsxi:198
+					'Don\'t spread it around, ok?',                                // view_settings.jsxi:198
+					function (arg){}, 
+					false);
+				localStorage.developerMode = true;                                 // view_settings.jsxi:199
+			}
+		});
 	}
 	
-	function feedbackForm(){                                                       // view_settings.jsxi:182
-		function sendFeedback(v){                                                  // view_settings.jsxi:183
+	function feedbackForm(){                                                       // view_settings.jsxi:204
+		function sendFeedback(v){                                                  // view_settings.jsxi:205
 			d.buttons.find('button:first-child').text('Please wait...').attr('disabled', true);
-			AppServerRequest.sendFeedback(v,                                       // view_settings.jsxi:186
-				function (arg){                                                    // view_settings.jsxi:186
-					d.close();                                                     // view_settings.jsxi:187
+			AppServerRequest.sendFeedback(v,                                       // view_settings.jsxi:208
+				function (arg){                                                    // view_settings.jsxi:208
+					d.close();                                                     // view_settings.jsxi:209
 					
-					if (arg){                                                      // view_settings.jsxi:188
-						new Dialog('Cannot Send Feedback', 'Sorry about that.');   // view_settings.jsxi:189
+					if (arg){                                                      // view_settings.jsxi:210
+						new Dialog('Cannot Send Feedback', 'Sorry about that.');   // view_settings.jsxi:211
 					} else {
-						_prevFeedback = null;                                      // view_settings.jsxi:191
-						new Dialog('Feedback Sent', 'Thank you.');                 // view_settings.jsxi:192
+						_prevFeedback = null;                                      // view_settings.jsxi:213
+						new Dialog('Feedback Sent', 'Thank you.');                 // view_settings.jsxi:214
 					}
 				});
 		}
 		
-		var d = new Dialog('Feedback',                                             // view_settings.jsxi:197
+		var d = new Dialog('Feedback',                                             // view_settings.jsxi:219
 			'<textarea style="width:350px;height:200px;resize:none" maxlength="5000"\
                 placeholder="If you have any ideas or suggestions please let me know"></textarea>', 
-			function (){                                                           // view_settings.jsxi:198
+			function (){                                                           // view_settings.jsxi:220
 				var v = this.content.find('textarea').val().trim();
 				
-				if (v)                                                             // view_settings.jsxi:200
-					sendFeedback(v);                                               // view_settings.jsxi:200
+				if (v)                                                             // view_settings.jsxi:222
+					sendFeedback(v);                                               // view_settings.jsxi:222
 				return false;
 			}, 
-			false).setButton('Send').addButton('Cancel').closeOnEnter(false);      // view_settings.jsxi:202
+			false).setButton('Send').addButton('Cancel').closeOnEnter(false);      // view_settings.jsxi:224
 		
 		d.content.find('textarea').val(_prevFeedback || '').change(function (arg){
-			return _prevFeedback = this.value;                                     // view_settings.jsxi:203
+			return _prevFeedback = this.value;                                     // view_settings.jsxi:225
 		});
 	}
 	
-	(function (){                                                                  // view_settings.jsxi:206
-		$('#settings-open').click(openDialog);                                     // view_settings.jsxi:207
+	(function (){                                                                  // view_settings.jsxi:228
+		$('#settings-open').click(openDialog);                                     // view_settings.jsxi:229
 	})();
 	return ViewSettings;
 })();

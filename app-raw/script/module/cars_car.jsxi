@@ -9,13 +9,13 @@ static partial class Cars {
 
         public get skinsDir '%0/skins'(path);
 
+        public data;
         public get displayName data && data.name || id;
 
-        public data;
         public error = [];
         public changed = false;
 
-        public skins;
+        public skins, selectedSkin;
 
         public parent = null;
         public children = [];
@@ -27,9 +27,9 @@ static partial class Cars {
             disabled = carPath.indexOf(AcDir.carsOff) != -1;
         }
 
-        public addError(id, msg, details){
+        public addError(id, msg, details, object){
             if (hasError(id)) return;
-            error.push({ id: id, msg: msg, details: details });
+            error.push({ id: id, msg: msg, details: details, object: object });
             mediator.dispatch('error:add', this);
         }
 
@@ -55,6 +55,14 @@ static partial class Cars {
 
                 mediator.dispatch('error:remove', this);
             }
+        }
+
+        public getError(id){
+            for (var e in-array error){
+                if (e.id === id) return e;
+            }
+
+            return null;
         }
 
         public hasError(id){
@@ -86,19 +94,10 @@ static partial class Cars {
 
             disabled = d;
             path = newPath;
-            if (skins){
-                skins.forEach(function (e){
-                    for (var n in e){
-                        if (typeof e[n] === 'string'){
-                            e[n] = e[n].replace(a, b);
-                        }
-                    }
-                });
-            }
 
             mediator.dispatch('update.car.disabled', this);
             mediator.dispatch('update.car.path', this);
-            mediator.dispatch('update.car.skins', this);
+            if (skins) mediator.dispatch('update.car.skins', this);
 
             if (parent && !disabled && parent.disabled){
                 toggle(parent, true);
@@ -203,9 +202,9 @@ static partial class Cars {
                 return e.id == skinId;
             })[0];
 
-            if (newSkin == skins.selected) return;
+            if (newSkin == selectedSkin) return;
 
-            skins.selected = newSkin;
+            selectedSkin = newSkin;
             mediator.dispatch('update.car.skins', this);
         }
 

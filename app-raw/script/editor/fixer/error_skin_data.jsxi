@@ -1,0 +1,52 @@
+class DamagedSkinDataFixer extends AbstractFixer {
+    private static var defaultSkinData = {
+        skinname: "Undefined"
+        drivername: ""
+        country: ""
+        team : ""
+        number: 0
+    };
+
+    protected reloadAfter(){
+        car.loadSkins();
+    }
+
+    remove(c){
+        if (!fs.existsSync(object.json + '~at_bak')){
+            fs.renameSync(object.json, object.json + '~at_bak');
+        } else {
+            fs.unlinkSync(object.json);
+        }
+        c();
+    }
+
+    blank(c){
+        if (!fs.existsSync(object.json + '~at_bak')){
+            fs.renameSync(object.json, object.json + '~at_bak');
+        }
+        fs.writeFileSync(object.json, JSON.stringify(defaultSkinData, null, 4));
+        c();
+    }
+
+    restore(c){
+        var parsed = UiJsonDamaged.parseSkinFile(object.json);
+        for (var k, v in-object defaultSkinData){
+            if (parsed[k] == null) parsed[k] = v;
+        }
+        if (!fs.existsSync(object.json + '~at_bak')){
+            fs.renameSync(object.json, object.json + '~at_bak');
+        }
+        fs.writeFileSync(object.json, JSON.stringify(parsed, null, 4));
+        c();
+    }
+
+    public get title 'File skins/%0/ui_skin.json is damaged'(object.id),
+        solutions [
+            { name: 'Try to restore', fn: restore }
+            { name: 'Just remove damaged file', fn: remove }
+            { name: 'Replace with the new one', fn: blank }
+        ].concat(tryToRestoreFileHere(object.json, 
+            lambda arg.isFile() && arg.size > 10 && arg.size < 1e5));
+}
+
+RestorationWizard.register('skin-data-damaged', DamagedSkinDataFixer);

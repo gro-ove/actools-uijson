@@ -7,7 +7,7 @@ class MissingBadgeIconFixer extends AbstractFixer {
         });
     }
 
-    protected get title 'Badge icon missing',
+    public get title 'Badge icon missing',
         solutions [
             // { name: 'Select badge', fn: newIcon }
         ].concat(tryToRestoreFile(car.badge, 

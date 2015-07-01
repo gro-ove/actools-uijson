@@ -1,7 +1,7 @@
 __defineGetter__('AcTools', function (){
     try {
         return AcTools = require('clr').init({
-            assemblies: [ 'native/AcTools.dll' ],
+            assemblies: [ 'native/AcTools.dll', 'native/AcToolsKn5Render.dll'  ],
             global: false
         }).AcTools;
     } catch (err){

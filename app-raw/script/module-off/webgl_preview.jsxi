@@ -1,0 +1,207 @@
+class WebGlPreview {
+    var vertexShader = 'attribute vec3 vertexPosition;'+
+                       'attribute vec2 textureCoord;'+
+                       'uniform mat4 mvMatrix;'+
+                       'uniform mat4 pMatrix;'+
+                       'varying vec2 vTextureCoord;'+
+                       'void main(void) {'+
+                       '  gl_Position = pMatrix * mvMatrix * vec4(vertexPosition, 1.0);'+
+                       '  vTextureCoord = textureCoord; }';
+    
+    var fragmentShader = 'precision mediump float;'+
+                         'varying vec2 vTextureCoord;'+
+                         'uniform sampler2D sampler;'+
+                         'void main(void) {'+
+                         '  gl_FragColor = texture2D(sampler, vec2(vTextureCoord.s, vTextureCoord.t)); }';
+
+    var canvas, gl, _kn5;
+
+    function initCanvas(){
+        canvas.width = canvas.clientWidth; 
+        canvas.height = canvas.clientHeight;
+        gl = canvas.getContext('experimental-webgl');
+        gl.viewport(0, 0, canvas.clientWidth, canvas.clientHeight);
+        gl.clearColor(255, 255, 255, 1);
+        gl.enable(gl.DEPTH_TEST);
+    }
+        
+    function getShader(type, text) {
+        var shader = gl.createShader(type);
+        gl.shaderSource(shader, text);
+        gl.compileShader(shader);
+        if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)){
+            throw gl.getShaderInfoLog(shader);
+        }
+        return shader;
+    }
+
+    var shaderProgram, vpLoc, tcLoc, pmLoc, mvLoc
+    function initShaders(){
+    }
+
+    (canvas, car){
+        this.canvas = canvas;
+        this.car = car;
+        initCanvas();
+
+        kn5 = AcTools.Kn5.Kn5.FromFile(AcTools.Utils.FileUtils.GetMainCarFile(AcDir.root, car.id));
+
+        var shaderProgram = gl.createProgram();
+        gl.attachShader(shaderProgram, getShader(gl.VERTEX_SHADER, vertexShader));
+        gl.attachShader(shaderProgram, getShader(gl.FRAGMENT_SHADER, fragmentShader));
+        gl.linkProgram(shaderProgram);
+
+        gl.useProgram(shaderProgram);
+        var vpLoc = gl.getAttribLocation(shaderProgram, 'vertexPosition');
+        gl.enableVertexAttribArray(vpLoc);
+        var tcLoc = gl.getAttribLocation(shaderProgram, 'textureCoord');
+        gl.enableVertexAttribArray(tcLoc);
+
+        var pmLoc   = gl.getUniformLocation(shaderProgram, 'pMatrix');
+        var mvLoc   = gl.getUniformLocation(shaderProgram, 'mvMatrix');
+        var sampler = gl.getUniformLocation(shaderProgram, 'sampler');        
+
+        function getPerspectiveMatrix( fov, aspectRatio, near, far )    {
+            var f = 1/Math.tan(fov * Math.PI / 360.0); // some divide fov by 2 instead.
+            return new Float32Array([ f/aspectRatio, 0, 0, 0, 0, f, 0, 0, 0, 0, (near+far)/(near-far), -1, 0, 0, 2*near*far/(near-far), 0]);
+        }
+        var pMatrix = getPerspectiveMatrix( 45, canvas.clientWidth/canvas.clientHeight, 0.1, 1000);
+        
+        function pushVertices( obj, v, n) {
+            for ( var i = 0; i<v.length; i++) {
+                obj.v.push( 2*!(v[i]&1)-1, 2*!(v[i]&2)-1, 2*!(v[i]&4)-1 ); // vertices
+                //obj.t.push( i&1?1:0, i&2?1:0 ); // uv mapping
+                obj.n.push.apply( obj.n, n); // normals
+            }
+            obj.t.push( 0,0,1,0,1,1,0,1 ); // uv mapping
+        }
+        
+        KN5 = kn5;
+        var nodes = NODES = new Array(200);
+
+        function getNodes(node){
+            if (!node) return;
+            if (node.NodeClass.CompareTo(AcTools.Kn5.Kn5NodeClass.Base) === 0){
+                var childs = node.Children.ToArray();
+                for (var i = 0; i < childs.Length; i++){
+                    getNodes(childs.Get(i));
+                }
+            } else {
+                var 
+                nodes.push(node);
+            }
+        }
+
+        getNodes(kn5.RootNode);
+        // COLLECT MESH NODES ONLY ONLY.
+        // THERE ARE AROUND TWO HUNDRED OF THEM.
+        // GUESS HOW QUICK?
+        // ELEVEN SECONDS. EVEVEN FUCKING SECONDS.
+        // SOMETHING IN THIS CLR IS TERRIBLY WRONG.
+        // WELL OKAY.
+
+        function getBox() {
+            var obj = { v : [], n : [], t : [], i : []};
+            var van = [ // vertices and normals
+                [[0, 4, 6, 2], [-1, 0, 0]],
+                [[1, 3, 7, 5], [+1, 0, 0]],
+                [[0, 1, 5, 4], [0, -1, 0]],
+                [[2, 6, 7, 3], [0, +1, 0]],
+                [[0, 2, 3, 1], [0, 0, -1]],
+                [[4, 5, 7, 6], [0, 0, +1]]
+            ];
+            for ( var i = 0; i<van.length; i++) {
+                pushVertices( obj, van[i][0], van[i][1] );
+                obj.i.push( 4*i+0, 4*i+1, 4*i+2, 4*i+0, 4*i+2, 4*i+3);
+            }
+            return obj;
+        }
+        var box = getBox();
+        
+        function createBuffer( target, type, data) {
+            var b = gl.createBuffer();
+            gl.bindBuffer( target, b);
+            gl.bufferData( target, new type(data), gl.STATIC_DRAW);
+            return b;
+        }
+        
+        function setUpBuffers( obj) {
+            obj.vb = createBuffer( gl.ARRAY_BUFFER, Float32Array, obj.v);
+            obj.nb = createBuffer( gl.ARRAY_BUFFER, Float32Array, obj.n);
+            obj.tb = createBuffer( gl.ARRAY_BUFFER, Float32Array, obj.t);
+            obj.ib = createBuffer( gl.ELEMENT_ARRAY_BUFFER, Uint16Array, obj.i);
+        }
+        
+        setUpBuffers( box);
+        
+        box.texture = gl.createTexture();
+        var image = new Image();
+        var ready = false;
+        image.onload = function () {
+            gl.bindTexture(gl.TEXTURE_2D, box.texture);
+            gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image);
+            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+            gl.bindTexture(gl.TEXTURE_2D, null);
+            ready = true;
+        }
+        image.src = 'data/texture.png';
+        var mvMatrix = new Float32Array([1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1]); // identity
+        mvMatrix[14]=-10;
+        
+        function rotate( mat, angle, x, y, z) {
+            var s, c, t, a00, a01, a02, a03, a10, a11, a12, a13, a20, a21, a22, a23, b00, b01, b02, b10, b11, b12, b20, b21, b22;
+            var len = Math.sqrt(x * x + y * y + z * z);
+            x /= len; y /= len; z /= len;
+            s = Math.sin(angle); c = Math.cos(angle); t = 1 - c;
+
+            a00=mat[0];a01=mat[1];a02=mat[2];a03=mat[3];a10=mat[4];a11=mat[5];
+            a12=mat[6];a13=mat[7];a20=mat[8];a21=mat[9];a22=mat[10];a23=mat[11];
+            b00 = x * x * t + c;     b01 = y * x * t + z * s; b02 = z * x * t - y * s; // Construct the elements of the rotation matrix
+            b10 = x * y * t - z * s; b11 = y * y * t + c;     b12 = z * y * t + x * s;
+            b20 = x * z * t + y * s; b21 = y * z * t - x * s; b22 = z * z * t + c;
+
+            // Perform rotation-specific matrix multiplication
+            mat[0] = a00 * b00 + a10 * b01 + a20 * b02;        mat[1] = a01 * b00 + a11 * b01 + a21 * b02;
+            mat[2] = a02 * b00 + a12 * b01 + a22 * b02;        mat[3] = a03 * b00 + a13 * b01 + a23 * b02;
+            mat[4] = a00 * b10 + a10 * b11 + a20 * b12;        mat[5] = a01 * b10 + a11 * b11 + a21 * b12;
+            mat[6] = a02 * b10 + a12 * b11 + a22 * b12;        mat[7] = a03 * b10 + a13 * b11 + a23 * b12;
+            mat[8] = a00 * b20 + a10 * b21 + a20 * b22;        mat[9] = a01 * b20 + a11 * b21 + a21 * b22;
+            mat[10] = a02 * b20 + a12 * b21 + a22 * b22;       mat[11] = a03 * b20 + a13 * b21 + a23 * b22;
+        }
+        
+        function drawScene( obj) {
+            gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+            
+            gl.uniformMatrix4fv( pmLoc, false, pMatrix);
+            gl.uniformMatrix4fv( mvLoc, false, mvMatrix);
+            
+            gl.bindBuffer( gl.ARRAY_BUFFER, obj.vb);
+            gl.vertexAttribPointer( vpLoc, 3, gl.FLOAT, false, 0, 0);
+
+            gl.bindBuffer( gl.ARRAY_BUFFER, obj.tb);
+            gl.vertexAttribPointer( tcLoc, 2, gl.FLOAT, false, 0, 0);
+
+            gl.bindTexture( gl.TEXTURE_2D, obj.texture);
+            gl.uniform1i( sampler, 0);
+
+            gl.bindBuffer( gl.ELEMENT_ARRAY_BUFFER, obj.ib);
+            gl.drawElements( gl.TRIANGLES, obj.i.length, gl.UNSIGNED_SHORT, 0);
+        }
+
+        var lastTime=0;
+        function tick( timeNow) {
+            var elapsed = timeNow - lastTime;
+            lastTime = timeNow;
+            if(isNaN(elapsed)) elapsed = 0;
+            requestAnimationFrame(tick);
+            if( ready) {
+                drawScene(box);
+                rotate( mvMatrix, elapsed/1000, 0.1,0.7,0.2);
+            }
+        }
+        
+        console.log( 'error: ' + gl.getError());
+        requestAnimationFrame(tick);
+    }
+}

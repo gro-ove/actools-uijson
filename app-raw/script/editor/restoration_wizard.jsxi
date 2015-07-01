@@ -1,12 +1,29 @@
 static class RestorationWizard {
     var _fixers = {};
 
-    public fix(car, errorId){
+    public fix(car, fullErrorId){
+        var errorId = fullErrorId.split(':')[0];
+
         if (errorId in-object _fixers){
-            new _fixers[errorId](car, errorId).run();
+            var fixer = createFixer(car, car.getError(fullErrorId));
+
+            if (errorId !== fullErrorId){
+                var simular = car.error.filter(function (e){
+                    return e.id !== fullErrorId && e.id.indexOf(errorId + ':') === 0;
+                });
+                if (simular.length > 0){
+                    fixer.simular();
+                }
+            }
+
+            fixer.run();
         } else {
             ErrorHandler.handled('Not supported error: %0'(errorId));
         }
+    }
+
+    public createFixer(car, error){
+        return new _fixers[error.id.split(':')[0]](car, error);
     }
 
     public register(id, classObj){

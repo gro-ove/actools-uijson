@@ -74,24 +74,42 @@ static partial class Cars {
             return e;
         });
 
-        mediator.dispatch('scan:list', _list);
         asyncLoad();
     }
 
     private asyncLoad(){
-        var a = _list, i = 0;
-        step();
+        var a = _list, i = 0,
+            step = lambda {
+                if (a != _list){
+                    mediator.dispatch('scan:interrupt', a);
+                } else if (i >= a.length){
+                    mediator.dispatch('scan:ready', a);
+                    lasyAsyncLoad();
+                } else {
+                    mediator.dispatch('scan:progress', i, a.length);
+                    a[i++].loadData(step);
+                }
+            };
 
-        function step(){
-            if (a != _list){
-                mediator.dispatch('scan:interrupt', a);
-            } else if (i >= a.length){
-                mediator.dispatch('scan:ready', a);
-            } else {
-                mediator.dispatch('scan:progress', i, a.length);
-                a[i++].load(step);
-            }
-        }
+        mediator.dispatch('scan:list', a);
+        step();
+    }
+
+    private lasyAsyncLoad(){
+        var a = _list, i = 0,
+            step = setTimeout.bind(window, lambda {
+                if (a != _list){
+                    mediator.dispatch('lazyscan:interrupt', a);
+                } else if (i >= a.length){
+                    mediator.dispatch('lazyscan:ready', a);
+                } else {
+                    mediator.dispatch('lazyscan:progress', i, a.length);
+                    a[i++].loadEnsure(step);
+                }
+            }, 20);
+
+        mediator.dispatch('lazyscan:start', a);
+        step();
     }
 
     public toggle(car, state){

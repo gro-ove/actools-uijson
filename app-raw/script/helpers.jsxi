@@ -94,7 +94,7 @@ JSON.restoreDamaged = function (data, fields){
         if (fields[key] === 'number'){
             value = value.replace(/^['"]/, '').replace(/['"]$/, '');
 
-            value = value.replace(/[oO]/g, '0');
+            value = value.replace(/[liI]/g, '1').replace(/[oO]/g, '0');
             result[key] = +value;
 
             if (Number.isNaN(result[key])){

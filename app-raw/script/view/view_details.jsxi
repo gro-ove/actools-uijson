@@ -97,7 +97,7 @@ static class ViewDetails {
 
     function outSkins(car){
         if (!car.skins || !car.skins[0]) return;
-        if (!car.skins.selected){
+        if (!car.selectedSkin){
             car.selectSkin(car.skins[0].id);
             return;
         }
@@ -112,17 +112,17 @@ static class ViewDetails {
                 ss.empty();
 
                 sp.attr({
-                    'data-id': car.skins.selected.id,
-                    'src': (car.skins.selected.preview + '?' + Math.random()).cssUrl()
+                    'data-id': car.selectedSkin.id,
+                    'src': (car.selectedSkin.preview + '?' + Math.random()).cssUrl()
                 });
 
                 car.skins.forEach(function (e){
                     var i = $('<img>').attr({
                         'data-id': e.id,
-                        'title': e.id,
+                        'title': e.displayName,
                         'src': e.livery.cssUrl()
                     }).appendTo(ss);
-                    if (e === car.skins.selected){
+                    if (e === car.selectedSkin){
                         i.addClass('selected');
                     }
                 });
@@ -219,6 +219,7 @@ static class ViewDetails {
                 $('main').show();
 
                 _selected = car;
+                car.loadEnsure();
 
                 if (car){
                     outMsg(null);
@@ -433,10 +434,20 @@ static class ViewDetails {
                     if (!_selected) return;
                     AcShowroom.start(_selected, id);
                 } }));
+                menu.append(new gui.MenuItem({ label: 'Open in Custom Showroom (Experimental)', click: function (){
+                    if (!_selected) return;
+                    try {
+                        AcTools.Utils.Kn5RenderWrapper.StartDarkRoomPreview(AcDir.root, _selected.id, id);
+                    } catch (err){
+                        ErrorHandler.handled('Cannot start Custom Showroom.', err);
+                        return;
+                    }
+                } }));
                 menu.append(new gui.MenuItem({ label: 'Start Practice', key: 'P', click: function (){
                     if (!_selected) return;
                     AcPractice.start(_selected, id);
                 } }));
+
                 // menu.append(new gui.MenuItem({ type: 'separator' }));
                 // menu.append(new gui.MenuItem({ label: 'Livery Editor', enabled: false }));
                 // menu.append(new gui.MenuItem({ label: 'Skin Editor', enabled: false }));
@@ -511,6 +522,16 @@ static class ViewDetails {
             AcShowroom.select(_selected);
         });
 
+        $('#selected-car-showroom-select').click(function (){
+            if (!_selected) return;
+            AcShowroom.select(_selected);
+        });
+
+        $('#selected-car-showroom-select').click(function (){
+            if (!_selected) return;
+            AcShowroom.select(_selected);
+        });
+
         $('#selected-car-practice').click(function (){
             if (!_selected) return;
             AcPractice.start(_selected);
@@ -567,25 +588,124 @@ static class ViewDetails {
             if (!_selected) return;
 
             var menu = new gui.Menu();
+
+            menu.append(new gui.MenuItem({ label: 'Update Ambient Shadows', click: function (){
+                $('main footer').removeClass('active');
+                if (!_selected) return;
+
+                try {
+                    AcTools.Utils.Kn5RenderWrapper.UpdateAmbientShadows(AcDir.root, _selected.id);
+                } catch (err){
+                    ErrorHandler.handled('Cannot update shadows.', err);
+                    return;
+                }
+            } }));
+
+            menu.append(new gui.MenuItem({ label: 'Change Body Ambient Shadow Size', click: function (){
+                $('main footer').removeClass('active');
+                if (!_selected) return;
+
+                var currentSize = AcTools.Utils.Kn5RenderWrapper.GetBodyAmbientShadowSize(_selected.path).split(',');
+                var d = new Dialog('Body Ambient Shadow', [
+                    '<h6>Size (in meters)</h6>',
+                    '<label style="display:inline-block;width:160px;line-height:24px">Width: <input id="body-ambient-shadow-width" type="number" step="0.1" min="0.8" max="6.0" style="width: 80px;float: right;margin-right: 20px;"></label>',
+                    '<label style="display:inline-block;width:160px;line-height:24px">Length: <input id="body-ambient-shadow-height" type="number" step="0.1" min="0.8" max="6.0" style="width: 80px;float: right;margin-right: 20px;"></label>',
+                ], function (){
+                    var w = +d.content.find('#body-ambient-shadow-width').val();
+                    if (Number.isNaN(w)) w = currentSize[0];
+
+                    var h = +d.content.find('#body-ambient-shadow-height').val();
+                    if (Number.isNaN(h)) h = currentSize[1];
+
+                    AcTools.Utils.Kn5RenderWrapper.SetBodyAmbientShadowSize(_selected.path, w, h);
+                });
+
+                d.content.find('#body-ambient-shadow-width').val(currentSize[0]);
+                d.content.find('#body-ambient-shadow-height').val(currentSize[1]);
+            } }));
+
             menu.append(new gui.MenuItem({ label: 'Fix SUSP_XX error', click: function (){
                 $('main footer').removeClass('active');
                 if (!_selected) return;
-                AcTools;
 
                 try {
-                    var res = AcTools.Utils.Kn5Fixer.FixSuspensionWrapper(AcDir.root, _selected.id);
+                    AcTools.Utils.Kn5Fixer.FixSuspensionWrapper(AcDir.root, _selected.id);
                 } catch (err){
                     ErrorHandler.handled('Cannot fix car.', err);
                     return;
                 }
-
-                if (res){
-                    ErrorHandler.handled('Cannot fix car.', res);
-                    return;
-                }
-
-                new Dialog('Done', 'Successfully fixed.');
             } }));
+
+            if (localStorage.developerMode){
+                var devMenu = new gui.MenuItem({ label: 'Developer Tools', submenu: new gui.Menu() });
+                menu.append(devMenu);
+                devMenu = devMenu.submenu;
+
+                devMenu.append(new gui.MenuItem({ label: 'Unpack KN5', click: function (){
+                    $('main footer').removeClass('active');
+                    if (!_selected) return;
+
+                    try {
+                        var kn5 = AcTools.Kn5File.Kn5.FromFile(AcTools.Utils.FileUtils.GetMainCarFile(AcDir.root, _selected.id));
+                        var dest = _selected.path + '/unpacked';
+                        if (fs.existsSync(dest)) AcTools.Utils.FileUtils.Recycle(dest);
+                        kn5.ExportDirectory(dest, false);
+                        if (kn5.RootNode != null) {
+                            kn5.Export(AcTools.Kn5File.Kn5.ExportType.Collada, dest + '/model.dae');
+                        }
+                        Shell.openItem(dest);
+                    } catch (err){
+                        ErrorHandler.handled('Failed.', err);
+                    }
+                } }));
+
+                if (fs.existsSync(_selected.path + '/unpacked')) devMenu.append(new gui.MenuItem({ label: 'Repack KN5', click: function (){
+                    $('main footer').removeClass('active');
+                    if (!_selected) return;
+
+                    try {
+                        var kn5 = AcTools.Kn5File.Kn5.FromDirectory(_selected.path + '/unpacked');
+                        var dest = AcTools.Utils.FileUtils.GetMainCarFile(AcDir.root, _selected.id);
+                        if (fs.existsSync(dest)) AcTools.Utils.FileUtils.Recycle(dest);
+                        kn5.Save(dest, false);
+                    } catch (err){
+                        ErrorHandler.handled('Failed.', err);
+                    }
+                } }));
+
+                if (fs.existsSync(_selected.path + '/data.acd')) devMenu.append(new gui.MenuItem({ label: 'Unpack data', click: function (){
+                    $('main footer').removeClass('active');
+                    if (!_selected) return;
+
+                    try {
+                        var source = _selected.path + '/data.acd';
+                        var acd = AcTools.AcdFile.Acd.FromFile(source);
+                        var dest = _selected.path + '/data';
+                        if (fs.existsSync(dest)) AcTools.Utils.FileUtils.Recycle(dest);
+                        acd.ExportDirectory(dest);
+                        Shell.openItem(dest);
+                        AcTools.Utils.FileUtils.Recycle(source);
+                    } catch (err){
+                        ErrorHandler.handled('Failed.', err);
+                    }
+                } }));
+
+                if (fs.existsSync(_selected.path + '/data')) devMenu.append(new gui.MenuItem({ label: 'Pack data', click: function (){
+                    $('main footer').removeClass('active');
+                    if (!_selected) return;
+
+                    try {
+                        var source = _selected.path + '/data';
+                        var acd = AcTools.AcdFile.Acd.FromDirectory(source);
+                        var dest = _selected.path + '/data.acd';
+                        if (fs.existsSync(dest)) AcTools.Utils.FileUtils.Recycle(dest);
+                        acd.Save(dest);
+                        AcTools.Utils.FileUtils.Recycle(source);
+                    } catch (err){
+                        ErrorHandler.handled('Failed.', err);
+                    }
+                } }));
+            }
 
             menu.append(new gui.MenuItem({ label: 'Delete car', click: function (){
                 $('main footer').removeClass('active');

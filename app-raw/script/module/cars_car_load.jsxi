@@ -1,5 +1,6 @@
 static partial class Cars {
     partial class Car {
+        var _badgeLoaded;
         public loadBadge(callback){
             clearErrors('badge');
 
@@ -8,8 +9,25 @@ static partial class Cars {
                     addError('badge-missing', 'Missing badge.png');
                 }
 
+                _badgeLoaded = true;
                 if (callback) callback();
             }.bind(this));
+        }
+
+        public loadSkins_data(callback){
+            var a = skins, i = 0;
+            step();
+
+            function step(){
+                if (a != skins){
+                    if (callback) callback();
+                } else if (i >= a.length){
+                    if (callback) callback();
+                    mediator.dispatch('update.car.skins:data', this);
+                } else {
+                    a[i++].loadData(step);
+                }
+            }
         }
 
         public loadSkins(callback){
@@ -18,6 +36,7 @@ static partial class Cars {
                 mediator.dispatch('update.car.skins', this);
             }
 
+            clearErrors('skin');
             clearErrors('skins');
 
             if (!fs.existsSync(skinsDir)){
@@ -46,17 +65,13 @@ static partial class Cars {
                         addError('skins-empty', 'Skins folder is empty');
                     } else {
                         skins = result.map(function (e){
-                            var p = '%0/skins/%1'(path, e);
-                            return {
-                                id: e,
-                                path: p,
-                                livery: p + '/livery.png',
-                                preview: p + '/preview.jpg',
-                            };
-                        });
+                            return new CarSkin(this, e);
+                        }.bind(this));
 
-                        skins.selected = skins[0];
+                        selectedSkin = skins[0];
                         mediator.dispatch('update.car.skins', this);
+                        loadSkins_data(callback);
+                        return;
                     }
                 }
 
@@ -107,12 +122,8 @@ static partial class Cars {
                     data = false;
                     addError('data-access', 'Unavailable ui_car.json', err);
                 } else {
-                    var dat;
-                    try {
-                        dat = JSON.flexibleParse(result);
-                    } catch (er){
-                        err = er;
-                    }
+                    var dat = parseLoadedData(result.toString()),
+                        err = dat instanceof Error && dat;
 
                     data = false;
                     if (err || !dat){
@@ -169,6 +180,23 @@ static partial class Cars {
             loadBadge();
             loadSkins();
             loadData(callback);
+        }
+
+        public loadEnsure(callback){
+            function s1(){ if (!_badgeLoaded) loadBadge(s2); else s2(); }
+            function s2(){ if (skins == null) loadSkins(s3); else s3(); }
+            function s3(){ if (data == null) loadData(callback); else if (callback) callback(); }
+            s1();
+        }
+    }
+
+    private parseLoadedData(data){
+        try {
+            return JSON.parse(data);
+        } catch try {
+            return JSON.flexibleParse(data);
+        } catch (er){
+            return er;
         }
     }
 }

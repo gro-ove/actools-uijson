@@ -1,4 +1,12 @@
 static class AcShowroom {
+    public var modes = [
+        { id: 'default', name: 'Regular Showroom (Recommended)' }
+        { id: 'kunos', name: 'Kunos Style (Dark Room)' }
+        { id: 'seatleon', name: 'Seat Leon Eurocup Style' }
+        { id: 'gt5', name: 'GT5-style' }
+        { id: 'gt6', name: 'GT6-style' }
+    ];
+
     var _showrooms = null;
 
     var _blackShowroom = 'studio_black';
@@ -47,6 +55,11 @@ static class AcShowroom {
             }
         }
 
+        if (err && err.message === 'Process exited'){
+            ErrorHandler.handled('Showroom was terminated too soon.');
+            return true;
+        }
+
         return false;
     }
 
@@ -57,7 +70,7 @@ static class AcShowroom {
         if (c.path.indexOf(AcDir.cars)) return;
 
         if (s == null){
-            s = c.skins.selected.id;
+            s = c.selectedSkin.id;
         }
 
         room = room || lastShowroom;
@@ -157,62 +170,66 @@ static class AcShowroom {
     public shot(c, m){
         if (c.path.indexOf(AcDir.cars)) return;
 
-        var showroom = Settings.get('aptShowroom') || _blackShowroom;
-        var x = -Settings.get('aptCameraX');
-        var y = -Settings.get('aptCameraY');
-        var distance = -Settings.get('aptCameraDistance');
-        var filter = Settings.get('aptFilter') || null;
-        var disableSweetFx = !!Settings.get('aptDisableSweetFx');
-        var delays = !!Settings.get('aptIncreaseDelays');
+        var mode = Settings.get('aptMode');
 
-        if (Number.isNaN(x)) x = Settings.defaults.aptCameraX;
-        if (Number.isNaN(y)) y = Settings.defaults.aptCameraY;
-        if (Number.isNaN(distance)) distance = Settings.defaults.aptCameraY;
+        if (mode === 'default'){
+            var showroom = Settings.get('aptShowroom') || _blackShowroom;
+            var x = -Settings.get('aptCameraX');
+            var y = -Settings.get('aptCameraY');
+            var distance = -Settings.get('aptCameraDistance');
+            var filter = Settings.get('aptFilter') || null;
+            var disableSweetFx = !!Settings.get('aptDisableSweetFx');
+            var delays = !!Settings.get('aptIncreaseDelays');
 
-        showroomTest();
+            if (Number.isNaN(x)) x = Settings.defaults.aptCameraX;
+            if (Number.isNaN(y)) y = Settings.defaults.aptCameraY;
+            if (Number.isNaN(distance)) distance = Settings.defaults.aptCameraY;
 
-        function showroomTest(){
-            function blackShowroomTest(){
-                return fs.existsSync(AcTools.Utils.FileUtils.GetShowroomFolder(AcDir.root, showroom));
-            }
+            showroomTest();
+            function showroomTest(){
+                function blackShowroomTest(){
+                    return fs.existsSync(AcTools.Utils.FileUtils.GetShowroomFolder(AcDir.root, showroom));
+                }
 
-            if (showroom == _blackShowroom && !blackShowroomTest()){
-                new Dialog('One More Thing',
-                    'Please, install <a href="#" onclick="Shell.openItem(\'%0\')">Black Showroom</a> first.'(_blackShowroomUrl),
-                    function (){
-                        Shell.openItem(_blackShowroomUrl);
-                        return false;
-                    }).setButton('From Here').addButton('Right Here', function (){
-                        Shell.openItem(AcTools.Utils.FileUtils.GetShowroomsFolder(AcDir.root));
-                        return false;
-                    }).addButton('Done', function (){
-                        if (blackShowroomTest()){
-                            setTimeout(proceed);
-                        } else {
-                            new Dialog('Black Showroom Installation', 'Showroom is still missing. Are you sure?');
-                            this.buttons.find('button:last-child').text('Really Done');
+                if (showroom == _blackShowroom && !blackShowroomTest()){
+                    new Dialog('One More Thing',
+                        'Please, install <a href="#" onclick="Shell.openItem(\'%0\')">Black Showroom</a> first.'(_blackShowroomUrl),
+                        function (){
+                            Shell.openItem(_blackShowroomUrl);
                             return false;
-                        }                        
-                    });
-            } else {
-                proceed();
+                        }).setButton('From Here').addButton('Right Here', function (){
+                            Shell.openItem(AcTools.Utils.FileUtils.GetShowroomsFolder(AcDir.root));
+                            return false;
+                        }).addButton('Done', function (){
+                            if (blackShowroomTest()){
+                                setTimeout(proceed);
+                            } else {
+                                new Dialog('Black Showroom Installation', 'Showroom is still missing. Are you sure?');
+                                this.buttons.find('button:last-child').text('Really Done');
+                                return false;
+                            }                        
+                        });
+                } else {
+                    proceed();
+                }
             }
+        } else {
+            proceed();
         }
 
         function proceed(){
             var output;
             try {
-                output = AcTools.Processes.Showroom.ShotWrapper(AcDir.root, c.id, showroom, !!m, x, y, distance, filter, disableSweetFx, delays);
+                if (mode === 'default'){
+                    output = AcTools.Processes.Showroom.Shot(AcDir.root, c.id, showroom, !!m, x, y, distance, filter, disableSweetFx, delays);
+                } else {
+                    output = AcTools.Utils.Kn5RenderWrapper.Shot(c.path, mode);
+                }
             } catch (err){
                 if (!handleError(err)){
                     ErrorHandler.handled('Cannot start showroom. Maybe the car is broken.', err);
                 }
-            }
 
-            if (!fs.existsSync(output)){
-                if (!handleError()){
-                    ErrorHandler.handled('Cannot get previews.', output);
-                }
                 return;
             }
 

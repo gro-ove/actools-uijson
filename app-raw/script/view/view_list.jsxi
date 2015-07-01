@@ -5,6 +5,8 @@ static class ViewList {
         _aside = $(document.getElementsByTagName('aside')[0]),
         _node = $(document.getElementById('cars-list'));
 
+    public get selected _selected;
+
     private scrollToSelected(){
         var n = _node[0].querySelector('.selected');
         if (!n) return;
@@ -138,7 +140,7 @@ static class ViewList {
                 document.body.removeChild(_aside[0]);
             })
             .on('scan:ready', function (list){
-                $('#total-cars').val(list.filter(function (e){
+                _aside.find('#total-cars').text(list.filter(function (e){
                     return e.parent == null;
                 }).length).attr('title', 'Including modded versions: {0}'.format(list.length));
 
@@ -381,10 +383,25 @@ static class ViewList {
         });
     }
 
-    public get selected _selected;
+    function lazyLoadingProgressInit(){
+        var p;
+        Cars
+            .on('lazyscan:start', function (list){
+                p = _aside.find('progress').show()[0];
+                p.indeterminate = false;
+                p.max = list.length;
+            })
+            .on('lazyscan:progress', function (i, m){
+                p.value = i;
+            })
+            .on('lazyscan:ready', function (list){
+                p.style.display = 'none';
+            });
+    }
 
     {
         init();
+        lazyLoadingProgressInit();
         mediator.extend(ViewList);
     }
 }

@@ -6,8 +6,12 @@ rem type app-raw\lib\*.js > app-raw\libs.js 2>nul
 rem call yuicompressor app-raw\libs.js -o app\libs.js
 rem del app-raw\libs.js
 
-del app\native\AcTools.dll
-mklink /h app\native\AcTools.dll "D:\Applications\AcTools\AcTools.dll" >nul 
+rem del app\native\AcTools.dll
+rem mklink /h app\native\AcTools.dll "D:\Applications\AcTools\AcTools.dll" >nul
+rem mklink /h app\native\AcToolsKn5Render.dll "D:\Applications\AcTools\AcToolsKn5Render.dll" >nul 
+
+copy "D:\Applications\AcTools\AcTools.dll" app\native\AcTools.dll >nul 
+copy "D:\Development\GitHub\actools\AcToolsKn5Render\bin\Release\AcToolsKn5Render.dll" app\native\AcToolsKn5Render.dll >nul 
 
 type app-raw\style\*.less > app-raw\style.less 2>nul 
 call lessc --no-ie-compat --strict-math=on app-raw\style.less app\main.css

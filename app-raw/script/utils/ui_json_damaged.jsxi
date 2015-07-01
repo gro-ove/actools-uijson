@@ -6,6 +6,10 @@ static class UiJsonDamaged {
             country: 'string'
             team: 'string'
             number: 'number'
+
+            author: 'string'
+            version: 'string'
+            url: 'string'
         });
 
         return result;
@@ -19,8 +23,6 @@ static class UiJsonDamaged {
             description: 'multiline'
             class: 'string'
             tags: 'array'
-            year: 'number'
-            country: 'string'
             bhp: 'string'
             torque: 'string'
             weight: 'string'
@@ -30,6 +32,13 @@ static class UiJsonDamaged {
             range: 'number'
             torqueCurve: 'pairsArray'
             powerCurve: 'pairsArray'
+            
+            year: 'number'
+            country: 'string'
+
+            author: 'string'
+            version: 'string'
+            url: 'string'
         });
 
         result.specs = {};

@@ -2,22 +2,23 @@ static class Settings {
     private var _settings;
 
     private var _defaults = {
-        disableTips:        false,
-        updateDatabase:     true,
-        uploadData:         false,
-        updatesCheck:       true,
-        updatesSource:      'stable',
+        disableTips:        false
+        updateDatabase:     true
+        uploadData:         false
+        updatesCheck:       true
+        updatesSource:      'stable'
         
-        badgeAutoupdate:    true,
+        badgeAutoupdate:    true
 
-        aptShowroom:        '',
-        aptFilter:          'S1-Dynamic',
-        aptResize:          true,
-        aptDisableSweetFx:  true,
-        aptCameraX:         -140,
-        aptCameraY:         36,
-        aptCameraDistance:  5.5,
-        aptIncreaseDelays:  false,
+        aptMode:            'default'
+        aptShowroom:        ''
+        aptFilter:          'S1-Dynamic'
+        aptResize:          true
+        aptDisableSweetFx:  true
+        aptCameraX:         -140
+        aptCameraY:         36
+        aptCameraDistance:  5.5
+        aptIncreaseDelays:  false
     };
 
     public get defaults _defaults;
