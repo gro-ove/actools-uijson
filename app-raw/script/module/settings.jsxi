@@ -15,7 +15,7 @@ static class Settings {
         aptFilter:          'S1-Dynamic'
         aptResize:          true
         aptDisableSweetFx:  true
-        aptCameraX:         -140
+        aptCameraX:         -145
         aptCameraY:         36
         aptCameraDistance:  5.5
         aptIncreaseDelays:  false

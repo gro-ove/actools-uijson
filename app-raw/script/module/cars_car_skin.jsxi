@@ -44,5 +44,19 @@ static partial class Cars {
                 if (callback) callback();
             }.bind(this));
         }
+
+        public load() async {
+            var res = async fs.exists(preview);
+            if (!res){
+                _car.addError('skin-preview-missing', 'Some of skin\'s previews are missing', null, this);
+            }
+
+            var res = async fs.exists(livery);
+            if (!res){
+                _car.addError('skin-livery-missing:%0'(id), 'Livery of “%0” skin is missing'(id), null, this);
+            }
+
+            async loadData();
+        }
     }
 }

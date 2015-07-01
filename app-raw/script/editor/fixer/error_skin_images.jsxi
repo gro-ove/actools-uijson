@@ -1,0 +1,36 @@
+class MissingPreviewFixer extends AbstractFixer {
+    protected removeError(){
+    }
+
+    restore(c){
+        AcShowroom.shot(car);
+        c();
+    }
+
+    public get title 'Some of skin\'s previews are missing',
+        solutions [
+            { name: 'Auto-generate new previews', fn: restore }
+        ].concat(tryToRestoreFileHere(object.preview, 
+            lambda arg.isFile() && arg.size > 1e3 && arg.size < 1e6));
+}
+
+RestorationWizard.register('skin-preview-missing', MissingPreviewFixer);
+
+class MissingPreviewFixer extends AbstractFixer {
+    protected reloadAfter(){
+        car.loadSkins();
+    }
+
+    autogenPrev(c){
+        // AcShowroom.shot(car);
+        c();
+    }
+
+    public get title 'Livery of skin “%0” is missing'(object.id),
+        solutions [
+            fs.existsSync(object.preview) && { name: 'Auto-generate new livery from skin\'s preview', fn: autogenPrev }
+        ].concat(tryToRestoreFileHere(object.livery, 
+            lambda arg.isFile() && arg.size > 1e1 && arg.size < 1e6));
+}
+
+RestorationWizard.register('skin-livery-missing', MissingPreviewFixer);

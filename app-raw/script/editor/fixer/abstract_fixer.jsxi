@@ -19,13 +19,17 @@ class AbstractFixer {
                 if (err){
                     error(err === true ? null : err);
                 } else {
-                    car.removeError(errorId);
+                    removeError();
                     setTimeout(reloadAfter);
                 }
             });
         } catch (err){
             error(err);
         }
+    }
+
+    protected removeError(){
+        car.removeError(errorId);
     }
 
     protected reloadAfter(){

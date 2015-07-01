@@ -14,7 +14,7 @@ static partial class Cars {
             }.bind(this));
         }
 
-        public loadSkins_data(callback){
+        public loadSkins_stuff(callback){
             var a = skins, i = 0;
             step();
 
@@ -25,7 +25,7 @@ static partial class Cars {
                     if (callback) callback();
                     mediator.dispatch('update.car.skins:data', this);
                 } else {
-                    a[i++].loadData(step);
+                    a[i++].load(step);
                 }
             }
         }
@@ -70,7 +70,7 @@ static partial class Cars {
 
                         selectedSkin = skins[0];
                         mediator.dispatch('update.car.skins', this);
-                        loadSkins_data(callback);
+                        loadSkins_stuff(callback);
                         return;
                     }
                 }

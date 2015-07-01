@@ -1289,7 +1289,7 @@ var AcShowroom = (function (){                                                  
 				output,                                                            // ac_showroom.jsxi:236
 				function (){                                                       // ac_showroom.jsxi:236
 					AcTools.Utils.ImageUtils.ApplyPreviews(AcDir.root, c.id, output, Settings.get('aptResize'));
-					c.updateSkins();                                               // ac_showroom.jsxi:238
+					c.loadSkins();                                                 // ac_showroom.jsxi:238
 					fs.rmdirSync(output);                                          // ac_showroom.jsxi:239
 				});
 		}
@@ -1984,7 +1984,7 @@ var Cars = (function (){                                                        
 						callback();                                                // cars_car_load.jsxi:13
 				}).bind(this));                                                    // cars_car_load.jsxi:14
 		};
-		Car.prototype.loadSkins_data = function (callback){                        // cars_car_load.jsxi:17
+		Car.prototype.loadSkins_stuff = function (callback){                       // cars_car_load.jsxi:17
 			var __that = this, 
 				a = this.skins, i = 0;
 			
@@ -2000,7 +2000,7 @@ var Cars = (function (){                                                        
 					
 					mediator.dispatch('update.car.skins:data', this);              // cars_car_load.jsxi:26
 				} else {
-					a[i ++].loadData(step);                                        // cars_car_load.jsxi:28
+					a[i ++].load(step);                                            // cars_car_load.jsxi:28
 				}
 			}
 		};
@@ -2050,7 +2050,7 @@ var Cars = (function (){                                                        
 							}).bind(this));                                        // cars_car_load.jsxi:69
 							__that.selectedSkin = __that.skins[0];
 							mediator.dispatch('update.car.skins', this);           // cars_car_load.jsxi:72
-							__that.loadSkins_data(callback);
+							__that.loadSkins_stuff(callback);
 							return;
 						}
 					}
@@ -2286,6 +2286,52 @@ var Cars = (function (){                                                        
 				if (callback)                                                      // cars_car_skin.jsxi:44
 					callback();                                                    // cars_car_skin.jsxi:44
 			}).bind(this));                                                        // cars_car_skin.jsxi:45
+	};
+	CarSkin.prototype.load = function (__callback){                                // cars_car_skin.jsxi:48
+		var __that = this, 
+			res, res;
+		
+		function __block_0(){
+			fs.exists(__that.preview,                                              // cars_car_skin.jsxi:49
+				function (__result){
+					res = __result;                                                // cars_car_skin.jsxi:49
+					
+					__block_1()
+				})
+		}
+		
+		function __block_1(){
+			if (!res){                                                             // cars_car_skin.jsxi:50
+				__that.__CarSkin__car.addError('skin-preview-missing',             // cars_car_skin.jsxi:51
+					'Some of skin\'s previews are missing',                        // cars_car_skin.jsxi:51
+					null, 
+					this);                                                         // cars_car_skin.jsxi:51
+			}
+			
+			fs.exists(__that.livery,                                               // cars_car_skin.jsxi:54
+				function (__result){
+					res = __result;                                                // cars_car_skin.jsxi:54
+					
+					__block_2()
+				})
+		}
+		
+		function __block_2(){
+			if (!res){                                                             // cars_car_skin.jsxi:55
+				__that.__CarSkin__car.addError('skin-livery-missing:' + __that.id, 
+					'Livery of “' + __that.id + '” skin is missing', 
+					null, 
+					this);                                                         // cars_car_skin.jsxi:56
+			}
+			
+			__that.loadData(__block_3)
+		}
+		
+		function __block_3(){
+			__callback();
+		}
+		
+		__block_0();
 	};
 	Object.defineProperty(CarSkin.prototype, 
 		'path', 
@@ -3545,7 +3591,7 @@ AbstractFixer.prototype.run = function (){                                      
 			if (err){                                                              // abstract_fixer.jsxi:19
 				__that.__AbstractFixer_error(err === true ? null : err);
 			} else {
-				__that.__car.removeError(__that.__errorId);                        // abstract_fixer.jsxi:22
+				__that.__removeError();
 				setTimeout(__bindOnce(__that, '__reloadAfter'));                   // abstract_fixer.jsxi:23
 			}
 		});
@@ -3553,52 +3599,55 @@ AbstractFixer.prototype.run = function (){                                      
 		this.__AbstractFixer_error(err);
 	} 
 };
-AbstractFixer.prototype.__reloadAfter = function (){};
-AbstractFixer.prototype.__AbstractFixer_error = function (err){                    // abstract_fixer.jsxi:35
-	this.__AbstractFixer__error = true;
-	ErrorHandler.handled('Cannot fix error: ' + this.__errorId, err);              // abstract_fixer.jsxi:37
+AbstractFixer.prototype.__removeError = function (){                               // abstract_fixer.jsxi:31
+	this.__car[this.__car instanceof AbstractFixer ? '__removeError' : 'removeError'](this.__errorId);
 };
-AbstractFixer.prototype.__AbstractFixer_work = function (c){                       // abstract_fixer.jsxi:40
+AbstractFixer.prototype.__reloadAfter = function (){};
+AbstractFixer.prototype.__AbstractFixer_error = function (err){                    // abstract_fixer.jsxi:39
+	this.__AbstractFixer__error = true;
+	ErrorHandler.handled('Cannot fix error: ' + this.__errorId, err);              // abstract_fixer.jsxi:41
+};
+AbstractFixer.prototype.__AbstractFixer_work = function (c){                       // abstract_fixer.jsxi:44
 	var __that = this, 
-		s = this.solutions.filter(function (arg){                                  // abstract_fixer.jsxi:41
-			return arg;                                                            // abstract_fixer.jsxi:41
+		s = this.solutions.filter(function (arg){                                  // abstract_fixer.jsxi:45
+			return arg;                                                            // abstract_fixer.jsxi:45
 		});
 	
-	if (s.length == 0){                                                            // abstract_fixer.jsxi:42
-		new Dialog(this.title,                                                     // abstract_fixer.jsxi:43
+	if (s.length == 0){                                                            // abstract_fixer.jsxi:46
+		new Dialog(this.title,                                                     // abstract_fixer.jsxi:47
 			[
-				'<h6>Available solutions:</h6>',                                   // abstract_fixer.jsxi:43
+				'<h6>Available solutions:</h6>',                                   // abstract_fixer.jsxi:47
 				'Sorry, but none of solutions is available.'
 			]);
 		return;
 	}
 	
-	var d = new Dialog(this.title,                                                 // abstract_fixer.jsxi:47
+	var d = new Dialog(this.title,                                                 // abstract_fixer.jsxi:51
 		[
-			'<h6>Available solutions:</h6>',                                       // abstract_fixer.jsxi:48
-			s.map(function (e, i){                                                 // abstract_fixer.jsxi:49
+			'<h6>Available solutions:</h6>',                                       // abstract_fixer.jsxi:52
+			s.map(function (e, i){                                                 // abstract_fixer.jsxi:53
 				return '<label><input name="solution" data-solution-id="' + i + '" type="radio">' + e.name + '</label>';
 			}).join('<br>')
 		], 
-		function (){                                                               // abstract_fixer.jsxi:50
+		function (){                                                               // abstract_fixer.jsxi:54
 			var id = this.find('input[name="solution"]:checked').data('solution-id');
 			
 			try {
-				s[id].fn(c);                                                       // abstract_fixer.jsxi:53
-			} catch (err){                                                         // abstract_fixer.jsxi:54
+				s[id].fn(c);                                                       // abstract_fixer.jsxi:57
+			} catch (err){                                                         // abstract_fixer.jsxi:58
 				__that.__AbstractFixer_error(err);
 			} 
 		});
 	
 	if (this.__simularErrors){
-		d.addButton('Apply to all',                                                // abstract_fixer.jsxi:60
-			function (){                                                           // abstract_fixer.jsxi:60
+		d.addButton('Apply to all',                                                // abstract_fixer.jsxi:64
+			function (){                                                           // abstract_fixer.jsxi:64
 				var id = this.find('input[name="solution"]:checked').data('solution-id');
 				
 				try {
 					var fns = [ s[id].fn ];
 					
-					s[id].fn(c);                                                   // abstract_fixer.jsxi:64
+					s[id].fn(c);                                                   // abstract_fixer.jsxi:68
 					
 					for (var __4 = 0; __4 < __that.__simularErrors.length; __4 ++){
 						var simularError = __that.__simularErrors[__4];
@@ -3606,173 +3655,173 @@ AbstractFixer.prototype.__AbstractFixer_work = function (c){                    
 						var fixer = RestorationWizard.createFixer(__that.__car, simularError);
 						
 						var simularSolution = fixer.solutions.filter(function (arg){
-							return arg && arg.name == s[id].name;                  // abstract_fixer.jsxi:68
+							return arg && arg.name == s[id].name;                  // abstract_fixer.jsxi:72
 						})[0];
 						
-						if (simularSolution){                                      // abstract_fixer.jsxi:69
-							fns.push(simularSolution.fn);                          // abstract_fixer.jsxi:70
+						if (simularSolution){                                      // abstract_fixer.jsxi:73
+							fns.push(simularSolution.fn);                          // abstract_fixer.jsxi:74
 						}
 					}
 					
 					var i = 0;
 					
-					function next(){                                               // abstract_fixer.jsxi:75
-						if (i < fns.length){                                       // abstract_fixer.jsxi:76
-							fns[i ++](next);                                       // abstract_fixer.jsxi:77
+					function next(){                                               // abstract_fixer.jsxi:79
+						if (i < fns.length){                                       // abstract_fixer.jsxi:80
+							fns[i ++](next);                                       // abstract_fixer.jsxi:81
 						} else {
-							c();                                                   // abstract_fixer.jsxi:79
+							c();                                                   // abstract_fixer.jsxi:83
 						}
 					}
 					
-					next();                                                        // abstract_fixer.jsxi:83
-				} catch (err){                                                     // abstract_fixer.jsxi:84
+					next();                                                        // abstract_fixer.jsxi:87
+				} catch (err){                                                     // abstract_fixer.jsxi:88
 					__that.__AbstractFixer_error(err);
 				} 
 				
-				console.log(id);                                                   // abstract_fixer.jsxi:88
+				console.log(id);                                                   // abstract_fixer.jsxi:92
 			});
 	}
 	
-	d.addButton('Cancel');                                                         // abstract_fixer.jsxi:92
-	d.find('input[name="solution"]')[0].checked = true;                            // abstract_fixer.jsxi:93
+	d.addButton('Cancel');                                                         // abstract_fixer.jsxi:96
+	d.find('input[name="solution"]')[0].checked = true;                            // abstract_fixer.jsxi:97
 };
-AbstractFixer.prototype.__fixJsonFile = function (filename, fn){                   // abstract_fixer.jsxi:99
+AbstractFixer.prototype.__fixJsonFile = function (filename, fn){                   // abstract_fixer.jsxi:103
 	try {
 		var dat = JSON.flexibleParse(fs.readFileSync(filename));
 		
-		fn(dat);                                                                   // abstract_fixer.jsxi:102
-		fs.writeFileSync(filename,                                                 // abstract_fixer.jsxi:103
+		fn(dat);                                                                   // abstract_fixer.jsxi:106
+		fs.writeFileSync(filename,                                                 // abstract_fixer.jsxi:107
 			JSON.stringify(dat, false, 
-				4));                                                               // abstract_fixer.jsxi:103
-	} catch (err){                                                                 // abstract_fixer.jsxi:104
+				4));                                                               // abstract_fixer.jsxi:107
+	} catch (err){                                                                 // abstract_fixer.jsxi:108
 		this.__AbstractFixer_error(err);
 	} 
 };
-AbstractFixer.__simularFile = function (a, b){                                     // abstract_fixer.jsxi:109
-	a = a.toLowerCase();                                                           // abstract_fixer.jsxi:111
-	b = b.toLowerCase();                                                           // abstract_fixer.jsxi:112
+AbstractFixer.__simularFile = function (a, b){                                     // abstract_fixer.jsxi:113
+	a = a.toLowerCase();                                                           // abstract_fixer.jsxi:115
+	b = b.toLowerCase();                                                           // abstract_fixer.jsxi:116
 	
-	if (b.indexOf(a) !== - 1)                                                      // abstract_fixer.jsxi:113
+	if (b.indexOf(a) !== - 1)                                                      // abstract_fixer.jsxi:117
 		return true;
 	
-	for (var i = a.length - 1; i > a.length / 2; i --)                             // abstract_fixer.jsxi:115
-		if (b.indexOf(a.substr(0, i)) !== - 1)                                     // abstract_fixer.jsxi:116
+	for (var i = a.length - 1; i > a.length / 2; i --)                             // abstract_fixer.jsxi:119
+		if (b.indexOf(a.substr(0, i)) !== - 1)                                     // abstract_fixer.jsxi:120
 			return true;
 	return false;
 };
-AbstractFixer.__simularFiles = function (filename, filter, deep, rec){             // abstract_fixer.jsxi:121
-	if (filter === undefined)                                                      // abstract_fixer.jsxi:121
-		filter = (function (arg){                                                  // abstract_fixer.jsxi:121
+AbstractFixer.__simularFiles = function (filename, filter, deep, rec){             // abstract_fixer.jsxi:125
+	if (filter === undefined)                                                      // abstract_fixer.jsxi:125
+		filter = (function (arg){                                                  // abstract_fixer.jsxi:125
 	return true;
 });
 
-	if (deep === undefined)                                                        // abstract_fixer.jsxi:121
-		deep = true;                                                               // abstract_fixer.jsxi:121
+	if (deep === undefined)                                                        // abstract_fixer.jsxi:125
+		deep = true;                                                               // abstract_fixer.jsxi:125
 
-	if (rec === undefined)                                                         // abstract_fixer.jsxi:121
-		rec = false;                                                               // abstract_fixer.jsxi:121
+	if (rec === undefined)                                                         // abstract_fixer.jsxi:125
+		rec = false;                                                               // abstract_fixer.jsxi:125
 
 	var dir = path.dirname(filename);
 	
 	var basename = path.basename(filename);
 	
-	if (fs.existsSync(dir)){                                                       // abstract_fixer.jsxi:125
-		if (fs.statSync(dir).isDirectory()){                                       // abstract_fixer.jsxi:126
-			return fs.readdirSync(dir).filter(function (arg){                      // abstract_fixer.jsxi:127
+	if (fs.existsSync(dir)){                                                       // abstract_fixer.jsxi:129
+		if (fs.statSync(dir).isDirectory()){                                       // abstract_fixer.jsxi:130
+			return fs.readdirSync(dir).filter(function (arg){                      // abstract_fixer.jsxi:131
 				return AbstractFixer.__simularFile(basename, arg) && (arg != basename || rec);
-			}).map(function (e){                                                   // abstract_fixer.jsxi:127
-				return dir + '/' + e;                                              // abstract_fixer.jsxi:128
-			}).filter(function (arg){                                              // abstract_fixer.jsxi:129
-				return filter(fs.statSync(arg));                                   // abstract_fixer.jsxi:129
+			}).map(function (e){                                                   // abstract_fixer.jsxi:131
+				return dir + '/' + e;                                              // abstract_fixer.jsxi:132
+			}).filter(function (arg){                                              // abstract_fixer.jsxi:133
+				return filter(fs.statSync(arg));                                   // abstract_fixer.jsxi:133
 			});
 		} else {
 			return [];
 		}
-	} else if (deep){                                                              // abstract_fixer.jsxi:133
+	} else if (deep){                                                              // abstract_fixer.jsxi:137
 		var r = [];
 		
-		var s = AbstractFixer.__simularFiles(dir,                                  // abstract_fixer.jsxi:135
-			function (arg){                                                        // abstract_fixer.jsxi:135
-				return arg.isDirectory();                                          // abstract_fixer.jsxi:135
+		var s = AbstractFixer.__simularFiles(dir,                                  // abstract_fixer.jsxi:139
+			function (arg){                                                        // abstract_fixer.jsxi:139
+				return arg.isDirectory();                                          // abstract_fixer.jsxi:139
 			}, 
 			false, 
 			true);
 		
-		for (var __5 = 0; __5 < s.length; __5 ++){                                 // abstract_fixer.jsxi:136
+		for (var __5 = 0; __5 < s.length; __5 ++){                                 // abstract_fixer.jsxi:140
 			var d = s[__5];
 			
-			r.push.call(r,                                                         // abstract_fixer.jsxi:137
+			r.push.call(r,                                                         // abstract_fixer.jsxi:141
 				AbstractFixer.__simularFiles(d + '/' + basename, filter, false, 
 					true));
 		}
-		return r;                                                                  // abstract_fixer.jsxi:139
+		return r;                                                                  // abstract_fixer.jsxi:143
 	} else {
 		return [];
 	}
 };
-AbstractFixer.__restoreFile = function (filename, from, c){                        // abstract_fixer.jsxi:145
-	if (fs.existsSync(filename))                                                   // abstract_fixer.jsxi:146
-		fs.unlinkSync(filename);                                                   // abstract_fixer.jsxi:147
+AbstractFixer.__restoreFile = function (filename, from, c){                        // abstract_fixer.jsxi:149
+	if (fs.existsSync(filename))                                                   // abstract_fixer.jsxi:150
+		fs.unlinkSync(filename);                                                   // abstract_fixer.jsxi:151
 	
-	function mkdirp(d){                                                            // abstract_fixer.jsxi:149
-		if (fs.existsSync(d))                                                      // abstract_fixer.jsxi:150
+	function mkdirp(d){                                                            // abstract_fixer.jsxi:153
+		if (fs.existsSync(d))                                                      // abstract_fixer.jsxi:154
 			return;
 		
-		mkdirp(path.dirname(d));                                                   // abstract_fixer.jsxi:151
-		fs.mkdirSync(d);                                                           // abstract_fixer.jsxi:152
+		mkdirp(path.dirname(d));                                                   // abstract_fixer.jsxi:155
+		fs.mkdirSync(d);                                                           // abstract_fixer.jsxi:156
 	}
 	
-	mkdirp(path.dirname(filename));                                                // abstract_fixer.jsxi:155
-	fs.rename(from,                                                                // abstract_fixer.jsxi:156
-		filename,                                                                  // abstract_fixer.jsxi:156
-		function (err){                                                            // abstract_fixer.jsxi:156
-			if (err){                                                              // abstract_fixer.jsxi:157
-				if (err.code === 'EXDEV'){                                         // abstract_fixer.jsxi:158
-					copy();                                                        // abstract_fixer.jsxi:159
+	mkdirp(path.dirname(filename));                                                // abstract_fixer.jsxi:159
+	fs.rename(from,                                                                // abstract_fixer.jsxi:160
+		filename,                                                                  // abstract_fixer.jsxi:160
+		function (err){                                                            // abstract_fixer.jsxi:160
+			if (err){                                                              // abstract_fixer.jsxi:161
+				if (err.code === 'EXDEV'){                                         // abstract_fixer.jsxi:162
+					copy();                                                        // abstract_fixer.jsxi:163
 				} else {
-					c(err);                                                        // abstract_fixer.jsxi:161
+					c(err);                                                        // abstract_fixer.jsxi:165
 				}
 			} else {
-				c();                                                               // abstract_fixer.jsxi:164
+				c();                                                               // abstract_fixer.jsxi:168
 			}
 		});
 	
-	function copy(){                                                               // abstract_fixer.jsxi:168
+	function copy(){                                                               // abstract_fixer.jsxi:172
 		var rs = fs.createReadStream(from);
 		
 		var ws = fs.createWriteStream(filename);
 		
-		rs.on('error', c);                                                         // abstract_fixer.jsxi:171
-		ws.on('error', c);                                                         // abstract_fixer.jsxi:172
-		rs.on('close',                                                             // abstract_fixer.jsxi:173
-			function (){                                                           // abstract_fixer.jsxi:173
-				c();                                                               // abstract_fixer.jsxi:174
-				fs.unlink(from);                                                   // abstract_fixer.jsxi:175
+		rs.on('error', c);                                                         // abstract_fixer.jsxi:175
+		ws.on('error', c);                                                         // abstract_fixer.jsxi:176
+		rs.on('close',                                                             // abstract_fixer.jsxi:177
+			function (){                                                           // abstract_fixer.jsxi:177
+				c();                                                               // abstract_fixer.jsxi:178
+				fs.unlink(from);                                                   // abstract_fixer.jsxi:179
 			});
-		rs.pipe(ws);                                                               // abstract_fixer.jsxi:177
+		rs.pipe(ws);                                                               // abstract_fixer.jsxi:181
 	}
 };
-AbstractFixer.__tryToRestoreFile = function (filename, filter, callback, deep){    // abstract_fixer.jsxi:181
+AbstractFixer.__tryToRestoreFile = function (filename, filter, callback, deep){    // abstract_fixer.jsxi:185
 	return AbstractFixer.__simularFiles(filename, filter, deep).map(function (e){
 		return {
 			name: 'Restore from …' + path.normalize(e).slice(AcDir.root.length), 
-			fn: (function (c){                                                     // abstract_fixer.jsxi:185
-				AbstractFixer.__restoreFile(filename,                              // abstract_fixer.jsxi:186
-					e,                                                             // abstract_fixer.jsxi:186
-					function (err){                                                // abstract_fixer.jsxi:186
-						if (err)                                                   // abstract_fixer.jsxi:187
-							return c(err);                                         // abstract_fixer.jsxi:187
+			fn: (function (c){                                                     // abstract_fixer.jsxi:189
+				AbstractFixer.__restoreFile(filename,                              // abstract_fixer.jsxi:190
+					e,                                                             // abstract_fixer.jsxi:190
+					function (err){                                                // abstract_fixer.jsxi:190
+						if (err)                                                   // abstract_fixer.jsxi:191
+							return c(err);                                         // abstract_fixer.jsxi:191
 						
-						if (callback)                                              // abstract_fixer.jsxi:188
-							callback();                                            // abstract_fixer.jsxi:188
+						if (callback)                                              // abstract_fixer.jsxi:192
+							callback();                                            // abstract_fixer.jsxi:192
 						
-						c();                                                       // abstract_fixer.jsxi:189
+						c();                                                       // abstract_fixer.jsxi:193
 					});
 			})
 		};
 	});
 };
-AbstractFixer.__tryToRestoreFileHere = function (filename, filter, callback){      // abstract_fixer.jsxi:196
+AbstractFixer.__tryToRestoreFileHere = function (filename, filter, callback){      // abstract_fixer.jsxi:200
 	return AbstractFixer.__tryToRestoreFile(filename, filter, callback, false);
 };
 
@@ -4284,6 +4333,43 @@ var DamagedSkinDataFixer = (function (){                                        
 })();
 
 RestorationWizard.register('skin-data-damaged', DamagedSkinDataFixer);             // error_skin_data.jsxi:52
+
+/* Class "MissingPreviewFixer" declaration */
+function MissingPreviewFixer(){                                                    // error_skin_images.jsxi:1
+	AbstractFixer.apply(this, 
+		arguments);
+}
+__prototypeExtend(MissingPreviewFixer, 
+	AbstractFixer);
+MissingPreviewFixer.prototype.__removeError = function (){};
+MissingPreviewFixer.prototype.__MissingPreviewFixer_restore = function (c){        // error_skin_images.jsxi:5
+	AcShowroom.shot(this.__car);                                                   // error_skin_images.jsxi:6
+	c();                                                                           // error_skin_images.jsxi:7
+};
+Object.defineProperty(MissingPreviewFixer.prototype, 
+	'title', 
+	{
+		get: (function (){
+			return 'Some of skin\'s previews are missing';                         // error_skin_images.jsxi:10
+		})
+	});
+Object.defineProperty(MissingPreviewFixer.prototype, 
+	'solutions', 
+	{
+		get: (function (){
+			return [
+				{
+					name: 'Auto-generate new previews',                            // error_skin_images.jsxi:12
+					fn: __bindOnce(this, '__MissingPreviewFixer_restore')
+				}
+			].concat(AbstractFixer.__tryToRestoreFileHere(this.__object.preview, 
+				function (arg){                                                    // error_skin_images.jsxi:14
+					return arg.isFile() && arg.size > 1e3 && arg.size < 1e6;       // error_skin_images.jsxi:14
+				}));
+		})
+	});
+
+RestorationWizard.register('skin-preview-missing', MissingPreviewFixer);           // error_skin_images.jsxi:17
 
 /* Class "MissingUpgradeIconFixer" declaration */
 function MissingUpgradeIconFixer(){                                                // error_upgrade_missing.jsxi:1
