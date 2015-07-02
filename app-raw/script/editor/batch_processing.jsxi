@@ -1,8 +1,10 @@
 class AbstractBatchProcessor {
+    public start(){}
     abstract public process(car, callback);
+    public end(){}
 }
 
-class JsBatchProcessor {
+class JsBatchProcessor extends AbstractBatchProcessor {
     var _fn;
 
     (fn){
@@ -21,7 +23,29 @@ class JsBatchProcessor {
     }
 }
 
+class ExportDbProcessor extends AbstractBatchProcessor {
+    var data;
+
+    (){
+    }
+
+    public start(){
+        data = {};
+    }
+
+    public end(){
+        fs.writeFileSync('%0/exported-data.json'(gui.App.dataPath), JSON.stringify(data));
+    }
+
+    public process(car, callback){
+        data[car.id] = car.data;
+        callback();
+    }
+}
+
 static class BatchProcessing {
+    var mediator = new Mediator();
+
     var _procs;
 
     public process(cars, processor){
@@ -37,19 +61,33 @@ static class BatchProcessing {
         var progress = d.find('progress');
         progress[0].max = cars.length;
 
-        var i = 0;
+        var i = 0, k = 0;
         function next(){
             if (abort) return;
 
-            if (!cars[i]){
+            if (cars[i]){
+                var j = i++;
+                progress[0].value = j;
+                processor.process(cars[j], nextDelayed);
+            } else {
                 AppServerRequest.sendDataDisabled = false;
                 d.close();
+                processor.end();
+                mediator.dispatch('end', processor);
             }
-
-            progress[0].value = i++;
-            processor.process(cars[i], lambda setTimeout(next));
         }
 
+        function nextDelayed(){
+            if (++k < 10){
+                next();
+            } else {
+                setTimeout(next);
+                k = 0;
+            }
+        }
+
+        mediator.dispatch('start', processor);
+        processor.start();
         next();
     }
 
@@ -77,35 +115,19 @@ static class BatchProcessing {
     private init(){
         add('Add missing brand names to car names', new JsBatchProcessor(function (car){
             if (!car.data || !car.data.name || !car.data.brand) return;
-            var brand  = car.data.brand;
-            var name = car.data.name;
-            if (brand === 'Kunos') return;
-            if (brand === 'Mercedes-Benz'){
-                if (name.indexOf(brand + ' ') === 0){
-                    name = name.substr(brand.length + 1);
-                }
 
-                brand = 'Mercedes';
-            }
+            if (car.data.brand === 'Kunos') return;
+            if (Brands.nameContains(car.data.name, car.data.brand)) return;
 
-            if (name.indexOf(brand + ' ') === 0) return;
-            car.changeData('name', brand + ' ' + name);
+            car.changeData('name', Brands.toNamePart(car.data.brand) + ' ' + car.data.name);
         }));
 
         add('Remove brand names from car names', new JsBatchProcessor(function (car){
             if (!car.data || !car.data.name || !car.data.brand) return;
-            var brand  = car.data.brand;
-            var name = car.data.name;
-            if (brand === 'Mercedes-Benz'){
-                if (name.indexOf(brand + ' ') === 0){
-                    car.changeData('name', name.substr(brand.length + 1));
-                    return;
-                }
 
-                brand = 'Mercedes';
-            }
-            if (name.indexOf(brand + ' ') !== 0) return;
-            car.changeData('name', name.substr(brand.length + 1));
+            if (!Brands.nameContains(car.data.name, car.data.brand)) return;
+
+            car.changeData('name', car.data.name.substr(Brands.toNamePart(car.data.brand).length + 1));
         }));
 
         add('Lowercase classes', new JsBatchProcessor(function (car){
@@ -117,33 +139,20 @@ static class BatchProcessing {
             if (!car.data || !car.data.tags) return;
             var temp = 0,
                 tags = car.data.tags.map(function (raw){
-                    var tag = raw.toLowerCase();
+                    var tag = Countries.fixTag(raw.toLowerCase());
+
                     if (/^#?(a\d+)$/.test(tag)){
                         return '#' + RegExp.$1.toUpperCase();
                     }
 
-                    switch (tag){
-                        case 'us':
-                        case 'america':
-                            return 'usa';
-                        case 'gb':
-                        case 'uk':
-                        case 'united kingdom':
-                        case 'england':
-                        case 'britain':
-                            return 'great britain';
-                        case 'swedish':
-                            return 'sweden';
-                        default:
-                            if (tag === raw){
-                                temp++;
-                            }
+                    if (tag === raw){
+                        temp++;
+                    } 
 
-                            return tag;
-                    }
+                    return tag;
                 });
 
-            if (temp.length !== car.data.tags.length){
+            if (temp !== car.data.tags.length){
                 car.changeData('tags', tags);
             }
         }));
@@ -162,5 +171,11 @@ static class BatchProcessing {
         add('Set default badges', new JsBatchProcessor(function (car){
             BadgeEditor.autoupdate(car, true);
         }));
+
+        if (localStorage.developerMode) add('Export database', new ExportDbProcessor());
+    }
+
+    {
+        mediator.extend(BatchProcessing);
     }
 }

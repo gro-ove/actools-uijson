@@ -13,7 +13,7 @@ Small utility for easy editing *ui_car.json* files. Written using [NW.js](http:/
 * Delete cars to Recycle Bin
 
 #### TODO
-* New custom fields: year, country, version, author
+* Test weight
 * Data Application
 * New mods installation
 * More hotkeys
@@ -26,19 +26,25 @@ Small utility for easy editing *ui_car.json* files. Written using [NW.js](http:/
 * Switchable & custom search providers (?)
 * Custom Batch Processing (?)
 * Clone cars, modify in-game specs (?)
-* Tracks/Showrooms Edit Mode (?)
+* Tracks/Showrooms Mode (?)
 * Custom Launcher (with GT-like career mode?)
 
 #### Changelog
 * 0.3.36
     * Introducing: Body/Wheels Ambient Shadow Fixer
-    * Body Ambient Shadow editing (works with packed data too!)
     * Introducing: Custom Showroom
+    * Body ambient shadow size editing (works with packed data too!)
+    * Auto-update Livery
     * Restoration Wizard:
         * Fix broken ui_skin.json
+        * Fix missing previews & liveries
+        * Fix SUSP_XX
+        * Autodetect & fix aero.ini problem without unpacking data.acd
     * New Auto-update Previews modes (GT5/6, Seat Leon Euro Cup Style)
         * I don't recommend to use them tho, Custom Showroom is pile of garbage, at least for now
         * By the way, if you know how to shaders work, I would be really glad if you could help me
+    * New custom fields: year, country, author, version, url
+    * Filter by year/country/tag
 * 0.3.35
     * Car deleting
     * Added a lot of missing brand's icons

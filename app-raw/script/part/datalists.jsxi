@@ -15,10 +15,14 @@ static class Datalists {
         create('tags');
         create('brands');
         create('classes');
+        create('authors');
+        create('countries');
 
         Cars
             .on('new.tag', add.bind(null, 'tags'))
             .on('new.brand', add.bind(null, 'brands'))
-            .on('new.class', add.bind(null, 'classes'));
+            .on('new.class', add.bind(null, 'classes'))
+            .on('new.author', add.bind(null, 'authors'))
+            .on('new.country', add.bind(null, 'countries'));
     }
 }

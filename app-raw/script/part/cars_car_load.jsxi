@@ -3,6 +3,7 @@ static partial class Cars {
         var _badgeLoaded;
         public loadBadge(callback){
             clearErrors('badge');
+            if (_badgeLoaded) gui.App.clearCache();
 
             fs.exists(badge, function (result){
                 if (!result){
@@ -34,6 +35,7 @@ static partial class Cars {
             if (skins){
                 skins = null;
                 mediator.dispatch('update.car.skins', this);
+                gui.App.clearCache();
             }
 
             clearErrors('skin');
@@ -68,7 +70,17 @@ static partial class Cars {
                             return new CarSkin(this, e);
                         }.bind(this));
 
-                        selectedSkin = skins[0];
+                        var index = 0;
+                        if (selectedSkin){
+                            for (var i, s in-array skins){
+                                if (s.id === selectedSkin.id){
+                                    index = i;
+                                    break;
+                                }
+                            }
+                        }
+
+                        selectedSkin = skins[index];
                         mediator.dispatch('update.car.skins', this);
                         loadSkins_stuff(callback);
                         return;
@@ -138,18 +150,35 @@ static partial class Cars {
                         if (!data.tags) data.tags = [];
                         if (!data.specs) data.specs = {};
 
-                        data.class = data.class || '';
+                        data.name = data.name.trim();
+                        data.brand = data.brand.trim();
+
+                        data.class = (data.class || '').trim();
                         data.description = data.description.replace(/\n/g, ' ')
-                            .replace(/<\/?br\/?>[ \t]*|\n[ \t]+/g, '\n').replace(/<\s*\/?\s*\w+\s*>/g, '').replace(/[\t ]+/g, ' ');
+                            .replace(/<\/?br\/?>[ \t]*|\n[ \t]+/g, '\n').replace(/<\s*\/?\s*\w+\s*>/g, '').replace(/[\t ]+/g, ' ').decodeHtmlEntities();
+
+                        if (data.year == null && Years.nameContains(data.name)){
+                            data.year = Years.fromName(data.name);
+                        }
+
+                        if (data.country == null){
+                            for (var tag in-array data.tags){
+                                var c = Countries.fromTag(tag);
+                                if (c == null) c = Countries.fromBrand(data.brand);
+                                if (c != null) data.country = c;
+                            }
+                        }
 
                         if (data.parent != null){
                             if (data.parent == id){
-                                addError('parent-wrong', 'Parent is child');
-                                // TODO: check if A → B → C or A → B → A
+                                addError('parent-wrong', 'Car cannot be parent to itself');
                             } else {
                                 var par = byName(data.parent);
                                 if (par == null){
                                     addError('parent-missing', 'Parent is missing');
+                                } else if (par.parent){
+                                    addError('parent-wrong', 'Parent is child');
+                                    // TODO: Check in second pass or something?
                                 } else {
                                     parent = par;
                                     parent.children.push(this);
@@ -167,6 +196,8 @@ static partial class Cars {
                         registerTags(data.tags);
                         registerClass(data.class);
                         registerBrand(data.brand);
+                        registerCountry(data.country);
+                        registerAuthor(data.author);
                     }
                 }
 
@@ -188,6 +219,18 @@ static partial class Cars {
             function s3(){ if (data == null) loadData(callback); else if (callback) callback(); }
             s1();
         }
+
+        public testAcd(callback){
+            clearErrors('acd');
+            AcTools.Utils.DataFixer.TestData(path, lambda {
+                addError(arg, _messages[arg] || 'Undeclared error: “%0”'(arg));
+            }, setTimeout.bind(window, callback));
+        }
+
+        static var _messages = {
+            'acd-test-error': 'Cannot test data'
+            'acd-obsolete-aero-data': 'Obsolete section “DATA” in aero.ini'
+        };
     }
 
     private parseLoadedData(data){

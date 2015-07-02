@@ -12,7 +12,7 @@ static class RestorationWizard {
                     return e.id !== fullErrorId && e.id.indexOf(errorId + ':') === 0;
                 });
                 if (simular.length > 0){
-                    fixer.simular();
+                    fixer.simular(simular);
                 }
             }
 

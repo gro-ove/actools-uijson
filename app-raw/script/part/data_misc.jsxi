@@ -1,0 +1,46 @@
+static class Years {
+    public nameContains(name){
+        return /\s(?:\W?(?:(?:\d\d){1,2})|((?:\d\d){1,2})\W)$/.test(name);
+    }
+
+    public fromName(name){
+        if (/\s(?:\W?((?:\d\d){1,2})|((?:\d\d){1,2})\W)$/.test(name)){
+            var year = +(RegExp.$1 || RegExp.$2);
+            if (year < 30){
+                year = 2e3 + year;
+            } else if (year < 1e3){
+                year = 1900 + year;
+            }
+
+            return year;
+        } else {
+            return null;
+        }
+    }
+}
+
+static class Brands {
+    public nameContains(name, brand){
+        return name.indexOf(toNamePart(brand) + ' ') === 0;
+    }
+
+    public fromNamePart(brand){
+        switch (brand){
+            case 'Mercedes':
+                return 'Mercedes-Benz';
+
+            default:
+                return brand;
+        }
+    }
+
+    public toNamePart(brand){
+        switch (brand){
+            case 'Mercedes-Benz':
+                return 'Mercedes';
+
+            default:
+                return brand;
+        }
+    }
+}

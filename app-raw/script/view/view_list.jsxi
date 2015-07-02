@@ -68,30 +68,66 @@ static class ViewList {
             i.style.display = 'block';
 
             var s = v.trim().split(/\s+/);
-            var bb = '', cc = '';
+            var brandFilter = '',
+                classFilter = '',
+                tagFilter = '',
+                countryFilter = '',
+                yearFilter = '',
+                authorFilter = '';
 
             var vv = s.filter(function (e){
                 if (/^brand:(.*)/.test(e)){
-                    bb = (bb && bb + '|') + RegExp.$1;
+                    brandFilter = (brandFilter && brandFilter + '|') + RegExp.$1;
                     return false;
                 }
 
                 if (/^class:(.*)/.test(e)){
-                    cc = (cc && cc + '|') + RegExp.$1;
+                    classFilter = (classFilter && classFilter + '|') + RegExp.$1;
+                    return false;
+                }
+
+                if (/^tag:(.*)/.test(e)){
+                    tagFilter = (tagFilter && tagFilter + '|') + RegExp.$1;
+                    return false;
+                }
+
+                if (/^country:(.*)/.test(e)){
+                    countryFilter = (countryFilter && countryFilter + '|') + RegExp.$1;
+                    return false;
+                }
+
+                if (/^author:(.*)/.test(e)){
+                    authorFilter = (authorFilter && authorFilter + '|') + RegExp.$1;
+                    return false;
+                }
+
+                if (/^year:(.*)/.test(e)){
+                    yearFilter = (yearFilter && yearFilter + '|') + RegExp.$1;
                     return false;
                 }
 
                 return true;
             });
 
-            var r = RegExp.fromQuery(vv.join(' '));
-            var b = bb && RegExp.fromQuery(bb, true); 
-            var c = cc && RegExp.fromQuery(cc, true); 
+            var re = RegExp.fromQuery(vv.join(' '));
+            var brandRe = brandFilter && RegExp.fromQuery(brandFilter, true); 
+            var classRe = classFilter && RegExp.fromQuery(classFilter, true); 
+            var tagRe = tagFilter && RegExp.fromQuery(tagFilter, true);
+            var countryRe = countryFilter && RegExp.fromQuery(countryFilter, true);
+            var authorRe = authorFilter && RegExp.fromQuery(authorFilter, true);
+            var yearRe = yearFilter && RegExp.fromQuery(yearFilter, true);
 
             var f = function (car){
-                if (b && (!car.data || !b.test(car.data.brand))) return false;
-                if (c && (!car.data || !c.test(car.data.class))) return false;
-                return r.test(car.id) || car.data && r.test(car.data.name);
+                if (brandRe && (!car.data || !brandRe.test(car.data.brand)) ||
+                    classRe && (!car.data || !classRe.test(car.data.class)) ||
+                    tagRe && (!car.data || !car.data.tags.some(tagRe.test.bind(tagRe))) ||
+                    countryRe && (!car.data || !countryRe.test(car.data.country)) ||
+                    yearRe && (!car.data || !yearRe.test(car.data.year)) ||
+                    authorRe && (!car.data || !authorRe.test(car.data.author))){
+                    return false;
+                } else {
+                    return re.test(car.id) || car.data && re.test(car.data.name);
+                }
             };
 
             _aside.find('#cars-list > div > [data-id]').each(function (){
@@ -116,24 +152,35 @@ static class ViewList {
             a.disabled && !b.disabled ? 1 : a.displayName.localeCompare(b.displayName)
     };
 
-    public sort(){
-        var c = Cars.list.sort(_sortFn.displayName);
-        var n = _node[0];
-        var a = n.children;
+    var sortingEnabled = true;
 
-        c.forEach(lambda {
-            for (var s in-array a){
-                if (s.children[0].getAttribute('data-id') == arg.id){
-                    n.appendChild(s);
-                    return;
+    public sort(){
+        if (!sortingEnabled) return;
+
+        var sorted = Cars.list.sort(_sortFn.displayName);
+        var listNode = _node[0];
+        var children = [].slice.call(listNode.children);
+
+        for (var car in-array sorted){
+            for (var entry in-array children){
+                if (entry.children[0].getAttribute('data-id') === car.id){
+                    listNode.appendChild(entry);
+                    break;
                 }
             }
-        });
+        }
 
         scrollToSelected();
     }
 
     function init(){
+        BatchProcessing
+            .on('start', lambda sortingEnabled = false)
+            .on('end' lambda {
+                sortingEnabled = true;
+                sort();
+            });
+
         Cars
             .on('scan:start', function (){
                 _aside.find('#cars-list').empty();

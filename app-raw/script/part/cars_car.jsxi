@@ -113,19 +113,46 @@ static partial class Cars {
             return str.trim().replace(/\s+/g, ' ');
         }
 
-        public changeData(key, value){
+        public changeData(key, value, inner = false){
             if (!data || data[key] == value) return;
+            if (!value && (key === 'name' || key === 'brand')) return;
 
-            if (key === 'name' || key === 'brand' || key === 'class' || key === 'year' || key === 'country'){
-                value = clearStr(value);
+            if (!inner){
+                if (key === 'name' || key === 'brand' || key === 'class' || 
+                    key === 'year' || key === 'country' ||
+                    key === 'author' || key === 'version' || key === 'url'){
+                    value = clearStr(value);
+                }
+
+                if (key === 'name'){
+                    if (Years.nameContains(value) && Years.fromName(data.name) == data.year){
+                        changeData('year', Years.fromName(value), true);
+                    }
+                }
+
+                if (key === 'brand'){
+                    if (Brands.nameContains(data.name, data.brand)){
+                        changeData('name', value + data.name.substr(Brands.toNamePart(data.brand).length));
+                    }
+                }
+
+                if (key === 'year'){
+                    value = value ? +('' + value).replace(/[^\d]+/g, '') : null;
+                    if (value < 1800 || value > 2100) return;
+
+                    if (Years.nameContains(data.name)){
+                        if (data.name.substr(-4) == data.year){
+                            data.name = data.name.slice(0, -4) + value;
+                        } else if (data.name.substr(-2) == ('' + data.year).slice(2)){
+                            data.name = data.name.slice(0, -2) + ('' + value).slice(2);
+                        }
+                    }
+                }
+
+                if (Settings.get('uploadData')){
+                    AppServerRequest.sendData(id, key, value);
+                }
             }
-
-            if (key === 'year'){
-                value = value.replace(/[^\d]+/g, '');
-            }
-
-            data[key] = value;
-            changed = true;
 
             if (key === 'tags'){
                 registerTags(value);
@@ -139,12 +166,21 @@ static partial class Cars {
                 registerClass(value);
             }
 
-            if (Settings.get('uploadData')){
-                AppServerRequest.sendData(id, key, value);
+            if (key === 'country'){
+                registerCountry(value);
             }
 
+            if (key === 'author'){
+                registerAuthor(value);
+            }
+
+            data[key] = value;
             mediator.dispatch('update.car.data:%0'(key), this);
-            mediator.dispatch('update.car.changed', this);
+
+            if (!changed){
+                changed = true;
+                mediator.dispatch('update.car.changed', this);
+            }
         }
 
         public changeDataSpecs(key, value){
@@ -195,13 +231,18 @@ static partial class Cars {
             mediator.dispatch('update.car.changed', this);
         }
 
+        public getSkin(skinId){
+            for (var skin in-array skins){
+                if (skin.id === skinId){
+                    return skin;
+                }
+            }
+        }
+
         public selectSkin(skinId){
             if (!skins) return;
             
-            var newSkin = skins.filter(function (e){
-                return e.id == skinId;
-            })[0];
-
+            var newSkin = getSkin(skinId);
             if (newSkin == selectedSkin) return;
 
             selectedSkin = newSkin;

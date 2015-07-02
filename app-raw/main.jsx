@@ -6,7 +6,7 @@
 @import('script/error_handler')
 
 @import('script/utils/*')
-@import('script/module/*')
+@import('script/part/*')
 @import('script/editor/*')
 @import('script/view/*')
 

@@ -45,12 +45,11 @@ static class AcShowroom {
         return fs.existsSync(AcDir.showrooms + '/' + id);
     }
 
-    private handleError(err){
+    private handleError(err, car){
         try {
             var logFile = fs.readFileSync(AcTools.Utils.FileUtils.GetLogFile()).toString();
             if (/\bCOULD NOT FIND SUSPENSION OBJECT SUSP_[LR][FR]\b/.test(logFile)){
-                ErrorHandler.handled('Car doesn\'t have a proper suspension. \
-                    You could try to use option “Fix SUSP_XX error” in additional edit tools menu.', err);
+                car.addError('kn5-susp_xx-error', 'Car\'s model doesn\'t have a proper suspension.');
                 return true;
             }
         }
@@ -94,7 +93,7 @@ static class AcShowroom {
             return;
         }
         
-        handleError();
+        handleError(null, c);
     }
 
     public select(c, s){
@@ -226,7 +225,7 @@ static class AcShowroom {
                     output = AcTools.Utils.Kn5RenderWrapper.Shot(c.path, mode);
                 }
             } catch (err){
-                if (!handleError(err)){
+                if (!handleError(err, c)){
                     ErrorHandler.handled('Cannot start showroom. Maybe the car is broken.', err);
                 }
 

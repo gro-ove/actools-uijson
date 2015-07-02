@@ -1,13 +1,38 @@
 static partial class Cars {
     var mediator = new Mediator();
 
+    class UniqueList {
+        public name;
+        public list = [];
+        private _lower = [];
+
+        (name){
+            this.name = name;
+        }
+
+        public add(v){
+            if (!v) return;
+            var l = v.toLowerCase();
+            if (_lower.indexOf(l) < 0){
+                list.push(v);
+                _lower.push(l);
+
+                mediator.dispatch('new.%0'(name), v);
+            }
+        }
+    }
+
     var _list,
-        _brands = [],
-        _brandsLower = [],
-        _classes = [],
-        _classesLower = [],
-        _tags = [],
-        _tagsLower = [];
+        _brands = new UniqueList('brand'),
+        _classes = new UniqueList('class'),
+        _countries = new UniqueList('country'),
+        _authors = new UniqueList('author'),
+        _tags = new UniqueList('tag');
+
+    public get list _list,
+        brands _brands.list,
+        classes _classes.list,
+        tags _tags.list;
 
     public byName(n){
         for (var i = 0; i < _list.length; i++){
@@ -21,34 +46,24 @@ static partial class Cars {
 
     private registerTags(tags){
         tags.forEach(function (e){
-            var l = e.toLowerCase();
-            if (_tagsLower.indexOf(l) < 0){
-                _tags.push(e);
-                _tagsLower.push(l);
-
-                mediator.dispatch('new.tag', e);
-            }
+            _tags.add(e);
         });
     }
 
-    private registerClass(className){
-        var l = className.toLowerCase();
-        if (_classesLower.indexOf(l) < 0){
-            _classes.push(className);
-            _classesLower.push(l);
-
-            mediator.dispatch('new.class', className);
-        }
+    private registerClass(v){
+        _classes.add(v);
     }
 
-    private registerBrand(brandName){
-        var l = brandName.toLowerCase();
-        if (_brandsLower.indexOf(l) < 0){
-            _brands.push(brandName);
-            _brandsLower.push(l);
+    private registerBrand(v){
+        _brands.add(v);
+    }
 
-            mediator.dispatch('new.brand', brandName);
-        }
+    private registerCountry(v){
+        _countries.add(v);
+    }
+
+    private registerAuthor(v){
+        _authors.add(v);
     }
 
     public scan(){
@@ -96,19 +111,37 @@ static partial class Cars {
     }
 
     private lasyAsyncLoad(){
-        var a = _list, i = 0,
+        var a = _list, b = a.slice(), i = 0,
             step = setTimeout.bind(window, lambda {
                 if (a != _list){
-                    mediator.dispatch('lazyscan:interrupt', a);
-                } else if (i >= a.length){
-                    mediator.dispatch('lazyscan:ready', a);
+                    mediator.dispatch('lazyscan:interrupt', b);
+                } else if (i >= b.length){
+                    mediator.dispatch('lazyscan:ready', b);
+                    lasyAsyncErrorTest();
                 } else {
-                    mediator.dispatch('lazyscan:progress', i, a.length);
-                    a[i++].loadEnsure(step);
+                    mediator.dispatch('lazyscan:progress', i, b.length);
+                    b[i++].loadEnsure(step);
                 }
             }, 20);
 
-        mediator.dispatch('lazyscan:start', a);
+        mediator.dispatch('lazyscan:start', b);
+        step();
+    }
+
+    private lasyAsyncErrorTest(){
+        var a = _list, b = a.slice(), i = 0,
+            step = setTimeout.bind(window, lambda {
+                if (a != _list){
+                    mediator.dispatch('lazyscan:interrupt', b);
+                } else if (i >= b.length){
+                    mediator.dispatch('lazyscan:ready', b);
+                } else {
+                    mediator.dispatch('lazyscan:progress', i, b.length);
+                    b[i++].testAcd(step);
+                }
+            }, 20);
+
+        mediator.dispatch('lazyscan:start', b);
         step();
     }
 
@@ -180,11 +213,6 @@ static partial class Cars {
             }
         }
     }
-
-    public get list _list,
-        brands _brands,
-        classes _classes,
-        tags _tags;
 
     {
         mediator.extend(Cars);

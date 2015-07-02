@@ -64,6 +64,9 @@ static class ViewDetails {
             val('#selected-car-brand', car.data.brand);
             val('#selected-car-class', car.data.class);
 
+            val('#selected-car-year', car.data.year);
+            val('#selected-car-country', car.data.country);
+
             val('#selected-car-bhp', car.data.specs.bhp);
             val('#selected-car-torque', car.data.specs.torque);
             val('#selected-car-weight', car.data.specs.weight);
@@ -257,6 +260,19 @@ static class ViewDetails {
                 } else {
                     this.querySelector('input').focus();
                 }
+            })
+            .on('contextmenu', function (e){
+                if (!_selected || !_selected.data) return;
+                if (e.target.tagName !== 'LI') return;
+
+                var menu = new gui.Menu();
+                menu.append(new gui.MenuItem({ label: 'Filter Tag', key: 'F', click: function (){
+                    if (!_selected) return;
+                    ViewList.addFilter('tag:%0'(e.target.textContent));
+                } }));
+
+                menu.popup(e.clientX, e.clientY);
+                return false;
             });
 
         $('#selected-car-tags input')
@@ -289,19 +305,7 @@ static class ViewDetails {
             })
             .on('change', function (e){
                 if (!_selected || this.readonly || !this.value) return;
-                var name = _selected.data.name;
-
-                if (name.indexOf(_selected.data.brand + ' ') === 0){
-                    name = name.substr(_selected.data.brand.length + 1);
-                } else {
-                    name = null;
-                }
-
                 Cars.changeData(_selected, 'brand', this.value);
-
-                if (name){
-                    Cars.changeData(_selected, 'name', this.value + ' ' + name);
-                }
             })
             .on('contextmenu', function (e){
                 if (!_selected || !_selected.data) return;
@@ -328,12 +332,74 @@ static class ViewDetails {
                 Cars.changeData(_selected, 'class', this.value);
             })
             .on('contextmenu', function (e){
-                if (!_selected || !_selected.data) return;
+                if (!_selected || !_selected.data || !_selected.data.class) return;
 
                 var menu = new gui.Menu();
                 menu.append(new gui.MenuItem({ label: 'Filter Class', key: 'F', click: function (){
                     if (!_selected) return;
                     ViewList.addFilter('class:%0'(_selected.data.class));
+                } }));
+
+                menu.popup(e.clientX, e.clientY);
+                return false;
+            });
+
+        $('#selected-car-year')
+            .on('keydown', function (e){
+                if (e.keyCode == 13){
+                    this.blur();
+                    return false;
+                }
+
+                if (e.keyCode == 37){
+                    this.value = +this.value + 1;
+                    return false;
+                }
+
+                if (e.keyCode == 39){
+                    this.value = +this.value - 1;
+                    return false;
+                }
+            })
+            .on('change', function (){
+                if (!_selected || this.readonly) return;
+                Cars.changeData(_selected, 'year', this.value);
+            })
+            .on('contextmenu', function (e){
+                if (!_selected || !_selected.data || !_selected.data.year) return;
+
+                var menu = new gui.Menu();
+                menu.append(new gui.MenuItem({ label: 'Filter Year', key: 'F', click: function (){
+                    if (!_selected) return;
+                    ViewList.addFilter('year:%0'(_selected.data.year));
+                } }));
+                menu.append(new gui.MenuItem({ label: 'Filter Decade', click: function (){
+                    if (!_selected) return;
+                    ViewList.addFilter('year:%0'(('' + _selected.data.year).slice(0, -1) + '?'));
+                } }));
+
+                menu.popup(e.clientX, e.clientY);
+                return false;
+            });
+
+        $('#selected-car-country')
+            .on('keydown', function (e){
+                if (e.keyCode == 13){
+                    this.blur();
+                    return false;
+                }
+            })
+            .on('change', function (){
+                if (!_selected || this.readonly) return;
+                Cars.changeData(_selected, 'country', this.value);
+            })
+            .on('contextmenu', function (e){
+                if (!_selected || !_selected.data || !_selected.data.country) return;
+
+                var menu = new gui.Menu();
+                menu.append(new gui.MenuItem({ label: 'Filter Country', key: 'F', click: function (){
+                    if (!_selected) return;
+                    ViewList.addFilter('country:%0'(_selected.data.country));
                 } }));
 
                 menu.popup(e.clientX, e.clientY);
@@ -437,7 +503,7 @@ static class ViewDetails {
                 menu.append(new gui.MenuItem({ label: 'Open in Custom Showroom (Experimental)', click: function (){
                     if (!_selected) return;
                     try {
-                        AcTools.Utils.Kn5RenderWrapper.StartDarkRoomPreview(AcDir.root, _selected.id, id);
+                        AcTools.Utils.Kn5RenderWrapper.StartDarkRoomPreview(_selected.path, id);
                     } catch (err){
                         ErrorHandler.handled('Cannot start Custom Showroom.', err);
                         return;
@@ -447,8 +513,41 @@ static class ViewDetails {
                     if (!_selected) return;
                     AcPractice.start(_selected, id);
                 } }));
+                menu.append(new gui.MenuItem({ label: 'Folder', click: function (){
+                    if (!_selected) return;
+                    Shell.openItem(_selected.getSkin(id).path);
+                } }));
 
-                // menu.append(new gui.MenuItem({ type: 'separator' }));
+                menu.append(new gui.MenuItem({ type: 'separator' }));
+
+                var autoUpdateLivery = new gui.MenuItem({ label: 'Update Livery', submenu: new gui.Menu() });
+                menu.append(autoUpdateLivery);
+                autoUpdateLivery = autoUpdateLivery.submenu;
+
+                autoUpdateLivery.append(new gui.MenuItem({ label: 'From Preview', click: function (){
+                    if (!_selected) return;
+                    var skin = _selected.getSkin(id);
+                    try {
+                        AcTools.Utils.ImageUtils.GenerateLivery(skin.preview, skin.livery);
+                        _selected.loadSkins();
+                    } catch (err){
+                        ErrorHandler.handled('Cannot update livery.', err);
+                        return;
+                    }
+                } }));
+
+                autoUpdateLivery.append(new gui.MenuItem({ label: 'With Custom Showroom', click: function (){
+                    if (!_selected) return;
+                    var skin = _selected.getSkin(id);
+                    try {
+                        AcTools.Utils.Kn5RenderWrapper.GenerateLivery(_selected.path, skin.id, skin.livery);
+                        _selected.loadSkins();
+                    } catch (err){
+                        ErrorHandler.handled('Cannot update livery.', err);
+                        return;
+                    }
+                } }));
+
                 // menu.append(new gui.MenuItem({ label: 'Livery Editor', enabled: false }));
                 // menu.append(new gui.MenuItem({ label: 'Skin Editor', enabled: false }));
                 // menu.append(new gui.MenuItem({ label: 'Remove skin', enabled: false }));
@@ -594,7 +693,7 @@ static class ViewDetails {
                 if (!_selected) return;
 
                 try {
-                    AcTools.Utils.Kn5RenderWrapper.UpdateAmbientShadows(AcDir.root, _selected.id);
+                    AcTools.Utils.Kn5RenderWrapper.UpdateAmbientShadows(_selected.path);
                 } catch (err){
                     ErrorHandler.handled('Cannot update shadows.', err);
                     return;
@@ -624,17 +723,16 @@ static class ViewDetails {
                 d.content.find('#body-ambient-shadow-height').val(currentSize[1]);
             } }));
 
-            menu.append(new gui.MenuItem({ label: 'Fix SUSP_XX error', click: function (){
-                $('main footer').removeClass('active');
-                if (!_selected) return;
-
-                try {
-                    AcTools.Utils.Kn5Fixer.FixSuspensionWrapper(AcDir.root, _selected.id);
-                } catch (err){
-                    ErrorHandler.handled('Cannot fix car.', err);
-                    return;
-                }
-            } }));
+            // menu.append(new gui.MenuItem({ label: 'Fix SUSP_XX error', click: function (){
+            //     $('main footer').removeClass('active');
+            //     if (!_selected) return;
+            //     try {
+            //         AcTools.Utils.Kn5Fixer.FixSuspensionWrapper(AcDir.root, _selected.id);
+            //     } catch (err){
+            //         ErrorHandler.handled('Cannot fix car.', err);
+            //         return;
+            //     }
+            // } }));
 
             if (localStorage.developerMode){
                 var devMenu = new gui.MenuItem({ label: 'Developer Tools', submenu: new gui.Menu() });

@@ -1,0 +1,346 @@
+static class Countries {
+    public fromBrand(brand){
+        switch (brand = brand.trim().toLowerCase()){
+            case 'abarth': return 'Italy';
+            case 'alfa': return 'Italy';
+            case 'alfa romeo': return 'Italy';
+            case 'alpine': return 'France';
+            case 'amc': return 'USA';
+            case 'aston': return 'Great Britain';
+            case 'aston martin': return 'Great Britain';
+            case 'audi': return 'Germany';
+            case 'bentley': return 'Great Britain';
+            case 'bmw': return 'Germany';
+            case 'bugatti': return 'France';
+            case 'buick': return 'USA';
+            case 'cadillac': return 'USA';
+            case 'chevrolet': return 'USA';
+            case 'datsun': return 'Japan';
+            case 'dodge': return 'USA';
+            case 'ferrari': return 'Italy';
+            case 'fiat': return 'Italy';
+            case 'ford': return 'USA';
+            case 'gemballa': return 'Germany';
+            case 'ginetta': return 'Great Britain';
+            case 'gmc': return 'USA';
+            case 'gumpert': return 'Germany';
+            case 'hamann': return 'Germany';
+            case 'holden': return 'Australia';
+            case 'honda': return 'Japan';
+            case 'hyundai': return 'Korea';
+            case 'infiniti': return 'Japan';
+            case 'jaguar': return 'Great Britain';
+            case 'kia': return 'Korea';
+            case 'koenigsegg': return 'Sweden';
+            case 'ktm': return 'Austria';
+            case 'lada': return 'Russia';
+            case 'lamborghini': return 'Italy';
+            case 'lancia': return 'Italy';
+            case 'lexus': return 'Japan';
+            case 'lotus': return 'Great Britain';
+            case 'maserati': return 'Italy';
+            case 'mazda': return 'Japan';
+            case 'mclaren': return 'Great Britain';
+            case 'mercedes': return 'Germany';
+            case 'mercedes-benz': return 'Germany';
+            case 'mg': return 'Great Britain';
+            case 'mini': return 'Great Britain';
+            case 'mitsubishi': return 'Japan';
+            case 'nissan': return 'Japan';
+            case 'noble': return 'Great Britain';
+            case 'opel': return 'Germany';
+            case 'oreca': return 'France';
+            case 'pagani': return 'Italy';
+            case 'detomaso': return 'Italy';
+            case 'de tomaso': return 'Italy';
+            case 'plymouth': return 'USA';
+            case 'pontiac': return 'USA';
+            case 'porsche': return 'Germany';
+            case 'radical': return 'Great Britain';
+            case 'reliant': return 'Great Britain';
+            case 'renault': return 'France';
+            case 'rover': return 'Great Britain';
+            case 'ruf': return 'Germany';
+            case 'saleen': return 'USA';
+            case 'sareni': return 'USA';
+            case 'scuderia glickenhaus': return 'Italy';
+            case 'seat': return 'Spain';
+            case 'shelby': return 'USA';
+            case 'subaru': return 'Japan';
+            case 'suzuki': return 'Japan';
+            case 'tatuus': return 'Italy';
+            case 'tesla': return 'USA';
+            case 'toyota': return 'Japan';
+            case 'volkswagen': return 'Germany';
+            case 'volvo': return 'Sweden';
+            default: return null;
+        }
+    }
+
+    public fromTag(tag){
+        switch (tag = tag.trim().toLowerCase()){
+            case 'afghanistan':
+            case 'albania':
+            case 'algeria':
+            case 'andorra':
+            case 'angola':
+            case 'argentina':
+            case 'armenia':
+            case 'aruba':
+            case 'australia':
+            case 'austria':
+            case 'azerbaijan':
+            case 'bahamas':
+            case 'bahrain':
+            case 'bangladesh':
+            case 'barbados':
+            case 'belarus':
+            case 'belgium':
+            case 'belize':
+            case 'benin':
+            case 'bhutan':
+            case 'bolivia':
+            case 'botswana':
+            case 'brazil':
+            case 'brunei':
+            case 'bulgaria':
+            case 'burma':
+            case 'burundi':
+            case 'cambodia':
+            case 'cameroon':
+            case 'canada':
+            case 'chad':
+            case 'chile':
+            case 'china':
+            case 'colombia':
+            case 'comoros':
+            case 'congo':
+            case 'croatia':
+            case 'cuba':
+            case 'curacao':
+            case 'cyprus':
+            case 'denmark':
+            case 'djibouti':
+            case 'dominica':
+            case 'ecuador':
+            case 'egypt':
+            case 'eritrea':
+            case 'estonia':
+            case 'ethiopia':
+            case 'fiji':
+            case 'finland':
+            case 'france':
+            case 'gabon':
+            case 'gambia':
+            case 'georgia':
+            case 'germany':
+            case 'ghana':
+            case 'greece':
+            case 'grenada':
+            case 'guatemala':
+            case 'guinea':
+            case 'guinea-bissau':
+            case 'guyana':
+            case 'haiti':
+            case 'holy see':
+            case 'honduras':
+            case 'hong kong':
+            case 'hungary':
+            case 'iceland':
+            case 'india':
+            case 'indonesia':
+            case 'iran':
+            case 'iraq':
+            case 'ireland':
+            case 'israel':
+            case 'italy':
+            case 'jamaica':
+            case 'japan':
+            case 'jordan':
+            case 'kazakhstan':
+            case 'kenya':
+            case 'kiribati':
+            case 'kosovo':
+            case 'kuwait':
+            case 'kyrgyzstan':
+            case 'laos':
+            case 'latvia':
+            case 'lebanon':
+            case 'lesotho':
+            case 'liberia':
+            case 'libya':
+            case 'liechtenstein':
+            case 'lithuania':
+            case 'luxembourg':
+            case 'macau':
+            case 'macedonia':
+            case 'madagascar':
+            case 'malawi':
+            case 'malaysia':
+            case 'maldives':
+            case 'mali':
+            case 'malta':
+            case 'mauritania':
+            case 'mauritius':
+            case 'mexico':
+            case 'micronesia':
+            case 'moldova':
+            case 'monaco':
+            case 'mongolia':
+            case 'montenegro':
+            case 'morocco':
+            case 'mozambique':
+            case 'namibia':
+            case 'nauru':
+            case 'nepal':
+            case 'netherlands':
+            case 'nicaragua':
+            case 'niger':
+            case 'nigeria':
+            case 'norway':
+            case 'oman':
+            case 'pakistan':
+            case 'palau':
+            case 'panama':
+            case 'paraguay':
+            case 'peru':
+            case 'philippines':
+            case 'poland':
+            case 'portugal':
+            case 'qatar':
+            case 'romania':
+            case 'russia':
+            case 'rwanda':
+            case 'samoa':
+            case 'senegal':
+            case 'serbia':
+            case 'seychelles':
+            case 'singapore':
+            case 'slovakia':
+            case 'slovenia':
+            case 'somalia':
+            case 'spain':
+            case 'sudan':
+            case 'suriname':
+            case 'swaziland':
+            case 'switzerland':
+            case 'syria':
+            case 'taiwan':
+            case 'tajikistan':
+            case 'tanzania':
+            case 'thailand':
+            case 'timor-leste':
+            case 'togo':
+            case 'tonga':
+            case 'tunisia':
+            case 'turkey':
+            case 'turkmenistan':
+            case 'tuvalu':
+            case 'uganda':
+            case 'ukraine':
+            case 'uruguay':
+            case 'uzbekistan':
+            case 'vanuatu':
+            case 'venezuela':
+            case 'vietnam':
+            case 'yemen':
+            case 'zambia':
+            case 'zimbabwe':
+                return tag[0].toUpperCase() + tag.slice(1);
+
+            case 'antigua and barbuda':
+            case 'bosnia and herzegovina':
+            case 'burkina faso':
+            case 'cape verde':
+            case 'central african republic':
+            case 'costa rica':
+            case 'el salvador':
+            case 'equatorial guinea':
+            case 'marshall islands':
+            case 'new zealand':
+            case 'san marino':
+            case 'saudi arabia':
+            case 'sierra leone':
+            case 'sint maarten':
+            case 'solomon islands':
+            case 'south africa':
+            case 'south sudan':
+            case 'sri lanka':
+            case 'trinidad and tobago':
+            case 'united arab emirates':
+                return tag.replace(/\b(?!and)\w/g, lambda arg.toUpperCase());
+
+            case 'cote d\'ivoire':
+            case 'côte d\'ivoire':
+            case 'cote d’ivoire':
+            case 'côte d’ivoire':
+                return 'Côte d’Ivoire';
+
+            case 'czech':
+            case 'czech republic':
+                return 'Czech';
+
+            case 'gb':
+            case 'uk':
+            case 'united kingdom':
+            case 'england':
+            case 'britain':
+            case 'great britain':
+                return 'Great Britain';
+
+            case 'korea':
+            case 'korea, south':
+            case 'south korea':
+                return 'Korea';
+
+            case 'sweden':
+            case 'swedish':
+                return 'Sweden';
+
+            case 'us':
+            case 'usa':
+            case 'america':
+                return 'USA';
+
+            default:
+                return null;
+        }
+    }
+
+    public fixTag(raw){
+        var tag = raw.toLowerCase();
+
+        switch (tag){
+            case 'gb':
+            case 'uk':
+            case 'united kingdom':
+            case 'england':
+            case 'britain':
+                return 'great britain';
+
+            case 'cote d\'ivoire':
+            case 'côte d\'ivoire':
+            case 'cote d’ivoire':
+                return 'côte d’ivoire';
+
+            case 'czech':
+            case 'czech republic':
+                return 'czech republic';
+
+            case 'korea':
+            case 'korea, south':
+            case 'south korea':
+                return 'korea';
+
+            case 'swedish':
+                return 'sweden';
+
+            case 'us':
+            case 'america':
+                return 'usa';
+
+            default:
+                return raw;
+        }
+    }
+}

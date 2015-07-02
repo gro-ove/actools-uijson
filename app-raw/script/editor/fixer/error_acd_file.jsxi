@@ -1,0 +1,13 @@
+class AcdAeroDataSectionFixer extends AbstractFixer {
+    removeSection (c){
+        AcTools.Utils.DataFixer.RemoveAeroDataSection(car.path);
+        c();
+    }
+
+    public get title 'Obsolete section “DATA” in aero.ini',
+        solutions [
+            { name: 'Remove section', fn: removeSection }
+        ];
+}
+
+RestorationWizard.register('acd-obsolete-aero-data', AcdAeroDataSectionFixer);

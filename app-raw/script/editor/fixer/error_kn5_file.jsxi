@@ -1,0 +1,13 @@
+class Kn5SuspXxErrorFixer extends AbstractFixer {
+    emptyPlaceholders (c){
+        AcTools.Utils.Kn5Fixer.FixSuspensionWrapper(AcDir.root, car.id);
+        c();
+    }
+
+    public get title 'Car\'s model doesn\'t have a proper suspension.',
+        solutions [
+            { name: 'Add empty placeholders', fn: emptyPlaceholders }
+        ];
+}
+
+RestorationWizard.register('kn5-susp_xx-error', Kn5SuspXxErrorFixer);
