@@ -278,7 +278,7 @@ static class Countries {
 
             case 'czech':
             case 'czech republic':
-                return 'Czech';
+                return 'Czech Republic';
 
             case 'gb':
             case 'uk':

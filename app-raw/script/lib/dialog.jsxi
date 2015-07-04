@@ -8,21 +8,11 @@ class Dialog {
     private _callback, _closeCallback, _endCallback;
     private _closeOnEnter = true;
 
-    private _prepareContent(elements){
-        if (!elements) elements = []; else
-        if (typeof elements == 'string') elements = [ elements ];
-
-        return elements.map(function (e){
-            return e ? e[0] == '<' && e[e.length - 1] == '>' ? e : '<p>' + e + '</p>' : '';
-        }).join('');
-    }
-
     (title, elements, callback, closeCallback) {
         el = $('<dialog>').html('<article><div class="dialog-header"><h4>' + title + 
-            '</h4></div><div class="dialog-content">' + _prepareContent(elements) + 
-            '</div><div class="dialog-buttons"><button data-id="dialog-ok">ОК</button></div></article>').click(function (e){
+            '</h4></div><div class="dialog-content"></div><div class="dialog-buttons"><button data-id="dialog-ok">ОК</button></div></article>').click(function (e){
             if (e.target.tagName == 'DIALOG' && (_closeCallback == null || 
-                    _closeCallback !== false && _closeCallback() !== false)){
+                    _closeCallback !== false && _closeCallback(e) !== false)){
                 close();
             }
         }).appendTo('body');
@@ -30,6 +20,8 @@ class Dialog {
         header = el.find('.dialog-header > h4');
         content = el.find('.dialog-content');
         buttons = el.find('.dialog-buttons');
+
+        setContent(elements);
 
         _callback = callback && callback.bind(this);
         _closeCallback = closeCallback && closeCallback.bind(this);
@@ -39,7 +31,7 @@ class Dialog {
         }
 
         el.find('[data-id="dialog-ok"]').click(function (e){
-            if (!_callback || _callback() !== false){
+            if (!_callback || _callback(e) !== false){
                 close();
             }
         });
@@ -53,6 +45,19 @@ class Dialog {
                 }
             }
         });
+    }
+
+    public setContent(elements){
+        if (!Array.isArray(elements)){
+            elements = [ elements ];
+        }
+
+        content.empty();
+        for (var element in-array elements){
+            content.append($(typeof element === 'string' && element[0] !== '<' && element[element.length - 1] !== '>' ? '<p>%0</p>'(element) : element));
+        }
+
+        return this;
     }
 
     public closeOnEnter(v){
@@ -71,15 +76,10 @@ class Dialog {
         return this;
     }
 
-    public setContent(content){
-        content.html(_prepareContent(content));
-        return this;
-    }
-
     public addButton(text, fn){
         fn = fn && fn.bind(this);
         $('<button>' + text + '</button>').appendTo(buttons).click(function (e){
-            if (!fn || fn() !== false){
+            if (!fn || fn(e) !== false){
                 close();
             }
         });

@@ -1,0 +1,42 @@
+static class DataStorage {
+    var _storage, _downloads;
+
+    public getDataDir(id){
+        return mkdir('%0/%1'(_storage, id));
+    }
+
+    public getDownloadsDir(id){
+        return id ? mkdir('%0/%1'(_downloads, id)) : _downloads;
+    }
+
+    private mkdir(p){
+        if (!fs.existsSync(p)){
+            fs.mkdirSync(p);
+        }
+        return p;
+    }
+
+    {
+        mkdir(gui.App.dataPath);
+        _storage = mkdir(path.join(gui.App.dataPath, 'Data Storage'));
+        _downloads = mkdir(path.join(gui.App.dataPath, 'Downloads'));
+    }
+}
+
+static class Data {
+    var mediator = new Mediator();
+
+    var _dataDir = DataStorage.getDataDir('Details'),
+        _userBadgesDir = DataStorage.getDataDir('Badges (User)');
+
+    var _builtInVersion = @macro :number { return fs.readFileSync('content/version') }();
+
+    private init(){
+        
+    }
+
+    {
+        $(init);
+        mediator.extend(Data);
+    }
+}

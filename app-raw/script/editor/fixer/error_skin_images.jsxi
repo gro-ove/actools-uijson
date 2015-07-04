@@ -26,9 +26,15 @@ class MissingLiveryFixer extends AbstractFixer {
         c();
     }
 
+    autogenFromCustomShowroom(c){
+        AcTools.Utils.Kn5RenderWrapper.GenerateLivery(car.path, object.id, object.livery);
+        c();
+    }
+
     public get title 'Livery of skin “%0” is missing'(object.id),
         solutions [
-            { name: 'Auto-generate new livery from skin\'s preview', fn: autogenFromPreview }
+            fs.existsSync(object.preview) && { name: 'Auto-generate new livery from skin\'s preview', fn: autogenFromPreview }
+            { name: 'Auto-generate new livery using Custom Showroom', fn: autogenFromCustomShowroom }
         ].concat(tryToRestoreFileHere(object.livery, 
             lambda arg.isFile() && arg.size > 1e1 && arg.size < 1e6));
 }

@@ -11,3 +11,18 @@ class AcdAeroDataSectionFixer extends AbstractFixer {
 }
 
 RestorationWizard.register('acd-obsolete-aero-data', AcdAeroDataSectionFixer);
+
+class AcdInvalidWeightFixer extends AbstractFixer {
+    changeWeight (c){
+        car.changeDataSpecs('weight', '%0kg'(AcTools.Utils.DataFixer.GetWeight(car.path)));
+        c();
+    }
+
+    public get title 'Obsolete section “DATA” in aero.ini',
+        solutions [
+            { name: 'Change weight in UI to %0kg'(AcTools.Utils.DataFixer.GetWeight(car.path)), fn: changeWeight }
+            localStorage.developerMode && { name: 'Change weight in data to %0kg (use only if UI weight is correct!)'(car.getSpec('weight')), fn: changeWeight }
+        ];
+}
+
+RestorationWizard.register('acd-invalid-weight', AcdInvalidWeightFixer);

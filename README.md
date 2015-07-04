@@ -13,12 +13,12 @@ Small utility for easy editing *ui_car.json* files. Written using [NW.js](http:/
 * Delete cars to Recycle Bin
 
 #### TODO
-* Test weight
 * Data Application
 * New mods installation
+* Auto-detect and fix sound errors
+* Fix memory consumption, make app more async
 * More hotkeys
 * Optional sorting, sorting by brand/id/…
-* Detect broken cars
 * Skins Editor
     * Drag'n'Drop textures
     * Extend selected skins with selected files
@@ -40,6 +40,7 @@ Small utility for easy editing *ui_car.json* files. Written using [NW.js](http:/
         * Fix missing previews & liveries
         * Fix SUSP_XX
         * Autodetect & fix aero.ini problem without unpacking data.acd
+        * Autodetect & fix different weight in data and ui_car.json
     * New Auto-update Previews modes (GT5/6, Seat Leon Euro Cup Style)
         * I don't recommend to use them tho, Custom Showroom is pile of garbage, at least for now
         * By the way, if you know how to shaders work, I would be really glad if you could help me

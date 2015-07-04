@@ -90,4 +90,7 @@ AcDir
         }
     });
 
-AcDir.init();
+Data
+    .on('ready', function (){
+        AcDir.init();
+    });

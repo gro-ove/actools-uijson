@@ -1,0 +1,91 @@
+static class Brands {
+    public get list {
+        if (!_sorted){
+            _list.sort();
+            _sorted = true;
+        }
+
+        return _list;
+    };
+
+    var _list = [];
+    var _listLower;
+    var _sorted = true;
+
+    public add(brand){
+        var lower = brand.toLowerCase();
+        if (_listLower.indexOf(lower) === -1){
+            list.push(brand);
+            list.sort();
+
+            _listLower.push(lower);
+            _sorted = false;
+        }
+    }
+
+    var _newBadgesDir = DataStorage.getDataDir('Badges'),
+        _userBadgesDir = DataStorage.getDataDir('Badges (User)');
+
+    var _newBadges = {}, _userBadges = {};
+
+    {
+        _listLower = list.map(lambda arg.toLowerCase());
+
+        for (var arg in-array fs.readdirSync(_newBadgesDir)){
+            var brand = arg.split('.')[0];
+            add(brand);
+            _newBadges[brand] = _newBadgesDir + '/' + arg;
+        }
+
+        for (var arg in-array fs.readdirSync(_userBadgesDir)){
+            var brand = arg.split('.')[0];
+            add(brand);
+            _userBadges[brand] = _userBadgesDir + '/' + arg;
+        }
+
+        $(lambda {
+            for (var b in-array _list) Cars.registerBrand(b);
+        });
+    }
+
+    public getBadge(brand){
+        return brand in-object _userBadges ? _userBadges[brand] :
+            brand in-object _newBadges ? _newBadges[brand] :
+            null;
+    }
+
+    public nameContains(name, brand){
+        return brand == null ? _list.some(lambda name.indexOf(toNamePart(arg) + ' ') === 0) : 
+            name.indexOf(toNamePart(brand) + ' ') === 0;
+    }
+
+    public fromName(name){
+        for (var b in-array _list){
+            if (name.indexOf(toNamePart(b) + ' ') === 0){
+                return b;
+            }
+        }
+        
+        return null;
+    }
+
+    public fromNamePart(brand){
+        switch (brand){
+            case 'Mercedes':
+                return 'Mercedes-Benz';
+
+            default:
+                return brand;
+        }
+    }
+
+    public toNamePart(brand){
+        switch (brand){
+            case 'Mercedes-Benz':
+                return 'Mercedes';
+
+            default:
+                return brand;
+        }
+    }
+}

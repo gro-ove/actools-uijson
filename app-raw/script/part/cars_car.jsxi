@@ -27,6 +27,10 @@ static partial class Cars {
             disabled = carPath.indexOf(AcDir.carsOff) != -1;
         }
 
+        public getSpec(id){
+            return data && data.specs[id] && +data.specs[id].match(/\d+(?:\.\d+)?/) || null;
+        }
+
         public addError(id, msg, details, object){
             if (hasError(id)) return;
             error.push({ id: id, msg: msg, details: details, object: object });
@@ -128,11 +132,25 @@ static partial class Cars {
                     if (Years.nameContains(value) && Years.fromName(data.name) == data.year){
                         changeData('year', Years.fromName(value), true);
                     }
+
+                    if (Brands.nameContains(data.name, data.brand) && Brands.nameContains(value)){
+                        changeData('brand', Brands.fromName(value), true);
+                    }
+                }
+
+                if (key === 'country'){
+                    var i = data.tags.map(lambda arg.toLowerCase()).indexOf(data.country.toLowerCase());
+
+                    if (i > -1){
+                        var tags = data.tags.slice();
+                        tags[i] = value.toLowerCase();
+                        changeData('tags', tags, true);
+                    }
                 }
 
                 if (key === 'brand'){
                     if (Brands.nameContains(data.name, data.brand)){
-                        changeData('name', value + data.name.substr(Brands.toNamePart(data.brand).length));
+                        changeData('name', value + data.name.substr(Brands.toNamePart(data.brand).length), true);
                     }
                 }
 
@@ -183,20 +201,36 @@ static partial class Cars {
             }
         }
 
-        public changeDataSpecs(key, value){
+        public changeDataSpecs(key, value, inner){
             if (!data || data.specs[key] == value) return;
 
             value = clearStr(value);
-
             data.specs[key] = value;
-            changed = true;
 
-            if (Settings.get('uploadData')){
-                AppServerRequest.sendData(id, 'specs:' + key, value);
+            if (!inner){
+                if (key === 'weight' || key === 'bhp'){
+                    recalculatePwRatio();
+                }
+
+                if (Settings.get('uploadData')){
+                    AppServerRequest.sendData(id, 'specs:' + key, value);
+                }
             }
 
-            mediator.dispatch('update.car.data', this);
-            mediator.dispatch('update.car.changed', this);
+            mediator.dispatch('update.car.data:specs', this);
+
+            if (!changed){
+                changed = true;
+                mediator.dispatch('update.car.changed', this);
+            }
+        }
+
+        public recalculatePwRatio(inner){
+            var w = getSpec('weight'),
+                p = getSpec('bhp');
+            if (w && p){
+                changeDataSpecs('pwratio', +(+w / +p).toFixed(2) + 'kg/cv', inner);
+            }
         }
 
         public changeParent(parentId){

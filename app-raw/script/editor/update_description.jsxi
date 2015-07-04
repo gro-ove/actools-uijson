@@ -9,7 +9,7 @@ class SearchProvider {
     public get userAgent 'Mozilla/5.0 (Linux; Android 2.3) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/30.0.0.0 Mobile Safari/537.36';
 
     public prepare(s){
-        return s.replace(/\[(?:\d+|citation needed)\]/g, '');
+        return s.trim().replace(/\[(?:\d+|citation needed)\]/g, '');
     }
 
     public clearUp(w){}
@@ -29,16 +29,33 @@ class WikiSearchProvider extends SearchProvider {
 }
 
 static class UpdateDescription {
+    var hiddenDialog;
+
     public update(car){
+        if (hiddenDialog){
+            hiddenDialog.el.show();
+            return;
+        }
+
         provider = new GoogleSearchProvider(car);
 
         var dialog = new Dialog('Update Description', [
-            '<iframe nwdisable nwfaketop nwUserAgent="{0}" src="{1}"></iframe>'.format(provider.userAgent, provider.url),
-        ], function (){
+            '<iframe nwdisable nwfaketop nwUserAgent="%0" src="%1"></iframe>'(provider.userAgent, provider.url)
+        ], function (e){
             if (s){
-                Cars.changeData(car, 'description', provider.prepare(s));
+                var p = provider.prepare(s);
+                if (/^\d{4}$/.test(p)){
+                    Cars.changeData(car, 'year', p);
+                } else {
+                    Cars.changeData(car, 'description', e.ctrlKey && car.data.description ? car.data.description + '\n\n' + p : p);
+                }
             }
         });
+
+        dialog.close = function (){
+            hiddenDialog = dialog;
+            dialog.el.hide();
+        }
 
         var s;
         dialog.find('iframe').on('load popstate', function (){
@@ -50,16 +67,35 @@ static class UpdateDescription {
         });
 
         var t = $('<div>' + 
-            '<button id="button-back">←</button> ' +
-            '<button id="button-external">↑</button>' + 
+            '<button id="button-back" title="Back">←</button> ' +
+            '<button id="button-top" title="Return to start page">↑</button> ' + 
+            '<button id="button-external" title="Open in default browser">→</button>' + 
         '</div>').insertBefore(dialog.header);
 
         t.find('#button-back').click(function (){
             dialog.find('iframe')[0].contentWindow.history.back(); 
         });
 
+        t.find('#button-top').click(function (){
+            dialog.find('iframe')[0].contentWindow.location = provider.url; 
+        });
+
         t.find('#button-external').click(function (){
             Shell.openItem(dialog.find('iframe')[0].contentWindow.location.href);
         });
+    }
+
+    private init(){
+        ViewList
+            .on('select', function (car){
+                if (hiddenDialog != null){
+                    hiddenDialog.el.remove();
+                    hiddenDialog = null;
+                }
+            });
+    }
+
+    {
+        $(init);
     }
 }

@@ -1,7 +1,7 @@
 @macro upgradeLib:string(){
     var d = 'app/data/upgrade-lib';
-    return fs.readdirSync(d).map(lambda (a, i)
-        '<img class="car-library-element%0" src="data/upgrade-lib/%1"></img>'(i ? '' : ' selected', a)).join('');
+    return ''/*fs.readdirSync(d).map(lambda (a, i)
+        '<img class="car-library-element%0" src="data/upgrade-lib/%1"></img>'(i ? '' : ' selected', a)).join('')*/;
 }
 
 static class UpgradeEditor {

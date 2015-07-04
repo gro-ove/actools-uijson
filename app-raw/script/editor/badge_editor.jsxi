@@ -1,11 +1,4 @@
 static class BadgeEditor {
-    var logos = @macro :object {
-        var r = {};
-        var d = 'data/brand-lib';
-        fs.readdirSync('app/' + d).forEach(lambda r[arg.split('.')[0]] = d + '/' + arg);
-        return r;
-    }();
-
     private saveFromLibrary(library, file, callback){
         fs.writeFile(file, fs.readFileSync(library), callback);
     }
@@ -26,7 +19,7 @@ static class BadgeEditor {
     public autoupdate(car, force){
         if (!force && !Settings.get('badgeAutoupdate')) return;
 
-        var image = logos[car.data.brand];
+        var image = Brands.getBadge(car.data.brand);
         if (image){
             saveFromLibrary(image, car.badge, lambda arg || car.updateBadge());
         }
@@ -44,11 +37,16 @@ static class BadgeEditor {
             if (callback) callback();
         }
 
-        var logosHtml = '', carBrand = car.data && car.data.brand;
-        for (var brand, file in-object logos){
-            logosHtml += '<span class="car-library-element%0" data-file="%2" title="%1" style=\'display:inline-block;width:64px;height:64px;\
-                background:center url("%2") no-repeat;background-size:54px\'></span>'(
-                (!logos[carBrand] && !logosHtml.length || carBrand === brand) ? ' selected' : '', brand, file);
+        var logosHtml = '',
+            carBrand = car.data && car.data.brand,
+            carBrandBadge = carBrand && Brands.getBadge(carBrand);
+        for (var brand in-array Brands.list){
+            var file = Brands.getBadge(brand);
+            if (file){
+                logosHtml += '<span class="car-library-element%0" data-file="%2" title="%1" style=\'display:inline-block;width:64px;height:64px;\
+                    background:center url("%2") no-repeat;background-size:54px\'></span>'(
+                    (!carBrandBadge && !logosHtml.length || carBrand === brand) ? ' selected' : '', brand, file.cssUrl());
+            }
         }
 
         var d = new Dialog('Change Badge', [

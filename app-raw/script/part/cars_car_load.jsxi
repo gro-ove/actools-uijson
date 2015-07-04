@@ -169,6 +169,10 @@ static partial class Cars {
                             }
                         }
 
+                        if (data.author == null){
+                            data.author = Authors.fromId(id);
+                        }
+
                         if (data.parent != null){
                             if (data.parent == id){
                                 addError('parent-wrong', 'Car cannot be parent to itself');
@@ -213,6 +217,16 @@ static partial class Cars {
             loadData(callback);
         }
 
+        public reload(callback){
+            clearErrors();
+            loadBadge();
+            loadSkins();
+            loadData(callback);
+            // loadData(lambda {
+            //     testAcd(callback);
+            // });
+        }
+
         public loadEnsure(callback){
             function s1(){ if (!_badgeLoaded) loadBadge(s2); else s2(); }
             function s2(){ if (skins == null) loadSkins(s3); else s3(); }
@@ -221,14 +235,18 @@ static partial class Cars {
         }
 
         public testAcd(callback){
+            if (data && data.author === 'Kunos') return callback();
             clearErrors('acd');
-            AcTools.Utils.DataFixer.TestData(path, lambda {
+            AcTools.Utils.DataFixer.TestData(path, getSpec('weight') || 0, lambda {
                 addError(arg, _messages[arg] || 'Undeclared error: “%0”'(arg));
-            }, setTimeout.bind(window, callback));
+            }, lambda {
+                if (callback) setTimeout(callback);
+            });
         }
 
         static var _messages = {
             'acd-test-error': 'Cannot test data'
+            'acd-invalid-weight': 'Weight in data has to be equal to weight in UI + 75kg (±90kg)'
             'acd-obsolete-aero-data': 'Obsolete section “DATA” in aero.ini'
         };
     }

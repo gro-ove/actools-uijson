@@ -31,7 +31,7 @@ RegExp.fromQuery = function (q, w){
 };
 
 String.prototype.cssUrl = function (){
-    return 'file://' + this.replace(/\\/g, '/');
+    return (this[1] === ':' ? 'file://' : '') + this.replace(/\\/g, '/');
 };
 
 String.prototype.decodeHtmlEntities = function (){

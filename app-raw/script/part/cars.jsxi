@@ -44,25 +44,26 @@ static partial class Cars {
         return null;
     }
 
-    private registerTags(tags){
+    public registerTags(tags){
         tags.forEach(function (e){
             _tags.add(e);
         });
     }
 
-    private registerClass(v){
+    public registerClass(v){
         _classes.add(v);
     }
 
-    private registerBrand(v){
+    public registerBrand(v){
         _brands.add(v);
+        Brands.add(v);
     }
 
-    private registerCountry(v){
+    public registerCountry(v){
         _countries.add(v);
     }
 
-    private registerAuthor(v){
+    public registerAuthor(v){
         _authors.add(v);
     }
 
@@ -100,6 +101,7 @@ static partial class Cars {
                 } else if (i >= a.length){
                     mediator.dispatch('scan:ready', a);
                     lasyAsyncLoad();
+                    //lasyAsyncErrorTest();
                 } else {
                     mediator.dispatch('scan:progress', i, a.length);
                     a[i++].loadData(step);
@@ -117,7 +119,6 @@ static partial class Cars {
                     mediator.dispatch('lazyscan:interrupt', b);
                 } else if (i >= b.length){
                     mediator.dispatch('lazyscan:ready', b);
-                    lasyAsyncErrorTest();
                 } else {
                     mediator.dispatch('lazyscan:progress', i, b.length);
                     b[i++].loadEnsure(step);
@@ -128,7 +129,7 @@ static partial class Cars {
         step();
     }
 
-    private lasyAsyncErrorTest(){
+    public acdTest(){
         var a = _list, b = a.slice(), i = 0,
             step = setTimeout.bind(window, lambda {
                 if (a != _list){

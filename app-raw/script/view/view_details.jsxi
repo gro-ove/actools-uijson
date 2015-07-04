@@ -42,6 +42,8 @@ static class ViewDetails {
                 if (!s) s = '';
                 if (c != s) e.value = s;
             }
+
+            return e;
         }
 
         var he = $('#selected-car'),
@@ -66,6 +68,7 @@ static class ViewDetails {
 
             val('#selected-car-year', car.data.year);
             val('#selected-car-country', car.data.country);
+            val('#selected-car-author', car.data.author ? car.data.author + (car.data.version ? ' (%0)'(car.data.version) : '') : car.data.version).title = car.data.url || '';
 
             val('#selected-car-bhp', car.data.specs.bhp);
             val('#selected-car-torque', car.data.specs.torque);
@@ -428,6 +431,44 @@ static class ViewDetails {
                 }
             });
 
+        $('#selected-car-author')
+            .on('click', function (){
+                if (!_selected || !_selected.data) return;
+
+                var a, v, u;
+
+                var d = new Dialog('In-Game Car Model', [
+                    '<label>Author: <input id="car-details-edit-author" autocomplete list="authors" placeholder="?" value="%0"></label>'(_selected.data.author || '')
+                    '<label>Version: <input id="car-details-edit-version" placeholder="?" value="%0"></label>'(_selected.data.version || '')
+                    '<label>URL: <input id="car-details-edit-url" placeholder="?" value="%0"></label>'(_selected.data.url || '')
+                ], function (){
+                    if (!_selected) return;
+                    if (a != null) _selected.changeData('author', a);
+                    if (v != null) _selected.changeData('version', v);
+                    if (u != null) _selected.changeData('url', u);
+                });
+
+                d.content.find('#car-details-edit-author').change(lambda a = this.value);
+                d.content.find('#car-details-edit-version').change(lambda v = this.value);
+                d.content.find('#car-details-edit-url').change(lambda u = this.value);
+            })
+            .on('dblclick', function (){
+                if (!_selected || !_selected.data || !_selected.data.url) return;
+                Shell.openItem(_selected.data.url);
+            })
+            .on('contextmenu', function (e){
+                if (!_selected || !_selected.data || !_selected.data.author) return;
+
+                var menu = new gui.Menu();
+                menu.append(new gui.MenuItem({ label: 'Filter Author', key: 'F', click: function (){
+                    if (!_selected) return;
+                    ViewList.addFilter('author:%0'(_selected.data.author));
+                } }));
+
+                menu.popup(e.clientX, e.clientY);
+                return false;
+            });
+
         [ 'bhp', 'torque', 'weight', 'topspeed', 'acceleration', 'pwratio' ].forEach(function (e){
             $('#selected-car-' + e).on('keydown', function (e){
                 if (e.keyCode == 13){
@@ -452,12 +493,8 @@ static class ViewDetails {
                 if (!_selected || !_selected.data || this.readonly) return;
 
                 function r(){
-                    if (!_selected || !_selected.data || this.readonly) return;
-                    var w = (_selected.data.specs.weight || '').match(/\d+/),
-                        p = (_selected.data.specs.bhp || '').match(/\d+/);
-                    if (w && p){
-                        Cars.changeDataSpecs(_selected, 'pwratio', +(+w / +p).toFixed(2) + 'kg/cv');
-                    }
+                    if (!_selected || this.readonly) return;
+                    _selected.recalculatePwRatio();
                 }
 
                 if (e.type === 'dblclick'){
@@ -653,8 +690,14 @@ static class ViewDetails {
             }
 
             function reload(){
-                Cars.reload(_selected);
+                if (!_selected) return;
+                _selected.reload();
             }
+        });
+
+        $('#selected-car-test').click(function (){
+            if (!_selected) return;
+            _selected.testAcd();
         });
 
         /* second row */
@@ -762,7 +805,7 @@ static class ViewDetails {
                     if (!_selected) return;
 
                     try {
-                        var kn5 = AcTools.Kn5File.Kn5.FromDirectory(_selected.path + '/unpacked');
+                        var kn5 = AcTools.Kn5File.Kn5.FromDirectory(_selected.path + '/unpacked', false);
                         var dest = AcTools.Utils.FileUtils.GetMainCarFile(AcDir.root, _selected.id);
                         if (fs.existsSync(dest)) AcTools.Utils.FileUtils.Recycle(dest);
                         kn5.Save(dest, false);

@@ -348,12 +348,12 @@ static class ViewList {
                     f.show()[0].focus();
                 }
 
-                if (e.keyCode === 38){
+                if (e.keyCode === 38 && !$('#dialog')[0]){
                     selectNear(-1);
                     return false;
                 }
 
-                if (e.keyCode === 40){
+                if (e.keyCode === 40 && !$('#dialog')[0]){
                     selectNear(1);
                     return false;
                 }
@@ -409,6 +409,10 @@ static class ViewList {
             }
         });
 
+        _aside.find('#cars-list-test-acd').click(function (){
+            Cars.acdTest();
+        });
+
         /* second row */
         _aside.find('#cars-list-batch').click(function (){
             if (_aside.find('#cars-list-filter').val()){
@@ -437,12 +441,17 @@ static class ViewList {
                 p = _aside.find('progress').show()[0];
                 p.indeterminate = false;
                 p.max = list.length;
+                p.value = 0;
+
+                $('#cars-list-test-acd').attr('disabled', true);
             })
             .on('lazyscan:progress', function (i, m){
                 p.value = i;
             })
             .on('lazyscan:ready', function (list){
                 p.style.display = 'none';
+
+                $('#cars-list-test-acd').attr('disabled', null);
             });
     }
 

@@ -15,11 +15,11 @@ static class ErrorHandler {
     }
 
     {
-        process.on('uncaughtException', function (err) {
+        process.on('uncaughtException', function (err) try {
             if (localStorage.developerMode){
                 require('nw.gui').Window.get().showDevTools();
             }
-            
+
             console.warn(_details(err));
 
             if (window.AppServerRequest && AppServerRequest.sendFeedback){
