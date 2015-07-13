@@ -9,6 +9,7 @@ output/*.upx
 output/download.txt
 output/locales
 output/debug.log
+content (user)
 
 *.bat
 

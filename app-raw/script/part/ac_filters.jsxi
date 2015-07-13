@@ -9,8 +9,17 @@ static class AcFilters {
         return _filters;
     };
 
+    public getPath(id){
+        return AcDir.filters + '/' + id + '.ini';
+    }
+
     public exists(id){
-        return fs.existsSync(AcDir.filters + '/' + id + '.ini');
+        return fs.existsSync(getPath(id));
+    }
+
+    public installFilter(source, id){
+        if (exists(id)) fs.unlinkSync(getPath(id));
+        fs.copyFileSync(source, getPath(id));
     }
 
     public load(){

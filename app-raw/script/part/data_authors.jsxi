@@ -1,80 +1,24 @@
 static class Authors {
     public fromId(id){
-        // TODO: take from /content/sfx/GUIDs.txt?
-        switch (id.toLowerCase()){
-            case 'abarth500':
-            case 'abarth500_s1':
-            case 'alfa_romeo_giulietta_qv':
-            case 'alfa_romeo_giulietta_qv_le':
-            case 'bmw_1m':
-            case 'bmw_1m_s3':
-            case 'bmw_m3_e30':
-            case 'bmw_m3_e30_s1':
-            case 'bmw_m3_e30_drift':
-            case 'bmw_m3_e30_dtm':
-            case 'bmw_m3_e30_gra':
-            case 'bmw_m3_e92':
-            case 'bmw_m3_e92_s1':
-            case 'bmw_m3_e92_drift':
-            case 'bmw_m3_gt2':
-            case 'bmw_z4':
-            case 'bmw_z4_s1':
-            case 'bmw_z4_drift':
-            case 'bmw_z4_gt3':
-            case 'ferrari_312t':
-            case 'ferrari_458':
-            case 'ferrari_458_gt2':
-            case 'ferrari_458_s3':
-            case 'ferrari_599xxevo':
-            case 'ferrari_f40':
-            case 'ferrari_f40_s3':
-            case 'ferrari_laferrari':
-            case 'ks_alfa_romeo_155_v6':
-            case 'ks_alfa_romeo_4c':
-            case 'ks_alfa_romeo_gta':
-            case 'ks_bmw_m235i_racing':
-            case 'ks_corvette_c7r':
-            case 'ks_mclaren_f1_gtr':
-            case 'ks_mclaren_p1':
-            case 'ks_mercedes_190_evo2':
-            case 'ks_mercedes_c9':
-            case 'ks_nissan_gtr_gt3':
-            case 'ktm_xbow_r':
-            case 'lotus_2_eleven':
-            case 'lotus_2_eleven_gt4':
-            case 'lotus_49':
-            case 'lotus_98t':
-            case 'lotus_elise_sc':
-            case 'lotus_elise_sc_s1':
-            case 'lotus_elise_sc_s2':
-            case 'lotus_evora_gtc':
-            case 'lotus_evora_gte':
-            case 'lotus_evora_gte_carbon':
-            case 'lotus_evora_gx':
-            case 'lotus_evora_s':
-            case 'lotus_evora_s_s2':
-            case 'lotus_exige_240':
-            case 'lotus_exige_240_s3':
-            case 'lotus_exige_s':
-            case 'lotus_exige_s_roadster':
-            case 'lotus_exige_scura':
-            case 'lotus_exige_v6_cup':
-            case 'lotus_exos_125':
-            case 'lotus_exos_125_s1':
-            case 'mclaren_mp412c':
-            case 'mclaren_mp412c_gt3':
-            case 'mercedes_sls':
-            case 'mercedes_sls_gt3':
-            case 'p4-5_2011':
-            case 'pagani_huayra':
-            case 'pagani_zonda_r':
-            case 'ruf_yellowbird':
-            case 'shelby_cobra_427sc':
-            case 'tatuusfa1':
-                return 'Kunos';
+        return Sfx.isCarOriginal(id) ? 'Kunos' : null;
+    }
 
-            default:
-                return null;
+    var _initialized = false,
+        _database;
+
+    public fromDatabase(id){
+        if (!_initialized){
+            init();
         }
+
+        if (_database && id in-object _database){
+            return _database[id];
+        } else {
+            return null;
+        }
+    }
+
+    public init(){
+        _database = DataStorage.readContentJsonFile('Details (Preload)', 'authors.json');
     }
 }

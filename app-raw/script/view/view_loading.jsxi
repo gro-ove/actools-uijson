@@ -7,27 +7,54 @@ static class ViewLoading {
         _interval = null,
         _dots;
 
+    function details(msg){
+        _node.querySelector('h6').textContent = msg;
+    }
+
     {
-        Cars
-            .on('scan:start', function (){
+        Data
+            .on('installation:start', function (){
                 clearInterval(_interval);
                 _node.style.display = null;
+                _progress.indeterminate = true;
                 _dots = 0;
                 _interval = setInterval(function (){
                     _h4.textContent = 'Please wait' + '...'.slice(0, 1 + _dots++ % 3);
                 }, 300);
+
+                details('Data installation in process');
+                mainForm.setProgressBar(2);
+            })
+            .on('installation:ready', function (list){
+                clearInterval(_interval);
+                _node.style.display = 'none';
+                mainForm.setProgressBar(-1);
+            });
+
+        Cars
+            .on('scan:start', function (){
+                clearInterval(_interval);
+                _node.style.display = null;
+                _progress.indeterminate = true;
+                _dots = 0;
+                _interval = setInterval(function (){
+                    _h4.textContent = 'Please wait' + '...'.slice(0, 1 + _dots++ % 3);
+                }, 300);
+                mainForm.setProgressBar(0);
             })
             .on('scan:list', function (list){
-                _node.querySelector('h6').textContent = 'Car{0} found: {1}'.format(list.length == 1 ? '' : 's', list.length);
+                details('Car%0 found: %1'(list.length == 1 ? '' : 's', list.length));
                 _progress.indeterminate = false;
                 _progress.max = list.length;
             })
             .on('scan:progress', function (i, m){
                 _progress.value = i;
+                mainForm.setProgressBar(i / m);
             })
             .on('scan:ready', function (list){
                 clearInterval(_interval);
                 _node.style.display = 'none';
+                mainForm.setProgressBar(-1);
             });
     }
 }

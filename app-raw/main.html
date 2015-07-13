@@ -16,10 +16,10 @@
             <button id="window-maximize">□</button>
             <button id="window-close">✖</button>
         </div>
-        <div id="loading" style="display:none">
+        <div id="loading">
             <div>
                 <h4>Please wait...</h4>
-                <h6>0 cars found</h6>
+                <h6></h6>
                 <progress indeterminate></progress>
             </div>
             <div id="loading-grab"></div>
@@ -77,6 +77,10 @@
                             <input id="selected-car-class" class="property-value" autocomplete list="classes" placeholder="?"></input>    
                         </li>
                         <li>
+                            <span class="property error">Sound From</span>
+                            <input id="selected-car-sound" class="property-value" placeholder="?" readonly></input>    
+                        </li>
+                        <li>
                             <span class="property">Parent</span>
                             <select id="selected-car-parent" class="property-value"></select>
                         </li>
@@ -125,13 +129,13 @@
                     </div>
                 </span>
                 <span>
-                    <button id="selected-car-practice" title="Start practice">Practice</button>
+                    <button id="selected-car-practice" title="Start practice">Drive</button>
                     <div>
                         <button id="selected-car-practice-select" title="Select track and start practice">Select</button>
                     </div>
                 </span>
                 <button id="selected-car-reload" title="Reload car">Reload</button>
-                <button id="selected-car-test" title="Test data.acd (or data/…) for some common errors">Test</button>
+                <button id="selected-car-test" title="Test data.acd (or data/…) for some common errors">Test data</button>
                 <br>
                 <button id="selected-car-disable" title="Enable/disable car">Disable</button>
                 <span>
@@ -140,6 +144,7 @@
                         <button id="selected-car-update-previews-manual" title="Manually adjust camera and update skins previews">Manual</button>
                     </div>
                 </span>
+                <button id="selected-car-update-data" title="Update data from database">Apply From Database</button>
                 <button id="selected-car-update-description" title="Try to find car description on the Internet">Find Description</button>
                 <button id="selected-car-save" title="Save changes">Save</button>
                 <button id="selected-car-additional" title="Additional edit tools">…</button>

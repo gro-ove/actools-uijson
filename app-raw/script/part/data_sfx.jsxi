@@ -1,0 +1,65 @@
+static class Sfx {
+    private _origIds, _origGuids;
+
+    public isCarOriginal(id){
+        if (!_origIds) init();
+        return id in-object _origIds;
+    }
+
+    public getSfxOriginal_inner(id, guids){
+        for (var l in-array guids.split(/\n/)){
+            var m = l.match(/^\{(\w{8}(?:-\w{4}){3}-\w{12})\}\s+event:\/cars\/(\w+)\/e/);
+            if (m && m[2] === id && _origGuids[m[1]]){
+                return _origGuids[m[1]];
+            }
+        }
+    }
+
+    public getSfxOriginal(id, path) async {
+        if (isCarOriginal(id)) return null;
+
+        var g = async-try fs.readFile(path + '/sfx/GUIDs.txt');
+        if (!g) return null;
+
+        return getSfxOriginal_inner(id, g.toString());
+    }
+
+    public init(){
+        _origIds = {};
+        _origGuids = {};
+
+        var file = AcDir.root + '/content/sfx/GUIDs.txt';
+        if (fs.existsSync(file)){
+            for (var l in-array fs.readFileSync(file).toString().split(/\n/)){
+                var m = l.match(/^\{(\w{8}(?:-\w{4}){3}-\w{12})\}\s+event:\/cars\/(\w+)\/e/);
+                if (m){
+                    _origGuids[m[1]] = m[2];
+                    _origIds[m[2]] = true;
+                }
+            }
+        }
+    }
+
+    public getGuidsById(id){
+        var file = Cars.byId(id).path + '/sfx/GUIDs.txt';
+        if (!fs.existsSync(file)) file = AcDir.root + '/content/sfx/GUIDs.txt';
+
+        var result = [];
+        for (var l in-array fs.readFileSync(file).toString().split(/\n/)){
+            var m = l.match(/^\{(\w{8}(?:-\w{4}){3}-\w{12})\}\s+event:\/cars\/(\w+)\/.+/);
+            if (m && m[2] === id){
+                result.push(m[0]);
+            }
+        }
+        
+        return result.join('\n');
+    }
+
+    public getBankFilenameById(id){
+        return Cars.byId(id).path + '/sfx/%0.bank'(id);
+    }
+
+    public getDefaultGuids(id){
+        return fs.readFileSync('data/GUIDs.txt').toString().replace(/\{\{CAR_ID\}\}/g, id);
+    }
+}

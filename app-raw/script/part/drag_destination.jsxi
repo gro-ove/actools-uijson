@@ -34,6 +34,7 @@ static class DragDestination {
             var entry = _registered[_registered.length - 1];
             if (entry){
                 setTimeout(entry.callback.bind(null, [].map.call(arg.dataTransfer.files, lambda arg.path)));
+                mainForm.focus();
             }
 
             return false;
@@ -45,7 +46,7 @@ static class DragDestination {
 
                 var entry = _registered[_registered.length - 1];
                 if (entry){
-                    _node.children[0].textContent = entry.name;
+                    _node.children[0].textContent = entry.text;
                     _node.style.display = null;
                 }
 

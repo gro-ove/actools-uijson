@@ -1,5 +1,3 @@
-/* всплывающие диалоговые окна */
-
 class Dialog {
     public el;
     public header, content, buttons;
@@ -52,10 +50,18 @@ class Dialog {
             elements = [ elements ];
         }
 
-        content.empty();
+        var html = '';
         for (var element in-array elements){
-            content.append($(typeof element === 'string' && element[0] !== '<' && element[element.length - 1] !== '>' ? '<p>%0</p>'(element) : element));
+            if (element == null || element === '') continue;
+            html += typeof element === 'string' && element[0] !== '<' && element[element.length - 1] !== '>' ? '<p>%0</p>'(element) : element;
         }
+        
+        content.html(html);
+
+        // content.empty();
+        // for (var element in-array elements){
+        //     content.append($(typeof element === 'string' && element[0] !== '<' && element[element.length - 1] !== '>' ? '<p>%0</p>'(element) : element));
+        // }
 
         return this;
     }

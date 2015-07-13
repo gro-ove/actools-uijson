@@ -1,0 +1,278 @@
+partial static class DragMainHandler {
+    var _exec_inner;
+    get _exec _exec_inner || (_exec_inner = require('child_process').execFileSync);
+
+    function exec(){
+        return '' + _exec.apply(null, arguments, { encoding: 'utf8' });
+    }
+
+    function fromArchive_getFiles(file){
+        var list = exec('native\\7z', [ 'l', '-sccUTF-8', file ]).split(/\r?\n/)
+            .map(lambda /^[-\d]+\s+[:\d]+\s+[\.\w]+\s+(\d+)\s+(?:\d+\s+)?(.+)/.test(arg) && { path: RegExp.$2, size: +RegExp.$1 }).filter(lambda arg);
+
+        var root = { sub: {}, path: '' };
+        for (var entry in-array list){
+            var path = entry.path.split('\\');
+            var loc = root;
+            for (var part in-array path){
+                if (!loc.sub) loc.sub = {};
+                loc = loc.sub[part] || (loc.sub[part] = { id: part });
+            }
+
+            loc.path = entry.path;
+            loc.size = entry.size;
+        }
+
+        return root;
+    }
+
+    function fromArchive_extractData(file, content){
+        var files = content.map(lambda arg.data).filter(lambda arg);
+        var output = exec('native\\7z', [ 'e', '-sccUTF-8', file, '-so' ].concat(files.map(lambda arg.path)));
+
+        for (var file in-array files){
+            try file.content = JSON.flexibleParse(output.substr(0, file.size));
+            output = output.slice(file.size);
+        }
+    }
+
+    function fromArchive_prepareFound(file, entry){
+        var path = '/' + entry.root.path.replace(/\\/g, '/'),
+            name = entry.data && entry.data.content && (entry.data.content.name || entry.data.content.skinname);
+
+        name = name ? '%0 (%1)'(name, path) : path;
+
+        switch (entry.type){
+            case 'car':
+                return Cars.byId(entry.id) == null ? {
+                    id: entry.id,
+                    type: 'New Car',
+                    name: name,
+                    actions: [
+                        { name: 'Install', action: lambda fromArchive_installCar(file, entry, arg) }
+                    ]
+                } : {
+                    id: entry.id,
+                    type: 'Update Existing Car',
+                    name: name,
+                    actions: [
+                        { name: 'Keep current skins & information', action: lambda fromArchive_updateCarKeepSkinsUi(file, entry, arg) },
+                        { name: 'Update only data & sfx', action: lambda fromArchive_updateCarOnlyDataSfx(file, entry, arg) },
+                        { name: 'Full update', action: lambda fromArchive_updateCarFull(file, entry, arg) },
+                    ]
+                };
+
+            case 'skin':
+                var selected = ViewList.selected;
+                if (!selected) return;
+
+                var _unique;
+                function unique(){
+                    for (var i = 1; selected.getSkin(_unique = entry.id + '-' + i) != null; i++);
+                    return _unique;
+                }
+
+                return selected.getSkin(entry.id) == null ? {
+                    id: entry.id,
+                    type: 'New Skin For %0'(selected.displayName),
+                    name: name,
+                    actions: [
+                        { name: 'Install', action: lambda fromArchive_installSkin(selected, file, entry, arg) }
+                    ]
+                } : {
+                    id: entry.id,
+                    type: 'Update Existing Skin Of %0'(selected.displayName),
+                    name: name,
+                    actions: [
+                        { name: 'Full update', action: lambda fromArchive_updateSkinFull(selected, file, entry, arg) },
+                        { name: 'Install as ' + unique(), action: lambda fromArchive_installSkinAs(selected, _unique, file, entry, arg) },
+                        { name: 'Keep current preview & information', action: lambda fromArchive_updateSkinKeepUi(selected, file, entry, arg) },
+                    ]
+                };
+
+            default:
+                throw new Error('Unsupported type: %0'(entry.type));
+        }
+    }
+
+    function fromArchive_unpack(file, node, target){
+        if (!fs.existsSync(target)) {
+            fs.mkdirSync(target);
+        }
+
+        if (node.path === ''){
+            var files = fromArchive_collectSub(node);
+            exec('native\\7z', [ 'x', '-sccUTF-8', '-o' + target, file ].concat(files));
+        } else {
+            var tmpDir = target + '/__tmp_' + Date.now();
+            fs.mkdirSync(tmpDir);
+
+            var files = fromArchive_collectSub(node);
+            exec('native\\7z', [ 'x', '-sccUTF-8', '-o' + tmpDir, file ].concat(files));
+
+            for (var f in-array files){
+                var dest = target + '/' + f.slice(node.path.length + 1);
+                fs.mkdirpSync(path.dirname(dest));
+                fs.renameSync(tmpDir + '/' + f, dest);
+            }
+
+            fs.removeDirSync(tmpDir);
+        }
+    }
+
+    function fromArchive_collectSub(node, result = []){
+        for (var id, child in-object node.sub){
+            if (child.sub){
+                fromArchive_collectSub(child, result);
+            } else {
+                result.push(child.path);
+            }
+        }
+
+        return result;
+    }
+
+    function fromArchive_installCar(file, entry, callback){
+        var destination = path.join(AcDir.cars, entry.id);
+        if (fs.existsSync(destination)){
+            return ErrorHandler.handled('Folder “%0” already exists.'(destination));
+        }
+        
+        fromArchive_unpack(file, entry.root, destination);
+        Cars.loadById(entry.id, lambda {
+            ViewList.select(entry.id);
+            if (callback) callback();
+        });
+    }
+
+    function fromArchive_updateCarFull(file, entry, callback){
+        var destination = Cars.byId(entry.id).path;
+        if (!fs.existsSync(destination)){
+            return ErrorHandler.handled('Folder “%0” doesn\'t exist.'(destination));
+        }
+
+        AcTools.Utils.FileUtils.Recycle(destination);
+        fromArchive_unpack(file, entry.root, destination);
+        Cars.loadById(entry.id, lambda {
+            ViewList.select(entry.id);
+            if (callback) callback();
+        });
+    }
+
+    function fromArchive_updateCarKeepSkinsUi(file, entry, callback){
+        var destination = Cars.byId(entry.id).path,
+            skins = destination + '/skins',
+            ui = destination + '/ui';
+        if (!fs.existsSync(destination)){
+            return ErrorHandler.handled('Folder “%0” doesn\'t exist.'(destination));
+        }
+
+        var tmpDir = AcDir.temp;
+        fs.mkdirSync(tmpDir);
+
+        if (fs.existsSync(skins)) fs.renameSync(skins, tmpDir + '/skins');
+        if (fs.existsSync(ui)) fs.renameSync(ui, tmpDir + '/ui');
+
+        AcTools.Utils.FileUtils.Recycle(destination);
+        fromArchive_unpack(file, entry.root, destination);
+
+        if (fs.existsSync(skins)) fs.removeDirSync(skins);
+        if (fs.existsSync(ui)) fs.removeDirSync(ui);
+
+        if (fs.existsSync(tmpDir + '/skins')) fs.renameSync(tmpDir + '/skins', skins);
+        if (fs.existsSync(tmpDir + '/ui')) fs.renameSync(tmpDir + '/ui', ui);
+        fs.removeDirSync(tmpDir);
+
+        Cars.loadById(entry.id, lambda {
+            ViewList.select(entry.id);
+            if (callback) callback();
+        });
+    }
+
+    function fromArchive_updateCarOnlyDataSfx(file, entry, callback){
+        var destination = Cars.byId(entry.id).path;
+        if (!fs.existsSync(destination)){
+            return ErrorHandler.handled('Folder “%0” doesn\'t exist.'(destination));
+        }
+
+        if (fs.existsSync(destination + '/sfx')) AcTools.Utils.FileUtils.Recycle(destination + '/sfx');
+        if (fs.existsSync(destination + '/data')) AcTools.Utils.FileUtils.Recycle(destination + '/data');
+        if (fs.existsSync(destination + '/data.acd')) AcTools.Utils.FileUtils.Recycle(destination + '/data.acd');
+
+        fromArchive_unpack(file, entry.root.sub['sfx'], destination + '/sfx');
+        if (entry.root.sub['data']) fromArchive_unpack(file, entry.root.sub['data'], destination + '/data');
+        if (entry.root.sub['data.acd']) fromArchive_unpack(file, entry.root.sub['data.acd'], destination + '/data.acd');
+
+        Cars.loadById(entry.id, lambda {
+            ViewList.select(entry.id);
+            if (callback) callback();
+        });
+    }
+
+    function fromArchive_installSkin(car, file, entry, callback){
+        var destination = path.join(car.path, 'skins', entry.id);
+        if (fs.existsSync(destination)){
+            return ErrorHandler.handled('Folder “%0” already exists.'(destination));
+        }
+        
+        fromArchive_unpack(file, entry.root, destination);
+        car.loadSkins(callback);
+    }
+
+    function fromArchive_installSkinAs(car, id, file, entry, callback){
+        var destination = path.join(car.path, 'skins', id);
+        if (fs.existsSync(destination)){
+            return ErrorHandler.handled('Folder “%0” already exists.'(destination));
+        }
+        
+        fromArchive_unpack(file, entry.root, destination);
+        car.loadSkins(callback);
+    }
+
+    function fromArchive_updateSkinFull(car, file, entry, callback){
+        var destination = path.join(car.path, 'skins', entry.id);
+        if (!fs.existsSync(destination)){
+            callback();
+            return ErrorHandler.handled('Folder “%0” doesn\'t exist.'(destination));
+        }
+        
+        AcTools.Utils.FileUtils.Recycle(destination);
+        fromArchive_unpack(file, entry.root, destination);
+        car.loadSkins(callback);
+    }
+
+    function fromArchive_updateSkinKeepUi(car, file, entry, callback){
+        var destination = path.join(car.path, 'skins', entry.id),
+            preview = destination + '/preview.jpg',
+            ui = destination + '/ui_skin.json';
+        if (!fs.existsSync(destination)){
+            callback();
+            return ErrorHandler.handled('Folder “%0” doesn\'t exist.'(destination));
+        }
+
+        var tmpDir = AcDir.temp;
+        fs.mkdirSync(tmpDir);
+
+        if (fs.existsSync(preview)) fs.renameSync(preview, tmpDir + '/p');
+        if (fs.existsSync(ui)) fs.renameSync(ui, tmpDir + '/u');
+
+        AcTools.Utils.FileUtils.Recycle(destination);
+        fromArchive_unpack(file, entry.root, destination);
+
+        if (fs.existsSync(preview)) fs.removeDirSync(preview);
+        if (fs.existsSync(ui)) fs.removeDirSync(ui);
+
+        if (fs.existsSync(tmpDir + '/p')) fs.renameSync(tmpDir + '/p', preview);
+        if (fs.existsSync(tmpDir + '/u')) fs.renameSync(tmpDir + '/u', ui);
+        fs.removeDirSync(tmpDir);
+
+        car.loadSkins(callback);
+    }
+
+    function fromArchive(file){
+        var tree = fromArchive_getFiles(file);
+        var content = detectContent(file, tree);
+        fromArchive_extractData(file, content);
+        return content.map(lambda fromArchive_prepareFound(file, arg));
+    }
+}

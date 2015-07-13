@@ -1,0 +1,123 @@
+static class Downloader {
+    public isAvailableYadisk(link){
+        return /^https:\/\/yadi.sk\/d\/\w+/.test(link);
+    }
+
+    public isAvailableRd(link){
+        return /^http:\/\/www.racedepartment.com\/downloads\//.test(link);
+    }
+
+    public isAvailable(link){
+        return isAvailableYadisk(link) || isAvailableRd(link);
+    }
+
+    public download(url, dest, callback, progressCallback){
+        if (isAvailableYadisk(url)) yadiskDownload(url, dest, callback, progressCallback);
+        else if (isAvailableRd(url)) rdDownload(url, dest, callback, progressCallback);
+        else httpDownload(url, dest, callback, progressCallback);
+    }
+
+    public abort(id){
+        if (_updateInProcess.abort){
+            _updateInProcess.abort();
+        }
+    }
+
+    var _updateInProcess;
+    private httpDownload(url, file, callback, progressCallback){
+        try {
+            if (typeof file === 'string'){
+                file = fs.createWriteStream(file);
+            }
+
+            _updateInProcess = require(url.match(/^https?/)[0]).get(url, function(r){
+                if (r.statusCode == 302){
+                    httpDownload(r.headers['location'], file, callback, progressCallback);
+                } else if (r.statusCode == 200){
+                    var m = r.headers['content-length'], p = 0;
+                    r.pipe(file);
+                    r.on('data', function(d) {
+                        if (progressCallback) progressCallback(p += d.length, m);
+                    }).on('end', function() {
+                        if (_updateInProcess){
+                            _updateInProcess = null;
+                            setTimeout(callback, 50);
+                        }
+                    });
+                } else {
+                    callback(r.statusCode);
+                }
+            }).on('error', function(e) {
+                callback(e);
+            });
+        } catch (e){
+            callback('DOWNLOAD:' + url);
+        }
+    }
+
+    private yadiskDownload(url, dest, callback, progressCallback){
+        _updateInProcess = true;
+        var ifr = $('<iframe nwdisable nwfaketop>').attr('src', url).on('load', function (e){
+            if (!_updateInProcess) return;
+
+            this.contentWindow._cb = function (e){
+                if (!_updateInProcess) return;
+                try {
+                    clearTimeout(to);
+                    httpDownload(e.models[0].data.file, dest, callback, progressCallback);
+                } catch callback('YADISK');
+                ifr.remove();
+            };
+            this.contentWindow.eval(`
+                _XMLHttpRequest = XMLHttpRequest;
+                XMLHttpRequest = function (){
+                    var r = new _XMLHttpRequest();
+                    r.onreadystatechange = function (e){
+                        if (r.status == 200 && r.readyState == 4)
+                            _cb(JSON.parse(r.responseText));
+                    };
+                    return {
+                        open: function (){ r.open.apply(r, arguments); },
+                        setRequestHeader: function (){ r.setRequestHeader.apply(r, arguments); },
+                        getAllResponseHeaders: function (){ r.getAllResponseHeaders.apply(r, arguments); },
+                        getResponseHeader: function (){ r.getResponseHeader.apply(r, arguments); },
+                        abort: function (){ r.abort.apply(r, arguments); },
+                        send: function (){ r.send.apply(r, arguments); },
+                    };
+                };`);
+            try {
+                this.contentWindow.document.querySelector('button[data-click-action="resource.download"]').click();
+            } catch {
+                ifr.remove();
+                callback('YADISK:BTN');
+            }
+        }).css({ position: 'fixed', top: '200vh', left: '200vw' }).appendTo('body');
+
+        var to = setTimeout(function (){
+            if (!_updateInProcess) return;
+            ifr.remove();
+            callback('YADISK:TO');
+        }, 10e3);
+    }
+
+    private rdDownload(url, dest, callback, progressCallback){
+        _updateInProcess = true;
+        var ifr = $('<iframe nwdisable nwfaketop>').attr('src', url).on('load', function (e){
+            if (!_updateInProcess) return;
+
+            try {
+                clearTimeout(to);
+                httpDownload(this.contentWindow.document.querySelector('.downloadButton a').href, dest, callback, progressCallback);
+            } catch (e){
+                ifr.remove();
+                callback('RD:BTN');
+            }
+        }).css({ position: 'fixed', top: '200vh', left: '200vw' }).appendTo('body');
+
+        var to = setTimeout(function (){
+            if (!_updateInProcess) return;
+            ifr.remove();
+            callback('RD:TO');
+        }, 10e3);
+    }
+}

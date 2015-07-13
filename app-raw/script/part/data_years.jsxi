@@ -1,11 +1,13 @@
 static class Years {
+    var _re = /\s['`]?(\d\d)$/;
+
     public nameContains(name){
-        return /\s(?:\W?(?:(?:\d\d){1,2})|((?:\d\d){1,2})\W)$/.test(name);
+        return _re.test(name);
     }
 
     public fromName(name){
-        if (/\s(?:\W?((?:\d\d){1,2})|((?:\d\d){1,2})\W)$/.test(name)){
-            var year = +(RegExp.$1 || RegExp.$2);
+        if (_re.test(name)){
+            var year = +RegExp.$1;
             if (year < 30){
                 year = 2e3 + year;
             } else if (year < 1e3){
@@ -16,5 +18,32 @@ static class Years {
         } else {
             return null;
         }
+    }
+
+    public addToName(name, year){
+        return name + ' \'' + ('' + year).slice(2);
+    }
+
+    public removeFromName(name){
+        return name.replace(_re, '');
+    }
+
+    var _initialized = false,
+        _database;
+
+    public fromDatabase(id){
+        if (!_initialized){
+            init();
+        }
+
+        if (_database && id in-object _database){
+            return _database[id];
+        } else {
+            return null;
+        }
+    }
+
+    public init(){
+        _database = DataStorage.readContentJsonFile('Details (Preload)', 'years.json');
     }
 }

@@ -7,12 +7,28 @@ static partial class Cars {
 
             fs.exists(badge, function (result){
                 if (!result){
-                    addError('badge-missing', 'Missing badge.png');
+                    addError('badge-missing', 'Missing ui/badge.png');
                 }
 
                 _badgeLoaded = true;
                 if (callback) callback();
             }.bind(this));
+        }
+
+        var _sfxLoaded;
+        public loadSfx() async {
+            clearErrors('sfx');
+
+            var e = async fs.exists(path + '/sfx/%0.bank'(id));
+            if (!e){
+                addError('sfx-bank-missing', 'Missing sfx/%0.bank'(id));
+                return;
+            }
+
+            originalSfx = async Sfx.getSfxOriginal(id, path);
+            _sfxLoaded = true;
+
+            mediator.dispatch('update.car.sfx:original', this);
         }
 
         public loadSkins_stuff(callback){
@@ -159,18 +175,43 @@ static partial class Cars {
 
                         if (data.year == null && Years.nameContains(data.name)){
                             data.year = Years.fromName(data.name);
+
+                            if (data.year == null){
+                                data.year = Years.fromDatabase(id);
+                            }
+                        }
+
+                        if (data.year != null && Settings.get('yearAutoupdate') && !Years.nameContains(data.name)){
+                            data.name = Years.addToName(data.name, data.year);
+                            changed = true;
+                            mediator.dispatch('update.car.changed', this);
                         }
 
                         if (data.country == null){
                             for (var tag in-array data.tags){
-                                var c = Countries.fromTag(tag);
-                                if (c == null) c = Countries.fromBrand(data.brand);
-                                if (c != null) data.country = c;
+                                data.country = Countries.fromTag(tag);
+                                if (data.country != null) break;
+                            }
+
+                            if (data.country == null){
+                                data.country = Countries.fromDatabase(id);
+                            }
+
+                            if (data.country == null){
+                                data.country = Countries.fromBrand(data.brand);
                             }
                         }
 
                         if (data.author == null){
                             data.author = Authors.fromId(id);
+
+                            if (data.author == null){
+                                data.author = Authors.fromDatabase(id);
+                            }
+                        }
+
+                        if (data.url == null){
+                            data.url = Urls.fromDatabase(id);
                         }
 
                         if (data.parent != null){
@@ -210,18 +251,16 @@ static partial class Cars {
             }.bind(this));
         }
 
-        public load(callback){
+        public load() async {
             clearErrors();
-            loadBadge();
-            loadSkins();
-            loadData(callback);
+            async loadBadge();
+            async loadSfx();
+            async loadSkins();
+            async loadData();
         }
 
         public reload(callback){
-            clearErrors();
-            loadBadge();
-            loadSkins();
-            loadData(callback);
+            load(callback);
             // loadData(lambda {
             //     testAcd(callback);
             // });
@@ -229,8 +268,9 @@ static partial class Cars {
 
         public loadEnsure(callback){
             function s1(){ if (!_badgeLoaded) loadBadge(s2); else s2(); }
-            function s2(){ if (skins == null) loadSkins(s3); else s3(); }
-            function s3(){ if (data == null) loadData(callback); else if (callback) callback(); }
+            function s2(){ if (!_sfxLoaded) loadSfx(s3); else s3(); }
+            function s3(){ if (skins == null) loadSkins(s4); else s4(); }
+            function s4(){ if (data == null) loadData(callback); else if (callback) callback(); }
             s1();
         }
 
@@ -253,8 +293,6 @@ static partial class Cars {
 
     private parseLoadedData(data){
         try {
-            return JSON.parse(data);
-        } catch try {
             return JSON.flexibleParse(data);
         } catch (er){
             return er;

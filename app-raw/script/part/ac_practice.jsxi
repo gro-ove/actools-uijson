@@ -1,73 +1,114 @@
 static class AcPractice {
-    var _tracks = null;
+    class Track {
+        public id, data, path, json;
 
-    public get list {
-        if (!_tracks){
-            loadTracks();
+        (id, path, json){
+            this.id = id;
+            this.path = path;
+            this.json = json;
+
+            try data = JSON.flexibleParse(fs.readFileSync(json));
         }
 
+        public get displayName data && data.name || id,
+            displayNameWithDescription data && data.description ? '%0: %1'(displayName, data.description) : id;
+    }
+
+    private _modes = [
+        'Practice', 'Hotlap', 'Drift'
+    ];
+
+    private _storage,
+        _tracks;
+
+    public get list {
+        if (!_tracks) init();
         return _tracks;
     };
 
-    function loadTracks(){
-        _tracks = fs.readdirSync(AcDir.tracks).map(function (e){
+    private initTracks(){
+        _tracks = [];
+
+        for (var e in-array fs.readdirSync(AcDir.tracks)){
             var p = path.join(AcDir.tracks, e);
             var d = null;
             var j = path.join(p, 'ui', 'ui_track.json');
 
             if (fs.existsSync(j)){
-                try {
-                    d = JSON.parse(fs.readFileSync(j));
-                } catch (e){}
-            }
+                _tracks.push(new Track(e, p, j));
+            } else {
+                var s = null;
+                try s = fs.readdirSync(path.join(p, 'ui'));
+                if (!s) continue;
 
-            return {
-                id: e,
-                data: d,
-                path: p,
-                json: j,
+                for (var u in-array s){ 
+                    var q = path.join(p, 'ui', u);
+                    if (fs.statSync(q).isDirectory()){
+                        _tracks.push(new Track(e + '/' + u, path.join(p, u), path.join(q, 'ui_track.json')));
+                    }
+                }
             }
-        }).filter(function (e){
-            return e;
-        });
+        }
     }
 
-    public start(c, s, r){
-        if (c.path.indexOf(AcDir.cars)) return;
+    private init(){
+        initTracks();
+        _storage = new ObjLocalStorage('practice', {
+            track: { 'Practice': 'spa', 'Hotlap': 'silverstone-national', 'Drift': 'drift' },
+            mode: _modes[0]
+        });
 
-        if (s == null){
-            s = c.selectedSkin.id;
+        if (localStorage.lastTrack){
+            _storage.update(lambda arg.track['Practice'] = localStorage.lastTrack);
+            delete localStorage.lastTrack;
+        }
+    }
+
+    public start(c, s = c.selectedSkin.id){
+        if (c.disabled){
+            Notification.warn('No Way', 'Enable car first.');
+            return;
         }
 
-        r = r || localStorage.lastTrack || 'spa';
-        localStorage.lastTrack = r;
+        if (!_tracks) init();
+        var m = _storage.get('mode');
+        var r = _storage.get('track')[m];
 
         AcTools;
         try {
-            AcTools.Processes.Game.StartPractice(AcDir.root, c.id, s, r.split('/')[0], r.split('/')[1] || '');
+            AcTools.Processes.Game[
+                m === 'Practice' ? 'StartPractice' : m === 'Hotlap' ? 'StartHotlap' : 'StartDrift'
+            ](AcDir.root, c.id, s, r.split('/')[0], r.split('/')[1] || '');
         } catch (e){
             ErrorHandler.handled('Cannot start the game. Maybe there is not enough rights.');
         }
     }
 
     public select(c, s){
-        if (!_tracks){
-            loadTracks();
-        }
+        if (!_tracks) init();
 
-        new Dialog('Track', [
-            '<select>{0}</select>'.format(_tracks.map(function (e){
-                return '<option value="{0}">{1}</option>'.format(e.id, e.data ? e.data.name : e.id);
-            }).join(''))
+        var d = new Dialog('Drive!', [
+            '<h6>Mode</h6>'
+            '<select id="practice-mode">%0</select>'(_modes.map(lambda '<option value="%0">%0</option>'(arg)).join(''))
+            '<h6>Track</h6>'
+            '<select id="practice-track">%0</select>'(_tracks.map(lambda '<option value="%0">%1</option>'(arg.id, arg.displayNameWithDescription)).join(''))
         ], function (){
-            start(c, s, this.find('select').val());
+            start(c, s);
         }).addButton('Reload List', function (){
             setTimeout(function (){
-                loadTracks();
+                initTracks();
                 select(c, s);
             });
-        }).find('select').val(localStorage.lastTrack || 'spa').change(function (){
-            localStorage.lastTrack = this.value;
+        });
+
+        d.find('#practice-mode').val(_storage.get('mode')).change(function (){
+            _storage.set('mode', this.value);
+            d.find('#practice-track').val(_storage.get('track')[_storage.get('mode')]);
+        });
+
+        d.find('#practice-track').val(_storage.get('track')[_storage.get('mode')]).change(function (){
+            var val = this.value;
+            _storage.update(lambda arg.track[_storage.get('mode')] = val);
         });
     }
 }

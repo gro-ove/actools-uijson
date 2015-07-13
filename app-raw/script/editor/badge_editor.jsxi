@@ -11,22 +11,43 @@ static class BadgeEditor {
                 AppServerRequest.sendBinary(_currentCarId, 'badge', fs.readFileSync(file));
             }
             callback();
+
+            new Dialog('Add Badge To User Base', [
+                '<label>Brand Name: <input value="%0"></label>'(Cars.byId(_currentCarId).data.brand),
+            ], function (){
+                fs.copyFileSync(file, DataStorage.getUserContentDir('Badges') + '/' + this.content.find('input').val() + '.png');
+                Brands.init();
+            });
         } catch (err){
             callback(err);
         }
     }
 
-    public autoupdate(car, force){
-        if (!force && !Settings.get('badgeAutoupdate')) return;
+    public autoupdate(car, force, callback){
+        if (!force && !Settings.get('badgeAutoupdate')){
+            if (callback) callback();
+            return;
+        }
 
         var image = Brands.getBadge(car.data.brand);
         if (image){
-            saveFromLibrary(image, car.badge, lambda arg || car.updateBadge());
+            saveFromLibrary(image, car.badge, lambda {
+                if (!arg){
+                    car.updateBadge();
+                }
+
+                if (callback) callback(arg);
+            });
+        } else {
+            if (callback) callback();
         }
     }
 
     public start(car, callback){
+        if (!car.data) return;
+
         _currentCarId = car.id;
+        Brands.init();
 
         function cb(e){
             if (e){
@@ -44,8 +65,8 @@ static class BadgeEditor {
             var file = Brands.getBadge(brand);
             if (file){
                 logosHtml += '<span class="car-library-element%0" data-file="%2" title="%1" style=\'display:inline-block;width:64px;height:64px;\
-                    background:center url("%2") no-repeat;background-size:54px\'></span>'(
-                    (!carBrandBadge && !logosHtml.length || carBrand === brand) ? ' selected' : '', brand, file.cssUrl());
+                    background:center url("%3") no-repeat;background-size:54px\'></span>'(
+                    (!carBrandBadge && !logosHtml.length || carBrand === brand) ? ' selected' : '', brand, file, file.cssUrl());
             }
         }
 

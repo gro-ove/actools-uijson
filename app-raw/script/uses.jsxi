@@ -1,10 +1,80 @@
 /* default modules */
-    var fs = require('fs'),
-        path = require('path');
+var fs = require('fs'),
+    path = require('path');
 
 /* nw.js modules */
-    var gui = require('nw.gui'),
-        mainForm = gui.Window.get();
+var gui = require('nw.gui'),
+    mainForm = gui.Window.get();
 
-    __defineGetter__('Shell', lambda gui.Shell);
+var Shell = gui.Shell,
+    App = gui.App;
 
+/* that's how we roll */
+fs.mkdirpSync = function (dir) {
+    if (!fs.existsSync(dir)){
+        fs.mkdirpSync(path.dirname(dir));
+        fs.mkdirSync(dir);
+    }
+};
+
+fs.readdirRecursiveSync = function (dir, limit = 1e3, sub = '', result = []){
+    if (result.length > limit) return;
+
+    try for (var c in-array fs.readdirSync(sub ? path.join(dir, sub) : dir)){
+        var subs = sub ? path.join(sub, c) : c;
+        result.push(subs);
+        if (fs.statSync(path.join(dir, subs)).isDirectory()){
+            fs.readdirRecursiveSync(dir, limit, subs, result);
+        }
+    }
+
+    return result;
+}
+
+fs.removeDirSync = function (dirPath, removeSelf = true) {
+    try {
+        var files = fs.readdirSync(dirPath);
+    } catch return;
+    for (var i = 0; i < files.length; i++) {
+        var filePath = path.join(dirPath, files[i]);
+        if (fs.statSync(filePath).isFile()){
+            fs.unlinkSync(filePath);
+        } else {
+            fs.removeDirSync(filePath, true);
+        }
+    }
+    if (removeSelf){
+        fs.rmdirSync(dirPath);
+    }
+};
+
+fs.copyFileSync = function (source, target) {
+    var targetFile = target;
+
+    if (fs.existsSync(target)) {
+        if (fs.lstatSync(target).isDirectory()) {
+            targetFile = path.join(target, path.basename(source));
+        }
+    }
+
+    fs.createReadStream(source).pipe(fs.createWriteStream(targetFile));
+}
+
+fs.copyDirRecursiveSync = function (source, target) {
+    var files = [];
+
+    if (!fs.existsSync(target)) {
+        fs.mkdirSync(target);
+    }
+
+    if (fs.lstatSync(source).isDirectory()) {
+        for (var file in-array fs.readdirSync(source)){
+            var curSource = path.join(source, file);
+            if (fs.lstatSync(curSource).isDirectory()) {
+                fs.copyDirRecursiveSync(curSource, path.join(target, file));
+            } else {
+                fs.copyFileSync(curSource, path.join(target, file));
+            }
+        }
+    }
+}

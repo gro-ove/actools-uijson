@@ -99,13 +99,17 @@ pre {
 }
 progress {
   height: 3px;
-  background: #eee;
 }
+progress,
 progress::-webkit-progress-bar {
   background: #eee;
 }
 progress::-webkit-progress-value {
   background: #59f;
+}
+progress:indeterminate,
+progress:indeterminate::-webkit-progress-bar {
+  background: #9be;
 }
 button:hover,
 footer span:hover > button:first-child {
@@ -206,7 +210,6 @@ ul.tags input:focus {
 }
 #selected-car-error:before {
   content: "";
-  font-family: Segoe UI Symbol;
   float: right;
   background: no-repeat url(img/warn.png) center;
   background-size: contain;
@@ -251,14 +254,14 @@ dialog {
   position: fixed;
   top: 0;
   left: 0;
-  background: rgba(0, 0, 0, 0.24);
+  background: rgba(255, 255, 255, 0.36);
   border-radius: 0;
   border: none;
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 0;
-  z-index: 10;
+  z-index: 11;
 }
 dialog h6 {
   margin: 10px 0 4px;
@@ -323,7 +326,9 @@ dialog > article {
   background: #fff;
 }
 .dialog-content {
-  overflow: hidden;
+  overflow-x: hidden;
+  overflow-y: auto;
+  max-height: 80vh;
 }
 .dialog-content > p:first-child {
   margin-top: 0;
@@ -393,6 +398,60 @@ th.headerSortDown {
 }
 tbody tr:hover {
   background: #def;
+}
+notification {
+  position: fixed;
+  background: #59f;
+  left: 30px;
+  right: 30px;
+  bottom: -50px;
+  height: 50px;
+  padding: 0 20px;
+  line-height: 50px;
+  white-space: nowrap;
+  color: white;
+  z-index: 12;
+  transition: bottom 0.3s ease-in-out;
+}
+notification.active {
+  bottom: 30px;
+}
+notification.warn h4 {
+  color: yellow;
+}
+notification.warn h4:before {
+  content: "";
+  font-family: Segoe UI Symbol;
+  background: no-repeat url(img/warn.png) center;
+  background-size: contain;
+  width: 14px;
+  height: 14px;
+  margin-right: 6px;
+  display: inline-block;
+}
+notification h4 {
+  display: inline;
+  margin-right: 20px;
+}
+notification p {
+  font-size: 13px;
+  display: inline-block;
+  vertical-align: bottom;
+  margin: 0;
+  max-width: calc(100% - 100px);
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+notification button {
+  position: absolute;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  width: 100px;
+  border-left: 1px solid rgba(255, 255, 255, 0.3);
+}
+notification button ~ p {
+  max-width: calc(100% - 200px);
 }
 #window-border {
   border: 1px solid #aaa;
@@ -492,7 +551,7 @@ iframe {
   bottom: 0;
   left: 0;
   right: 0;
-  background: rgba(0, 0, 0, 0.24);
+  background: rgba(255, 255, 255, 0.36);
   z-index: 91;
 }
 #drop-target h4 {
@@ -502,6 +561,8 @@ iframe {
   left: 60px;
   right: 60px;
   background: rgba(255, 255, 255, 0.91);
+  background: #59f;
+  color: white;
   padding-top: calc(50vh - 90px);
   text-align: center;
 }
@@ -518,8 +579,8 @@ footer {
   box-sizing: border-box;
   padding: 0;
   z-index: 2;
-  /*transition: .1s bottom linear;*/
-  /*transform: translate3d(0, 0, 0);*/
+  transition: .12s bottom;
+  transform: translate3d(0, 0, 0);
 }
 footer.active {
   bottom: 0;
@@ -732,6 +793,7 @@ main > div > h4 {
 #selected-car-skins-article {
   position: relative;
   padding: 0;
+  -webkit-user-select: none;
 }
 #selected-car-skins {
   position: absolute;

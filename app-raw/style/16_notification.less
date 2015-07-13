@@ -1,0 +1,65 @@
+@notification-padding: 30px;
+
+notification {
+    position: fixed;
+    background: #59f;
+    left: @notification-padding;
+    right: @notification-padding;
+    bottom: -50px;
+    height: 50px;
+    padding: 0 20px;
+    line-height: 50px;
+    white-space: nowrap;
+
+    color: white;
+    z-index: 12;
+
+    transition: bottom .3s ease-in-out;
+
+    &.active {
+        bottom: @notification-padding;
+    }
+
+    &.warn h4 {
+        color: yellow;
+
+        &:before {
+            content: "";
+            font-family: Segoe UI Symbol;
+            background: no-repeat url(img/warn.png) center;
+            background-size: contain;
+            width: 14px;
+            height: 14px;
+            margin-right: 6px;
+            display: inline-block;
+        }
+    }
+
+    h4 {
+        display: inline;
+        margin-right: 20px;
+    }
+
+    p {
+        font-size: 13px;
+        display: inline-block;
+        vertical-align: bottom;
+        margin: 0;
+        max-width: calc(100% - 100px);
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    button {
+        position: absolute;
+        right: 0;
+        top: 0;
+        bottom: 0;
+        width: 100px;
+        border-left: 1px solid rgba(255,255,255,0.3);
+    }
+
+    button ~ p {
+        max-width: calc(100% - 200px);
+    }
+}

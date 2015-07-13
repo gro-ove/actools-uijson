@@ -21,13 +21,113 @@ var fs = require('fs'), path = require('path');
 
 var gui = require('nw.gui'), mainForm = gui.Window.get();
 
-__defineGetter__('Shell',                                                          // uses.jsxi:9
-	function (arg){                                                                // uses.jsxi:9
-		return gui.Shell;                                                          // uses.jsxi:9
-	});
+var Shell = gui.Shell, App = gui.App;
+
+fs.mkdirpSync = function (dir){                                                    // uses.jsxi:13
+	if (!fs.existsSync(dir)){                                                      // uses.jsxi:14
+		fs.mkdirpSync(path.dirname(dir));                                          // uses.jsxi:15
+		fs.mkdirSync(dir);                                                         // uses.jsxi:16
+	}
+};
+fs.readdirRecursiveSync = function (dir, limit, sub, result){                      // uses.jsxi:20
+	if (limit === undefined)                                                       // uses.jsxi:20
+		limit = 1e3;                                                               // uses.jsxi:20
+
+	if (sub === undefined)                                                         // uses.jsxi:20
+		sub = '';                                                                  // uses.jsxi:20
+
+	if (result === undefined)                                                      // uses.jsxi:20
+		result = [];                                                               // uses.jsxi:20
+
+	if (result.length > limit)                                                     // uses.jsxi:21
+		return;
+	
+	try {
+		{
+			var __1 = fs.readdirSync(sub ? path.join(dir, sub) : dir);
+			
+			for (var __0 = 0; __0 < __1.length; __0 ++){
+				var c = __1[__0];
+				
+				var subs = sub ? path.join(sub, c) : c;
+				
+				result.push(subs);                                                 // uses.jsxi:25
+				
+				if (fs.statSync(path.join(dir, subs)).isDirectory()){              // uses.jsxi:26
+					fs.readdirRecursiveSync(dir, limit, subs, result);             // uses.jsxi:27
+				}
+			}
+			
+			__1 = undefined;
+		}
+	} catch (e){} 
+	return result;                                                                 // uses.jsxi:31
+};
+fs.removeDirSync = function (dirPath, removeSelf){                                 // uses.jsxi:34
+	if (removeSelf === undefined)                                                  // uses.jsxi:34
+		removeSelf = true;                                                         // uses.jsxi:34
+
+	try {
+		var files = fs.readdirSync(dirPath);
+	} catch (e){
+		return;
+	} 
+	
+	for (var i = 0; i < files.length; i ++){                                       // uses.jsxi:38
+		var filePath = path.join(dirPath, files[i]);
+		
+		if (fs.statSync(filePath).isFile()){                                       // uses.jsxi:40
+			fs.unlinkSync(filePath);                                               // uses.jsxi:41
+		} else {
+			fs.removeDirSync(filePath, true);                                      // uses.jsxi:43
+		}
+	}
+	
+	if (removeSelf){                                                               // uses.jsxi:46
+		fs.rmdirSync(dirPath);                                                     // uses.jsxi:47
+	}
+};
+fs.copyFileSync = function (source, target){                                       // uses.jsxi:51
+	var targetFile = target;
+	
+	if (fs.existsSync(target)){                                                    // uses.jsxi:54
+		if (fs.lstatSync(target).isDirectory()){                                   // uses.jsxi:55
+			targetFile = path.join(target, path.basename(source));                 // uses.jsxi:56
+		}
+	}
+	
+	fs.createReadStream(source).pipe(fs.createWriteStream(targetFile));            // uses.jsxi:60
+};
+fs.copyDirRecursiveSync = function (source, target){                               // uses.jsxi:63
+	var files = [];
+	
+	if (!fs.existsSync(target)){                                                   // uses.jsxi:66
+		fs.mkdirSync(target);                                                      // uses.jsxi:67
+	}
+	
+	if (fs.lstatSync(source).isDirectory()){                                       // uses.jsxi:70
+		{
+			var __3 = fs.readdirSync(source);
+			
+			for (var __2 = 0; __2 < __3.length; __2 ++){
+				var file = __3[__2];
+				
+				var curSource = path.join(source, file);
+				
+				if (fs.lstatSync(curSource).isDirectory()){                        // uses.jsxi:73
+					fs.copyDirRecursiveSync(curSource, path.join(target, file));   // uses.jsxi:74
+				} else {
+					fs.copyFileSync(curSource, path.join(target, file));           // uses.jsxi:76
+				}
+			}
+			
+			__3 = undefined;
+		}
+	}
+};
 
 /* Class "Dialog" declaration */
-function Dialog(title, elements, callback, closeCallback){                         // dialog.jsxi:3
+function Dialog(title, elements, callback, closeCallback){                         // dialog.jsxi:1
 	var __that = this;
 	
 	this.__Dialog__closeOnEnter = true;
@@ -35,117 +135,260 @@ function Dialog(title, elements, callback, closeCallback){                      
 		if (e.target.tagName == 'DIALOG' && (__that.__Dialog__closeCallback == null || __that.__Dialog__closeCallback !== false && __that.__Dialog__closeCallback(e) !== false)){
 			__that.close();
 		}
-	}).appendTo('body');                                                           // dialog.jsxi:18
-	this.header = this.el.find('.dialog-header > h4');                             // dialog.jsxi:20
-	this.content = this.el.find('.dialog-content');                                // dialog.jsxi:21
-	this.buttons = this.el.find('.dialog-buttons');                                // dialog.jsxi:22
+	}).appendTo('body');                                                           // dialog.jsxi:16
+	this.header = this.el.find('.dialog-header > h4');                             // dialog.jsxi:18
+	this.content = this.el.find('.dialog-content');                                // dialog.jsxi:19
+	this.buttons = this.el.find('.dialog-buttons');                                // dialog.jsxi:20
 	this.setContent(elements);
-	this.__Dialog__callback = callback && callback.bind(this);                     // dialog.jsxi:26
-	this.__Dialog__closeCallback = closeCallback && closeCallback.bind(this);      // dialog.jsxi:27
+	this.__Dialog__callback = callback && callback.bind(this);                     // dialog.jsxi:24
+	this.__Dialog__closeCallback = closeCallback && closeCallback.bind(this);      // dialog.jsxi:25
 	
 	if (this.__Dialog__callback === false){
-		this.el.find('[data-id="dialog-ok"]').hide();                              // dialog.jsxi:30
+		this.el.find('[data-id="dialog-ok"]').hide();                              // dialog.jsxi:28
 	}
 	
-	this.el.find('[data-id="dialog-ok"]').click(function (e){                      // dialog.jsxi:33
+	this.el.find('[data-id="dialog-ok"]').click(function (e){                      // dialog.jsxi:31
 		if (!__that.__Dialog__callback || __that.__Dialog__callback(e) !== false){
 			__that.close();
 		}
 	});
-	this.el.find('*').keydown(function (e){                                        // dialog.jsxi:39
-		if (e.keyCode == 13 && __that.__Dialog__closeOnEnter){                     // dialog.jsxi:40
-			var okButton = __that.el[0].querySelector('[data-id="dialog-ok"]');    // dialog.jsxi:41
+	this.el.find('*').keydown(function (e){                                        // dialog.jsxi:37
+		if (e.keyCode == 13 && __that.__Dialog__closeOnEnter){                     // dialog.jsxi:38
+			var okButton = __that.el[0].querySelector('[data-id="dialog-ok"]');    // dialog.jsxi:39
 			
-			if (okButton){                                                         // dialog.jsxi:42
-				__that.el[0].querySelector('[data-id="dialog-ok"]').click();       // dialog.jsxi:43
+			if (okButton){                                                         // dialog.jsxi:40
+				__that.el[0].querySelector('[data-id="dialog-ok"]').click();       // dialog.jsxi:41
 				return false;
 			}
 		}
 	});
 }
-Dialog.prototype.setContent = function (elements){                                 // dialog.jsxi:50
-	if (!Array.isArray(elements)){                                                 // dialog.jsxi:51
-		elements = [ elements ];                                                   // dialog.jsxi:52
+Dialog.prototype.setContent = function (elements){                                 // dialog.jsxi:48
+	if (!Array.isArray(elements)){                                                 // dialog.jsxi:49
+		elements = [ elements ];                                                   // dialog.jsxi:50
 	}
 	
-	this.content.empty();                                                          // dialog.jsxi:55
+	var html = '';
 	
-	for (var __0 = 0; __0 < elements.length; __0 ++){                              // dialog.jsxi:56
-		var element = elements[__0];
+	for (var __4 = 0; __4 < elements.length; __4 ++){                              // dialog.jsxi:54
+		var element = elements[__4];
 		
-		this.content.append($(typeof element === 'string' && element[0] !== '<' && element[element.length - 1] !== '>' ? '<p>' + element + '</p>' : element));
+		if (element == null || element === '')                                     // dialog.jsxi:55
+			continue;
+		
+		html += typeof element === 'string' && element[0] !== '<' && element[element.length - 1] !== '>' ? '<p>' + element + '</p>' : element;
 	}
-	return this;                                                                   // dialog.jsxi:60
-};
-Dialog.prototype.closeOnEnter = function (v){                                      // dialog.jsxi:63
-	this.__Dialog__closeOnEnter = v;                                               // dialog.jsxi:64
-	return this;                                                                   // dialog.jsxi:65
-};
-Dialog.prototype.onEnd = function (callback){                                      // dialog.jsxi:68
-	this.__Dialog__endCallback = callback.bind(this);                              // dialog.jsxi:69
-	return this;                                                                   // dialog.jsxi:70
-};
-Dialog.prototype.setButton = function (a, c){                                      // dialog.jsxi:73
-	this.buttons.find('[data-id="dialog-ok"]').toggle(a != null).text(a);          // dialog.jsxi:74
 	
-	if (c != null){                                                                // dialog.jsxi:75
-		this.__Dialog__callback = c;                                               // dialog.jsxi:75
-	}
+	this.content.html(html);                                                       // dialog.jsxi:59
+	return this;                                                                   // dialog.jsxi:66
+};
+Dialog.prototype.closeOnEnter = function (v){                                      // dialog.jsxi:69
+	this.__Dialog__closeOnEnter = v;                                               // dialog.jsxi:70
+	return this;                                                                   // dialog.jsxi:71
+};
+Dialog.prototype.onEnd = function (callback){                                      // dialog.jsxi:74
+	this.__Dialog__endCallback = callback.bind(this);                              // dialog.jsxi:75
 	return this;                                                                   // dialog.jsxi:76
 };
-Dialog.prototype.addButton = function (text, fn){                                  // dialog.jsxi:79
+Dialog.prototype.setButton = function (a, c){                                      // dialog.jsxi:79
+	this.buttons.find('[data-id="dialog-ok"]').toggle(a != null).text(a);          // dialog.jsxi:80
+	
+	if (c != null){                                                                // dialog.jsxi:81
+		this.__Dialog__callback = c;                                               // dialog.jsxi:81
+	}
+	return this;                                                                   // dialog.jsxi:82
+};
+Dialog.prototype.addButton = function (text, fn){                                  // dialog.jsxi:85
 	var __that = this;
 	
-	fn = fn && fn.bind(this);                                                      // dialog.jsxi:80
+	fn = fn && fn.bind(this);                                                      // dialog.jsxi:86
 	$('<button>' + text + '</button>').appendTo(this.buttons).click(function (e){
-		if (!fn || fn(e) !== false){                                               // dialog.jsxi:82
+		if (!fn || fn(e) !== false){                                               // dialog.jsxi:88
 			__that.close();
 		}
 	});
-	return this;                                                                   // dialog.jsxi:86
+	return this;                                                                   // dialog.jsxi:92
 };
-Dialog.prototype.find = function (a){                                              // dialog.jsxi:89
-	return this.el.find(a);                                                        // dialog.jsxi:90
+Dialog.prototype.find = function (a){                                              // dialog.jsxi:95
+	return this.el.find(a);                                                        // dialog.jsxi:96
 };
-Dialog.prototype.close = function (){                                              // dialog.jsxi:93
+Dialog.prototype.close = function (){                                              // dialog.jsxi:99
 	if (this.__Dialog__endCallback)
 		this.__Dialog__endCallback();
 	
-	this.el.remove();                                                              // dialog.jsxi:95
+	this.el.remove();                                                              // dialog.jsxi:101
 };
-Dialog.prototype.addTab = function (title, content, callback, closeCallback){      // dialog.jsxi:98
+Dialog.prototype.addTab = function (title, content, callback, closeCallback){      // dialog.jsxi:104
 	var __that = this;
 	
 	if (!this.tabs){
 		this.tabs = [ this ];
-		this.header.parent().addClass('tabs').click(function (e){                  // dialog.jsxi:101
+		this.header.parent().addClass('tabs').click(function (e){                  // dialog.jsxi:107
 			if (e.target.tagName === 'H4' && !e.target.classList.contains('active')){
 				__that.el.find('.dialog-header h4.active').removeClass('active');
-				e.target.classList.add('active');                                  // dialog.jsxi:104
+				e.target.classList.add('active');                                  // dialog.jsxi:110
 				
 				var i = Array.prototype.indexOf.call(e.target.parentNode.childNodes, e.target);
 				
 				var l = __that.el.find('.dialog-content')[0];
 				
-				l.parentNode.removeChild(l);                                       // dialog.jsxi:108
+				l.parentNode.removeChild(l);                                       // dialog.jsxi:114
 				
 				var l = __that.el.find('.dialog-buttons')[0];
 				
-				l.parentNode.removeChild(l);                                       // dialog.jsxi:110
-				__that.tabs[i].content.appendTo(__that.el.children());             // dialog.jsxi:111
-				__that.tabs[i].buttons.appendTo(__that.el.children());             // dialog.jsxi:112
+				l.parentNode.removeChild(l);                                       // dialog.jsxi:116
+				__that.tabs[i].content.appendTo(__that.el.children());             // dialog.jsxi:117
+				__that.tabs[i].buttons.appendTo(__that.el.children());             // dialog.jsxi:118
 			}
 		});
 	}
 	
 	var n = new Dialog(title, content, callback, closeCallback);
 	
-	this.tabs.push(n);                                                             // dialog.jsxi:118
-	document.body.removeChild(n.el[0]);                                            // dialog.jsxi:120
-	n.header.appendTo(this.header.addClass('active').parent());                    // dialog.jsxi:121
-	n.close = __bindOnce(this, 'close').bind(this);                                // dialog.jsxi:122
-	return n;                                                                      // dialog.jsxi:124
+	this.tabs.push(n);                                                             // dialog.jsxi:124
+	document.body.removeChild(n.el[0]);                                            // dialog.jsxi:126
+	n.header.appendTo(this.header.addClass('active').parent());                    // dialog.jsxi:127
+	n.close = __bindOnce(this, 'close').bind(this);                                // dialog.jsxi:128
+	return n;                                                                      // dialog.jsxi:130
 };
+
+/* Class "Downloader" declaration */
+var Downloader = (function (){                                                     // downloader.jsxi:1
+	var Downloader = function (){}, 
+		_updateInProcess;
+	
+	Downloader.isAvailableYadisk = function (link){                                // downloader.jsxi:2
+		return /^https:\/\/yadi.sk\/d\/\w+/.test(link);                            // downloader.jsxi:3
+	};
+	Downloader.isAvailableRd = function (link){                                    // downloader.jsxi:6
+		return /^http:\/\/www.racedepartment.com\/downloads\//.test(link);         // downloader.jsxi:7
+	};
+	Downloader.isAvailable = function (link){                                      // downloader.jsxi:10
+		return Downloader.isAvailableYadisk(link) || Downloader.isAvailableRd(link);
+	};
+	Downloader.download = function (url, dest, callback, progressCallback){        // downloader.jsxi:14
+		if (Downloader.isAvailableYadisk(url))
+			yadiskDownload(url, dest, callback, progressCallback);                 // downloader.jsxi:15
+		else if (Downloader.isAvailableRd(url))
+			rdDownload(url, dest, callback, progressCallback);                     // downloader.jsxi:16
+		else
+			httpDownload(url, dest, callback, progressCallback);                   // downloader.jsxi:17
+	};
+	Downloader.abort = function (id){                                              // downloader.jsxi:20
+		if (_updateInProcess.abort){                                               // downloader.jsxi:21
+			_updateInProcess.abort();                                              // downloader.jsxi:22
+		}
+	};
+	
+	function httpDownload(url, file, callback, progressCallback){                  // downloader.jsxi:27
+		try {
+			if (typeof file === 'string'){                                         // downloader.jsxi:29
+				file = fs.createWriteStream(file);                                 // downloader.jsxi:30
+			}
+			
+			_updateInProcess = require(url.match(/^https?/)[0]).get(url,           // downloader.jsxi:33
+				function (r){                                                      // downloader.jsxi:33
+					if (r.statusCode == 302){                                      // downloader.jsxi:34
+						httpDownload(r.headers['location'], file, callback, progressCallback);
+					} else if (r.statusCode == 200){                               // downloader.jsxi:36
+						var m = r.headers['content-length'], p = 0;
+						
+						r.pipe(file);                                              // downloader.jsxi:38
+						r.on('data',                                               // downloader.jsxi:39
+							function (d){                                          // downloader.jsxi:39
+								if (progressCallback)                              // downloader.jsxi:40
+									progressCallback(p += d.length, m);            // downloader.jsxi:40
+							}).on('end',                                           // downloader.jsxi:41
+							function (){                                           // downloader.jsxi:41
+								if (_updateInProcess){                             // downloader.jsxi:42
+									_updateInProcess = null;                       // downloader.jsxi:43
+									setTimeout(callback, 50);                      // downloader.jsxi:44
+								}
+							});
+					} else {
+						callback(r.statusCode);                                    // downloader.jsxi:48
+					}
+				}).on('error',                                                     // downloader.jsxi:50
+				function (e){                                                      // downloader.jsxi:50
+					callback(e);                                                   // downloader.jsxi:51
+				});
+		} catch (e){                                                               // downloader.jsxi:53
+			callback('DOWNLOAD:' + url);                                           // downloader.jsxi:54
+		} 
+	}
+	
+	function yadiskDownload(url, dest, callback, progressCallback){                // downloader.jsxi:58
+		_updateInProcess = true;                                                   // downloader.jsxi:59
+		
+		var ifr = $('<iframe nwdisable nwfaketop>').attr('src', url).on('load',    // downloader.jsxi:60
+			function (e){                                                          // downloader.jsxi:60
+				if (!_updateInProcess)                                             // downloader.jsxi:61
+					return;
+				
+				this.contentWindow._cb = function (e){                             // downloader.jsxi:63
+					if (!_updateInProcess)                                         // downloader.jsxi:64
+						return;
+					
+					try {
+						clearTimeout(to);                                          // downloader.jsxi:66
+						httpDownload(e.models[0].data.file, dest, callback, progressCallback);
+					} catch (e){
+						callback('YADISK');                                        // downloader.jsxi:68
+					} 
+					
+					ifr.remove();                                                  // downloader.jsxi:69
+				};
+				this.contentWindow.eval("\t\t\t\t\t \n_XMLHttpRequest = XMLHttpRequest;\nXMLHttpRequest = function (){\n\tvar r = new _XMLHttpRequest();\n\tr.onreadystatechange = function (e){\n\t\tif (r.status == 200 && r.readyState == 4)\n\t\t\t_cb(JSON.parse(r.responseText));\n\t};\n\treturn {\n\t\topen: function (){ r.open.apply(r, arguments); },\n\t\tsetRequestHeader: function (){ r.setRequestHeader.apply(r, arguments); },\n\t\tgetAllResponseHeaders: function (){ r.getAllResponseHeaders.apply(r, arguments); },\n\t\tgetResponseHeader: function (){ r.getResponseHeader.apply(r, arguments); },\n\t\tabort: function (){ r.abort.apply(r, arguments); },\n\t\tsend: function (){ r.send.apply(r, arguments); },\n\t};\n};");
+				
+				try {
+					this.contentWindow.document.querySelector('button[data-click-action="resource.download"]').click();
+				} catch (e){
+					ifr.remove();                                                  // downloader.jsxi:91
+					callback('YADISK:BTN');                                        // downloader.jsxi:92
+				} 
+			}).css({ position: 'fixed', top: '200vh', left: '200vw' }).appendTo('body');
+		
+		var to = setTimeout(function (){                                           // downloader.jsxi:96
+			if (!_updateInProcess)                                                 // downloader.jsxi:97
+				return;
+			
+			ifr.remove();                                                          // downloader.jsxi:98
+			callback('YADISK:TO');                                                 // downloader.jsxi:99
+		}, 
+		10e3);
+	}
+	
+	function rdDownload(url, dest, callback, progressCallback){                    // downloader.jsxi:103
+		_updateInProcess = true;                                                   // downloader.jsxi:104
+		
+		var ifr = $('<iframe nwdisable nwfaketop>').attr('src', url).on('load',    // downloader.jsxi:105
+			function (e){                                                          // downloader.jsxi:105
+				if (!_updateInProcess)                                             // downloader.jsxi:106
+					return;
+				
+				try {
+					clearTimeout(to);                                              // downloader.jsxi:109
+					httpDownload(this.contentWindow.document.querySelector('.downloadButton a').href, 
+						dest,                                                      // downloader.jsxi:110
+						callback,                                                  // downloader.jsxi:110
+						progressCallback);                                         // downloader.jsxi:110
+				} catch (e){                                                       // downloader.jsxi:111
+					ifr.remove();                                                  // downloader.jsxi:112
+					callback('RD:BTN');                                            // downloader.jsxi:113
+				} 
+			}).css({ position: 'fixed', top: '200vh', left: '200vw' }).appendTo('body');
+		
+		var to = setTimeout(function (){                                           // downloader.jsxi:117
+			if (!_updateInProcess)                                                 // downloader.jsxi:118
+				return;
+			
+			ifr.remove();                                                          // downloader.jsxi:119
+			callback('RD:TO');                                                     // downloader.jsxi:120
+		}, 
+		10e3);
+	}
+	return Downloader;
+})();
 
 var Mediator = (function (){                                                       // mediator.jsxi:1
 	function _splitAndCall(type, fn, arg){                                         // mediator.jsxi:2
@@ -402,6 +645,64 @@ var Mediator = (function (){                                                    
 		return m;                                                                  // mediator.jsxi:249
 	};
 	return Mediator;                                                               // mediator.jsxi:252
+})();
+
+/* Class "Notification" declaration */
+var Notification = (function (){                                                   // notification.jsxi:1
+	var Notification = function (message, details, type){                          // notification.jsxi:1
+			if (type === undefined)                                                // notification.jsxi:7
+				type = 'info';                                                     // notification.jsxi:7
+		
+			var __that = this;
+			
+			if (_current)                                                          // notification.jsxi:8
+				_current.close();                                                  // notification.jsxi:8
+			
+			this.el = $('<notification class="' + type + '">').html('<h4>' + message + '</h4><p>' + details + '</p>').click(function (e){
+				__that.close();
+			}).appendTo('body');                                                   // notification.jsxi:12
+			_current = this;                                                       // notification.jsxi:14
+			window.setTimeout(function (arg){                                      // notification.jsxi:16
+				return __that.el.addClass('active');                               // notification.jsxi:16
+			});
+			this.setTimeout(3e3);
+		}, 
+		_current;                                                                  // notification.jsxi:2
+	
+	Notification.prototype.close = function (){                                    // notification.jsxi:20
+		var __that = this;
+		
+		clearTimeout(this.__Notification__timeout);                                // notification.jsxi:21
+		_current = null;                                                           // notification.jsxi:22
+		this.el.removeClass('active');                                             // notification.jsxi:24
+		window.setTimeout(function (arg){                                          // notification.jsxi:25
+			return __that.el.remove();                                             // notification.jsxi:25
+		}, 
+		500);
+		return this;                                                               // notification.jsxi:26
+	};
+	Notification.prototype.setTimeout = function (timeout){                        // notification.jsxi:29
+		clearTimeout(this.__Notification__timeout);                                // notification.jsxi:30
+		this.__Notification__timeout = window.setTimeout(__bindOnce(this, 'close'), timeout);
+		return this;                                                               // notification.jsxi:32
+	};
+	Notification.prototype.setButton = function (text, callback){                  // notification.jsxi:35
+		var __that = this;
+		
+		$('<button>' + text + '</button>').click((function (e){                    // notification.jsxi:36
+			if (!callback || callback(e) !== false){                               // notification.jsxi:37
+				__that.close();
+			}
+		}).bind(this)).prependTo(this.el);                                         // notification.jsxi:40
+		return this;                                                               // notification.jsxi:41
+	};
+	Notification.info = function (m, d){                                           // notification.jsxi:44
+		return new Notification(m, d, 'info');                                     // notification.jsxi:44
+	};
+	Notification.warn = function (m, d){                                           // notification.jsxi:45
+		return new Notification(m, d, 'warn');                                     // notification.jsxi:45
+	};
+	return Notification;
 })();
 
 !(function (){                                                                     // winstate.jsxi:1
@@ -788,28 +1089,34 @@ String.prototype.decodeHtmlEntities = function (){                              
 		});
 };
 JSON.flexibleParse = function (d){                                                 // helpers.jsxi:146
-	var r;
+	d = d.toString();                                                              // helpers.jsxi:147
 	
-	eval('r=' + d.toString().replace(/"(?:[^"\\]*(?:\\.)?)+"/g,                    // helpers.jsxi:148
-		function (_){                                                              // helpers.jsxi:148
-			return _.replace(/\r?\n/g, '\\n');                                     // helpers.jsxi:149
-		}));
-	return r;                                                                      // helpers.jsxi:151
+	try {
+		return JSON.parse(d);                                                      // helpers.jsxi:150
+	} catch (e){
+		var r;
+		
+		eval('r=' + d.toString().replace(/"(?:[^"\\]*(?:\\.)?)+"/g,                // helpers.jsxi:153
+			function (_){                                                          // helpers.jsxi:153
+				return _.replace(/\r?\n/g, '\\n');                                 // helpers.jsxi:154
+			}));
+		return r;                                                                  // helpers.jsxi:156
+	} 
 };
-JSON.restoreDamaged = function (data, fields){                                     // helpers.jsxi:154
-	data = data.toString().replace(/\r?\n|\r/g, '\n').trim();                      // helpers.jsxi:155
+JSON.restoreDamaged = function (data, fields){                                     // helpers.jsxi:160
+	data = data.toString().replace(/\r?\n|\r/g, '\n').trim();                      // helpers.jsxi:161
 	
 	var result = {};
 	
-	for (var key in fields)                                                        // helpers.jsxi:158
-		if (fields.hasOwnProperty(key)){                                           // helpers.jsxi:158
+	for (var key in fields)                                                        // helpers.jsxi:164
+		if (fields.hasOwnProperty(key)){                                           // helpers.jsxi:164
 			var type = fields[key];
 			
 			var re = new RegExp('(?:\"\\s*' + key + '\\s*\"|\'\\s*' + key + '\\s*\'|' + key + ')\\s*:\\s*([\\s\\S]+)');
 			
 			var m = data.match(re);
 			
-			if (re.test(data)){                                                    // helpers.jsxi:161
+			if (re.test(data)){                                                    // helpers.jsxi:167
 				var d = RegExp.$1.trim();
 				
 				if (type !== 'multiline' && type !== 'array' && type !== 'pairsArray'){
@@ -817,66 +1124,70 @@ JSON.restoreDamaged = function (data, fields){                                  
 				}
 				
 				d = d.replace(/(?:\n?\s*,?\s*("\s*\w+\s*"|'\s*\w+\s*'|\w+)\s*:|\s*})[\s\S]*$/, 
-					'');                                                           // helpers.jsxi:168
-				result[key] = d.trim().replace(/,$/, '');                          // helpers.jsxi:169
+					'');                                                           // helpers.jsxi:174
+				result[key] = d.trim().replace(/,$/, '');                          // helpers.jsxi:175
 			}
 		}
 	
-	for (var key in result)                                                        // helpers.jsxi:173
-		if (result.hasOwnProperty(key)){                                           // helpers.jsxi:173
+	for (var key in result)                                                        // helpers.jsxi:179
+		if (result.hasOwnProperty(key)){                                           // helpers.jsxi:179
 			var value = result[key];
 			
-			if (fields[key] === 'string' || fields[key] === 'multiline'){          // helpers.jsxi:174
-				result[key] = value.replace(/^['"]/, '').replace(/['"]$/, '');     // helpers.jsxi:175
+			if (fields[key] === 'string' || fields[key] === 'multiline'){          // helpers.jsxi:180
+				result[key] = value === 'null' ? null : value.replace(/^['"]/, '').replace(/['"]$/, '').replace(/\\(?=")/g, '');
 			}
 			
-			if (fields[key] === 'array' || fields[key] === 'pairsArray'){          // helpers.jsxi:178
-				value = value.split(/\n|,/).map(function (arg){                    // helpers.jsxi:179
-					return arg.trim().replace(/^['"]/, '').replace(/['"]$/, '');   // helpers.jsxi:180
-				}).filter(function (a, i){                                         // helpers.jsxi:181
-					return a && (i > 0 || a != '[');                               // helpers.jsxi:181
+			if (fields[key] === 'array' || fields[key] === 'pairsArray'){          // helpers.jsxi:184
+				value = value.split(/\n|,/).map(function (arg){                    // helpers.jsxi:185
+					return arg.trim().replace(/^['"]/, '').replace(/['"]$/, '');   // helpers.jsxi:186
+				}).filter(function (a, i){                                         // helpers.jsxi:187
+					return a && (i > 0 || a != '[');                               // helpers.jsxi:187
 				});
 				
-				if (value[value.length - 1] === ']'){                              // helpers.jsxi:182
-					value.length --;                                               // helpers.jsxi:183
+				if (value[value.length - 1] === ']'){                              // helpers.jsxi:188
+					value.length --;                                               // helpers.jsxi:189
 				}
 				
-				result[key] = value;                                               // helpers.jsxi:186
+				result[key] = value;                                               // helpers.jsxi:192
 			}
 			
-			if (fields[key] === 'pairsArray'){                                     // helpers.jsxi:189
-				result[key] = [];                                                  // helpers.jsxi:190
+			if (fields[key] === 'pairsArray'){                                     // helpers.jsxi:195
+				result[key] = [];                                                  // helpers.jsxi:196
 				
 				var last;
 				
-				value.forEach(function (arg){                                      // helpers.jsxi:192
-					if (arg === '[' || arg === ']')                                // helpers.jsxi:193
+				value.forEach(function (arg){                                      // helpers.jsxi:198
+					if (arg === '[' || arg === ']')                                // helpers.jsxi:199
 						return;
 					
-					if (last){                                                     // helpers.jsxi:194
-						last.push(arg);                                            // helpers.jsxi:195
-						last = null;                                               // helpers.jsxi:196
+					if (last){                                                     // helpers.jsxi:200
+						last.push(arg);                                            // helpers.jsxi:201
+						last = null;                                               // helpers.jsxi:202
 					} else {
-						result[key].push(last = [ arg ]);                          // helpers.jsxi:198
+						result[key].push(last = [ arg ]);                          // helpers.jsxi:204
 					}
 				});
 			}
 			
-			if (fields[key] === 'number'){                                         // helpers.jsxi:203
-				value = value.replace(/^['"]/, '').replace(/['"]$/, '');           // helpers.jsxi:204
-				value = value.replace(/[liI]/g, '1').replace(/[oO]/g, '0');        // helpers.jsxi:206
-				result[key] = + value;                                             // helpers.jsxi:207
-				
-				if (Number.isNaN(result[key])){                                    // helpers.jsxi:209
-					result[key] = + value.replace(/[^-.\d]+/g, '');                // helpers.jsxi:210
-				}
-				
-				if (Number.isNaN(result[key])){                                    // helpers.jsxi:213
-					result[key] = + (value.replace(/[^\d]+/g, '') || '0');         // helpers.jsxi:214
+			if (fields[key] === 'number'){                                         // helpers.jsxi:209
+				if (value === 'null'){                                             // helpers.jsxi:210
+					value = null;                                                  // helpers.jsxi:211
+				} else {
+					value = value.replace(/^['"]/, '').replace(/['"]$/, '');       // helpers.jsxi:213
+					value = value.replace(/[liI]/g, '1').replace(/[oO]/g, '0');    // helpers.jsxi:215
+					result[key] = + value;                                         // helpers.jsxi:216
+					
+					if (Number.isNaN(result[key])){                                // helpers.jsxi:218
+						result[key] = + value.replace(/[^-.\d]+/g, '');            // helpers.jsxi:219
+					}
+					
+					if (Number.isNaN(result[key])){                                // helpers.jsxi:222
+						result[key] = + (value.replace(/[^\d]+/g, '') || '0');     // helpers.jsxi:223
+					}
 				}
 			}
 		}
-	return result;                                                                 // helpers.jsxi:219
+	return result;                                                                 // helpers.jsxi:229
 };
 
 /* Class "ErrorHandler" declaration */
@@ -937,59 +1248,65 @@ var ErrorHandler = (function (){                                                
 /* Class "UiJsonDamaged" declaration */
 function UiJsonDamaged(){}
 UiJsonDamaged.parseSkinFile = function (filename){                                 // ui_json_damaged.jsxi:2
-	var result = JSON.restoreDamaged(fs.readFileSync(filename),                    // ui_json_damaged.jsxi:3
+	return UiJsonDamaged.parseSkinData(fs.readFileSync(filename));
+};
+UiJsonDamaged.parseSkinData = function (data){                                     // ui_json_damaged.jsxi:6
+	var result = JSON.restoreDamaged(data,                                         // ui_json_damaged.jsxi:7
 		{
-			skinname: 'string',                                                    // ui_json_damaged.jsxi:4
-			drivername: 'string',                                                  // ui_json_damaged.jsxi:5
-			country: 'string',                                                     // ui_json_damaged.jsxi:6
-			team: 'string',                                                        // ui_json_damaged.jsxi:7
-			number: 'number',                                                      // ui_json_damaged.jsxi:8
-			author: 'string',                                                      // ui_json_damaged.jsxi:10
-			version: 'string',                                                     // ui_json_damaged.jsxi:11
+			skinname: 'string',                                                    // ui_json_damaged.jsxi:8
+			drivername: 'string',                                                  // ui_json_damaged.jsxi:9
+			country: 'string',                                                     // ui_json_damaged.jsxi:10
+			team: 'string',                                                        // ui_json_damaged.jsxi:11
+			number: 'number',                                                      // ui_json_damaged.jsxi:12
+			author: 'string',                                                      // ui_json_damaged.jsxi:14
+			version: 'string',                                                     // ui_json_damaged.jsxi:15
 			url: 'string'
 		});
-	return result;                                                                 // ui_json_damaged.jsxi:15
+	return result;                                                                 // ui_json_damaged.jsxi:19
 };
-UiJsonDamaged.parseCarFile = function (filename){                                  // ui_json_damaged.jsxi:18
-	var result = JSON.restoreDamaged(fs.readFileSync(filename),                    // ui_json_damaged.jsxi:19
+UiJsonDamaged.parseCarFile = function (filename){                                  // ui_json_damaged.jsxi:22
+	return UiJsonDamaged.parseCarData(fs.readFileSync(filename));
+};
+UiJsonDamaged.parseCarData = function (data){                                      // ui_json_damaged.jsxi:26
+	var result = JSON.restoreDamaged(data,                                         // ui_json_damaged.jsxi:27
 		{
-			name: 'string',                                                        // ui_json_damaged.jsxi:20
-			brand: 'string',                                                       // ui_json_damaged.jsxi:21
-			parent: 'string',                                                      // ui_json_damaged.jsxi:22
-			description: 'multiline',                                              // ui_json_damaged.jsxi:23
-			class: 'string',                                                       // ui_json_damaged.jsxi:24
-			tags: 'array',                                                         // ui_json_damaged.jsxi:25
-			bhp: 'string',                                                         // ui_json_damaged.jsxi:26
-			torque: 'string',                                                      // ui_json_damaged.jsxi:27
-			weight: 'string',                                                      // ui_json_damaged.jsxi:28
-			topspeed: 'string',                                                    // ui_json_damaged.jsxi:29
-			acceleration: 'string',                                                // ui_json_damaged.jsxi:30
-			pwratio: 'string',                                                     // ui_json_damaged.jsxi:31
-			range: 'number',                                                       // ui_json_damaged.jsxi:32
-			torqueCurve: 'pairsArray',                                             // ui_json_damaged.jsxi:33
-			powerCurve: 'pairsArray',                                              // ui_json_damaged.jsxi:34
-			year: 'number',                                                        // ui_json_damaged.jsxi:36
-			country: 'string',                                                     // ui_json_damaged.jsxi:37
-			author: 'string',                                                      // ui_json_damaged.jsxi:39
-			version: 'string',                                                     // ui_json_damaged.jsxi:40
+			name: 'string',                                                        // ui_json_damaged.jsxi:28
+			brand: 'string',                                                       // ui_json_damaged.jsxi:29
+			parent: 'string',                                                      // ui_json_damaged.jsxi:30
+			description: 'multiline',                                              // ui_json_damaged.jsxi:31
+			class: 'string',                                                       // ui_json_damaged.jsxi:32
+			tags: 'array',                                                         // ui_json_damaged.jsxi:33
+			bhp: 'string',                                                         // ui_json_damaged.jsxi:34
+			torque: 'string',                                                      // ui_json_damaged.jsxi:35
+			weight: 'string',                                                      // ui_json_damaged.jsxi:36
+			topspeed: 'string',                                                    // ui_json_damaged.jsxi:37
+			acceleration: 'string',                                                // ui_json_damaged.jsxi:38
+			pwratio: 'string',                                                     // ui_json_damaged.jsxi:39
+			range: 'number',                                                       // ui_json_damaged.jsxi:40
+			torqueCurve: 'pairsArray',                                             // ui_json_damaged.jsxi:41
+			powerCurve: 'pairsArray',                                              // ui_json_damaged.jsxi:42
+			year: 'number',                                                        // ui_json_damaged.jsxi:44
+			country: 'string',                                                     // ui_json_damaged.jsxi:45
+			author: 'string',                                                      // ui_json_damaged.jsxi:47
+			version: 'string',                                                     // ui_json_damaged.jsxi:48
 			url: 'string'
 		});
 	
-	result.specs = {};                                                             // ui_json_damaged.jsxi:44
+	result.specs = {};                                                             // ui_json_damaged.jsxi:52
 	[
-		'bhp',                                                                     // ui_json_damaged.jsxi:46
-		'torque',                                                                  // ui_json_damaged.jsxi:46
-		'weight',                                                                  // ui_json_damaged.jsxi:46
-		'topspeed',                                                                // ui_json_damaged.jsxi:46
-		'acceleration',                                                            // ui_json_damaged.jsxi:46
+		'bhp',                                                                     // ui_json_damaged.jsxi:54
+		'torque',                                                                  // ui_json_damaged.jsxi:54
+		'weight',                                                                  // ui_json_damaged.jsxi:54
+		'topspeed',                                                                // ui_json_damaged.jsxi:54
+		'acceleration',                                                            // ui_json_damaged.jsxi:54
 		'pwratio'
-	].forEach(function (arg){                                                      // ui_json_damaged.jsxi:46
-		if (result.hasOwnProperty(arg)){                                           // ui_json_damaged.jsxi:47
-			result.specs[arg] = result[arg];                                       // ui_json_damaged.jsxi:48
-			delete result[arg];                                                    // ui_json_damaged.jsxi:49
+	].forEach(function (arg){                                                      // ui_json_damaged.jsxi:54
+		if (result.hasOwnProperty(arg)){                                           // ui_json_damaged.jsxi:55
+			result.specs[arg] = result[arg];                                       // ui_json_damaged.jsxi:56
+			delete result[arg];                                                    // ui_json_damaged.jsxi:57
 		}
 	});
-	return result;                                                                 // ui_json_damaged.jsxi:53
+	return result;                                                                 // ui_json_damaged.jsxi:61
 };
 
 /* Class "AcDir" declaration */
@@ -1140,8 +1457,15 @@ var AcDir = (function (){                                                       
 				return _filters;                                                   // ac_dir.jsxi:107
 			})
 		});
-	(function (){                                                                  // ac_dir.jsxi:109
-		mediator.extend(AcDir);                                                    // ac_dir.jsxi:110
+	Object.defineProperty(AcDir,                                                   // ac_dir.jsxi:1
+		'temp', 
+		{
+			get: (function (){
+				return _root + '/content/__at_tmp_' + Date.now();                  // ac_dir.jsxi:109
+			})
+		});
+	(function (){                                                                  // ac_dir.jsxi:111
+		mediator.extend(AcDir);                                                    // ac_dir.jsxi:112
 	})();
 	return AcDir;
 })();
@@ -1151,22 +1475,31 @@ var AcFilters = (function (){                                                   
 	var AcFilters = function (){}, 
 		_filters = null;
 	
-	AcFilters.exists = function (id){                                              // ac_filters.jsxi:12
-		return fs.existsSync(AcDir.filters + '/' + id + '.ini');                   // ac_filters.jsxi:13
+	AcFilters.getPath = function (id){                                             // ac_filters.jsxi:12
+		return AcDir.filters + '/' + id + '.ini';                                  // ac_filters.jsxi:13
 	};
-	AcFilters.load = function (){                                                  // ac_filters.jsxi:16
+	AcFilters.exists = function (id){                                              // ac_filters.jsxi:16
+		return fs.existsSync(AcFilters.getPath(id));                               // ac_filters.jsxi:17
+	};
+	AcFilters.installFilter = function (source, id){                               // ac_filters.jsxi:20
+		if (AcFilters.exists(id))
+			fs.unlinkSync(AcFilters.getPath(id));                                  // ac_filters.jsxi:21
+		
+		fs.copyFileSync(source, AcFilters.getPath(id));                            // ac_filters.jsxi:22
+	};
+	AcFilters.load = function (){                                                  // ac_filters.jsxi:25
 		var path = AcDir.filters;
 		
 		try {
-			_filters = fs.readdirSync(path).map(function (e){                      // ac_filters.jsxi:20
-				if (!/\.ini$/i.test(e))                                            // ac_filters.jsxi:21
+			_filters = fs.readdirSync(path).map(function (e){                      // ac_filters.jsxi:29
+				if (!/\.ini$/i.test(e))                                            // ac_filters.jsxi:30
 					return;
 				return { id: e.replace(/\.ini$/i, ''), path: path + '/' + e };
-			}).filter(function (e){                                                // ac_filters.jsxi:26
-				return e;                                                          // ac_filters.jsxi:27
+			}).filter(function (e){                                                // ac_filters.jsxi:35
+				return e;                                                          // ac_filters.jsxi:36
 			});
-		} catch (e){                                                               // ac_filters.jsxi:29
-			_filters = [];                                                         // ac_filters.jsxi:31
+		} catch (e){                                                               // ac_filters.jsxi:38
+			_filters = [];                                                         // ac_filters.jsxi:40
 		} 
 	};
 	Object.defineProperty(AcFilters,                                               // ac_filters.jsxi:1
@@ -1185,76 +1518,167 @@ var AcFilters = (function (){                                                   
 /* Class "AcPractice" declaration */
 var AcPractice = (function (){                                                     // ac_practice.jsxi:1
 	var AcPractice = function (){}, 
-		_tracks = null;
+		_modes = [ 'Practice', 'Hotlap', 'Drift' ],                                // ac_practice.jsxi:17
+		_storage,                                                                  // ac_practice.jsxi:21
+		_tracks;                                                                   // ac_practice.jsxi:22
 	
-	function loadTracks(){                                                         // ac_practice.jsxi:12
-		_tracks = fs.readdirSync(AcDir.tracks).map(function (e){                   // ac_practice.jsxi:13
-			var p = path.join(AcDir.tracks, e);
+	function initTracks(){                                                         // ac_practice.jsxi:29
+		_tracks = [];                                                              // ac_practice.jsxi:30
+		
+		{
+			var __7 = fs.readdirSync(AcDir.tracks);
 			
-			var d = null;
-			
-			var j = path.join(p, 'ui', 'ui_track.json');
-			
-			if (fs.existsSync(j)){                                                 // ac_practice.jsxi:18
-				try {
-					d = JSON.parse(fs.readFileSync(j));                            // ac_practice.jsxi:20
-				} catch (e){} 
+			for (var __6 = 0; __6 < __7.length; __6 ++){
+				var e = __7[__6];
+				
+				var p = path.join(AcDir.tracks, e);
+				
+				var d = null;
+				
+				var j = path.join(p, 'ui', 'ui_track.json');
+				
+				if (fs.existsSync(j)){                                             // ac_practice.jsxi:37
+					_tracks.push(new Track(e, p, j));                              // ac_practice.jsxi:38
+				} else {
+					var s = null;
+					
+					try {
+						s = fs.readdirSync(path.join(p, 'ui'));                    // ac_practice.jsxi:41
+					} catch (e){} 
+					
+					if (!s)                                                        // ac_practice.jsxi:42
+						continue;
+					
+					for (var __5 = 0; __5 < s.length; __5 ++){                     // ac_practice.jsxi:44
+						var u = s[__5];
+						
+						var q = path.join(p, 'ui', u);
+						
+						if (fs.statSync(q).isDirectory()){                         // ac_practice.jsxi:46
+							_tracks.push(new Track(e + '/' + u, path.join(p, u), path.join(q, 'ui_track.json')));
+						}
+					}
+				}
 			}
-			return { id: e, data: d, path: p, json: j };
-		}).filter(function (e){                                                    // ac_practice.jsxi:30
-			return e;                                                              // ac_practice.jsxi:31
-		});
+			
+			__7 = undefined;
+		}
 	}
 	
-	AcPractice.start = function (c, s, r){                                         // ac_practice.jsxi:35
-		if (c.path.indexOf(AcDir.cars))                                            // ac_practice.jsxi:36
-			return;
+	function init(){                                                               // ac_practice.jsxi:54
+		initTracks();                                                              // ac_practice.jsxi:55
+		_storage = new ObjLocalStorage('practice',                                 // ac_practice.jsxi:56
+			{
+				track: {                                                           // ac_practice.jsxi:57
+					'Practice': 'spa',                                             // ac_practice.jsxi:57
+					'Hotlap': 'silverstone-national',                              // ac_practice.jsxi:57
+					'Drift': 'drift'
+				}, 
+				mode: _modes[0]
+			});
 		
-		if (s == null){                                                            // ac_practice.jsxi:38
-			s = c.selectedSkin.id;                                                 // ac_practice.jsxi:39
+		if (localStorage.lastTrack){                                               // ac_practice.jsxi:61
+			_storage.update(function (arg){                                        // ac_practice.jsxi:62
+				return arg.track['Practice'] = localStorage.lastTrack;             // ac_practice.jsxi:62
+			});
+			delete localStorage.lastTrack;                                         // ac_practice.jsxi:63
+		}
+	}
+	
+	AcPractice.start = function (c, s){                                            // ac_practice.jsxi:67
+		if (s === undefined)                                                       // ac_practice.jsxi:67
+			s = c.selectedSkin.id;                                                 // ac_practice.jsxi:67
+	
+		if (c.disabled){                                                           // ac_practice.jsxi:68
+			Notification.warn('No Way', 'Enable car first.');                      // ac_practice.jsxi:69
+			return;
 		}
 		
-		r = r || localStorage.lastTrack || 'spa';                                  // ac_practice.jsxi:42
-		localStorage.lastTrack = r;                                                // ac_practice.jsxi:43
-		AcTools;                                                                   // ac_practice.jsxi:45
+		if (!_tracks)                                                              // ac_practice.jsxi:73
+			init();                                                                // ac_practice.jsxi:73
+		
+		var m = _storage.get('mode');
+		
+		var r = _storage.get('track')[m];
+		
+		AcTools;                                                                   // ac_practice.jsxi:77
 		
 		try {
-			AcTools.Processes.Game.StartPractice(AcDir.root, c.id, s, r.split('/')[0], r.split('/')[1] || '');
-		} catch (e){                                                               // ac_practice.jsxi:48
+			AcTools.Processes.Game[m === 'Practice' ? 'StartPractice' : m === 'Hotlap' ? 'StartHotlap' : 'StartDrift'](AcDir.root, c.id, s, r.split('/')[0], r.split('/')[1] || '');
+		} catch (e){                                                               // ac_practice.jsxi:82
 			ErrorHandler.handled('Cannot start the game. Maybe there is not enough rights.');
 		} 
 	};
-	AcPractice.select = function (c, s){                                           // ac_practice.jsxi:53
-		if (!_tracks){                                                             // ac_practice.jsxi:54
-			loadTracks();                                                          // ac_practice.jsxi:55
-		}
+	AcPractice.select = function (c, s){                                           // ac_practice.jsxi:87
+		if (!_tracks)                                                              // ac_practice.jsxi:88
+			init();                                                                // ac_practice.jsxi:88
 		
-		new Dialog('Track',                                                        // ac_practice.jsxi:58
+		var d = new Dialog('Drive!',                                               // ac_practice.jsxi:90
 			[
-				'<select>{0}</select>'.format(_tracks.map(function (e){            // ac_practice.jsxi:59
-					return '<option value="{0}">{1}</option>'.format(e.id, e.data ? e.data.name : e.id);
-				}).join(''))
+				'<h6>Mode</h6>',                                                   // ac_practice.jsxi:91
+				'<select id="practice-mode">' + _modes.map(function (arg){         // ac_practice.jsxi:92
+					return '<option value="' + arg + '">' + arg + '</option>';     // ac_practice.jsxi:92
+				}).join('') + '</select>',                                         // ac_practice.jsxi:92
+				'<h6>Track</h6>',                                                  // ac_practice.jsxi:93
+				'<select id="practice-track">' + _tracks.map(function (arg){       // ac_practice.jsxi:94
+					return '<option value="' + arg.id + '">' + arg.displayNameWithDescription + '</option>';
+				}).join('') + '</select>'
 			], 
-			function (){                                                           // ac_practice.jsxi:62
-				AcPractice.start(c, s, this.find('select').val());
-			}).addButton('Reload List',                                            // ac_practice.jsxi:64
-			function (){                                                           // ac_practice.jsxi:64
-				setTimeout(function (){                                            // ac_practice.jsxi:65
-					loadTracks();                                                  // ac_practice.jsxi:66
+			function (){                                                           // ac_practice.jsxi:95
+				AcPractice.start(c, s);
+			}).addButton('Reload List',                                            // ac_practice.jsxi:97
+			function (){                                                           // ac_practice.jsxi:97
+				setTimeout(function (){                                            // ac_practice.jsxi:98
+					initTracks();                                                  // ac_practice.jsxi:99
 					AcPractice.select(c, s);
 				});
-			}).find('select').val(localStorage.lastTrack || 'spa').change(function (){
-			localStorage.lastTrack = this.value;                                   // ac_practice.jsxi:70
+			});
+		
+		d.find('#practice-mode').val(_storage.get('mode')).change(function (){     // ac_practice.jsxi:104
+			_storage.set('mode', this.value);                                      // ac_practice.jsxi:105
+			d.find('#practice-track').val(_storage.get('track')[_storage.get('mode')]);
+		});
+		d.find('#practice-track').val(_storage.get('track')[_storage.get('mode')]).change(function (){
+			var val = this.value;
+			
+			_storage.update(function (arg){                                        // ac_practice.jsxi:111
+				return arg.track[_storage.get('mode')] = val;                      // ac_practice.jsxi:111
+			});
 		});
 	};
+	
+	/* Class "Track" declaration */
+	function Track(id, path, json){                                                // ac_practice.jsxi:2
+		this.id = id;                                                              // ac_practice.jsxi:6
+		this.path = path;                                                          // ac_practice.jsxi:7
+		this.json = json;                                                          // ac_practice.jsxi:8
+		
+		try {
+			this.data = JSON.flexibleParse(fs.readFileSync(json));                 // ac_practice.jsxi:10
+		} catch (e){} 
+	}
+	Object.defineProperty(Track.prototype, 
+		'displayName', 
+		{
+			get: (function (){
+				return this.data && this.data.name || this.id;                     // ac_practice.jsxi:13
+			})
+		});
+	Object.defineProperty(Track.prototype, 
+		'displayNameWithDescription', 
+		{
+			get: (function (){
+				return this.data && this.data.description ? this.displayName + ': ' + this.data.description : this.id;
+			})
+		});
+	
 	Object.defineProperty(AcPractice,                                              // ac_practice.jsxi:1
 		'list', 
 		{
 			get: (function (){
-				if (!_tracks){                                                     // ac_practice.jsxi:5
-					loadTracks();                                                  // ac_practice.jsxi:6
-				}
-				return _tracks;                                                    // ac_practice.jsxi:9
+				if (!_tracks)                                                      // ac_practice.jsxi:25
+					init();                                                        // ac_practice.jsxi:25
+				return _tracks;                                                    // ac_practice.jsxi:26
 			})
 		});
 	return AcPractice;
@@ -1269,7 +1693,7 @@ var AcShowroom = (function (){                                                  
 	
 	AcShowroom.modes = [                                                           // ac_showroom.jsxi:2
 		{ id: 'default', name: 'Regular Showroom (Recommended)' },                 // ac_showroom.jsxi:2
-		{ id: 'kunos', name: 'Kunos Style (Dark Room)' }, 
+		{ id: 'kunos', name: 'Dark Room' }, 
 		{ id: 'seatleon', name: 'Seat Leon Eurocup Style' }, 
 		{ id: 'gt5', name: 'GT5-style' }, 
 		{ id: 'gt6', name: 'GT6-style' }
@@ -1303,123 +1727,138 @@ var AcShowroom = (function (){                                                  
 			if (/\bCOULD NOT FIND SUSPENSION OBJECT SUSP_[LR][FR]\b/.test(logFile)){
 				car.addError('kn5-susp_xx-error',                                  // ac_showroom.jsxi:52
 					'Car\'s model doesn\'t have a proper suspension.');            // ac_showroom.jsxi:52
+				ErrorHandler.handled('Car\'s model doesn\'t have a proper suspension.');
+				return true;
+			}
+			
+			if (/\bCOULD NOT FIND SUSPENSION OBJECT WHEEL_[LR][FR]\b/.test(logFile)){
+				ErrorHandler.handled('Car\'s model doesn\'t have some of the wheels.');
+				return true;
+			}
+			
+			if (/\\cameraforwardyebis\.cpp \(\d+\): CameraForwardYebis::render\b/.test(logFile)){
+				ErrorHandler.handled('Most likely selected filter is missing.');   // ac_showroom.jsxi:63
 				return true;
 			}
 		} catch (e){} 
 		
-		if (err && err.message === 'Process exited'){                              // ac_showroom.jsxi:57
-			ErrorHandler.handled('Showroom was terminated too soon.');             // ac_showroom.jsxi:58
+		if (err && err.message === 'Process exited'){                              // ac_showroom.jsxi:68
+			ErrorHandler.handled('Showroom was terminated too soon.');             // ac_showroom.jsxi:69
 			return true;
 		}
 		return false;
 	}
 	
-	AcShowroom.start = function (c, s, room){                                      // ac_showroom.jsxi:68
-		if (c.path.indexOf(AcDir.cars))                                            // ac_showroom.jsxi:69
+	AcShowroom.start = function (c, s, room){                                      // ac_showroom.jsxi:79
+		if (c.disabled){                                                           // ac_showroom.jsxi:80
+			Notification.warn('No Way', 'Enable car first.');                      // ac_showroom.jsxi:81
 			return;
-		
-		if (s == null){                                                            // ac_showroom.jsxi:71
-			s = c.selectedSkin.id;                                                 // ac_showroom.jsxi:72
 		}
 		
-		room = room || AcShowroom.__AcShowroom_lastShowroom;                       // ac_showroom.jsxi:75
+		if (s == null){                                                            // ac_showroom.jsxi:85
+			s = c.selectedSkin.id;                                                 // ac_showroom.jsxi:86
+		}
+		
+		room = room || AcShowroom.__AcShowroom_lastShowroom;                       // ac_showroom.jsxi:89
 		
 		var filter = AcShowroom.__AcShowroom_lastShowroomFilter || null;
 		
 		if (!AcShowroom.exists(room)){
-			ErrorHandler.handled('Showroom “' + room + '” is missing.');           // ac_showroom.jsxi:79
+			ErrorHandler.handled('Showroom “' + room + '” is missing.');           // ac_showroom.jsxi:93
 			return;
 		}
 		
-		if (filter && !AcFilters.exists(filter)){                                  // ac_showroom.jsxi:83
-			ErrorHandler.handled('Filter “' + filter + '” is missing.');           // ac_showroom.jsxi:84
+		if (filter && !AcFilters.exists(filter)){                                  // ac_showroom.jsxi:97
+			ErrorHandler.handled('Filter “' + filter + '” is missing.');           // ac_showroom.jsxi:98
 			return;
 		}
 		
-		AcTools;                                                                   // ac_showroom.jsxi:88
+		AcTools;                                                                   // ac_showroom.jsxi:102
 		
 		try {
-			AcTools.Processes.Showroom.Start(AcDir.root, c.id, s, room, filter);   // ac_showroom.jsxi:90
-		} catch (err){                                                             // ac_showroom.jsxi:91
+			AcTools.Processes.Showroom.Start(AcDir.root, c.id, s, room, filter);   // ac_showroom.jsxi:104
+		} catch (err){                                                             // ac_showroom.jsxi:105
 			ErrorHandler.handled('Cannot start showroom. Maybe the car is broken.', err);
 			return;
 		} 
 		
-		handleError(null, c);                                                      // ac_showroom.jsxi:96
+		handleError(null, c);                                                      // ac_showroom.jsxi:110
 	};
-	AcShowroom.select = function (c, s){                                           // ac_showroom.jsxi:99
-		var d = new Dialog('Showroom',                                             // ac_showroom.jsxi:100
+	AcShowroom.select = function (c, s){                                           // ac_showroom.jsxi:113
+		var d = new Dialog('Showroom',                                             // ac_showroom.jsxi:114
 			[
-				'<h6>Select showroom</h6>',                                        // ac_showroom.jsxi:101
+				'<h6>Select showroom</h6>',                                        // ac_showroom.jsxi:115
 				'<select id="showroom-select-showroom">{0}</select>'.format(AcShowroom.list.map(function (e){
 					return '<option value="{0}">{1}</option>'.format(e.id, e.data ? e.data.name : e.id);
-				}).join('')),                                                      // ac_showroom.jsxi:104
-				'<h6>Select filter</h6>',                                          // ac_showroom.jsxi:105
+				}).join('')),                                                      // ac_showroom.jsxi:118
+				'<h6>Select filter</h6>',                                          // ac_showroom.jsxi:119
 				'<select id="showroom-select-filter"><option value="">Don\'t change</option>{0}</select>'.format(AcFilters.list.map(function (e){
 					return '<option value="{0}">{1}</option>'.format(e.id, e.id);
 				}).join(''))
 			], 
-			function (){                                                           // ac_showroom.jsxi:109
+			function (){                                                           // ac_showroom.jsxi:123
 				AcShowroom.start(c, s);
-			}).addButton('Reload List',                                            // ac_showroom.jsxi:111
-			function (){                                                           // ac_showroom.jsxi:111
-				setTimeout(function (){                                            // ac_showroom.jsxi:112
+			}).addButton('Reload List',                                            // ac_showroom.jsxi:125
+			function (){                                                           // ac_showroom.jsxi:125
+				setTimeout(function (){                                            // ac_showroom.jsxi:126
 					AcShowroom.load();
-					AcFilters.load();                                              // ac_showroom.jsxi:114
+					AcFilters.load();                                              // ac_showroom.jsxi:128
 					AcShowroom.select(c, s);
 				});
 			});
 		
 		d.find('#showroom-select-showroom').val(AcShowroom.__AcShowroom_lastShowroom).change(function (){
-			localStorage.lastShowroom = this.value;                                // ac_showroom.jsxi:119
+			localStorage.lastShowroom = this.value;                                // ac_showroom.jsxi:133
 		});
 		d.find('#showroom-select-filter').val(AcShowroom.__AcShowroom_lastShowroomFilter).change(function (){
-			localStorage.lastShowroomFilter = this.value;                          // ac_showroom.jsxi:122
+			localStorage.lastShowroomFilter = this.value;                          // ac_showroom.jsxi:136
 		});
 	};
 	
-	function shotOutputPreview(car, output, callback){                             // ac_showroom.jsxi:126
-		var d = new Dialog('Update Previews',                                      // ac_showroom.jsxi:128
+	function shotOutputPreview(car, output, callback){                             // ac_showroom.jsxi:140
+		var d = new Dialog('Update Previews',                                      // ac_showroom.jsxi:142
 			[
 				'<div class="left"><h6>Current</h6><img id="current-preview"></div>', 
 				'<div class="right"><h6>New</h6><img id="new-preview"></div>'
 			], 
-			function (){                                                           // ac_showroom.jsxi:131
-				callback();                                                        // ac_showroom.jsxi:132
+			function (){                                                           // ac_showroom.jsxi:145
+				callback();                                                        // ac_showroom.jsxi:146
 			}, 
-			false).setButton('Apply').addButton('Cancel');                         // ac_showroom.jsxi:133
+			false).setButton('Apply').addButton('Cancel');                         // ac_showroom.jsxi:147
 		
 		var t = $('<div>' + '<button data-action="prev" id="button-prev" disabled>←</button> ' + '<button data-action="next" id="button-next">→</button>' + '</div>').insertBefore(d.header);
 		
-		t.find('#button-prev').click(function (){                                  // ac_showroom.jsxi:140
-			pos --;                                                                // ac_showroom.jsxi:141
-			out();                                                                 // ac_showroom.jsxi:142
+		t.find('#button-prev').click(function (){                                  // ac_showroom.jsxi:154
+			pos --;                                                                // ac_showroom.jsxi:155
+			out();                                                                 // ac_showroom.jsxi:156
 		});
-		t.find('#button-next').click(function (){                                  // ac_showroom.jsxi:145
-			pos ++;                                                                // ac_showroom.jsxi:146
-			out();                                                                 // ac_showroom.jsxi:147
+		t.find('#button-next').click(function (){                                  // ac_showroom.jsxi:159
+			pos ++;                                                                // ac_showroom.jsxi:160
+			out();                                                                 // ac_showroom.jsxi:161
 		});
 		d.content.css({ maxWidth: 'calc(100vw - 100px)', paddingBottom: '10px' }).find('img').css({ width: '100%', verticalAlign: 'top' });
 		
 		var pos = 0;
 		
-		function out(){                                                            // ac_showroom.jsxi:159
-			t.find('#button-prev').attr('disabled', pos > 0 ? null : true);        // ac_showroom.jsxi:160
+		function out(){                                                            // ac_showroom.jsxi:173
+			t.find('#button-prev').attr('disabled', pos > 0 ? null : true);        // ac_showroom.jsxi:174
 			t.find('#button-next').attr('disabled', pos < car.skins.length - 1 ? null : true);
 			d.content.find('#current-preview').prop('src', car.skins[pos].preview.cssUrl());
 			d.content.find('#new-preview').prop('src', (output + '/' + car.skins[pos].id + '.jpg').cssUrl());
 		}
 		
-		out();                                                                     // ac_showroom.jsxi:166
+		out();                                                                     // ac_showroom.jsxi:180
 	}
 	
-	AcShowroom.shot = function (c, m){                                             // ac_showroom.jsxi:169
-		if (c.path.indexOf(AcDir.cars))                                            // ac_showroom.jsxi:170
-			return;
-		
+	AcShowroom.shot = function (c, m){                                             // ac_showroom.jsxi:183
 		var mode = Settings.get('aptMode');
 		
-		if (mode === 'default'){                                                   // ac_showroom.jsxi:174
+		if (mode === 'default'){                                                   // ac_showroom.jsxi:186
+			if (c.disabled){                                                       // ac_showroom.jsxi:187
+				Notification.warn('No Way', 'Enable car first.');                  // ac_showroom.jsxi:188
+				return;
+			}
+			
 			var showroom = Settings.get('aptShowroom') || _blackShowroom;
 			
 			var x = - Settings.get('aptCameraX');
@@ -1434,82 +1873,97 @@ var AcShowroom = (function (){                                                  
 			
 			var delays = !!Settings.get('aptIncreaseDelays');
 			
-			if (Number.isNaN(x))                                                   // ac_showroom.jsxi:183
-				x = Settings.defaults.aptCameraX;                                  // ac_showroom.jsxi:183
+			if (Number.isNaN(x))                                                   // ac_showroom.jsxi:200
+				x = Settings.defaults.aptCameraX;                                  // ac_showroom.jsxi:200
 			
-			if (Number.isNaN(y))                                                   // ac_showroom.jsxi:184
-				y = Settings.defaults.aptCameraY;                                  // ac_showroom.jsxi:184
+			if (Number.isNaN(y))                                                   // ac_showroom.jsxi:201
+				y = Settings.defaults.aptCameraY;                                  // ac_showroom.jsxi:201
 			
-			if (Number.isNaN(distance))                                            // ac_showroom.jsxi:185
-				distance = Settings.defaults.aptCameraY;                           // ac_showroom.jsxi:185
+			if (Number.isNaN(distance))                                            // ac_showroom.jsxi:202
+				distance = Settings.defaults.aptCameraY;                           // ac_showroom.jsxi:202
 			
-			showroomTest();                                                        // ac_showroom.jsxi:187
+			showroomTest();                                                        // ac_showroom.jsxi:204
 			
-			function showroomTest(){                                               // ac_showroom.jsxi:188
-				function blackShowroomTest(){                                      // ac_showroom.jsxi:189
+			function showroomTest(){                                               // ac_showroom.jsxi:205
+				function blackShowroomTest(){                                      // ac_showroom.jsxi:206
 					return fs.existsSync(AcTools.Utils.FileUtils.GetShowroomFolder(AcDir.root, showroom));
 				}
 				
-				if (showroom == _blackShowroom && !blackShowroomTest()){           // ac_showroom.jsxi:193
-					new Dialog('One More Thing',                                   // ac_showroom.jsxi:194
+				if (showroom == _blackShowroom && !blackShowroomTest()){           // ac_showroom.jsxi:210
+					new Dialog('One More Thing',                                   // ac_showroom.jsxi:211
 						'Please, install <a href="#" onclick="Shell.openItem(\'' + _blackShowroomUrl + '\')">Black Showroom</a> first.', 
-						function (){                                               // ac_showroom.jsxi:196
-							Shell.openItem(_blackShowroomUrl);                     // ac_showroom.jsxi:197
+						function (){                                               // ac_showroom.jsxi:213
+							Shell.openItem(_blackShowroomUrl);                     // ac_showroom.jsxi:214
 							return false;
-						}).setButton('From Here').addButton('Right Here',          // ac_showroom.jsxi:199
-						function (){                                               // ac_showroom.jsxi:199
+						}).setButton('From Here').addButton('Right Here',          // ac_showroom.jsxi:216
+						function (){                                               // ac_showroom.jsxi:216
 							Shell.openItem(AcTools.Utils.FileUtils.GetShowroomsFolder(AcDir.root));
 							return false;
-						}).addButton('Done',                                       // ac_showroom.jsxi:202
-						function (){                                               // ac_showroom.jsxi:202
-							if (blackShowroomTest()){                              // ac_showroom.jsxi:203
-								setTimeout(proceed);                               // ac_showroom.jsxi:204
+						}).addButton('Done',                                       // ac_showroom.jsxi:219
+						function (){                                               // ac_showroom.jsxi:219
+							if (blackShowroomTest()){                              // ac_showroom.jsxi:220
+								setTimeout(proceed);                               // ac_showroom.jsxi:221
 							} else {
-								new Dialog('Black Showroom Installation',          // ac_showroom.jsxi:206
-									'Showroom is still missing. Are you sure?');   // ac_showroom.jsxi:206
+								new Dialog('Black Showroom Installation',          // ac_showroom.jsxi:223
+									'Showroom is still missing. No way.');         // ac_showroom.jsxi:223
 								this.buttons.find('button:last-child').text('Really Done');
 								return false;
 							}
 						});
 				} else {
-					proceed();                                                     // ac_showroom.jsxi:212
+					proceed();                                                     // ac_showroom.jsxi:229
 				}
 			}
 		} else {
-			proceed();                                                             // ac_showroom.jsxi:216
+			proceed();                                                             // ac_showroom.jsxi:233
 		}
 		
-		function proceed(){                                                        // ac_showroom.jsxi:219
+		function proceed(){                                                        // ac_showroom.jsxi:236
+			if (mode === 'default'){                                               // ac_showroom.jsxi:237
+				if (filter === Settings.defaults.aptFilter){                       // ac_showroom.jsxi:238
+					AcFilters.installFilter('data/ppfilter.ini', Settings.defaults.aptFilter);
+					setTimeout(proceedShot, 500);                                  // ac_showroom.jsxi:240
+					return;
+				} else if (filter && !AcFilters.exists(filter)){                   // ac_showroom.jsxi:242
+					ErrorHandler.handled('Filter “' + filter + '” is missing.');   // ac_showroom.jsxi:243
+					return;
+				}
+			}
+			
+			proceedShot();                                                         // ac_showroom.jsxi:248
+		}
+		
+		function proceedShot(){                                                    // ac_showroom.jsxi:251
 			var output;
 			
 			try {
-				if (mode === 'default'){                                           // ac_showroom.jsxi:222
-					output = AcTools.Processes.Showroom.Shot(AcDir.root,           // ac_showroom.jsxi:223
-						c.id,                                                      // ac_showroom.jsxi:223
-						showroom,                                                  // ac_showroom.jsxi:223
-						!!m,                                                       // ac_showroom.jsxi:223
-						x,                                                         // ac_showroom.jsxi:223
-						y,                                                         // ac_showroom.jsxi:223
-						distance,                                                  // ac_showroom.jsxi:223
-						filter,                                                    // ac_showroom.jsxi:223
-						disableSweetFx,                                            // ac_showroom.jsxi:223
-						delays);                                                   // ac_showroom.jsxi:223
+				if (mode === 'default'){                                           // ac_showroom.jsxi:254
+					output = AcTools.Processes.Showroom.Shot(AcDir.root,           // ac_showroom.jsxi:255
+						c.id,                                                      // ac_showroom.jsxi:255
+						showroom,                                                  // ac_showroom.jsxi:255
+						!!m,                                                       // ac_showroom.jsxi:255
+						x,                                                         // ac_showroom.jsxi:255
+						y,                                                         // ac_showroom.jsxi:255
+						distance,                                                  // ac_showroom.jsxi:255
+						filter,                                                    // ac_showroom.jsxi:255
+						disableSweetFx,                                            // ac_showroom.jsxi:255
+						delays);                                                   // ac_showroom.jsxi:255
 				} else {
-					output = AcTools.Utils.Kn5RenderWrapper.Shot(c.path, mode);    // ac_showroom.jsxi:225
+					output = AcTools.Utils.Kn5RenderWrapper.Shot(c.path, mode);    // ac_showroom.jsxi:257
 				}
-			} catch (err){                                                         // ac_showroom.jsxi:227
-				if (!handleError(err, c)){                                         // ac_showroom.jsxi:228
+			} catch (err){                                                         // ac_showroom.jsxi:259
+				if (!handleError(err, c)){                                         // ac_showroom.jsxi:260
 					ErrorHandler.handled('Cannot start showroom. Maybe the car is broken.', err);
 				}
 				return;
 			} 
 			
-			shotOutputPreview(c,                                                   // ac_showroom.jsxi:235
-				output,                                                            // ac_showroom.jsxi:235
-				function (){                                                       // ac_showroom.jsxi:235
+			shotOutputPreview(c,                                                   // ac_showroom.jsxi:267
+				output,                                                            // ac_showroom.jsxi:267
+				function (){                                                       // ac_showroom.jsxi:267
 					AcTools.Utils.ImageUtils.ApplyPreviews(AcDir.root, c.id, output, Settings.get('aptResize'));
-					c.loadSkins();                                                 // ac_showroom.jsxi:237
-					fs.rmdirSync(output);                                          // ac_showroom.jsxi:238
+					c.loadSkins();                                                 // ac_showroom.jsxi:269
+					fs.rmdirSync(output);                                          // ac_showroom.jsxi:270
 				});
 		}
 	};
@@ -1527,14 +1981,14 @@ var AcShowroom = (function (){                                                  
 		'__AcShowroom_lastShowroom', 
 		{
 			get: (function (){
-				return localStorage.lastShowroom || 'showroom';                    // ac_showroom.jsxi:65
+				return localStorage.lastShowroom || 'showroom';                    // ac_showroom.jsxi:76
 			})
 		});
 	Object.defineProperty(AcShowroom,                                              // ac_showroom.jsxi:1
 		'__AcShowroom_lastShowroomFilter', 
 		{
 			get: (function (){
-				return localStorage.lastShowroomFilter || '';                      // ac_showroom.jsxi:66
+				return localStorage.lastShowroomFilter || '';                      // ac_showroom.jsxi:77
 			})
 		});
 	return AcShowroom;
@@ -1558,267 +2012,116 @@ var CheckUpdate = (function (){                                                 
 		mediator = new Mediator(),                                                 // app_check_update.jsxi:2
 		_updateFile = path.join(path.dirname(process.execPath), 'carsmgr_update.next'), 
 		_details = 'https://ascobash.wordpress.com/2015/06/14/actools-uijson/',    // app_check_update.jsxi:5
-		_updateInProcess;                                                          // app_check_update.jsxi:48
+		_downloadId;                                                               // app_check_update.jsxi:36
 	
-	function isInstallableYadisk(link){                                            // app_check_update.jsxi:7
-		return /^https:\/\/yadi.sk\/d\/\w+/.test(link);                            // app_check_update.jsxi:8
-	}
-	
-	function isInstallableRd(link){                                                // app_check_update.jsxi:11
-		return /^http:\/\/www.racedepartment.com\/downloads\//.test(link);         // app_check_update.jsxi:12
-	}
-	
-	function isInstallable(link){                                                  // app_check_update.jsxi:15
-		return isInstallableYadisk(link) || isInstallableRd(link);                 // app_check_update.jsxi:16
-	}
-	
-	CheckUpdate.check = function (c){                                              // app_check_update.jsxi:19
-		mediator.dispatch('check:start');                                          // app_check_update.jsxi:20
-		AppServerRequest.checkUpdate(gui.App.manifest.version,                     // app_check_update.jsxi:22
-			Settings.get('updatesSource', 'stable'),                               // app_check_update.jsxi:24
-			function (err, data){                                                  // app_check_update.jsxi:25
-				if (err){                                                          // app_check_update.jsxi:26
-					console.warn(err);                                             // app_check_update.jsxi:27
-					mediator.dispatch('check:failed');                             // app_check_update.jsxi:28
+	CheckUpdate.check = function (c){                                              // app_check_update.jsxi:7
+		mediator.dispatch('check:start');                                          // app_check_update.jsxi:8
+		AppServerRequest.checkUpdate(gui.App.manifest.version,                     // app_check_update.jsxi:10
+			Settings.get('updatesSource'),                                         // app_check_update.jsxi:12
+			function (err, data){                                                  // app_check_update.jsxi:13
+				if (err){                                                          // app_check_update.jsxi:14
+					console.warn(err);                                             // app_check_update.jsxi:15
+					mediator.dispatch('check:failed');                             // app_check_update.jsxi:16
 					return;
 				}
 				
-				if (data){                                                         // app_check_update.jsxi:32
-					mediator.dispatch('update',                                    // app_check_update.jsxi:33
+				if (data){                                                         // app_check_update.jsxi:20
+					mediator.dispatch('update',                                    // app_check_update.jsxi:21
 						{
-							actualVersion: data.version,                           // app_check_update.jsxi:34
-							changelog: data.changes,                               // app_check_update.jsxi:35
-							detailsUrl: _details,                                  // app_check_update.jsxi:36
-							downloadUrl: data.url,                                 // app_check_update.jsxi:37
-							installUrl: data.download || isInstallable(data.url) && data.url
+							actualVersion: data.version,                           // app_check_update.jsxi:22
+							changelog: data.changes,                               // app_check_update.jsxi:23
+							detailsUrl: _details,                                  // app_check_update.jsxi:24
+							downloadUrl: data.url,                                 // app_check_update.jsxi:25
+							installUrl: data.download || Downloader.isAvailable(data.url) && data.url
 						});
-					mediator.dispatch('check:done:found');                         // app_check_update.jsxi:41
+					mediator.dispatch('check:done:found');                         // app_check_update.jsxi:29
 				} else {
-					mediator.dispatch('check:done');                               // app_check_update.jsxi:43
+					mediator.dispatch('check:done');                               // app_check_update.jsxi:31
 				}
 			});
 	};
-	
-	function httpDownload(url, file, callback, progressCallback){                  // app_check_update.jsxi:49
-		try {
-			if (typeof file === 'string'){                                         // app_check_update.jsxi:51
-				file = fs.createWriteStream(file);                                 // app_check_update.jsxi:52
-			}
-			
-			_updateInProcess = require(url.match(/^https?/)[0]).get(url,           // app_check_update.jsxi:55
-				function (r){                                                      // app_check_update.jsxi:55
-					if (r.statusCode == 302){                                      // app_check_update.jsxi:56
-						httpDownload(r.headers['location'], file, callback, progressCallback);
-					} else if (r.statusCode == 200){                               // app_check_update.jsxi:58
-						var m = r.headers['content-length'], p = 0;
-						
-						r.pipe(file);                                              // app_check_update.jsxi:60
-						r.on('data',                                               // app_check_update.jsxi:61
-							function (d){                                          // app_check_update.jsxi:61
-								progressCallback(p += d.length, m);                // app_check_update.jsxi:62
-							}).on('end',                                           // app_check_update.jsxi:63
-							function (){                                           // app_check_update.jsxi:63
-								if (_updateInProcess){                             // app_check_update.jsxi:64
-									_updateInProcess = null;                       // app_check_update.jsxi:65
-									setTimeout(callback, 50);                      // app_check_update.jsxi:66
-								}
-							});
-					} else {
-						callback(r.statusCode);                                    // app_check_update.jsxi:70
-					}
-				}).on('error',                                                     // app_check_update.jsxi:72
-				function (e){                                                      // app_check_update.jsxi:72
-					callback(e);                                                   // app_check_update.jsxi:73
-				});
-		} catch (e){                                                               // app_check_update.jsxi:75
-			callback('DOWNLOAD:' + url);                                           // app_check_update.jsxi:76
-		} 
-	}
-	
-	function yadiskDownload(url, dest, callback, progressCallback){                // app_check_update.jsxi:80
-		_updateInProcess = true;                                                   // app_check_update.jsxi:81
-		
-		var ifr = $('<iframe nwdisable nwfaketop>').attr('src', url).on('load',    // app_check_update.jsxi:82
-			function (e){                                                          // app_check_update.jsxi:82
-				if (!_updateInProcess)                                             // app_check_update.jsxi:83
-					return;
-				
-				this.contentWindow._cb = function (e){                             // app_check_update.jsxi:85
-					if (!_updateInProcess)                                         // app_check_update.jsxi:86
-						return;
-					
-					try {
-						clearTimeout(to);                                          // app_check_update.jsxi:88
-						httpDownload(e.models[0].data.file, dest, callback, progressCallback);
-					} catch (e){
-						callback('YADISK');                                        // app_check_update.jsxi:90
-					} 
-					
-					ifr.remove();                                                  // app_check_update.jsxi:91
-				};
-				this.contentWindow.eval("\t\t\t\t\t \n_XMLHttpRequest = XMLHttpRequest;\nXMLHttpRequest = function (){\n\tvar r = new _XMLHttpRequest();\n\tr.onreadystatechange = function (e){\n\t\tif (r.status == 200 && r.readyState == 4)\n\t\t\t_cb(JSON.parse(r.responseText));\n\t};\n\treturn {\n\t\topen: function (){ r.open.apply(r, arguments); },\n\t\tsetRequestHeader: function (){ r.setRequestHeader.apply(r, arguments); },\n\t\tgetAllResponseHeaders: function (){ r.getAllResponseHeaders.apply(r, arguments); },\n\t\tgetResponseHeader: function (){ r.getResponseHeader.apply(r, arguments); },\n\t\tabort: function (){ r.abort.apply(r, arguments); },\n\t\tsend: function (){ r.send.apply(r, arguments); },\n\t};\n};");
-				
-				try {
-					this.contentWindow.document.querySelector('button[data-click-action="resource.download"]').click();
-				} catch (e){
-					ifr.remove();                                                  // app_check_update.jsxi:113
-					callback('YADISK:BTN');                                        // app_check_update.jsxi:114
-				} 
-			}).css({ position: 'fixed', top: '200vh', left: '200vw' }).appendTo('body');
-		
-		var to = setTimeout(function (){                                           // app_check_update.jsxi:118
-			if (!_updateInProcess)                                                 // app_check_update.jsxi:119
-				return;
-			
-			ifr.remove();                                                          // app_check_update.jsxi:120
-			callback('YADISK:TO');                                                 // app_check_update.jsxi:121
-		}, 
-		10e3);
-	}
-	
-	function rdDownload(url, dest, callback, progressCallback){                    // app_check_update.jsxi:125
-		_updateInProcess = true;                                                   // app_check_update.jsxi:126
-		
-		var ifr = $('<iframe nwdisable nwfaketop>').attr('src', url).on('load',    // app_check_update.jsxi:127
-			function (e){                                                          // app_check_update.jsxi:127
-				if (!_updateInProcess)                                             // app_check_update.jsxi:128
-					return;
-				
-				try {
-					clearTimeout(to);                                              // app_check_update.jsxi:131
-					httpDownload(this.contentWindow.document.querySelector('.downloadButton a').href, 
-						dest,                                                      // app_check_update.jsxi:132
-						callback,                                                  // app_check_update.jsxi:132
-						progressCallback);                                         // app_check_update.jsxi:132
-				} catch (e){                                                       // app_check_update.jsxi:133
-					ifr.remove();                                                  // app_check_update.jsxi:134
-					callback('RD:BTN');                                            // app_check_update.jsxi:135
-				} 
-			}).css({ position: 'fixed', top: '200vh', left: '200vw' }).appendTo('body');
-		
-		var to = setTimeout(function (){                                           // app_check_update.jsxi:139
-			if (!_updateInProcess)                                                 // app_check_update.jsxi:140
-				return;
-			
-			ifr.remove();                                                          // app_check_update.jsxi:141
-			callback('RD:TO');                                                     // app_check_update.jsxi:142
-		}, 
-		10e3);
-	}
-	
-	function download(url, dest, callback, progressCallback){                      // app_check_update.jsxi:146
-		if (isInstallableYadisk(url))                                              // app_check_update.jsxi:147
-			yadiskDownload(url, dest, callback, progressCallback);                 // app_check_update.jsxi:147
-		else if (isInstallableRd(url))                                             // app_check_update.jsxi:148
-			rdDownload(url, dest, callback, progressCallback);                     // app_check_update.jsxi:148
-		else
-			httpDownload(url, dest, callback, progressCallback);                   // app_check_update.jsxi:149
-	}
-	
-	CheckUpdate.install = function (url){                                          // app_check_update.jsxi:152
-		mediator.dispatch('install:start');                                        // app_check_update.jsxi:153
-		download(url,                                                              // app_check_update.jsxi:154
-			_updateFile + '~tmp',                                                  // app_check_update.jsxi:154
-			function (error){                                                      // app_check_update.jsxi:154
-				if (error){                                                        // app_check_update.jsxi:155
-					_updateInProcess = null;                                       // app_check_update.jsxi:156
-					mediator.dispatch('install:failed', error);                    // app_check_update.jsxi:157
+	CheckUpdate.install = function (url){                                          // app_check_update.jsxi:37
+		mediator.dispatch('install:start');                                        // app_check_update.jsxi:38
+		_downloadId = Downloader.download(url,                                     // app_check_update.jsxi:39
+			_updateFile + '~tmp',                                                  // app_check_update.jsxi:39
+			function (error){                                                      // app_check_update.jsxi:39
+				if (error){                                                        // app_check_update.jsxi:40
+					mediator.dispatch('install:failed', error);                    // app_check_update.jsxi:41
 				} else {
-					fs.renameSync(_updateFile + '~tmp', _updateFile);              // app_check_update.jsxi:159
-					mediator.dispatch('install:ready');                            // app_check_update.jsxi:160
+					fs.renameSync(_updateFile + '~tmp', _updateFile);              // app_check_update.jsxi:43
+					mediator.dispatch('install:ready');                            // app_check_update.jsxi:44
 				}
+				
+				_downloadId = null;                                                // app_check_update.jsxi:47
 			}, 
-			function (p, m){                                                       // app_check_update.jsxi:162
-				mediator.dispatch('install:progress', p, m);                       // app_check_update.jsxi:163
+			function (p, m){                                                       // app_check_update.jsxi:48
+				mediator.dispatch('install:progress', p, m);                       // app_check_update.jsxi:49
 			});
 	};
-	CheckUpdate.abort = function (){                                               // app_check_update.jsxi:167
-		if (!_updateInProcess)                                                     // app_check_update.jsxi:168
+	CheckUpdate.abort = function (){                                               // app_check_update.jsxi:53
+		if (!_downloadId)                                                          // app_check_update.jsxi:54
 			return;
 		
-		if (_updateInProcess.abort)                                                // app_check_update.jsxi:169
-			_updateInProcess.abort();                                              // app_check_update.jsxi:169
-		
-		_updateInProcess = null;                                                   // app_check_update.jsxi:171
-		mediator.dispatch('install:interrupt');                                    // app_check_update.jsxi:172
-		setTimeout(function (arg){                                                 // app_check_update.jsxi:174
+		Downloader.abort(_downloadId);                                             // app_check_update.jsxi:55
+		_downloadId = null;                                                        // app_check_update.jsxi:56
+		mediator.dispatch('install:interrupt');                                    // app_check_update.jsxi:58
+		setTimeout(function (arg){                                                 // app_check_update.jsxi:60
 			try {
-				fs.unlinkSync(_updateFile + '~tmp');                               // app_check_update.jsxi:175
+				fs.unlinkSync(_updateFile + '~tmp');                               // app_check_update.jsxi:61
 			} catch (e){} 
 		}, 
 		500);
 	};
-	CheckUpdate.autoupdate = function (){                                          // app_check_update.jsxi:179
-		function clearDir(dirPath){                                                // app_check_update.jsxi:180
-			try {
-				var files = fs.readdirSync(dirPath);
-			} catch (e){
-				return;
-			} 
-			
-			for (var i = 0; i < files.length; i ++){                               // app_check_update.jsxi:184
-				var filePath = dirPath + '/' + files[i];
-				
-				if (fs.statSync(filePath).isFile()){                               // app_check_update.jsxi:186
-					fs.unlinkSync(filePath);                                       // app_check_update.jsxi:187
-				} else {
-					clearDir(filePath);                                            // app_check_update.jsxi:189
-					fs.rmdirSync(filePath);                                        // app_check_update.jsxi:190
-				}
-			}
-		}
-		
-		;
-		
+	CheckUpdate.autoupdate = function (){                                          // app_check_update.jsxi:65
 		try {
-			if (fs.existsSync(_updateFile)){                                       // app_check_update.jsxi:196
+			if (fs.existsSync(_updateFile)){                                       // app_check_update.jsxi:67
 				var d = path.join(path.dirname(process.execPath), 'carsmgr_update~next');
 				
-				if (fs.existsSync(d)){                                             // app_check_update.jsxi:198
-					clearDir(d);                                                   // app_check_update.jsxi:199
+				if (fs.existsSync(d)){                                             // app_check_update.jsxi:69
+					fs.removeDirSync(d, false);                                    // app_check_update.jsxi:70
 				} else {
-					fs.mkdirSync(d);                                               // app_check_update.jsxi:201
+					fs.mkdirSync(d);                                               // app_check_update.jsxi:72
 				}
 				
-				AcTools.Utils.FileUtils.Unzip(_updateFile, d);                     // app_check_update.jsxi:204
+				AcTools.Utils.FileUtils.Unzip(_updateFile, d);                     // app_check_update.jsxi:75
 				
 				var b = path.join(path.dirname(process.execPath), 'carsmgr_update.bat');
 				
-				fs.writeFileSync(b,                                                // app_check_update.jsxi:207
+				fs.writeFileSync(b,                                                // app_check_update.jsxi:78
 					"\t\t\t\t \n@ECHO OFF\n\nCD %~dp0\nTASKKILL /F /IM carsmgr.exe\n\n:CHECK_EXECUTABLE\nIF NOT EXIST carsmgr.exe GOTO EXECUTABLE_REMOVED\n\nDEL carsmgr.exe\nTIMEOUT /T 1 >nul\n\nGOTO CHECK_EXECUTABLE\n:EXECUTABLE_REMOVED\n\nDEL carsmgr.exe\n\nfor /r %%i in (carsmgr_update~next\\*) do MOVE /Y \"%%i\" %%~nxi\nRMDIR /S /Q carsmgr_update~next\n\nstart carsmgr.exe\n\nDEL %0 carsmgr_update.next".replace(/\n/g, '\r\n'));
-				Shell.openItem(b);                                                 // app_check_update.jsxi:230
-				gui.App.quit();                                                    // app_check_update.jsxi:231
+				Shell.openItem(b);                                                 // app_check_update.jsxi:101
+				gui.App.quit();                                                    // app_check_update.jsxi:102
 			}
-		} catch (e){                                                               // app_check_update.jsxi:233
-			mediator.dispatch('autoupdate:failed', e);                             // app_check_update.jsxi:234
+		} catch (e){                                                               // app_check_update.jsxi:104
+			mediator.dispatch('autoupdate:failed', e);                             // app_check_update.jsxi:105
 			
 			try {
-				if (fs.existsSync(_updateFile)){                                   // app_check_update.jsxi:236
-					fs.unlinkSync(_updateFile);                                    // app_check_update.jsxi:237
+				if (fs.existsSync(_updateFile)){                                   // app_check_update.jsxi:107
+					fs.unlinkSync(_updateFile);                                    // app_check_update.jsxi:108
 				}
 			} catch (e){} 
 			
 			try {
 				var d = path.join(path.dirname(process.execPath), 'carsmgr_update~next');
 				
-				if (fs.existsSync(d)){                                             // app_check_update.jsxi:242
-					clearDir(d);                                                   // app_check_update.jsxi:243
-					fs.rmdirSync(d);                                               // app_check_update.jsxi:244
+				if (fs.existsSync(d)){                                             // app_check_update.jsxi:113
+					clearDir(d);                                                   // app_check_update.jsxi:114
+					fs.rmdirSync(d);                                               // app_check_update.jsxi:115
 				}
 			} catch (e){} 
 			
 			try {
 				var b = path.join(path.dirname(process.execPath), 'carsmgr_update.bat');
 				
-				if (fs.existsSync(b)){                                             // app_check_update.jsxi:250
-					fs.unlinkSync(b);                                              // app_check_update.jsxi:251
+				if (fs.existsSync(b)){                                             // app_check_update.jsxi:121
+					fs.unlinkSync(b);                                              // app_check_update.jsxi:122
 				}
 			} catch (e){} 
 		} 
 	};
-	(function (){                                                                  // app_check_update.jsxi:257
+	(function (){                                                                  // app_check_update.jsxi:128
 		CheckUpdate.autoupdate();
-		mediator.extend(CheckUpdate);                                              // app_check_update.jsxi:259
+		mediator.extend(CheckUpdate);                                              // app_check_update.jsxi:130
 	})();
 	return CheckUpdate;
 })();
@@ -1826,16 +2129,14 @@ var CheckUpdate = (function (){                                                 
 /* Class "AppServerRequest" declaration */
 var AppServerRequest = (function (){                                               // app_server_request.jsxi:1
 	var AppServerRequest = function (){}, 
-		_host = 'ascobash.comuf.com',                                              // app_server_request.jsxi:2
-		_dataToSend = [],                                                          // app_server_request.jsxi:62
-		_sendTimeout,                                                              // app_server_request.jsxi:63
-		_sendDelay = 3e3;                                                          // app_server_request.jsxi:64
+		_url = 'http://ascobash.comuf.com/api.php',                                // app_server_request.jsxi:2
+		_dataToSend = [],                                                          // app_server_request.jsxi:76
+		_sendTimeout,                                                              // app_server_request.jsxi:77
+		_sendDelay = 3e3;                                                          // app_server_request.jsxi:78
 	
-	AppServerRequest.sendDataDisabled = false;                                     // app_server_request.jsxi:88
-	AppServerRequest.checkUpdate = function (version, source, callback){           // app_server_request.jsxi:6
-		$.ajax({                                                                   // app_server_request.jsxi:7
-			url: 'http://ascobash.comuf.com/api.php?0=check&v=' + version + '&b=' + source
-		}).fail(function (){                                                       // app_server_request.jsxi:9
+	AppServerRequest.sendDataDisabled = false;                                     // app_server_request.jsxi:102
+	AppServerRequest.checkUpdate = function (version, branch, callback){           // app_server_request.jsxi:6
+		$.ajax({ url: _url + ('?0=check&v=' + version + '&b=' + branch) }).fail(function (){
 			if (callback)                                                          // app_server_request.jsxi:10
 				callback('error:request');                                         // app_server_request.jsxi:10
 		}).done(function (data){                                                   // app_server_request.jsxi:11
@@ -1848,42 +2149,39 @@ var AppServerRequest = (function (){                                            
 			}
 		});
 	};
-	AppServerRequest.sendBinary = function (car, file, buf, callback){             // app_server_request.jsxi:20
-		var req = new XMLHttpRequest();
-		
-		req.open('POST',                                                           // app_server_request.jsxi:22
-			'http://ascobash.comuf.com/api.php?0=binary&c=' + car + '&f=' + file, 
-			true);
-		req.setRequestHeader('Content-Type', 'application/octet-stream');          // app_server_request.jsxi:23
-		req.onreadystatechange = function (){                                      // app_server_request.jsxi:25
-			if (req.readyState == 4){                                              // app_server_request.jsxi:26
+	AppServerRequest.checkContentUpdate = function (version, callback){            // app_server_request.jsxi:20
+		$.ajax({ url: _url + ('?0=check-content&v=' + version) }).fail(function (){
+			if (callback)                                                          // app_server_request.jsxi:24
+				callback('error:request');                                         // app_server_request.jsxi:24
+		}).done(function (data){                                                   // app_server_request.jsxi:25
+			if (data == null || typeof data === 'object'){                         // app_server_request.jsxi:26
 				if (callback)                                                      // app_server_request.jsxi:27
-					callback(null);                                                // app_server_request.jsxi:27
+					callback(null, data);                                          // app_server_request.jsxi:27
+			} else {
+				if (callback)                                                      // app_server_request.jsxi:29
+					callback('error:' + data);                                     // app_server_request.jsxi:29
 			}
-		};
-		req.send(new Uint8Array(buf).buffer);                                      // app_server_request.jsxi:31
-	};
-	AppServerRequest.sendFeedback = function (feedback, callback){                 // app_server_request.jsxi:34
-		$.ajax({                                                                   // app_server_request.jsxi:35
-			url: 'http://ascobash.comuf.com/api.php?0=feedback',                   // app_server_request.jsxi:35
-			type: 'POST',                                                          // app_server_request.jsxi:37
-			contentType: 'text/plain',                                             // app_server_request.jsxi:38
-			data: feedback,                                                        // app_server_request.jsxi:39
-			processData: false
-		}).fail(function (){                                                       // app_server_request.jsxi:41
-			if (callback)                                                          // app_server_request.jsxi:42
-				callback('error:request');                                         // app_server_request.jsxi:42
-		}).done(function (data){                                                   // app_server_request.jsxi:43
-			if (callback)                                                          // app_server_request.jsxi:44
-				callback(null);                                                    // app_server_request.jsxi:44
 		});
 	};
-	AppServerRequest.sendError = function (version, details, callback){            // app_server_request.jsxi:48
+	AppServerRequest.sendBinary = function (car, file, buf, callback){             // app_server_request.jsxi:34
+		var req = new XMLHttpRequest();
+		
+		req.open('POST', _url + ('?0=binary&c=' + car + '&f=' + file), true);      // app_server_request.jsxi:36
+		req.setRequestHeader('Content-Type', 'application/octet-stream');          // app_server_request.jsxi:37
+		req.onreadystatechange = function (){                                      // app_server_request.jsxi:39
+			if (req.readyState == 4){                                              // app_server_request.jsxi:40
+				if (callback)                                                      // app_server_request.jsxi:41
+					callback(null);                                                // app_server_request.jsxi:41
+			}
+		};
+		req.send(new Uint8Array(buf).buffer);                                      // app_server_request.jsxi:45
+	};
+	AppServerRequest.sendFeedback = function (feedback, callback){                 // app_server_request.jsxi:48
 		$.ajax({                                                                   // app_server_request.jsxi:49
-			url: 'http://ascobash.comuf.com/api.php?0=error',                      // app_server_request.jsxi:49
+			url: _url + '?0=feedback',                                             // app_server_request.jsxi:49
 			type: 'POST',                                                          // app_server_request.jsxi:51
 			contentType: 'text/plain',                                             // app_server_request.jsxi:52
-			data: version + ':' + details,                                         // app_server_request.jsxi:53
+			data: feedback,                                                        // app_server_request.jsxi:53
 			processData: false
 		}).fail(function (){                                                       // app_server_request.jsxi:55
 			if (callback)                                                          // app_server_request.jsxi:56
@@ -1893,50 +2191,65 @@ var AppServerRequest = (function (){                                            
 				callback(null);                                                    // app_server_request.jsxi:58
 		});
 	};
-	
-	function sendDataInner(carId, key, value){                                     // app_server_request.jsxi:66
-		$.ajax({                                                                   // app_server_request.jsxi:67
-			url: 'http://ascobash.comuf.com/api.php?0=database&c=' + carId + '&f=' + key, 
-			type: 'POST',                                                          // app_server_request.jsxi:69
-			contentType: 'text/plain',                                             // app_server_request.jsxi:70
-			data: value,                                                           // app_server_request.jsxi:71
+	AppServerRequest.sendError = function (version, details, callback){            // app_server_request.jsxi:62
+		$.ajax({                                                                   // app_server_request.jsxi:63
+			url: _url + '?0=error',                                                // app_server_request.jsxi:63
+			type: 'POST',                                                          // app_server_request.jsxi:65
+			contentType: 'text/plain',                                             // app_server_request.jsxi:66
+			data: version + ':' + details,                                         // app_server_request.jsxi:67
 			processData: false
-		}).fail(function (){                                                       // app_server_request.jsxi:73
-			console.warn('send data failed');                                      // app_server_request.jsxi:74
+		}).fail(function (){                                                       // app_server_request.jsxi:69
+			if (callback)                                                          // app_server_request.jsxi:70
+				callback('error:request');                                         // app_server_request.jsxi:70
+		}).done(function (data){                                                   // app_server_request.jsxi:71
+			if (callback)                                                          // app_server_request.jsxi:72
+				callback(null);                                                    // app_server_request.jsxi:72
+		});
+	};
+	
+	function sendDataInner(carId, key, value){                                     // app_server_request.jsxi:80
+		$.ajax({                                                                   // app_server_request.jsxi:81
+			url: _url + ('?0=database&c=' + carId + '&f=' + key),                  // app_server_request.jsxi:81
+			type: 'POST',                                                          // app_server_request.jsxi:83
+			contentType: 'text/plain',                                             // app_server_request.jsxi:84
+			data: value,                                                           // app_server_request.jsxi:85
+			processData: false
+		}).fail(function (){                                                       // app_server_request.jsxi:87
+			console.warn('send data failed');                                      // app_server_request.jsxi:88
 		});
 	}
 	
-	function sendDataGroup(carId, key, value, callback){                           // app_server_request.jsxi:78
-		for (var i = 0; i < _dataToSend.length; i ++){                             // app_server_request.jsxi:79
+	function sendDataGroup(carId, key, value, callback){                           // app_server_request.jsxi:92
+		for (var i = 0; i < _dataToSend.length; i ++){                             // app_server_request.jsxi:93
 			var e = _dataToSend[i];
 			
-			if (e){                                                                // app_server_request.jsxi:80
-				sendDataInner(e.car, e.key, e.value);                              // app_server_request.jsxi:81
+			if (e){                                                                // app_server_request.jsxi:94
+				sendDataInner(e.car, e.key, e.value);                              // app_server_request.jsxi:95
 			}
 		}
 		
-		_dataToSend = [];                                                          // app_server_request.jsxi:85
+		_dataToSend = [];                                                          // app_server_request.jsxi:99
 	}
 	
-	AppServerRequest.sendData = function (carId, key, value, callback){            // app_server_request.jsxi:89
+	AppServerRequest.sendData = function (carId, key, value, callback){            // app_server_request.jsxi:103
 		if (AppServerRequest.sendDataDisabled)
 			return;
 		
-		for (var i = 0; i < _dataToSend.length; i ++){                             // app_server_request.jsxi:92
+		for (var i = 0; i < _dataToSend.length; i ++){                             // app_server_request.jsxi:106
 			var e = _dataToSend[i];
 			
-			if (e && e.car === carId && e.key === key){                            // app_server_request.jsxi:93
-				_dataToSend[i] = null;                                             // app_server_request.jsxi:94
+			if (e && e.car === carId && e.key === key){                            // app_server_request.jsxi:107
+				_dataToSend[i] = null;                                             // app_server_request.jsxi:108
 			}
 		}
 		
-		_dataToSend.push({ car: carId, key: key, value: value });                  // app_server_request.jsxi:98
+		_dataToSend.push({ car: carId, key: key, value: value });                  // app_server_request.jsxi:112
 		
-		if (callback)                                                              // app_server_request.jsxi:99
-			callback(null);                                                        // app_server_request.jsxi:99
+		if (callback)                                                              // app_server_request.jsxi:113
+			callback(null);                                                        // app_server_request.jsxi:113
 		
-		clearTimeout(_sendTimeout);                                                // app_server_request.jsxi:101
-		_sendTimeout = setTimeout(sendDataGroup, _sendDelay);                      // app_server_request.jsxi:102
+		clearTimeout(_sendTimeout);                                                // app_server_request.jsxi:115
+		_sendTimeout = setTimeout(sendDataGroup, _sendDelay);                      // app_server_request.jsxi:116
 	};
 	Object.defineProperty(AppServerRequest,                                        // app_server_request.jsxi:1
 		'__AppServerRequest_http', 
@@ -2024,204 +2337,234 @@ var AppWindow = (function (){                                                   
 var Cars = (function (){                                                           // cars.jsxi:1
 	var Cars = function (){}, 
 		mediator = new Mediator(),                                                 // cars.jsxi:2
-		_list,                                                                     // cars.jsxi:25
-		_brands = new UniqueList('brand'),                                         // cars.jsxi:26
-		_classes = new UniqueList('class'),                                        // cars.jsxi:27
-		_countries = new UniqueList('country'),                                    // cars.jsxi:28
-		_authors = new UniqueList('author'),                                       // cars.jsxi:29
-		_tags = new UniqueList('tag');                                             // cars.jsxi:30
+		_list,                                                                     // cars.jsxi:26
+		_brands = new UniqueList('brand'),                                         // cars.jsxi:27
+		_classes = new UniqueList('class'),                                        // cars.jsxi:28
+		_countries = new UniqueList('country'),                                    // cars.jsxi:29
+		_authors = new UniqueList('author'),                                       // cars.jsxi:30
+		_tags = new UniqueList('tag');                                             // cars.jsxi:31
 	
-	Cars.byName = function (n){                                                    // cars.jsxi:37
-		for (var i = 0; i < _list.length; i ++){                                   // cars.jsxi:38
-			if (_list[i].id === n){                                                // cars.jsxi:39
-				return _list[i];                                                   // cars.jsxi:40
+	Cars.byId = function (n){                                                      // cars.jsxi:38
+		for (var i = 0; i < _list.length; i ++){                                   // cars.jsxi:39
+			if (_list[i].id === n){                                                // cars.jsxi:40
+				return _list[i];                                                   // cars.jsxi:41
 			}
 		}
 		return null;
 	};
-	Cars.registerTags = function (tags){                                           // cars.jsxi:47
-		tags.forEach(function (e){                                                 // cars.jsxi:48
-			_tags.add(e);                                                          // cars.jsxi:49
+	Cars.byName = function (n){                                                    // cars.jsxi:48
+		return Cars.byId(n);
+	};
+	Cars.registerTags = function (tags){                                           // cars.jsxi:52
+		tags.forEach(function (e){                                                 // cars.jsxi:53
+			_tags.add(e);                                                          // cars.jsxi:54
 		});
 	};
-	Cars.registerClass = function (v){                                             // cars.jsxi:53
-		_classes.add(v);                                                           // cars.jsxi:54
+	Cars.registerClass = function (v){                                             // cars.jsxi:58
+		_classes.add(v);                                                           // cars.jsxi:59
 	};
-	Cars.registerBrand = function (v){                                             // cars.jsxi:57
-		_brands.add(v);                                                            // cars.jsxi:58
-		Brands.add(v);                                                             // cars.jsxi:59
+	Cars.registerBrand = function (v){                                             // cars.jsxi:62
+		_brands.add(v);                                                            // cars.jsxi:63
+		Brands.add(v);                                                             // cars.jsxi:64
 	};
-	Cars.registerCountry = function (v){                                           // cars.jsxi:62
-		_countries.add(v);                                                         // cars.jsxi:63
+	Cars.registerCountry = function (v){                                           // cars.jsxi:67
+		_countries.add(v);                                                         // cars.jsxi:68
 	};
-	Cars.registerAuthor = function (v){                                            // cars.jsxi:66
-		_authors.add(v);                                                           // cars.jsxi:67
+	Cars.registerAuthor = function (v){                                            // cars.jsxi:71
+		_authors.add(v);                                                           // cars.jsxi:72
 	};
-	Cars.scan = function (){                                                       // cars.jsxi:70
-		mediator.dispatch('scan:start');                                           // cars.jsxi:71
+	Cars.scan = function (){                                                       // cars.jsxi:75
+		mediator.dispatch('scan:start');                                           // cars.jsxi:76
 		
-		if (!fs.existsSync(AcDir.carsOff)){                                        // cars.jsxi:73
-			fs.mkdirSync(AcDir.carsOff);                                           // cars.jsxi:74
+		if (!fs.existsSync(AcDir.carsOff)){                                        // cars.jsxi:78
+			fs.mkdirSync(AcDir.carsOff);                                           // cars.jsxi:79
 		}
 		
 		var names = {};
 		
-		_list = fs.readdirSync(AcDir.cars).map(function (e){                       // cars.jsxi:78
-			return path.join(AcDir.cars, e);                                       // cars.jsxi:79
-		}).concat(fs.readdirSync(AcDir.carsOff).map(function (e){                  // cars.jsxi:80
-			return path.join(AcDir.carsOff, e);                                    // cars.jsxi:81
-		})).map(function (carPath){                                                // cars.jsxi:82
-			car = new Car(carPath);                                                // cars.jsxi:83
+		_list = fs.readdirSync(AcDir.cars).map(function (e){                       // cars.jsxi:83
+			return path.join(AcDir.cars, e);                                       // cars.jsxi:84
+		}).concat(fs.readdirSync(AcDir.carsOff).map(function (e){                  // cars.jsxi:85
+			return path.join(AcDir.carsOff, e);                                    // cars.jsxi:86
+		})).map(function (carPath){                                                // cars.jsxi:87
+			car = new Car(carPath);                                                // cars.jsxi:88
 			
-			if (names[car.id])                                                     // cars.jsxi:85
+			if (names[car.id])                                                     // cars.jsxi:89
 				return;
 			
-			mediator.dispatch('new.car', car);                                     // cars.jsxi:86
-			names[car.id] = true;                                                  // cars.jsxi:87
-			return car;                                                            // cars.jsxi:88
-		}).filter(function (e){                                                    // cars.jsxi:89
-			return e;                                                              // cars.jsxi:90
+			mediator.dispatch('new.car', car);                                     // cars.jsxi:90
+			names[car.id] = true;                                                  // cars.jsxi:91
+			return car;                                                            // cars.jsxi:92
+		}).filter(function (e){                                                    // cars.jsxi:93
+			return e;                                                              // cars.jsxi:94
 		});
-		asyncLoad();                                                               // cars.jsxi:93
+		asyncLoad();                                                               // cars.jsxi:97
+	};
+	Cars.loadById = function (id, callback){                                       // cars.jsxi:100
+		var car = Cars.byId(id);
+		
+		if (car){                                                                  // cars.jsxi:102
+			car.reload(callback);                                                  // cars.jsxi:103
+		} else {
+			var path = AcDir.cars + '/' + id;
+			
+			if (fs.existsSync(path)){                                              // cars.jsxi:106
+				car = new Car(path);                                               // cars.jsxi:107
+			} else {
+				path = AcDir.carsOff + '/' + id;                                   // cars.jsxi:109
+				
+				if (fs.existsSync(path)){                                          // cars.jsxi:110
+					car = new Car(path);                                           // cars.jsxi:111
+				} else {
+					throw new Error('Car with id “' + id + '” not found.');        // cars.jsxi:113
+				}
+			}
+			
+			_list.push(car);                                                       // cars.jsxi:117
+			mediator.dispatch('new.car', car);                                     // cars.jsxi:118
+			car.loadEnsure(callback);                                              // cars.jsxi:119
+		}
 	};
 	
-	function asyncLoad(){                                                          // cars.jsxi:96
-		var a = _list,                                                             // cars.jsxi:97
-			i = 0,                                                                 // cars.jsxi:97
-			step = function (arg){                                                 // cars.jsxi:98
-				if (a != _list){                                                   // cars.jsxi:99
-					mediator.dispatch('scan:interrupt', a);                        // cars.jsxi:100
-				} else if (i >= a.length){                                         // cars.jsxi:101
-					mediator.dispatch('scan:ready', a);                            // cars.jsxi:102
-					lasyAsyncLoad();                                               // cars.jsxi:103
+	function asyncLoad(){                                                          // cars.jsxi:123
+		var a = _list,                                                             // cars.jsxi:124
+			i = 0,                                                                 // cars.jsxi:124
+			step = function (arg){                                                 // cars.jsxi:125
+				if (a != _list){                                                   // cars.jsxi:126
+					mediator.dispatch('scan:interrupt', a);                        // cars.jsxi:127
+				} else if (i >= a.length){                                         // cars.jsxi:128
+					mediator.dispatch('scan:ready', a);                            // cars.jsxi:129
+					lasyAsyncLoad();                                               // cars.jsxi:130
 				} else {
-					mediator.dispatch('scan:progress', i, a.length);               // cars.jsxi:106
-					a[i ++].loadData(step);                                        // cars.jsxi:107
+					mediator.dispatch('scan:progress', i, a.length);               // cars.jsxi:133
+					a[i ++].loadData(step);                                        // cars.jsxi:134
 				}
 			};
 		
-		mediator.dispatch('scan:list', a);                                         // cars.jsxi:111
-		step();                                                                    // cars.jsxi:112
+		mediator.dispatch('scan:list', a);                                         // cars.jsxi:138
+		step();                                                                    // cars.jsxi:139
 	}
 	
-	function lasyAsyncLoad(){                                                      // cars.jsxi:115
-		var a = _list,                                                             // cars.jsxi:116
-			b = a.slice(),                                                         // cars.jsxi:116
-			i = 0,                                                                 // cars.jsxi:116
-			step = setTimeout.bind(window,                                         // cars.jsxi:117
-				function (arg){                                                    // cars.jsxi:117
-					if (a != _list){                                               // cars.jsxi:118
-						mediator.dispatch('lazyscan:interrupt', b);                // cars.jsxi:119
-					} else if (i >= b.length){                                     // cars.jsxi:120
-						mediator.dispatch('lazyscan:ready', b);                    // cars.jsxi:121
+	function lasyAsyncLoad(){                                                      // cars.jsxi:142
+		var a = _list,                                                             // cars.jsxi:143
+			b = a.slice(),                                                         // cars.jsxi:143
+			i = 0,                                                                 // cars.jsxi:143
+			step = setTimeout.bind(window,                                         // cars.jsxi:144
+				function (arg){                                                    // cars.jsxi:144
+					if (a != _list){                                               // cars.jsxi:145
+						mediator.dispatch('lazyscan:interrupt', b);                // cars.jsxi:146
+					} else if (i >= b.length){                                     // cars.jsxi:147
+						mediator.dispatch('lazyscan:ready', b);                    // cars.jsxi:148
 					} else {
-						mediator.dispatch('lazyscan:progress', i, b.length);       // cars.jsxi:123
-						b[i ++].loadEnsure(step);                                  // cars.jsxi:124
+						mediator.dispatch('lazyscan:progress', i, b.length);       // cars.jsxi:150
+						b[i ++].loadEnsure(step);                                  // cars.jsxi:151
 					}
 				}, 
 				20);
 		
-		mediator.dispatch('lazyscan:start', b);                                    // cars.jsxi:128
-		step();                                                                    // cars.jsxi:129
+		mediator.dispatch('lazyscan:start', b);                                    // cars.jsxi:155
+		step();                                                                    // cars.jsxi:156
 	}
 	
-	Cars.acdTest = function (){                                                    // cars.jsxi:132
-		var a = _list,                                                             // cars.jsxi:133
-			b = a.slice(),                                                         // cars.jsxi:133
-			i = 0,                                                                 // cars.jsxi:133
-			step = setTimeout.bind(window,                                         // cars.jsxi:134
-				function (arg){                                                    // cars.jsxi:134
-					if (a != _list){                                               // cars.jsxi:135
-						mediator.dispatch('lazyscan:interrupt', b);                // cars.jsxi:136
-					} else if (i >= b.length){                                     // cars.jsxi:137
-						mediator.dispatch('lazyscan:ready', b);                    // cars.jsxi:138
+	Cars.acdTest = function (){                                                    // cars.jsxi:159
+		var a = _list,                                                             // cars.jsxi:160
+			b = a.slice(),                                                         // cars.jsxi:160
+			i = 0,                                                                 // cars.jsxi:160
+			step = setTimeout.bind(window,                                         // cars.jsxi:161
+				function (arg){                                                    // cars.jsxi:161
+					if (a != _list){                                               // cars.jsxi:162
+						mediator.dispatch('lazyscan:interrupt', b);                // cars.jsxi:163
+					} else if (i >= b.length){                                     // cars.jsxi:164
+						mediator.dispatch('lazyscan:ready', b);                    // cars.jsxi:165
 					} else {
-						mediator.dispatch('lazyscan:progress', i, b.length);       // cars.jsxi:140
-						b[i ++].testAcd(step);                                     // cars.jsxi:141
+						mediator.dispatch('lazyscan:progress', i, b.length);       // cars.jsxi:167
+						b[i ++].testAcd(step);                                     // cars.jsxi:168
 					}
 				}, 
 				20);
 		
-		mediator.dispatch('lazyscan:start', b);                                    // cars.jsxi:145
-		step();                                                                    // cars.jsxi:146
+		mediator.dispatch('lazyscan:start', b);                                    // cars.jsxi:172
+		step();                                                                    // cars.jsxi:173
 	};
-	Cars.toggle = function (car, state){                                           // cars.jsxi:149
-		car.toggle(state);                                                         // cars.jsxi:150
+	Cars.toggle = function (car, state){                                           // cars.jsxi:176
+		car.toggle(state);                                                         // cars.jsxi:177
 	};
-	Cars.changeData = function (car, key, value){                                  // cars.jsxi:153
-		car.changeData(key, value);                                                // cars.jsxi:154
+	Cars.changeData = function (car, key, value){                                  // cars.jsxi:180
+		car.changeData(key, value);                                                // cars.jsxi:181
 	};
-	Cars.changeDataSpecs = function (car, key, value){                             // cars.jsxi:157
-		car.changeDataSpecs(key, value);                                           // cars.jsxi:158
+	Cars.changeDataSpecs = function (car, key, value){                             // cars.jsxi:184
+		car.changeDataSpecs(key, value);                                           // cars.jsxi:185
 	};
-	Cars.changeParent = function (car, parentId){                                  // cars.jsxi:161
-		car.changeParent(parentId);                                                // cars.jsxi:162
+	Cars.changeParent = function (car, parentId){                                  // cars.jsxi:188
+		car.changeParent(parentId);                                                // cars.jsxi:189
 	};
-	Cars.selectSkin = function (car, skinId){                                      // cars.jsxi:165
-		car.selectSkin(skinId);                                                    // cars.jsxi:166
+	Cars.selectSkin = function (car, skinId){                                      // cars.jsxi:192
+		car.selectSkin(skinId);                                                    // cars.jsxi:193
 	};
-	Cars.updateSkins = function (car){                                             // cars.jsxi:169
-		car.updateSkins();                                                         // cars.jsxi:170
+	Cars.updateSkins = function (car){                                             // cars.jsxi:196
+		car.updateSkins();                                                         // cars.jsxi:197
 	};
-	Cars.updateUpgrade = function (car){                                           // cars.jsxi:173
-		car.updateUpgrade();                                                       // cars.jsxi:174
+	Cars.updateUpgrade = function (car){                                           // cars.jsxi:200
+		car.updateUpgrade();                                                       // cars.jsxi:201
 	};
-	Cars.reload = function (car){                                                  // cars.jsxi:177
-		car.load();                                                                // cars.jsxi:178
+	Cars.reload = function (car){                                                  // cars.jsxi:204
+		car.load();                                                                // cars.jsxi:205
 	};
-	Cars.reloadAll = function (){                                                  // cars.jsxi:181
+	Cars.reloadAll = function (){                                                  // cars.jsxi:208
 		Cars.scan();
 	};
-	Cars.save = function (car){                                                    // cars.jsxi:185
-		car.save();                                                                // cars.jsxi:186
+	Cars.save = function (car){                                                    // cars.jsxi:212
+		car.save();                                                                // cars.jsxi:213
 	};
-	Cars.saveAll = function (){                                                    // cars.jsxi:189
-		_list.forEach(function (car){                                              // cars.jsxi:190
-			if (car.changed){                                                      // cars.jsxi:191
-				car.save();                                                        // cars.jsxi:192
+	Cars.saveAll = function (){                                                    // cars.jsxi:216
+		_list.forEach(function (car){                                              // cars.jsxi:217
+			if (car.changed){                                                      // cars.jsxi:218
+				car.save();                                                        // cars.jsxi:219
 			}
 		});
 	};
-	Cars.remove = function (car){                                                  // cars.jsxi:197
-		for (var i = 0; i < _list.length; i ++){                                   // cars.jsxi:198
+	Cars.remove = function (car){                                                  // cars.jsxi:224
+		for (var i = 0; i < _list.length; i ++){                                   // cars.jsxi:225
 			var c = _list[i];
 			
-			if (c === car){                                                        // cars.jsxi:199
-				AcTools.Utils.FileUtils.Recycle(car.path);                         // cars.jsxi:200
+			if (c === car){                                                        // cars.jsxi:226
+				AcTools.Utils.FileUtils.Recycle(car.path);                         // cars.jsxi:227
 				
-				if (car.parent){                                                   // cars.jsxi:202
+				if (car.parent){                                                   // cars.jsxi:229
 					car.parent.children.splice(car.parent.children.indexOf(car), 1);
-					mediator.dispatch('update.car.children', car.parent);          // cars.jsxi:204
+					mediator.dispatch('update.car.children', car.parent);          // cars.jsxi:231
 				}
 				
 				{
-					var __2 = car.children;
+					var __9 = car.children;
 					
-					for (var __1 = 0; __1 < __2.length; __1 ++){
-						var child = __2[__1];
+					for (var __8 = 0; __8 < __9.length; __8 ++){
+						var child = __9[__8];
 						
-						Cars.remove(child);                                        // cars.jsxi:208
+						Cars.remove(child);                                        // cars.jsxi:235
 					}
 					
-					__2 = undefined;
+					__9 = undefined;
 				}
 				
-				_list.splice(i, 1);                                                // cars.jsxi:211
-				mediator.dispatch('remove.car', car);                              // cars.jsxi:212
+				_list.splice(i, 1);                                                // cars.jsxi:238
+				mediator.dispatch('remove.car', car);                              // cars.jsxi:239
 				return;
 			}
 		}
 	};
+	Cars.databaseContains = function (id){                                         // cars.jsxi:245
+		return DataStorage.getContentFile('Details', id + '.json') != null;        // cars.jsxi:246
+	};
+	Cars.fromDatabase = function (id){                                             // cars.jsxi:249
+		return DataStorage.readContentJsonFile('Details', id + '.json');           // cars.jsxi:250
+	};
 	
-	function parseLoadedData(data){                                                // cars_car_load.jsxi:254
+	function parseLoadedData(data){                                                // cars_car_load.jsxi:294
 		try {
-			return JSON.parse(data);                                               // cars_car_load.jsxi:256
-		} catch (e){
-			try {
-				return JSON.flexibleParse(data);                                   // cars_car_load.jsxi:258
-			} catch (er){                                                          // cars_car_load.jsxi:259
-				return er;                                                         // cars_car_load.jsxi:260
-			} 
+			return JSON.flexibleParse(data);                                       // cars_car_load.jsxi:296
+		} catch (er){                                                              // cars_car_load.jsxi:297
+			return er;                                                             // cars_car_load.jsxi:298
 		} 
 	}
 	
@@ -2235,12 +2578,14 @@ var Cars = (function (){                                                        
 		if (!v)                                                                    // cars.jsxi:14
 			return;
 		
+		v = '' + v;                                                                // cars.jsxi:15
+		
 		var l = v.toLowerCase();
 		
-		if (this.__UniqueList__lower.indexOf(l) < 0){                              // cars.jsxi:16
-			this.list.push(v);                                                     // cars.jsxi:17
-			this.__UniqueList__lower.push(l);                                      // cars.jsxi:18
-			mediator.dispatch('new.' + this.name, v);                              // cars.jsxi:20
+		if (this.__UniqueList__lower.indexOf(l) < 0){                              // cars.jsxi:17
+			this.list.push(v);                                                     // cars.jsxi:18
+			this.__UniqueList__lower.push(l);                                      // cars.jsxi:19
+			mediator.dispatch('new.' + this.name, v);                              // cars.jsxi:21
 		}
 	};
 	
@@ -2252,82 +2597,82 @@ var Cars = (function (){                                                        
 				this.parent = null;
 				this.children = [];
 				this.id = carPath.slice(Math.max(carPath.lastIndexOf('/'), carPath.lastIndexOf('\\')) + 1);
-				this.path = carPath;                                               // cars_car.jsxi:25
-				this.disabled = carPath.indexOf(AcDir.carsOff) != - 1;             // cars_car.jsxi:27
+				this.path = carPath;                                               // cars_car.jsxi:32
+				this.disabled = carPath.indexOf(AcDir.carsOff) != - 1;             // cars_car.jsxi:34
 			}, 
-			_messages = {                                                          // cars_car_load.jsxi:247
-				'acd-test-error': 'Cannot test data',                              // cars_car_load.jsxi:247
+			_messages = {                                                          // cars_car_load.jsxi:287
+				'acd-test-error': 'Cannot test data',                              // cars_car_load.jsxi:287
 				'acd-invalid-weight': 'Weight in data has to be equal to weight in UI + 75kg (±90kg)', 
 				'acd-obsolete-aero-data': 'Obsolete section “DATA” in aero.ini'
 			};
 		
-		Car.prototype.getSpec = function (id){                                     // cars_car.jsxi:30
+		Car.prototype.getSpec = function (id){                                     // cars_car.jsxi:37
 			return this.data && this.data.specs[id] && + this.data.specs[id].match(/\d+(?:\.\d+)?/) || null;
 		};
-		Car.prototype.addError = function (id, msg, details, object){              // cars_car.jsxi:34
+		Car.prototype.addError = function (id, msg, details, object){              // cars_car.jsxi:41
 			if (this.hasError(id))
 				return;
 			
 			this.error.push({ id: id, msg: msg, details: details, object: object });
-			mediator.dispatch('error:add', this);                                  // cars_car.jsxi:37
+			mediator.dispatch('error:add', this);                                  // cars_car.jsxi:44
 		};
-		Car.prototype.removeError = function (id){                                 // cars_car.jsxi:40
-			for (var i = 0; i < this.error.length; i ++){                          // cars_car.jsxi:41
+		Car.prototype.removeError = function (id){                                 // cars_car.jsxi:47
+			for (var i = 0; i < this.error.length; i ++){                          // cars_car.jsxi:48
 				var e = this.error[i];
 				
-				if (e.id === id){                                                  // cars_car.jsxi:42
-					this.error.splice(i, 1);                                       // cars_car.jsxi:43
-					mediator.dispatch('error:remove', this);                       // cars_car.jsxi:44
+				if (e.id === id){                                                  // cars_car.jsxi:49
+					this.error.splice(i, 1);                                       // cars_car.jsxi:50
+					mediator.dispatch('error:remove', this);                       // cars_car.jsxi:51
 					return;
 				}
 			}
 		};
-		Car.prototype.clearErrors = function (filter){                             // cars_car.jsxi:50
-			if (this.error.length > 0){                                            // cars_car.jsxi:51
-				if (filter){                                                       // cars_car.jsxi:52
+		Car.prototype.clearErrors = function (filter){                             // cars_car.jsxi:57
+			if (this.error.length > 0){                                            // cars_car.jsxi:58
+				if (filter){                                                       // cars_car.jsxi:59
 					var o = this.error.length;
 					
-					this.error = this.error.filter(function (arg){                 // cars_car.jsxi:54
-						return arg.id.indexOf(filter) < 0;                         // cars_car.jsxi:54
+					this.error = this.error.filter(function (arg){                 // cars_car.jsxi:61
+						return arg.id.indexOf(filter) < 0;                         // cars_car.jsxi:61
 					});
 					
-					if (o === this.error.length)                                   // cars_car.jsxi:55
+					if (o === this.error.length)                                   // cars_car.jsxi:62
 						return;
 				} else {
-					this.error.length = 0;                                         // cars_car.jsxi:57
+					this.error.length = 0;                                         // cars_car.jsxi:64
 				}
 				
-				mediator.dispatch('error:remove', this);                           // cars_car.jsxi:60
+				mediator.dispatch('error:remove', this);                           // cars_car.jsxi:67
 			}
 		};
-		Car.prototype.getError = function (id){                                    // cars_car.jsxi:64
-			for (var __3 = 0; __3 < this.error.length; __3 ++){
-				var e = this.error[__3];
+		Car.prototype.getError = function (id){                                    // cars_car.jsxi:71
+			for (var __a = 0; __a < this.error.length; __a ++){
+				var e = this.error[__a];
 				
-				if (e.id === id)                                                   // cars_car.jsxi:66
-					return e;                                                      // cars_car.jsxi:66
+				if (e.id === id)                                                   // cars_car.jsxi:73
+					return e;                                                      // cars_car.jsxi:73
 			}
 			return null;
 		};
-		Car.prototype.hasError = function (id){                                    // cars_car.jsxi:72
-			for (var __4 = 0; __4 < this.error.length; __4 ++){
-				var e = this.error[__4];
+		Car.prototype.hasError = function (id){                                    // cars_car.jsxi:79
+			for (var __b = 0; __b < this.error.length; __b ++){
+				var e = this.error[__b];
 				
-				if (e.id === id)                                                   // cars_car.jsxi:74
+				if (e.id === id)                                                   // cars_car.jsxi:81
 					return true;
 			}
 			return false;
 		};
-		Car.prototype.toggle = function (state){                                   // cars_car.jsxi:80
+		Car.prototype.toggle = function (state){                                   // cars_car.jsxi:87
 			var __that = this, 
-				d = state == null ? !this.disabled : !state;                       // cars_car.jsxi:81
+				d = state == null ? !this.disabled : !state;                       // cars_car.jsxi:88
 			
-			if (this.disabled == d)                                                // cars_car.jsxi:82
+			if (this.disabled == d)                                                // cars_car.jsxi:89
 				return;
 			
 			var a, b;
 			
-			if (d){                                                                // cars_car.jsxi:85
+			if (d){                                                                // cars_car.jsxi:92
 				a = AcDir.cars, b = AcDir.carsOff;
 			} else {
 				a = AcDir.carsOff, b = AcDir.cars;
@@ -2336,45 +2681,45 @@ var Cars = (function (){                                                        
 			var newPath = this.path.replace(a, b);
 			
 			try {
-				fs.renameSync(this.path, newPath);                                 // cars_car.jsxi:93
-			} catch (err){                                                         // cars_car.jsxi:94
-				ErrorHandler.handled('Cannot change car state.', err);             // cars_car.jsxi:95
+				fs.renameSync(this.path, newPath);                                 // cars_car.jsxi:100
+			} catch (err){                                                         // cars_car.jsxi:101
+				ErrorHandler.handled('Cannot change car state.', err);             // cars_car.jsxi:102
 				return;
 			} 
 			
-			this.disabled = d;                                                     // cars_car.jsxi:99
-			this.path = newPath;                                                   // cars_car.jsxi:100
-			mediator.dispatch('update.car.disabled', this);                        // cars_car.jsxi:102
-			mediator.dispatch('update.car.path', this);                            // cars_car.jsxi:103
+			this.disabled = d;                                                     // cars_car.jsxi:106
+			this.path = newPath;                                                   // cars_car.jsxi:107
+			mediator.dispatch('update.car.disabled', this);                        // cars_car.jsxi:109
+			mediator.dispatch('update.car.path', this);                            // cars_car.jsxi:110
 			
 			if (this.skins)
-				mediator.dispatch('update.car.skins', this);                       // cars_car.jsxi:104
+				mediator.dispatch('update.car.skins', this);                       // cars_car.jsxi:111
 			
-			if (this.parent && !this.disabled && this.parent.disabled){            // cars_car.jsxi:106
+			if (this.parent && !this.disabled && this.parent.disabled){            // cars_car.jsxi:113
 				this.toggle(this.parent, 
 					true);
 			}
 			
-			this.children.forEach(function (e){                                    // cars_car.jsxi:110
+			this.children.forEach(function (e){                                    // cars_car.jsxi:117
 				__that.toggle(e, !__that.disabled);
 			});
 		};
-		Car.prototype.changeData = function (key, value, inner){                   // cars_car.jsxi:120
-			if (inner === undefined)                                               // cars_car.jsxi:120
-				inner = false;                                                     // cars_car.jsxi:120
+		Car.prototype.changeData = function (key, value, inner){                   // cars_car.jsxi:127
+			if (inner === undefined)                                               // cars_car.jsxi:127
+				inner = false;                                                     // cars_car.jsxi:127
 		
-			if (!this.data || this.data[key] == value)                             // cars_car.jsxi:121
+			if (!this.data || this.data[key] == value)                             // cars_car.jsxi:128
 				return;
 			
-			if (!value && (key === 'name' || key === 'brand'))                     // cars_car.jsxi:122
+			if (!value && (key === 'name' || key === 'brand'))                     // cars_car.jsxi:129
 				return;
 			
-			if (!inner){                                                           // cars_car.jsxi:124
+			if (!inner){                                                           // cars_car.jsxi:131
 				if (key === 'name' || key === 'brand' || key === 'class' || key === 'year' || key === 'country' || key === 'author' || key === 'version' || key === 'url'){
-					value = clearStr(value);                                       // cars_car.jsxi:128
+					value = clearStr(value);                                       // cars_car.jsxi:135
 				}
 				
-				if (key === 'name'){                                               // cars_car.jsxi:131
+				if (key === 'name'){                                               // cars_car.jsxi:138
 					if (Years.nameContains(value) && Years.fromName(this.data.name) == this.data.year){
 						this.changeData('year', Years.fromName(value), true);
 					}
@@ -2384,194 +2729,207 @@ var Cars = (function (){                                                        
 					}
 				}
 				
-				if (key === 'country'){                                            // cars_car.jsxi:141
-					var i = this.data.tags.map(function (arg){                     // cars_car.jsxi:142
-						return arg.toLowerCase();                                  // cars_car.jsxi:142
-					}).indexOf(this.data.country.toLowerCase());                   // cars_car.jsxi:142
+				if (key === 'country'){                                            // cars_car.jsxi:148
+					var i = this.data.tags.map(function (arg){                     // cars_car.jsxi:149
+						return arg.toLowerCase();                                  // cars_car.jsxi:149
+					}).indexOf(this.data.country.toLowerCase());                   // cars_car.jsxi:149
 					
-					if (i > - 1){                                                  // cars_car.jsxi:144
+					if (i > - 1){                                                  // cars_car.jsxi:151
 						var tags = this.data.tags.slice();
 						
-						tags[i] = value.toLowerCase();                             // cars_car.jsxi:146
+						if (value){                                                // cars_car.jsxi:153
+							tags[i] = value.toLowerCase();                         // cars_car.jsxi:154
+						} else {
+							tags.splice(i, 1);                                     // cars_car.jsxi:156
+						}
+						
 						this.changeData('tags', tags, true);
 					}
 				}
 				
-				if (key === 'brand'){                                              // cars_car.jsxi:151
-					if (Brands.nameContains(this.data.name, this.data.brand)){     // cars_car.jsxi:152
-						this.changeData('name',                                    // cars_car.jsxi:153
+				if (key === 'brand'){                                              // cars_car.jsxi:162
+					if (Brands.nameContains(this.data.name, this.data.brand)){     // cars_car.jsxi:163
+						this.changeData('name',                                    // cars_car.jsxi:164
 							value + this.data.name.substr(Brands.toNamePart(this.data.brand).length), 
 							true);
 					}
 				}
 				
-				if (key === 'year'){                                               // cars_car.jsxi:157
+				if (key === 'year'){                                               // cars_car.jsxi:168
 					value = value ? + ('' + value).replace(/[^\d]+/g, '') : null;
 					
-					if (value < 1800 || value > 2100)                              // cars_car.jsxi:159
+					if (value < 1800 || value > 2100)                              // cars_car.jsxi:170
 						return;
 					
-					if (Years.nameContains(this.data.name)){                       // cars_car.jsxi:161
-						if (this.data.name.substr(- 4) == this.data.year){         // cars_car.jsxi:162
-							this.data.name = this.data.name.slice(0, - 4) + value;
-						} else if (this.data.name.substr(- 2) == ('' + this.data.year).slice(2)){
-							this.data.name = this.data.name.slice(0, - 2) + ('' + value).slice(2);
-						}
+					if (Years.nameContains(this.data.name)){                       // cars_car.jsxi:172
+						this.changeData('name',                                    // cars_car.jsxi:173
+							this.data.name.slice(0, - 2) + ('' + value).slice(2), 
+							true);
+					} else if (Settings.get('yearAutoupdate')){                    // cars_car.jsxi:174
+						this.changeData('name', Years.addToName(this.data.name, value), true);
 					}
 				}
 				
-				if (Settings.get('uploadData')){                                   // cars_car.jsxi:170
-					AppServerRequest.sendData(this.id, key, value);                // cars_car.jsxi:171
+				if (Settings.get('uploadData')){                                   // cars_car.jsxi:179
+					AppServerRequest.sendData(this.id, key, value);                // cars_car.jsxi:180
 				}
 			}
 			
-			if (key === 'tags'){                                                   // cars_car.jsxi:175
+			if (key === 'tags'){                                                   // cars_car.jsxi:184
 				Cars.registerTags(value);
 			}
 			
-			if (key === 'brand'){                                                  // cars_car.jsxi:179
+			if (key === 'brand'){                                                  // cars_car.jsxi:188
 				Cars.registerBrand(value);
 			}
 			
-			if (key === 'class'){                                                  // cars_car.jsxi:183
+			if (key === 'class'){                                                  // cars_car.jsxi:192
 				Cars.registerClass(value);
 			}
 			
-			if (key === 'country'){                                                // cars_car.jsxi:187
+			if (key === 'country'){                                                // cars_car.jsxi:196
 				Cars.registerCountry(value);
 			}
 			
-			if (key === 'author'){                                                 // cars_car.jsxi:191
+			if (key === 'author'){                                                 // cars_car.jsxi:200
 				Cars.registerAuthor(value);
 			}
 			
-			this.data[key] = value;                                                // cars_car.jsxi:195
-			mediator.dispatch('update.car.data:' + key, this);                     // cars_car.jsxi:196
+			this.data[key] = value;                                                // cars_car.jsxi:204
+			mediator.dispatch('update.car.data:' + key, this);                     // cars_car.jsxi:205
 			
 			if (!this.changed){
 				this.changed = true;
-				mediator.dispatch('update.car.changed', this);                     // cars_car.jsxi:200
+				mediator.dispatch('update.car.changed', this);                     // cars_car.jsxi:209
 			}
 		};
-		Car.prototype.changeDataSpecs = function (key, value, inner){              // cars_car.jsxi:204
-			if (!this.data || this.data.specs[key] == value)                       // cars_car.jsxi:205
+		Car.prototype.changeDataSpecs = function (key, value, inner){              // cars_car.jsxi:213
+			if (!this.data || this.data.specs[key] == value)                       // cars_car.jsxi:214
 				return;
 			
-			value = clearStr(value);                                               // cars_car.jsxi:207
-			this.data.specs[key] = value;                                          // cars_car.jsxi:208
+			value = clearStr(value);                                               // cars_car.jsxi:216
+			this.data.specs[key] = value;                                          // cars_car.jsxi:217
 			
-			if (!inner){                                                           // cars_car.jsxi:210
-				if (key === 'weight' || key === 'bhp'){                            // cars_car.jsxi:211
+			if (!inner){                                                           // cars_car.jsxi:219
+				if (key === 'weight' || key === 'bhp'){                            // cars_car.jsxi:220
 					this.recalculatePwRatio();
 				}
 				
-				if (Settings.get('uploadData')){                                   // cars_car.jsxi:215
-					AppServerRequest.sendData(this.id, 'specs:' + key, value);     // cars_car.jsxi:216
+				if (Settings.get('uploadData')){                                   // cars_car.jsxi:224
+					AppServerRequest.sendData(this.id, 'specs:' + key, value);     // cars_car.jsxi:225
 				}
 			}
 			
-			mediator.dispatch('update.car.data:specs', this);                      // cars_car.jsxi:220
+			mediator.dispatch('update.car.data:specs', this);                      // cars_car.jsxi:229
 			
 			if (!this.changed){
 				this.changed = true;
-				mediator.dispatch('update.car.changed', this);                     // cars_car.jsxi:224
+				mediator.dispatch('update.car.changed', this);                     // cars_car.jsxi:233
 			}
 		};
-		Car.prototype.recalculatePwRatio = function (inner){                       // cars_car.jsxi:228
+		Car.prototype.recalculatePwRatio = function (inner){                       // cars_car.jsxi:237
 			var w = this.getSpec('weight'), p = this.getSpec('bhp');
 			
-			if (w && p){                                                           // cars_car.jsxi:231
+			if (w && p){                                                           // cars_car.jsxi:240
 				this.changeDataSpecs('pwratio', + (+ w / + p).toFixed(2) + 'kg/cv', inner);
 			}
 		};
-		Car.prototype.changeParent = function (parentId){                          // cars_car.jsxi:236
+		Car.prototype.changeParent = function (parentId){                          // cars_car.jsxi:245
 			if (!this.data || this.parent && this.parent.id == parentId || !this.parent && parentId == null)
 				return;
 			
-			if (this.children.length > 0)                                          // cars_car.jsxi:238
-				throw new Error('Children car cannot have childrens');             // cars_car.jsxi:238
+			if (this.children.length > 0)                                          // cars_car.jsxi:247
+				throw new Error('Children car cannot have childrens');             // cars_car.jsxi:247
 			
 			if (this.parent){
 				this.parent.children.splice(this.parent.children.indexOf(this), 1);
-				mediator.dispatch('update.car.children', this.parent);             // cars_car.jsxi:242
+				mediator.dispatch('update.car.children', this.parent);             // cars_car.jsxi:251
 			}
 			
-			if (parentId){                                                         // cars_car.jsxi:245
+			if (parentId){                                                         // cars_car.jsxi:254
 				var par = Cars.byName(parentId);
 				
-				if (!par)                                                          // cars_car.jsxi:247
-					throw new Error('Parent car "' + parentId + '" not found');    // cars_car.jsxi:247
+				if (!par)                                                          // cars_car.jsxi:256
+					throw new Error('Parent car "' + parentId + '" not found');    // cars_car.jsxi:256
 				
-				this.parent = par;                                                 // cars_car.jsxi:249
-				this.parent.children.push(this);                                   // cars_car.jsxi:250
-				mediator.dispatch('update.car.parent', this);                      // cars_car.jsxi:251
-				mediator.dispatch('update.car.children', this.parent);             // cars_car.jsxi:252
-				this.data.parent = this.parent.id;                                 // cars_car.jsxi:254
-				mediator.dispatch('update.car.data', this);                        // cars_car.jsxi:255
+				this.parent = par;                                                 // cars_car.jsxi:258
+				this.parent.children.push(this);                                   // cars_car.jsxi:259
+				mediator.dispatch('update.car.parent', this);                      // cars_car.jsxi:260
+				mediator.dispatch('update.car.children', this.parent);             // cars_car.jsxi:261
+				this.data.parent = this.parent.id;                                 // cars_car.jsxi:263
+				mediator.dispatch('update.car.data', this);                        // cars_car.jsxi:264
 			} else {
 				this.parent = null;
-				mediator.dispatch('update.car.parent', this);                      // cars_car.jsxi:258
-				delete this.data.parent;                                           // cars_car.jsxi:260
-				mediator.dispatch('update.car.data', this);                        // cars_car.jsxi:261
+				mediator.dispatch('update.car.parent', this);                      // cars_car.jsxi:267
+				delete this.data.parent;                                           // cars_car.jsxi:269
+				mediator.dispatch('update.car.data', this);                        // cars_car.jsxi:270
 			}
 			
 			this.changed = true;
-			mediator.dispatch('update.car.changed', this);                         // cars_car.jsxi:265
+			mediator.dispatch('update.car.changed', this);                         // cars_car.jsxi:274
 		};
-		Car.prototype.getSkin = function (skinId){                                 // cars_car.jsxi:268
-			for (var __5 = 0; __5 < this.skins.length; __5 ++){
-				var skin = this.skins[__5];
+		Car.prototype.getSkin = function (skinId){                                 // cars_car.jsxi:277
+			for (var __c = 0; __c < this.skins.length; __c ++){
+				var skin = this.skins[__c];
 				
-				if (skin.id === skinId){                                           // cars_car.jsxi:270
-					return skin;                                                   // cars_car.jsxi:271
+				if (skin.id === skinId){                                           // cars_car.jsxi:279
+					return skin;                                                   // cars_car.jsxi:280
 				}
 			}
 		};
-		Car.prototype.selectSkin = function (skinId){                              // cars_car.jsxi:276
+		Car.prototype.selectSkin = function (skinId){                              // cars_car.jsxi:285
 			if (!this.skins)
 				return;
 			
 			var newSkin = this.getSkin(skinId);
 			
-			if (newSkin == this.selectedSkin)                                      // cars_car.jsxi:280
+			if (newSkin == this.selectedSkin)                                      // cars_car.jsxi:289
 				return;
 			
-			this.selectedSkin = newSkin;                                           // cars_car.jsxi:282
-			mediator.dispatch('update.car.skins', this);                           // cars_car.jsxi:283
+			this.selectedSkin = newSkin;                                           // cars_car.jsxi:291
+			mediator.dispatch('update.car.skins', this);                           // cars_car.jsxi:292
 		};
-		Car.prototype.updateSkins = function (){                                   // cars_car.jsxi:286
-			gui.App.clearCache();                                                  // cars_car.jsxi:287
-			setTimeout((function (){                                               // cars_car.jsxi:288
-				mediator.dispatch('update.car.skins', this);                       // cars_car.jsxi:289
-			}).bind(this),                                                         // cars_car.jsxi:290
+		Car.prototype.updateSkins = function (){                                   // cars_car.jsxi:295
+			gui.App.clearCache();                                                  // cars_car.jsxi:296
+			setTimeout((function (){                                               // cars_car.jsxi:297
+				mediator.dispatch('update.car.skins', this);                       // cars_car.jsxi:298
+			}).bind(this),                                                         // cars_car.jsxi:299
 			100);
 		};
-		Car.prototype.updateBadge = function (){                                   // cars_car.jsxi:293
-			gui.App.clearCache();                                                  // cars_car.jsxi:294
-			setTimeout((function (){                                               // cars_car.jsxi:295
-				mediator.dispatch('update.car.badge', this);                       // cars_car.jsxi:296
-			}).bind(this),                                                         // cars_car.jsxi:297
+		Car.prototype.updateBadge = function (){                                   // cars_car.jsxi:302
+			gui.App.clearCache();                                                  // cars_car.jsxi:303
+			setTimeout((function (){                                               // cars_car.jsxi:304
+				mediator.dispatch('update.car.badge', this);                       // cars_car.jsxi:305
+			}).bind(this),                                                         // cars_car.jsxi:306
 			100);
 		};
-		Car.prototype.updateUpgrade = function (){                                 // cars_car.jsxi:300
-			gui.App.clearCache();                                                  // cars_car.jsxi:301
-			setTimeout((function (){                                               // cars_car.jsxi:302
-				mediator.dispatch('update.car.data', this);                        // cars_car.jsxi:303
-			}).bind(this),                                                         // cars_car.jsxi:304
+		Car.prototype.updateUpgrade = function (){                                 // cars_car.jsxi:309
+			gui.App.clearCache();                                                  // cars_car.jsxi:310
+			setTimeout((function (){                                               // cars_car.jsxi:311
+				mediator.dispatch('update.car.data', this);                        // cars_car.jsxi:312
+			}).bind(this),                                                         // cars_car.jsxi:313
 			100);
 		};
-		Car.prototype.save = function (){                                          // cars_car.jsxi:307
+		Car.prototype.save = function (){                                          // cars_car.jsxi:316
 			if (this.data){
 				var p = Object.clone(this.data);
 				
-				p.description = p.description.replace(/\n/g, '<br>');              // cars_car.jsxi:310
-				p.class = p.class.toLowerCase();                                   // cars_car.jsxi:311
-				fs.writeFileSync(this.json,                                        // cars_car.jsxi:312
+				p.description = p.description.replace(/\n/g, '<br>');              // cars_car.jsxi:319
+				p.class = p.class.toLowerCase();                                   // cars_car.jsxi:320
+				fs.writeFileSync(this.json,                                        // cars_car.jsxi:321
 					JSON.stringify(p, null, 
-						4));                                                       // cars_car.jsxi:312
+						4));                                                       // cars_car.jsxi:321
 				this.changed = false;
-				mediator.dispatch('update.car.changed', this);                     // cars_car.jsxi:314
+				mediator.dispatch('update.car.changed', this);                     // cars_car.jsxi:323
 			}
+		};
+		Car.prototype.exportDatabase = function (){                                // cars_car.jsxi:327
+			var dir = DataStorage.getUserContentDir('Details');
+			
+			var obj = Object.clone(this.data);
+			
+			delete obj.version;                                                    // cars_car.jsxi:330
+			fs.writeFileSync(dir + '/' + this.id + '.json', JSON.stringify(obj));
 		};
 		Car.prototype.loadBadge = function (callback){                             // cars_car_load.jsxi:4
 			var __that = this;
@@ -2584,7 +2942,7 @@ var Cars = (function (){                                                        
 			fs.exists(this.badge,                                                  // cars_car_load.jsxi:8
 				(function (result){                                                // cars_car_load.jsxi:8
 					if (!result){                                                  // cars_car_load.jsxi:9
-						__that.addError('badge-missing', 'Missing badge.png');
+						__that.addError('badge-missing', 'Missing ui/badge.png');
 					}
 					
 					__that.__Car__badgeLoaded = true;
@@ -2593,219 +2951,282 @@ var Cars = (function (){                                                        
 						callback();                                                // cars_car_load.jsxi:14
 				}).bind(this));                                                    // cars_car_load.jsxi:15
 		};
-		Car.prototype.loadSkins_stuff = function (callback){                       // cars_car_load.jsxi:18
+		Car.prototype.loadSfx = function (__callback){                             // cars_car_load.jsxi:19
+			var __that = this, 
+				e;
+			
+			var __block_0 = (function (){
+				__that.clearErrors('sfx');
+				
+				fs.exists(__that.path + ('/sfx/' + __that.id + '.bank'),           // cars_car_load.jsxi:22
+					function (__result){
+						e = __result;                                              // cars_car_load.jsxi:22
+						
+						__block_1()
+					})
+			}).bind(this);
+			
+			var __block_1 = (function (){
+				if (!e){                                                           // cars_car_load.jsxi:23
+					__that.addError('sfx-bank-missing', 'Missing sfx/' + __that.id + '.bank');
+					return __callback();
+				}
+				
+				Sfx.getSfxOriginal(__that.id,                                      // cars_car_load.jsxi:28
+					__that.path, 
+					function (__result){
+						__that.originalSfx = __result;
+						
+						__block_2()
+					})
+			}).bind(this);
+			
+			var __block_2 = (function (){
+				__that.__Car__sfxLoaded = true;
+				mediator.dispatch('update.car.sfx:original', this);                // cars_car_load.jsxi:31
+				
+				if (__callback)
+					__callback();
+			}).bind(this);
+			
+			__block_0();
+		};
+		Car.prototype.loadSkins_stuff = function (callback){                       // cars_car_load.jsxi:34
 			var __that = this, 
 				a = this.skins, i = 0;
 			
-			step();                                                                // cars_car_load.jsxi:20
+			step();                                                                // cars_car_load.jsxi:36
 			
-			function step(){                                                       // cars_car_load.jsxi:22
-				if (a != __that.skins){                                            // cars_car_load.jsxi:23
-					if (callback)                                                  // cars_car_load.jsxi:24
-						callback();                                                // cars_car_load.jsxi:24
-				} else if (i >= a.length){                                         // cars_car_load.jsxi:25
-					if (callback)                                                  // cars_car_load.jsxi:26
-						callback();                                                // cars_car_load.jsxi:26
+			function step(){                                                       // cars_car_load.jsxi:38
+				if (a != __that.skins){                                            // cars_car_load.jsxi:39
+					if (callback)                                                  // cars_car_load.jsxi:40
+						callback();                                                // cars_car_load.jsxi:40
+				} else if (i >= a.length){                                         // cars_car_load.jsxi:41
+					if (callback)                                                  // cars_car_load.jsxi:42
+						callback();                                                // cars_car_load.jsxi:42
 					
-					mediator.dispatch('update.car.skins:data', this);              // cars_car_load.jsxi:27
+					mediator.dispatch('update.car.skins:data', this);              // cars_car_load.jsxi:43
 				} else {
-					a[i ++].load(step);                                            // cars_car_load.jsxi:29
+					a[i ++].load(step);                                            // cars_car_load.jsxi:45
 				}
 			}
 		};
-		Car.prototype.loadSkins = function (callback){                             // cars_car_load.jsxi:34
+		Car.prototype.loadSkins = function (callback){                             // cars_car_load.jsxi:50
 			var __that = this;
 			
 			if (this.skins){
 				this.skins = null;
-				mediator.dispatch('update.car.skins', this);                       // cars_car_load.jsxi:37
-				gui.App.clearCache();                                              // cars_car_load.jsxi:38
+				mediator.dispatch('update.car.skins', this);                       // cars_car_load.jsxi:53
+				gui.App.clearCache();                                              // cars_car_load.jsxi:54
 			}
 			
 			this.clearErrors('skin');
 			this.clearErrors('skins');
 			
-			if (!fs.existsSync(this.skinsDir)){                                    // cars_car_load.jsxi:44
+			if (!fs.existsSync(this.skinsDir)){                                    // cars_car_load.jsxi:60
 				this.addError('skins-missing', 'Skins folder is missing');
 				
-				if (callback)                                                      // cars_car_load.jsxi:46
-					callback();                                                    // cars_car_load.jsxi:46
+				if (callback)                                                      // cars_car_load.jsxi:62
+					callback();                                                    // cars_car_load.jsxi:62
 				return;
 			}
 			
-			if (!fs.statSync(this.skinsDir).isDirectory()){                        // cars_car_load.jsxi:50
+			if (!fs.statSync(this.skinsDir).isDirectory()){                        // cars_car_load.jsxi:66
 				this.addError('skins-file', 'There is a file instead of skins folder', err);
 				
-				if (callback)                                                      // cars_car_load.jsxi:52
-					callback();                                                    // cars_car_load.jsxi:52
+				if (callback)                                                      // cars_car_load.jsxi:68
+					callback();                                                    // cars_car_load.jsxi:68
 				return;
 			}
 			
-			fs.readdir(this.skinsDir,                                              // cars_car_load.jsxi:56
-				(function (err, result){                                           // cars_car_load.jsxi:56
+			fs.readdir(this.skinsDir,                                              // cars_car_load.jsxi:72
+				(function (err, result){                                           // cars_car_load.jsxi:72
 					__that.skins = false;
 					
-					if (err){                                                      // cars_car_load.jsxi:59
+					if (err){                                                      // cars_car_load.jsxi:75
 						__that.addError('skins-access', 'Cannot access skins', err);
 					} else {
-						result = result.filter(function (e){                       // cars_car_load.jsxi:62
+						result = result.filter(function (e){                       // cars_car_load.jsxi:78
 							return fs.statSync(__that.path + '/skins/' + e).isDirectory();
 						});
 						
-						if (__that.skins.length === 0){                            // cars_car_load.jsxi:66
+						if (__that.skins.length === 0){                            // cars_car_load.jsxi:82
 							__that.addError('skins-empty', 'Skins folder is empty');
 						} else {
-							__that.skins = result.map((function (e){               // cars_car_load.jsxi:69
-								return new CarSkin(this, e);                       // cars_car_load.jsxi:70
-							}).bind(this));                                        // cars_car_load.jsxi:71
+							__that.skins = result.map((function (e){               // cars_car_load.jsxi:85
+								return new CarSkin(this, e);                       // cars_car_load.jsxi:86
+							}).bind(this));                                        // cars_car_load.jsxi:87
 							
 							var index = 0;
 							
 							if (__that.selectedSkin){
-								for (var i = 0; i < __that.skins.length; i ++){    // cars_car_load.jsxi:75
+								for (var i = 0; i < __that.skins.length; i ++){    // cars_car_load.jsxi:91
 									var s = __that.skins[i];
 									
-									if (s.id === __that.selectedSkin.id){          // cars_car_load.jsxi:76
-										index = i;                                 // cars_car_load.jsxi:77
+									if (s.id === __that.selectedSkin.id){          // cars_car_load.jsxi:92
+										index = i;                                 // cars_car_load.jsxi:93
 										
 										break;
 									}
 								}
 							}
 							
-							__that.selectedSkin = __that.skins[index];             // cars_car_load.jsxi:83
-							mediator.dispatch('update.car.skins', this);           // cars_car_load.jsxi:84
+							__that.selectedSkin = __that.skins[index];             // cars_car_load.jsxi:99
+							mediator.dispatch('update.car.skins', this);           // cars_car_load.jsxi:100
 							__that.loadSkins_stuff(callback);
 							return;
 						}
 					}
 					
-					if (callback)                                                  // cars_car_load.jsxi:90
-						callback();                                                // cars_car_load.jsxi:90
-				}).bind(this));                                                    // cars_car_load.jsxi:91
+					if (callback)                                                  // cars_car_load.jsxi:106
+						callback();                                                // cars_car_load.jsxi:106
+				}).bind(this));                                                    // cars_car_load.jsxi:107
 		};
-		Car.prototype.loadData = function (callback){                              // cars_car_load.jsxi:94
+		Car.prototype.loadData = function (callback){                              // cars_car_load.jsxi:110
 			var __that = this;
 			
 			if (this.data){
 				this.data = null;
-				mediator.dispatch('update.car.data', this);                        // cars_car_load.jsxi:97
+				mediator.dispatch('update.car.data', this);                        // cars_car_load.jsxi:113
 			}
 			
 			if (this.parent){
 				this.parent.children.splice(this.parent.children.indexOf(this), 1);
-				mediator.dispatch('update.car.children', this.parent);             // cars_car_load.jsxi:102
+				mediator.dispatch('update.car.children', this.parent);             // cars_car_load.jsxi:118
 				this.parent = null;
-				mediator.dispatch('update.car.parent', this);                      // cars_car_load.jsxi:104
+				mediator.dispatch('update.car.parent', this);                      // cars_car_load.jsxi:120
 			}
 			
 			this.clearErrors('data');
 			this.clearErrors('parent');
 			
-			if (!fs.existsSync(this.json)){                                        // cars_car_load.jsxi:110
-				if (fs.existsSync(this.json + '.disabled')){                       // cars_car_load.jsxi:111
-					fs.renameSync(this.json + '.disabled', this.json);             // cars_car_load.jsxi:112
+			if (!fs.existsSync(this.json)){                                        // cars_car_load.jsxi:126
+				if (fs.existsSync(this.json + '.disabled')){                       // cars_car_load.jsxi:127
+					fs.renameSync(this.json + '.disabled', this.json);             // cars_car_load.jsxi:128
 				} else {
 					if (this.changed){
 						this.changed = false;
-						mediator.dispatch('update.car.changed', this);             // cars_car_load.jsxi:116
+						mediator.dispatch('update.car.changed', this);             // cars_car_load.jsxi:132
 					}
 					
 					this.data = false;
 					this.addError('data-missing', 'Missing ui_car.json');
-					mediator.dispatch('update.car.data', this);                    // cars_car_load.jsxi:121
+					mediator.dispatch('update.car.data', this);                    // cars_car_load.jsxi:137
 					
-					if (callback)                                                  // cars_car_load.jsxi:122
-						callback();                                                // cars_car_load.jsxi:122
+					if (callback)                                                  // cars_car_load.jsxi:138
+						callback();                                                // cars_car_load.jsxi:138
 					return;
 				}
 			}
 			
-			fs.readFile(this.json,                                                 // cars_car_load.jsxi:127
-				(function (err, result){                                           // cars_car_load.jsxi:127
+			fs.readFile(this.json,                                                 // cars_car_load.jsxi:143
+				(function (err, result){                                           // cars_car_load.jsxi:143
 					if (__that.changed){
 						__that.changed = false;
-						mediator.dispatch('update.car.changed', this);             // cars_car_load.jsxi:130
+						mediator.dispatch('update.car.changed', this);             // cars_car_load.jsxi:146
 					}
 					
-					if (err){                                                      // cars_car_load.jsxi:133
+					if (err){                                                      // cars_car_load.jsxi:149
 						__that.data = false;
 						__that.addError('data-access', 'Unavailable ui_car.json', err);
 					} else {
-						var dat = parseLoadedData(result.toString()),              // cars_car_load.jsxi:137
-							err = dat instanceof Error && dat;                     // cars_car_load.jsxi:138
+						var dat = parseLoadedData(result.toString()),              // cars_car_load.jsxi:153
+							err = dat instanceof Error && dat;                     // cars_car_load.jsxi:154
 						
 						__that.data = false;
 						
-						if (err || !dat){                                          // cars_car_load.jsxi:141
+						if (err || !dat){                                          // cars_car_load.jsxi:157
 							__that.addError('data-damaged', 'Damaged ui_car.json', err);
-						} else if (!dat.name){                                     // cars_car_load.jsxi:143
+						} else if (!dat.name){                                     // cars_car_load.jsxi:159
 							__that.addError('data-name-missing', 'Name is missing');
-						} else if (!dat.brand){                                    // cars_car_load.jsxi:145
+						} else if (!dat.brand){                                    // cars_car_load.jsxi:161
 							__that.addError('data-brand-missing', 'Brand is missing');
 						} else {
-							__that.data = dat;                                     // cars_car_load.jsxi:148
+							__that.data = dat;                                     // cars_car_load.jsxi:164
 							
-							if (!__that.data.description)                          // cars_car_load.jsxi:149
-								__that.data.description = '';                      // cars_car_load.jsxi:149
+							if (!__that.data.description)                          // cars_car_load.jsxi:165
+								__that.data.description = '';                      // cars_car_load.jsxi:165
 							
-							if (!__that.data.tags)                                 // cars_car_load.jsxi:150
-								__that.data.tags = [];                             // cars_car_load.jsxi:150
+							if (!__that.data.tags)                                 // cars_car_load.jsxi:166
+								__that.data.tags = [];                             // cars_car_load.jsxi:166
 							
-							if (!__that.data.specs)                                // cars_car_load.jsxi:151
-								__that.data.specs = {};                            // cars_car_load.jsxi:151
+							if (!__that.data.specs)                                // cars_car_load.jsxi:167
+								__that.data.specs = {};                            // cars_car_load.jsxi:167
 							
-							__that.data.name = __that.data.name.trim();            // cars_car_load.jsxi:153
-							__that.data.brand = __that.data.brand.trim();          // cars_car_load.jsxi:154
+							__that.data.name = __that.data.name.trim();            // cars_car_load.jsxi:169
+							__that.data.brand = __that.data.brand.trim();          // cars_car_load.jsxi:170
 							__that.data.class = (__that.data.class || '').trim();
 							__that.data.description = __that.data.description.replace(/\n/g, ' ').replace(/<\/?br\/?>[ \t]*|\n[ \t]+/g, '\n').replace(/<\s*\/?\s*\w+\s*>/g, '').replace(/[\t ]+/g, ' ').decodeHtmlEntities();
 							
 							if (__that.data.year == null && Years.nameContains(__that.data.name)){
 								__that.data.year = Years.fromName(__that.data.name);
-							}
-							
-							if (__that.data.country == null){                      // cars_car_load.jsxi:164
-								{
-									var __7 = __that.data.tags;
-									
-									for (var __6 = 0; __6 < __7.length; __6 ++){
-										var tag = __7[__6];
-										
-										var c = Countries.fromTag(tag);
-										
-										if (c == null)                             // cars_car_load.jsxi:167
-											c = Countries.fromBrand(__that.data.brand);
-										
-										if (c != null)                             // cars_car_load.jsxi:168
-											__that.data.country = c;               // cars_car_load.jsxi:168
-									}
-									
-									__7 = undefined;
+								
+								if (__that.data.year == null){                     // cars_car_load.jsxi:179
+									__that.data.year = Years.fromDatabase(__that.id);
 								}
 							}
 							
-							if (__that.data.author == null){                       // cars_car_load.jsxi:172
-								__that.data.author = Authors.fromId(__that.id);    // cars_car_load.jsxi:173
+							if (__that.data.year != null && Settings.get('yearAutoupdate') && !Years.nameContains(__that.data.name)){
+								__that.data.name = Years.addToName(__that.data.name, __that.data.year);
+								__that.changed = true;
+								mediator.dispatch('update.car.changed', this);     // cars_car_load.jsxi:187
 							}
 							
-							if (__that.data.parent != null){                       // cars_car_load.jsxi:176
-								if (__that.data.parent == __that.id){              // cars_car_load.jsxi:177
+							if (__that.data.country == null){                      // cars_car_load.jsxi:190
+								{
+									var __e = __that.data.tags;
+									
+									for (var __d = 0; __d < __e.length; __d ++){
+										var tag = __e[__d];
+										
+										__that.data.country = Countries.fromTag(tag);
+										
+										if (__that.data.country != null)           // cars_car_load.jsxi:193
+											break;
+									}
+									
+									__e = undefined;
+								}
+								
+								if (__that.data.country == null){                  // cars_car_load.jsxi:196
+									__that.data.country = Countries.fromDatabase(__that.id);
+								}
+								
+								if (__that.data.country == null){                  // cars_car_load.jsxi:200
+									__that.data.country = Countries.fromBrand(__that.data.brand);
+								}
+							}
+							
+							if (__that.data.author == null){                       // cars_car_load.jsxi:205
+								__that.data.author = Authors.fromId(__that.id);    // cars_car_load.jsxi:206
+								
+								if (__that.data.author == null){                   // cars_car_load.jsxi:208
+									__that.data.author = Authors.fromDatabase(__that.id);
+								}
+							}
+							
+							if (__that.data.url == null){                          // cars_car_load.jsxi:213
+								__that.data.url = Urls.fromDatabase(__that.id);    // cars_car_load.jsxi:214
+							}
+							
+							if (__that.data.parent != null){                       // cars_car_load.jsxi:217
+								if (__that.data.parent == __that.id){              // cars_car_load.jsxi:218
 									__that.addError('parent-wrong', 'Car cannot be parent to itself');
 								} else {
 									var par = Cars.byName(__that.data.parent);
 									
-									if (par == null){                              // cars_car_load.jsxi:181
+									if (par == null){                              // cars_car_load.jsxi:222
 										__that.addError('parent-missing', 'Parent is missing');
-									} else if (par.parent){                        // cars_car_load.jsxi:183
+									} else if (par.parent){                        // cars_car_load.jsxi:224
 										__that.addError('parent-wrong', 'Parent is child');
 									} else {
-										__that.parent = par;                       // cars_car_load.jsxi:187
-										__that.parent.children.push(this);         // cars_car_load.jsxi:188
+										__that.parent = par;                       // cars_car_load.jsxi:228
+										__that.parent.children.push(this);         // cars_car_load.jsxi:229
 										mediator.dispatch('update.car.parent', this);
 										mediator.dispatch('update.car.children', __that.parent);
 									}
 									
-									if (!fs.existsSync(__that.upgrade)){           // cars_car_load.jsxi:194
+									if (!fs.existsSync(__that.upgrade)){           // cars_car_load.jsxi:235
 										__that.addError('parent-upgrade-missing', 'Missing upgrade.png');
 									}
 								}
@@ -2819,65 +3240,90 @@ var Cars = (function (){                                                        
 						}
 					}
 					
-					mediator.dispatch('update.car.data', this);                    // cars_car_load.jsxi:208
+					mediator.dispatch('update.car.data', this);                    // cars_car_load.jsxi:249
 					
-					if (callback)                                                  // cars_car_load.jsxi:209
-						callback();                                                // cars_car_load.jsxi:209
-				}).bind(this));                                                    // cars_car_load.jsxi:210
+					if (callback)                                                  // cars_car_load.jsxi:250
+						callback();                                                // cars_car_load.jsxi:250
+				}).bind(this));                                                    // cars_car_load.jsxi:251
 		};
-		Car.prototype.load = function (callback){                                  // cars_car_load.jsxi:213
-			this.clearErrors();
-			this.loadBadge();
-			this.loadSkins();
-			this.loadData(callback);
+		Car.prototype.load = function (__callback){                                // cars_car_load.jsxi:254
+			var __that = this, 
+				__block_0 = (function (){
+					__that.clearErrors();
+					
+					__that.loadBadge(__block_1)
+				}).bind(this);
+			
+			var __block_1 = (function (){
+				__that.loadSfx(__block_2)
+			}).bind(this);
+			
+			var __block_2 = (function (){
+				__that.loadSkins(__block_3)
+			}).bind(this);
+			
+			var __block_3 = (function (){
+				__that.loadData(__block_4)
+			}).bind(this);
+			
+			var __block_4 = (function (){
+				if (__callback)
+					__callback();
+			}).bind(this);
+			
+			__block_0();
 		};
-		Car.prototype.reload = function (callback){                                // cars_car_load.jsxi:220
-			this.clearErrors();
-			this.loadBadge();
-			this.loadSkins();
-			this.loadData(callback);
+		Car.prototype.reload = function (callback){                                // cars_car_load.jsxi:262
+			this.load(callback);
 		};
-		Car.prototype.loadEnsure = function (callback){                            // cars_car_load.jsxi:230
+		Car.prototype.loadEnsure = function (callback){                            // cars_car_load.jsxi:269
 			var __that = this;
 			
-			function s1(){                                                         // cars_car_load.jsxi:231
+			function s1(){                                                         // cars_car_load.jsxi:270
 				if (!__that.__Car__badgeLoaded)
 					__that.loadBadge(s2);
 				else
-					s2();                                                          // cars_car_load.jsxi:231
+					s2();                                                          // cars_car_load.jsxi:270
 			}
 			
-			function s2(){                                                         // cars_car_load.jsxi:232
-				if (__that.skins == null)
-					__that.loadSkins(s3);
+			function s2(){                                                         // cars_car_load.jsxi:271
+				if (!__that.__Car__sfxLoaded)
+					__that.loadSfx(s3);
 				else
-					s3();                                                          // cars_car_load.jsxi:232
+					s3();                                                          // cars_car_load.jsxi:271
 			}
 			
-			function s3(){                                                         // cars_car_load.jsxi:233
+			function s3(){                                                         // cars_car_load.jsxi:272
+				if (__that.skins == null)
+					__that.loadSkins(s4);
+				else
+					s4();                                                          // cars_car_load.jsxi:272
+			}
+			
+			function s4(){                                                         // cars_car_load.jsxi:273
 				if (__that.data == null)
 					__that.loadData(callback);
-				else if (callback)                                                 // cars_car_load.jsxi:233
-					callback();                                                    // cars_car_load.jsxi:233
+				else if (callback)                                                 // cars_car_load.jsxi:273
+					callback();                                                    // cars_car_load.jsxi:273
 			}
 			
-			s1();                                                                  // cars_car_load.jsxi:234
+			s1();                                                                  // cars_car_load.jsxi:274
 		};
-		Car.prototype.testAcd = function (callback){                               // cars_car_load.jsxi:237
+		Car.prototype.testAcd = function (callback){                               // cars_car_load.jsxi:277
 			var __that = this;
 			
-			if (this.data && this.data.author === 'Kunos')                         // cars_car_load.jsxi:238
-				return callback();                                                 // cars_car_load.jsxi:238
+			if (this.data && this.data.author === 'Kunos')                         // cars_car_load.jsxi:278
+				return callback();                                                 // cars_car_load.jsxi:278
 			
 			this.clearErrors('acd');
-			AcTools.Utils.DataFixer.TestData(this.path,                            // cars_car_load.jsxi:240
+			AcTools.Utils.DataFixer.TestData(this.path,                            // cars_car_load.jsxi:280
 				this.getSpec('weight') || 0, 
-				function (arg){                                                    // cars_car_load.jsxi:240
+				function (arg){                                                    // cars_car_load.jsxi:280
 					__that.addError(arg, _messages[arg] || 'Undeclared error: “' + arg + '”');
 				}, 
-				function (arg){                                                    // cars_car_load.jsxi:242
-					if (callback)                                                  // cars_car_load.jsxi:243
-						setTimeout(callback);                                      // cars_car_load.jsxi:243
+				function (arg){                                                    // cars_car_load.jsxi:282
+					if (callback)                                                  // cars_car_load.jsxi:283
+						setTimeout(callback);                                      // cars_car_load.jsxi:283
 				});
 		};
 		Object.defineProperty(Car.prototype, 
@@ -2915,11 +3361,22 @@ var Cars = (function (){                                                        
 					return this.data && this.data.name || this.id;                 // cars_car.jsxi:13
 				})
 			});
+		Object.defineProperty(Car.prototype, 
+			'originalSfxDisplayName', 
+			{
+				get: (function (){
+					if (!this.originalSfx)
+						return '';                                                 // cars_car.jsxi:25
+					
+					var c = Cars.byId(this.originalSfx);
+					return c && c.displayName || this.originalSfx;                 // cars_car.jsxi:27
+				})
+			});
 		
-		function clearStr(str){                                                    // cars_car.jsxi:115
-			if (typeof str !== 'string')                                           // cars_car.jsxi:116
+		function clearStr(str){                                                    // cars_car.jsxi:122
+			if (typeof str !== 'string')                                           // cars_car.jsxi:123
 				return;
-			return str.trim().replace(/\s+/g, ' ');                                // cars_car.jsxi:117
+			return str.trim().replace(/\s+/g, ' ');                                // cars_car.jsxi:124
 		}
 		return Car;
 	})();
@@ -3010,7 +3467,8 @@ var Cars = (function (){                                                        
 		}).bind(this);
 		
 		var __block_3 = (function (){
-			__callback();
+			if (__callback)
+				__callback();
 		}).bind(this);
 		
 		__block_0();
@@ -3055,32 +3513,32 @@ var Cars = (function (){                                                        
 		'list', 
 		{
 			get: (function (){
-				return _list;                                                      // cars.jsxi:32
+				return _list;                                                      // cars.jsxi:33
 			})
 		});
 	Object.defineProperty(Cars,                                                    // cars.jsxi:1
 		'brands', 
 		{
 			get: (function (){
-				return _brands.list;                                               // cars.jsxi:33
+				return _brands.list;                                               // cars.jsxi:34
 			})
 		});
 	Object.defineProperty(Cars,                                                    // cars.jsxi:1
 		'classes', 
 		{
 			get: (function (){
-				return _classes.list;                                              // cars.jsxi:34
+				return _classes.list;                                              // cars.jsxi:35
 			})
 		});
 	Object.defineProperty(Cars,                                                    // cars.jsxi:1
 		'tags', 
 		{
 			get: (function (){
-				return _tags.list;                                                 // cars.jsxi:35
+				return _tags.list;                                                 // cars.jsxi:36
 			})
 		});
-	(function (){                                                                  // cars.jsxi:218
-		mediator.extend(Cars);                                                     // cars.jsxi:219
+	(function (){                                                                  // cars.jsxi:253
+		mediator.extend(Cars);                                                     // cars.jsxi:254
 	})();
 	return Cars;
 })();
@@ -3094,43 +3552,224 @@ var Cars = (function (){                                                        
 /* Class "DataStorage" declaration */
 var DataStorage = (function (){                                                    // data.jsxi:1
 	var DataStorage = function (){}, 
-		_storage, _downloads;
+		_contentDir,                                                               // data.jsxi:2
+		_userContentDir,                                                           // data.jsxi:2
+		_downloadsDir;                                                             // data.jsxi:2
 	
-	DataStorage.getDataDir = function (id){                                        // data.jsxi:4
-		return mkdir(_storage + '/' + id);                                         // data.jsxi:5
+	DataStorage.getContentDir = function (id){                                     // data.jsxi:4
+		return id ? mkdir(_contentDir + '/' + id) : _contentDir;                   // data.jsxi:5
 	};
-	DataStorage.getDownloadsDir = function (id){                                   // data.jsxi:8
-		return id ? mkdir(_downloads + '/' + id) : _downloads;                     // data.jsxi:9
+	DataStorage.getUserContentDir = function (id){                                 // data.jsxi:8
+		return id ? mkdir(_userContentDir + '/' + id) : _userContentDir;           // data.jsxi:9
 	};
+	DataStorage.getDownloadsDir = function (id){                                   // data.jsxi:12
+		return id ? mkdir(_downloadsDir + '/' + id) : _downloadsDir;               // data.jsxi:13
+	};
+	DataStorage.getDownloadsTemp = function (id){                                  // data.jsxi:16
+		if (id === undefined)                                                      // data.jsxi:16
+			id = 'tmp';                                                            // data.jsxi:16
 	
-	function mkdir(p){                                                             // data.jsxi:12
-		if (!fs.existsSync(p)){                                                    // data.jsxi:13
-			fs.mkdirSync(p);                                                       // data.jsxi:14
+		return _downloadsDir + '/' + ('__' + id + '_' + Date.now() + '~tmp');      // data.jsxi:17
+	};
+	DataStorage.getContentFile = function (id, file){                              // data.jsxi:20
+		var userOverride = _userContentDir + '/' + id + '/' + file;
+		
+		if (fs.existsSync(userOverride))                                           // data.jsxi:22
+			return userOverride;                                                   // data.jsxi:22
+		
+		var contentFile = _contentDir + '/' + id + '/' + file;
+		
+		if (fs.existsSync(contentFile))                                            // data.jsxi:25
+			return contentFile;                                                    // data.jsxi:25
+		return null;
+	};
+	DataStorage.readContentFile = function (id, file){                             // data.jsxi:30
+		var filename = DataStorage.getContentFile(id, file);
+		return filename ? fs.readFileSync(filename) : null;                        // data.jsxi:32
+	};
+	DataStorage.readContentJsonFile = function (id, file){                         // data.jsxi:35
+		var content = DataStorage.readContentFile(id, file);
+		return content ? JSON.parse('' + content) : null;                          // data.jsxi:37
+	};
+	DataStorage.readContentDir = function (id, extension){                         // data.jsxi:40
+		extension = '.' + extension;                                               // data.jsxi:41
+		
+		var dir = DataStorage.getContentDir(id);
+		
+		var result = {};
+		
+		{
+			var __g = fs.readdirSync(dir);
+			
+			for (var __f = 0; __f < __g.length; __f ++){
+				var file = __g[__f];
+				
+				if (file.substr(file.length - extension.length) === extension){    // data.jsxi:47
+					result[file.substr(0, file.length - extension.length)] = dir + '/' + file;
+				}
+			}
+			
+			__g = undefined;
 		}
-		return p;                                                                  // data.jsxi:16
+		
+		dir = DataStorage.getUserContentDir(id);                                   // data.jsxi:52
+		
+		{
+			var __i = fs.readdirSync(dir);
+			
+			for (var __h = 0; __h < __i.length; __h ++){
+				var file = __i[__h];
+				
+				if (file.substr(file.length - extension.length) === extension){    // data.jsxi:54
+					result[file.substr(0, file.length - extension.length)] = dir + '/' + file;
+				}
+			}
+			
+			__i = undefined;
+		}
+		return result;                                                             // data.jsxi:59
+	};
+	
+	function mkdir(p){                                                             // data.jsxi:62
+		if (!fs.existsSync(p)){                                                    // data.jsxi:63
+			fs.mkdirSync(p);                                                       // data.jsxi:64
+		}
+		return p;                                                                  // data.jsxi:66
 	}
 	
-	(function (){                                                                  // data.jsxi:19
-		mkdir(gui.App.dataPath);                                                   // data.jsxi:20
-		_storage = mkdir(path.join(gui.App.dataPath, 'Data Storage'));             // data.jsxi:21
-		_downloads = mkdir(path.join(gui.App.dataPath, 'Downloads'));              // data.jsxi:22
+	DataStorage.isEmpty = function (){                                             // data.jsxi:69
+		return fs.readdirSync(_contentDir).length === 0;                           // data.jsxi:70
+	};
+	(function (){                                                                  // data.jsxi:73
+		mkdir(gui.App.dataPath);                                                   // data.jsxi:74
+		_contentDir = mkdir(path.join(gui.App.dataPath, 'Data Storage'));          // data.jsxi:75
+		_userContentDir = mkdir(path.join(gui.App.dataPath, 'Data Storage (User)'));
+		_downloadsDir = mkdir(path.join(gui.App.dataPath, 'Downloads'));           // data.jsxi:77
+		
+		{
+			var __k = fs.readdirSync(_downloadsDir);
+			
+			for (var __j = 0; __j < __k.length; __j ++){
+				var file = __k[__j];
+				
+				if (/^__.+~tmp$/.test(file)){                                      // data.jsxi:80
+					fs.unlinkSync(_downloadsDir + '/' + file);                     // data.jsxi:81
+				}
+			}
+			
+			__k = undefined;
+		}
 	})();
 	return DataStorage;
 })();
 
 /* Class "Data" declaration */
-var Data = (function (){                                                           // data.jsxi:26
+var Data = (function (){                                                           // data.jsxi:87
 	var Data = function (){}, 
-		mediator = new Mediator(),                                                 // data.jsxi:27
-		_dataDir = DataStorage.getDataDir('Details'),                              // data.jsxi:29
-		_userBadgesDir = DataStorage.getDataDir('Badges (User)'),                  // data.jsxi:30
-		_builtInVersion = 6;                                                       // data.jsxi:32
+		mediator = new Mediator(),                                                 // data.jsxi:88
+		_builtInVersion = 24,                                                      // data.jsxi:90
+		_scheduled;                                                                // data.jsxi:177
 	
-	function init(){}
+	function installBuiltIn(){                                                     // data.jsxi:95
+		console.time('installation');                                              // data.jsxi:96
+		
+		try {
+			fs.removeDirSync(DataStorage.getContentDir(), false);                  // data.jsxi:98
+			fs.copyDirRecursiveSync('content', DataStorage.getContentDir());       // data.jsxi:99
+		} catch (err){                                                             // data.jsxi:100
+			throw new Error('Installation failed', err);                           // data.jsxi:101
+		} finally {
+			console.timeEnd('installation');                                       // data.jsxi:103
+		}
+	}
 	
-	(function (){                                                                  // data.jsxi:38
-		$(init);                                                                   // data.jsxi:39
-		mediator.extend(Data);                                                     // data.jsxi:40
+	function installUpdate(data){                                                  // data.jsxi:107
+		mediator.dispatch('install:start');                                        // data.jsxi:108
+		
+		var tmpFile = DataStorage.getDownloadsTemp();
+		
+		Downloader.download(data.url,                                              // data.jsxi:111
+			tmpFile,                                                               // data.jsxi:111
+			function (arg){                                                        // data.jsxi:111
+				if (arg){                                                          // data.jsxi:112
+					mediator.dispatch('install:failed', arg);                      // data.jsxi:113
+				} else {
+					var d = DataStorage.getContentDir();
+					
+					fs.removeDirSync(d, false);                                    // data.jsxi:116
+					AcTools.Utils.FileUtils.Unzip(tmpFile, d);                     // data.jsxi:117
+					Data.__Data__currentVersion = data.version;                    // data.jsxi:119
+					mediator.dispatch('install:ready');                            // data.jsxi:120
+					mediator.dispatch('update');                                   // data.jsxi:121
+					Notification.info('Database Updated', 'New version: ' + data.version);
+				}
+				
+				Data.scheduleCheckUpdate();
+			});
+	}
+	
+	function init(){                                                               // data.jsxi:130
+		if (Data.__Data__currentVersion < _builtInVersion || DataStorage.isEmpty()){
+			mediator.dispatch('install:start');                                    // data.jsxi:132
+			setTimeout(function (){                                                // data.jsxi:134
+				installBuiltIn();                                                  // data.jsxi:135
+				Data.__Data__currentVersion = _builtInVersion;                     // data.jsxi:136
+				mediator.dispatch('install:ready');                                // data.jsxi:137
+				mediator.dispatch('update');                                       // data.jsxi:138
+				Data.checkUpdate();
+			}, 
+			100);
+		} else {
+			mediator.dispatch('update');                                           // data.jsxi:142
+			Data.checkUpdate();
+		}
+	}
+	
+	Data.checkUpdate = function (){                                                // data.jsxi:147
+		clearTimeout(_scheduled);                                                  // data.jsxi:148
+		
+		if (!Settings.get('updateDatabase')){                                      // data.jsxi:150
+			Data.scheduleCheckUpdate();
+			return;
+		}
+		
+		mediator.dispatch('check:start');                                          // data.jsxi:155
+		AppServerRequest.checkContentUpdate(Data.__Data__currentVersion,           // data.jsxi:157
+			function (err, data){                                                  // data.jsxi:157
+				if (err){                                                          // data.jsxi:158
+					console.warn(err);                                             // data.jsxi:159
+					mediator.dispatch('check:failed');                             // data.jsxi:160
+					Data.scheduleCheckUpdate();
+					return;
+				}
+				
+				if (data){                                                         // data.jsxi:165
+					Notification.info('Database Update Is Available', 'Downloading in process...');
+					installUpdate(data);                                           // data.jsxi:168
+					mediator.dispatch('check:done:found');                         // data.jsxi:169
+				} else {
+					mediator.dispatch('check:done');                               // data.jsxi:171
+					Data.scheduleCheckUpdate();
+				}
+			});
+	};
+	Data.scheduleCheckUpdate = function (){                                        // data.jsxi:178
+		clearTimeout(_scheduled);                                                  // data.jsxi:179
+		_scheduled = setTimeout(Data.checkUpdate, 2.5 * 3.6e6);                    // data.jsxi:180
+	};
+	Object.defineProperty(Data,                                                    // data.jsxi:87
+		'__Data__currentVersion', 
+		{
+			get: (function (){
+				return + (localStorage.installedDataVersion || - 1);               // data.jsxi:92
+			}), 
+			set: (function (arg){
+				return localStorage.installedDataVersion = arg;                    // data.jsxi:93
+			})
+		});
+	(function (){                                                                  // data.jsxi:183
+		$(init);                                                                   // data.jsxi:184
+		mediator.extend(Data);                                                     // data.jsxi:185
 	})();
 	return Data;
 })();
@@ -3162,205 +3801,83 @@ var Datalists = (function (){                                                   
 })();
 
 /* Class "Authors" declaration */
-function Authors(){}
-Authors.fromId = function (id){                                                    // data_authors.jsxi:2
-	switch (id.toLowerCase()){                                                     // data_authors.jsxi:4
-		case 'abarth500':                                                          // data_authors.jsxi:5
-			
-		case 'abarth500_s1':                                                       // data_authors.jsxi:6
-			
-		case 'alfa_romeo_giulietta_qv':                                            // data_authors.jsxi:7
-			
-		case 'alfa_romeo_giulietta_qv_le':                                         // data_authors.jsxi:8
-			
-		case 'bmw_1m':                                                             // data_authors.jsxi:9
-			
-		case 'bmw_1m_s3':                                                          // data_authors.jsxi:10
-			
-		case 'bmw_m3_e30':                                                         // data_authors.jsxi:11
-			
-		case 'bmw_m3_e30_s1':                                                      // data_authors.jsxi:12
-			
-		case 'bmw_m3_e30_drift':                                                   // data_authors.jsxi:13
-			
-		case 'bmw_m3_e30_dtm':                                                     // data_authors.jsxi:14
-			
-		case 'bmw_m3_e30_gra':                                                     // data_authors.jsxi:15
-			
-		case 'bmw_m3_e92':                                                         // data_authors.jsxi:16
-			
-		case 'bmw_m3_e92_s1':                                                      // data_authors.jsxi:17
-			
-		case 'bmw_m3_e92_drift':                                                   // data_authors.jsxi:18
-			
-		case 'bmw_m3_gt2':                                                         // data_authors.jsxi:19
-			
-		case 'bmw_z4':                                                             // data_authors.jsxi:20
-			
-		case 'bmw_z4_s1':                                                          // data_authors.jsxi:21
-			
-		case 'bmw_z4_drift':                                                       // data_authors.jsxi:22
-			
-		case 'bmw_z4_gt3':                                                         // data_authors.jsxi:23
-			
-		case 'ferrari_312t':                                                       // data_authors.jsxi:24
-			
-		case 'ferrari_458':                                                        // data_authors.jsxi:25
-			
-		case 'ferrari_458_gt2':                                                    // data_authors.jsxi:26
-			
-		case 'ferrari_458_s3':                                                     // data_authors.jsxi:27
-			
-		case 'ferrari_599xxevo':                                                   // data_authors.jsxi:28
-			
-		case 'ferrari_f40':                                                        // data_authors.jsxi:29
-			
-		case 'ferrari_f40_s3':                                                     // data_authors.jsxi:30
-			
-		case 'ferrari_laferrari':                                                  // data_authors.jsxi:31
-			
-		case 'ks_alfa_romeo_155_v6':                                               // data_authors.jsxi:32
-			
-		case 'ks_alfa_romeo_4c':                                                   // data_authors.jsxi:33
-			
-		case 'ks_alfa_romeo_gta':                                                  // data_authors.jsxi:34
-			
-		case 'ks_bmw_m235i_racing':                                                // data_authors.jsxi:35
-			
-		case 'ks_corvette_c7r':                                                    // data_authors.jsxi:36
-			
-		case 'ks_mclaren_f1_gtr':                                                  // data_authors.jsxi:37
-			
-		case 'ks_mclaren_p1':                                                      // data_authors.jsxi:38
-			
-		case 'ks_mercedes_190_evo2':                                               // data_authors.jsxi:39
-			
-		case 'ks_mercedes_c9':                                                     // data_authors.jsxi:40
-			
-		case 'ks_nissan_gtr_gt3':                                                  // data_authors.jsxi:41
-			
-		case 'ktm_xbow_r':                                                         // data_authors.jsxi:42
-			
-		case 'lotus_2_eleven':                                                     // data_authors.jsxi:43
-			
-		case 'lotus_2_eleven_gt4':                                                 // data_authors.jsxi:44
-			
-		case 'lotus_49':                                                           // data_authors.jsxi:45
-			
-		case 'lotus_98t':                                                          // data_authors.jsxi:46
-			
-		case 'lotus_elise_sc':                                                     // data_authors.jsxi:47
-			
-		case 'lotus_elise_sc_s1':                                                  // data_authors.jsxi:48
-			
-		case 'lotus_elise_sc_s2':                                                  // data_authors.jsxi:49
-			
-		case 'lotus_evora_gtc':                                                    // data_authors.jsxi:50
-			
-		case 'lotus_evora_gte':                                                    // data_authors.jsxi:51
-			
-		case 'lotus_evora_gte_carbon':                                             // data_authors.jsxi:52
-			
-		case 'lotus_evora_gx':                                                     // data_authors.jsxi:53
-			
-		case 'lotus_evora_s':                                                      // data_authors.jsxi:54
-			
-		case 'lotus_evora_s_s2':                                                   // data_authors.jsxi:55
-			
-		case 'lotus_exige_240':                                                    // data_authors.jsxi:56
-			
-		case 'lotus_exige_240_s3':                                                 // data_authors.jsxi:57
-			
-		case 'lotus_exige_s':                                                      // data_authors.jsxi:58
-			
-		case 'lotus_exige_s_roadster':                                             // data_authors.jsxi:59
-			
-		case 'lotus_exige_scura':                                                  // data_authors.jsxi:60
-			
-		case 'lotus_exige_v6_cup':                                                 // data_authors.jsxi:61
-			
-		case 'lotus_exos_125':                                                     // data_authors.jsxi:62
-			
-		case 'lotus_exos_125_s1':                                                  // data_authors.jsxi:63
-			
-		case 'mclaren_mp412c':                                                     // data_authors.jsxi:64
-			
-		case 'mclaren_mp412c_gt3':                                                 // data_authors.jsxi:65
-			
-		case 'mercedes_sls':                                                       // data_authors.jsxi:66
-			
-		case 'mercedes_sls_gt3':                                                   // data_authors.jsxi:67
-			
-		case 'p4-5_2011':                                                          // data_authors.jsxi:68
-			
-		case 'pagani_huayra':                                                      // data_authors.jsxi:69
-			
-		case 'pagani_zonda_r':                                                     // data_authors.jsxi:70
-			
-		case 'ruf_yellowbird':                                                     // data_authors.jsxi:71
-			
-		case 'shelby_cobra_427sc':                                                 // data_authors.jsxi:72
-			
-		case 'tatuusfa1':                                                          // data_authors.jsxi:73
-			return 'Kunos';                                                        // data_authors.jsxi:74
-		default:
+var Authors = (function (){                                                        // data_authors.jsxi:1
+	var Authors = function (){}, 
+		_initialized = false, _database;
+	
+	Authors.fromId = function (id){                                                // data_authors.jsxi:2
+		return Sfx.isCarOriginal(id) ? 'Kunos' : null;                             // data_authors.jsxi:3
+	};
+	Authors.fromDatabase = function (id){                                          // data_authors.jsxi:9
+		if (!_initialized){                                                        // data_authors.jsxi:10
+			Authors.init();
+		}
+		
+		if (_database && _database.hasOwnProperty(id)){                            // data_authors.jsxi:14
+			return _database[id];                                                  // data_authors.jsxi:15
+		} else {
 			return null;
-	}
-};
+		}
+	};
+	Authors.init = function (){                                                    // data_authors.jsxi:21
+		_database = DataStorage.readContentJsonFile('Details (Preload)', 'authors.json');
+	};
+	return Authors;
+})();
 
 /* Class "Brands" declaration */
 var Brands = (function (){                                                         // data_brands.jsxi:1
 	var Brands = function (){}, 
 		_list = [],                                                                // data_brands.jsxi:11
-		_listLower,                                                                // data_brands.jsxi:12
-		_sorted = true,                                                            // data_brands.jsxi:13
-		_newBadgesDir = DataStorage.getDataDir('Badges'),                          // data_brands.jsxi:26
-		_userBadgesDir = DataStorage.getDataDir('Badges (User)'),                  // data_brands.jsxi:27
-		_newBadges = {},                                                           // data_brands.jsxi:29
-		_userBadges = {};                                                          // data_brands.jsxi:29
+		_listLower = [],                                                           // data_brands.jsxi:11
+		_badges,                                                                   // data_brands.jsxi:12
+		_sorted = true;                                                            // data_brands.jsxi:13
 	
-	Brands.add = function (brand){                                                 // data_brands.jsxi:15
+	Brands.add = function (brand){                                                 // data_brands.jsxi:20
 		var lower = brand.toLowerCase();
 		
-		if (_listLower.indexOf(lower) === - 1){                                    // data_brands.jsxi:17
-			Brands.list.push(brand);                                               // data_brands.jsxi:18
-			Brands.list.sort();                                                    // data_brands.jsxi:19
-			_listLower.push(lower);                                                // data_brands.jsxi:21
-			_sorted = false;                                                       // data_brands.jsxi:22
+		if (_listLower.indexOf(lower) === - 1){                                    // data_brands.jsxi:22
+			_list.push(brand);                                                     // data_brands.jsxi:23
+			_list.sort();                                                          // data_brands.jsxi:24
+			_listLower.push(lower);                                                // data_brands.jsxi:26
+			_sorted = false;                                                       // data_brands.jsxi:27
 		}
 	};
-	Brands.getBadge = function (brand){                                            // data_brands.jsxi:51
-		return _userBadges.hasOwnProperty(brand) ? _userBadges[brand] : _newBadges.hasOwnProperty(brand) ? _newBadges[brand] : null;
+	Brands.init = function (){                                                     // data_brands.jsxi:31
+		_badges = DataStorage.readContentDir('Badges', 'png');                     // data_brands.jsxi:32
 	};
-	Brands.nameContains = function (name, brand){                                  // data_brands.jsxi:57
-		return brand == null ? _list.some(function (arg){                          // data_brands.jsxi:58
-			return name.indexOf(Brands.toNamePart(arg) + ' ') === 0;               // data_brands.jsxi:58
-		}) : name.indexOf(Brands.toNamePart(brand) + ' ') === 0;                   // data_brands.jsxi:59
+	Brands.getBadge = function (brand){                                            // data_brands.jsxi:35
+		return _badges.hasOwnProperty(brand) ? _badges[brand] : null;              // data_brands.jsxi:36
 	};
-	Brands.fromName = function (name){                                             // data_brands.jsxi:62
-		for (var __d = 0; __d < _list.length; __d ++){                             // data_brands.jsxi:63
-			var b = _list[__d];
+	Brands.nameContains = function (name, brand){                                  // data_brands.jsxi:39
+		return brand == null ? _list.some(function (arg){                          // data_brands.jsxi:40
+			return name.indexOf(Brands.toNamePart(arg) + ' ') === 0;               // data_brands.jsxi:40
+		}) : name.indexOf(Brands.toNamePart(brand) + ' ') === 0;                   // data_brands.jsxi:41
+	};
+	Brands.fromName = function (name){                                             // data_brands.jsxi:44
+		for (var __l = 0; __l < _list.length; __l ++){                             // data_brands.jsxi:45
+			var b = _list[__l];
 			
-			if (name.indexOf(Brands.toNamePart(b) + ' ') === 0){                   // data_brands.jsxi:64
-				return b;                                                          // data_brands.jsxi:65
+			if (name.indexOf(Brands.toNamePart(b) + ' ') === 0){                   // data_brands.jsxi:46
+				return b;                                                          // data_brands.jsxi:47
 			}
 		}
 		return null;
 	};
-	Brands.fromNamePart = function (brand){                                        // data_brands.jsxi:72
-		switch (brand){                                                            // data_brands.jsxi:73
-			case 'Mercedes':                                                       // data_brands.jsxi:74
-				return 'Mercedes-Benz';                                            // data_brands.jsxi:75
+	Brands.fromNamePart = function (brand){                                        // data_brands.jsxi:54
+		switch (brand){                                                            // data_brands.jsxi:55
+			case 'Mercedes':                                                       // data_brands.jsxi:56
+				return 'Mercedes-Benz';                                            // data_brands.jsxi:57
 			default:
-				return brand;                                                      // data_brands.jsxi:78
+				return brand;                                                      // data_brands.jsxi:60
 		}
 	};
-	Brands.toNamePart = function (brand){                                          // data_brands.jsxi:82
-		switch (brand){                                                            // data_brands.jsxi:83
-			case 'Mercedes-Benz':                                                  // data_brands.jsxi:84
-				return 'Mercedes';                                                 // data_brands.jsxi:85
+	Brands.toNamePart = function (brand){                                          // data_brands.jsxi:64
+		switch (brand){                                                            // data_brands.jsxi:65
+			case 'Mercedes-Benz':                                                  // data_brands.jsxi:66
+				return 'Mercedes';                                                 // data_brands.jsxi:67
 			default:
-				return brand;                                                      // data_brands.jsxi:88
+				return brand;                                                      // data_brands.jsxi:70
 		}
 	};
 	Object.defineProperty(Brands,                                                  // data_brands.jsxi:1
@@ -3374,667 +3891,760 @@ var Brands = (function (){                                                      
 				return _list;                                                      // data_brands.jsxi:8
 			})
 		});
-	(function (){                                                                  // data_brands.jsxi:31
-		_listLower = Brands.list.map(function (arg){                               // data_brands.jsxi:32
-			return arg.toLowerCase();                                              // data_brands.jsxi:32
-		});
-		
-		{
-			var __9 = fs.readdirSync(_newBadgesDir);
-			
-			for (var __8 = 0; __8 < __9.length; __8 ++){
-				var arg = __9[__8];
-				
-				var brand = arg.split('.')[0];
-				
-				Brands.add(brand);
-				_newBadges[brand] = _newBadgesDir + '/' + arg;                     // data_brands.jsxi:37
-			}
-			
-			__9 = undefined;
-		}
-		
-		{
-			var __b = fs.readdirSync(_userBadgesDir);
-			
-			for (var __a = 0; __a < __b.length; __a ++){
-				var arg = __b[__a];
-				
-				var brand = arg.split('.')[0];
-				
-				Brands.add(brand);
-				_userBadges[brand] = _userBadgesDir + '/' + arg;                   // data_brands.jsxi:43
-			}
-			
-			__b = undefined;
-		}
-		
-		$(function (arg){                                                          // data_brands.jsxi:46
-			for (var __c = 0; __c < _list.length; __c ++){                         // data_brands.jsxi:47
-				var b = _list[__c];
-				
-				Cars.registerBrand(b);                                             // data_brands.jsxi:47
-			}
-		});
+	(function (){                                                                  // data_brands.jsxi:15
+		Data.on('update', Brands.init);                                            // data_brands.jsxi:16
 	})();
 	return Brands;
 })();
 
 /* Class "Countries" declaration */
-function Countries(){}
-Countries.fromBrand = function (brand){                                            // data_countries.jsxi:2
-	switch (brand = brand.trim().toLowerCase()){                                   // data_countries.jsxi:3
-		case 'abarth':                                                             // data_countries.jsxi:4
-			return 'Italy';                                                        // data_countries.jsxi:4
-		case 'alfa':                                                               // data_countries.jsxi:5
-			return 'Italy';                                                        // data_countries.jsxi:5
-		case 'alfa romeo':                                                         // data_countries.jsxi:6
-			return 'Italy';                                                        // data_countries.jsxi:6
-		case 'alpine':                                                             // data_countries.jsxi:7
-			return 'France';                                                       // data_countries.jsxi:7
-		case 'amc':                                                                // data_countries.jsxi:8
-			return 'USA';                                                          // data_countries.jsxi:8
-		case 'aston':                                                              // data_countries.jsxi:9
-			return 'Great Britain';                                                // data_countries.jsxi:9
-		case 'aston martin':                                                       // data_countries.jsxi:10
-			return 'Great Britain';                                                // data_countries.jsxi:10
-		case 'audi':                                                               // data_countries.jsxi:11
-			return 'Germany';                                                      // data_countries.jsxi:11
-		case 'bentley':                                                            // data_countries.jsxi:12
-			return 'Great Britain';                                                // data_countries.jsxi:12
-		case 'bmw':                                                                // data_countries.jsxi:13
-			return 'Germany';                                                      // data_countries.jsxi:13
-		case 'bugatti':                                                            // data_countries.jsxi:14
-			return 'France';                                                       // data_countries.jsxi:14
-		case 'buick':                                                              // data_countries.jsxi:15
-			return 'USA';                                                          // data_countries.jsxi:15
-		case 'cadillac':                                                           // data_countries.jsxi:16
-			return 'USA';                                                          // data_countries.jsxi:16
-		case 'chevrolet':                                                          // data_countries.jsxi:17
-			return 'USA';                                                          // data_countries.jsxi:17
-		case 'datsun':                                                             // data_countries.jsxi:18
-			return 'Japan';                                                        // data_countries.jsxi:18
-		case 'dodge':                                                              // data_countries.jsxi:19
-			return 'USA';                                                          // data_countries.jsxi:19
-		case 'ferrari':                                                            // data_countries.jsxi:20
-			return 'Italy';                                                        // data_countries.jsxi:20
-		case 'fiat':                                                               // data_countries.jsxi:21
-			return 'Italy';                                                        // data_countries.jsxi:21
-		case 'ford':                                                               // data_countries.jsxi:22
-			return 'USA';                                                          // data_countries.jsxi:22
-		case 'gemballa':                                                           // data_countries.jsxi:23
-			return 'Germany';                                                      // data_countries.jsxi:23
-		case 'ginetta':                                                            // data_countries.jsxi:24
-			return 'Great Britain';                                                // data_countries.jsxi:24
-		case 'gmc':                                                                // data_countries.jsxi:25
-			return 'USA';                                                          // data_countries.jsxi:25
-		case 'gumpert':                                                            // data_countries.jsxi:26
-			return 'Germany';                                                      // data_countries.jsxi:26
-		case 'hamann':                                                             // data_countries.jsxi:27
-			return 'Germany';                                                      // data_countries.jsxi:27
-		case 'holden':                                                             // data_countries.jsxi:28
-			return 'Australia';                                                    // data_countries.jsxi:28
-		case 'honda':                                                              // data_countries.jsxi:29
-			return 'Japan';                                                        // data_countries.jsxi:29
-		case 'hyundai':                                                            // data_countries.jsxi:30
-			return 'Korea';                                                        // data_countries.jsxi:30
-		case 'infiniti':                                                           // data_countries.jsxi:31
-			return 'Japan';                                                        // data_countries.jsxi:31
-		case 'jaguar':                                                             // data_countries.jsxi:32
-			return 'Great Britain';                                                // data_countries.jsxi:32
-		case 'kia':                                                                // data_countries.jsxi:33
-			return 'Korea';                                                        // data_countries.jsxi:33
-		case 'koenigsegg':                                                         // data_countries.jsxi:34
-			return 'Sweden';                                                       // data_countries.jsxi:34
-		case 'ktm':                                                                // data_countries.jsxi:35
-			return 'Austria';                                                      // data_countries.jsxi:35
-		case 'lada':                                                               // data_countries.jsxi:36
-			return 'Russia';                                                       // data_countries.jsxi:36
-		case 'lamborghini':                                                        // data_countries.jsxi:37
-			return 'Italy';                                                        // data_countries.jsxi:37
-		case 'lancia':                                                             // data_countries.jsxi:38
-			return 'Italy';                                                        // data_countries.jsxi:38
-		case 'lexus':                                                              // data_countries.jsxi:39
-			return 'Japan';                                                        // data_countries.jsxi:39
-		case 'lotus':                                                              // data_countries.jsxi:40
-			return 'Great Britain';                                                // data_countries.jsxi:40
-		case 'maserati':                                                           // data_countries.jsxi:41
-			return 'Italy';                                                        // data_countries.jsxi:41
-		case 'mazda':                                                              // data_countries.jsxi:42
-			return 'Japan';                                                        // data_countries.jsxi:42
-		case 'mclaren':                                                            // data_countries.jsxi:43
-			return 'Great Britain';                                                // data_countries.jsxi:43
-		case 'mercedes':                                                           // data_countries.jsxi:44
-			return 'Germany';                                                      // data_countries.jsxi:44
-		case 'mercedes-benz':                                                      // data_countries.jsxi:45
-			return 'Germany';                                                      // data_countries.jsxi:45
-		case 'mg':                                                                 // data_countries.jsxi:46
-			return 'Great Britain';                                                // data_countries.jsxi:46
-		case 'mini':                                                               // data_countries.jsxi:47
-			return 'Great Britain';                                                // data_countries.jsxi:47
-		case 'mitsubishi':                                                         // data_countries.jsxi:48
-			return 'Japan';                                                        // data_countries.jsxi:48
-		case 'nissan':                                                             // data_countries.jsxi:49
-			return 'Japan';                                                        // data_countries.jsxi:49
-		case 'noble':                                                              // data_countries.jsxi:50
-			return 'Great Britain';                                                // data_countries.jsxi:50
-		case 'opel':                                                               // data_countries.jsxi:51
-			return 'Germany';                                                      // data_countries.jsxi:51
-		case 'oreca':                                                              // data_countries.jsxi:52
-			return 'France';                                                       // data_countries.jsxi:52
-		case 'pagani':                                                             // data_countries.jsxi:53
-			return 'Italy';                                                        // data_countries.jsxi:53
-		case 'detomaso':                                                           // data_countries.jsxi:54
-			return 'Italy';                                                        // data_countries.jsxi:54
-		case 'de tomaso':                                                          // data_countries.jsxi:55
-			return 'Italy';                                                        // data_countries.jsxi:55
-		case 'plymouth':                                                           // data_countries.jsxi:56
-			return 'USA';                                                          // data_countries.jsxi:56
-		case 'pontiac':                                                            // data_countries.jsxi:57
-			return 'USA';                                                          // data_countries.jsxi:57
-		case 'porsche':                                                            // data_countries.jsxi:58
-			return 'Germany';                                                      // data_countries.jsxi:58
-		case 'radical':                                                            // data_countries.jsxi:59
-			return 'Great Britain';                                                // data_countries.jsxi:59
-		case 'reliant':                                                            // data_countries.jsxi:60
-			return 'Great Britain';                                                // data_countries.jsxi:60
-		case 'renault':                                                            // data_countries.jsxi:61
-			return 'France';                                                       // data_countries.jsxi:61
-		case 'rover':                                                              // data_countries.jsxi:62
-			return 'Great Britain';                                                // data_countries.jsxi:62
-		case 'ruf':                                                                // data_countries.jsxi:63
-			return 'Germany';                                                      // data_countries.jsxi:63
-		case 'saleen':                                                             // data_countries.jsxi:64
-			return 'USA';                                                          // data_countries.jsxi:64
-		case 'sareni':                                                             // data_countries.jsxi:65
-			return 'USA';                                                          // data_countries.jsxi:65
-		case 'scuderia glickenhaus':                                               // data_countries.jsxi:66
-			return 'Italy';                                                        // data_countries.jsxi:66
-		case 'seat':                                                               // data_countries.jsxi:67
-			return 'Spain';                                                        // data_countries.jsxi:67
-		case 'shelby':                                                             // data_countries.jsxi:68
-			return 'USA';                                                          // data_countries.jsxi:68
-		case 'subaru':                                                             // data_countries.jsxi:69
-			return 'Japan';                                                        // data_countries.jsxi:69
-		case 'suzuki':                                                             // data_countries.jsxi:70
-			return 'Japan';                                                        // data_countries.jsxi:70
-		case 'tatuus':                                                             // data_countries.jsxi:71
-			return 'Italy';                                                        // data_countries.jsxi:71
-		case 'tesla':                                                              // data_countries.jsxi:72
-			return 'USA';                                                          // data_countries.jsxi:72
-		case 'toyota':                                                             // data_countries.jsxi:73
-			return 'Japan';                                                        // data_countries.jsxi:73
-		case 'volkswagen':                                                         // data_countries.jsxi:74
-			return 'Germany';                                                      // data_countries.jsxi:74
-		case 'volvo':                                                              // data_countries.jsxi:75
-			return 'Sweden';                                                       // data_countries.jsxi:75
-		default:
-			return null;
-	}
-};
-Countries.fromTag = function (tag){                                                // data_countries.jsxi:80
-	switch (tag = tag.trim().toLowerCase()){                                       // data_countries.jsxi:81
-		case 'afghanistan':                                                        // data_countries.jsxi:82
-			
-		case 'albania':                                                            // data_countries.jsxi:83
-			
-		case 'algeria':                                                            // data_countries.jsxi:84
-			
-		case 'andorra':                                                            // data_countries.jsxi:85
-			
-		case 'angola':                                                             // data_countries.jsxi:86
-			
-		case 'argentina':                                                          // data_countries.jsxi:87
-			
-		case 'armenia':                                                            // data_countries.jsxi:88
-			
-		case 'aruba':                                                              // data_countries.jsxi:89
-			
-		case 'australia':                                                          // data_countries.jsxi:90
-			
-		case 'austria':                                                            // data_countries.jsxi:91
-			
-		case 'azerbaijan':                                                         // data_countries.jsxi:92
-			
-		case 'bahamas':                                                            // data_countries.jsxi:93
-			
-		case 'bahrain':                                                            // data_countries.jsxi:94
-			
-		case 'bangladesh':                                                         // data_countries.jsxi:95
-			
-		case 'barbados':                                                           // data_countries.jsxi:96
-			
-		case 'belarus':                                                            // data_countries.jsxi:97
-			
-		case 'belgium':                                                            // data_countries.jsxi:98
-			
-		case 'belize':                                                             // data_countries.jsxi:99
-			
-		case 'benin':                                                              // data_countries.jsxi:100
-			
-		case 'bhutan':                                                             // data_countries.jsxi:101
-			
-		case 'bolivia':                                                            // data_countries.jsxi:102
-			
-		case 'botswana':                                                           // data_countries.jsxi:103
-			
-		case 'brazil':                                                             // data_countries.jsxi:104
-			
-		case 'brunei':                                                             // data_countries.jsxi:105
-			
-		case 'bulgaria':                                                           // data_countries.jsxi:106
-			
-		case 'burma':                                                              // data_countries.jsxi:107
-			
-		case 'burundi':                                                            // data_countries.jsxi:108
-			
-		case 'cambodia':                                                           // data_countries.jsxi:109
-			
-		case 'cameroon':                                                           // data_countries.jsxi:110
-			
-		case 'canada':                                                             // data_countries.jsxi:111
-			
-		case 'chad':                                                               // data_countries.jsxi:112
-			
-		case 'chile':                                                              // data_countries.jsxi:113
-			
-		case 'china':                                                              // data_countries.jsxi:114
-			
-		case 'colombia':                                                           // data_countries.jsxi:115
-			
-		case 'comoros':                                                            // data_countries.jsxi:116
-			
-		case 'congo':                                                              // data_countries.jsxi:117
-			
-		case 'croatia':                                                            // data_countries.jsxi:118
-			
-		case 'cuba':                                                               // data_countries.jsxi:119
-			
-		case 'curacao':                                                            // data_countries.jsxi:120
-			
-		case 'cyprus':                                                             // data_countries.jsxi:121
-			
-		case 'denmark':                                                            // data_countries.jsxi:122
-			
-		case 'djibouti':                                                           // data_countries.jsxi:123
-			
-		case 'dominica':                                                           // data_countries.jsxi:124
-			
-		case 'ecuador':                                                            // data_countries.jsxi:125
-			
-		case 'egypt':                                                              // data_countries.jsxi:126
-			
-		case 'eritrea':                                                            // data_countries.jsxi:127
-			
-		case 'estonia':                                                            // data_countries.jsxi:128
-			
-		case 'ethiopia':                                                           // data_countries.jsxi:129
-			
-		case 'fiji':                                                               // data_countries.jsxi:130
-			
-		case 'finland':                                                            // data_countries.jsxi:131
-			
-		case 'france':                                                             // data_countries.jsxi:132
-			
-		case 'gabon':                                                              // data_countries.jsxi:133
-			
-		case 'gambia':                                                             // data_countries.jsxi:134
-			
-		case 'georgia':                                                            // data_countries.jsxi:135
-			
-		case 'germany':                                                            // data_countries.jsxi:136
-			
-		case 'ghana':                                                              // data_countries.jsxi:137
-			
-		case 'greece':                                                             // data_countries.jsxi:138
-			
-		case 'grenada':                                                            // data_countries.jsxi:139
-			
-		case 'guatemala':                                                          // data_countries.jsxi:140
-			
-		case 'guinea':                                                             // data_countries.jsxi:141
-			
-		case 'guinea-bissau':                                                      // data_countries.jsxi:142
-			
-		case 'guyana':                                                             // data_countries.jsxi:143
-			
-		case 'haiti':                                                              // data_countries.jsxi:144
-			
-		case 'holy see':                                                           // data_countries.jsxi:145
-			
-		case 'honduras':                                                           // data_countries.jsxi:146
-			
-		case 'hong kong':                                                          // data_countries.jsxi:147
-			
-		case 'hungary':                                                            // data_countries.jsxi:148
-			
-		case 'iceland':                                                            // data_countries.jsxi:149
-			
-		case 'india':                                                              // data_countries.jsxi:150
-			
-		case 'indonesia':                                                          // data_countries.jsxi:151
-			
-		case 'iran':                                                               // data_countries.jsxi:152
-			
-		case 'iraq':                                                               // data_countries.jsxi:153
-			
-		case 'ireland':                                                            // data_countries.jsxi:154
-			
-		case 'israel':                                                             // data_countries.jsxi:155
-			
-		case 'italy':                                                              // data_countries.jsxi:156
-			
-		case 'jamaica':                                                            // data_countries.jsxi:157
-			
-		case 'japan':                                                              // data_countries.jsxi:158
-			
-		case 'jordan':                                                             // data_countries.jsxi:159
-			
-		case 'kazakhstan':                                                         // data_countries.jsxi:160
-			
-		case 'kenya':                                                              // data_countries.jsxi:161
-			
-		case 'kiribati':                                                           // data_countries.jsxi:162
-			
-		case 'kosovo':                                                             // data_countries.jsxi:163
-			
-		case 'kuwait':                                                             // data_countries.jsxi:164
-			
-		case 'kyrgyzstan':                                                         // data_countries.jsxi:165
-			
-		case 'laos':                                                               // data_countries.jsxi:166
-			
-		case 'latvia':                                                             // data_countries.jsxi:167
-			
-		case 'lebanon':                                                            // data_countries.jsxi:168
-			
-		case 'lesotho':                                                            // data_countries.jsxi:169
-			
-		case 'liberia':                                                            // data_countries.jsxi:170
-			
-		case 'libya':                                                              // data_countries.jsxi:171
-			
-		case 'liechtenstein':                                                      // data_countries.jsxi:172
-			
-		case 'lithuania':                                                          // data_countries.jsxi:173
-			
-		case 'luxembourg':                                                         // data_countries.jsxi:174
-			
-		case 'macau':                                                              // data_countries.jsxi:175
-			
-		case 'macedonia':                                                          // data_countries.jsxi:176
-			
-		case 'madagascar':                                                         // data_countries.jsxi:177
-			
-		case 'malawi':                                                             // data_countries.jsxi:178
-			
-		case 'malaysia':                                                           // data_countries.jsxi:179
-			
-		case 'maldives':                                                           // data_countries.jsxi:180
-			
-		case 'mali':                                                               // data_countries.jsxi:181
-			
-		case 'malta':                                                              // data_countries.jsxi:182
-			
-		case 'mauritania':                                                         // data_countries.jsxi:183
-			
-		case 'mauritius':                                                          // data_countries.jsxi:184
-			
-		case 'mexico':                                                             // data_countries.jsxi:185
-			
-		case 'micronesia':                                                         // data_countries.jsxi:186
-			
-		case 'moldova':                                                            // data_countries.jsxi:187
-			
-		case 'monaco':                                                             // data_countries.jsxi:188
-			
-		case 'mongolia':                                                           // data_countries.jsxi:189
-			
-		case 'montenegro':                                                         // data_countries.jsxi:190
-			
-		case 'morocco':                                                            // data_countries.jsxi:191
-			
-		case 'mozambique':                                                         // data_countries.jsxi:192
-			
-		case 'namibia':                                                            // data_countries.jsxi:193
-			
-		case 'nauru':                                                              // data_countries.jsxi:194
-			
-		case 'nepal':                                                              // data_countries.jsxi:195
-			
-		case 'netherlands':                                                        // data_countries.jsxi:196
-			
-		case 'nicaragua':                                                          // data_countries.jsxi:197
-			
-		case 'niger':                                                              // data_countries.jsxi:198
-			
-		case 'nigeria':                                                            // data_countries.jsxi:199
-			
-		case 'norway':                                                             // data_countries.jsxi:200
-			
-		case 'oman':                                                               // data_countries.jsxi:201
-			
-		case 'pakistan':                                                           // data_countries.jsxi:202
-			
-		case 'palau':                                                              // data_countries.jsxi:203
-			
-		case 'panama':                                                             // data_countries.jsxi:204
-			
-		case 'paraguay':                                                           // data_countries.jsxi:205
-			
-		case 'peru':                                                               // data_countries.jsxi:206
-			
-		case 'philippines':                                                        // data_countries.jsxi:207
-			
-		case 'poland':                                                             // data_countries.jsxi:208
-			
-		case 'portugal':                                                           // data_countries.jsxi:209
-			
-		case 'qatar':                                                              // data_countries.jsxi:210
-			
-		case 'romania':                                                            // data_countries.jsxi:211
-			
-		case 'russia':                                                             // data_countries.jsxi:212
-			
-		case 'rwanda':                                                             // data_countries.jsxi:213
-			
-		case 'samoa':                                                              // data_countries.jsxi:214
-			
-		case 'senegal':                                                            // data_countries.jsxi:215
-			
-		case 'serbia':                                                             // data_countries.jsxi:216
-			
-		case 'seychelles':                                                         // data_countries.jsxi:217
-			
-		case 'singapore':                                                          // data_countries.jsxi:218
-			
-		case 'slovakia':                                                           // data_countries.jsxi:219
-			
-		case 'slovenia':                                                           // data_countries.jsxi:220
-			
-		case 'somalia':                                                            // data_countries.jsxi:221
-			
-		case 'spain':                                                              // data_countries.jsxi:222
-			
-		case 'sudan':                                                              // data_countries.jsxi:223
-			
-		case 'suriname':                                                           // data_countries.jsxi:224
-			
-		case 'swaziland':                                                          // data_countries.jsxi:225
-			
-		case 'switzerland':                                                        // data_countries.jsxi:226
-			
-		case 'syria':                                                              // data_countries.jsxi:227
-			
-		case 'taiwan':                                                             // data_countries.jsxi:228
-			
-		case 'tajikistan':                                                         // data_countries.jsxi:229
-			
-		case 'tanzania':                                                           // data_countries.jsxi:230
-			
-		case 'thailand':                                                           // data_countries.jsxi:231
-			
-		case 'timor-leste':                                                        // data_countries.jsxi:232
-			
-		case 'togo':                                                               // data_countries.jsxi:233
-			
-		case 'tonga':                                                              // data_countries.jsxi:234
-			
-		case 'tunisia':                                                            // data_countries.jsxi:235
-			
-		case 'turkey':                                                             // data_countries.jsxi:236
-			
-		case 'turkmenistan':                                                       // data_countries.jsxi:237
-			
-		case 'tuvalu':                                                             // data_countries.jsxi:238
-			
-		case 'uganda':                                                             // data_countries.jsxi:239
-			
-		case 'ukraine':                                                            // data_countries.jsxi:240
-			
-		case 'uruguay':                                                            // data_countries.jsxi:241
-			
-		case 'uzbekistan':                                                         // data_countries.jsxi:242
-			
-		case 'vanuatu':                                                            // data_countries.jsxi:243
-			
-		case 'venezuela':                                                          // data_countries.jsxi:244
-			
-		case 'vietnam':                                                            // data_countries.jsxi:245
-			
-		case 'yemen':                                                              // data_countries.jsxi:246
-			
-		case 'zambia':                                                             // data_countries.jsxi:247
-			
-		case 'zimbabwe':                                                           // data_countries.jsxi:248
-			return tag[0].toUpperCase() + tag.slice(1);                            // data_countries.jsxi:249
-		case 'antigua and barbuda':                                                // data_countries.jsxi:251
-			
-		case 'bosnia and herzegovina':                                             // data_countries.jsxi:252
-			
-		case 'burkina faso':                                                       // data_countries.jsxi:253
-			
-		case 'cape verde':                                                         // data_countries.jsxi:254
-			
-		case 'central african republic':                                           // data_countries.jsxi:255
-			
-		case 'costa rica':                                                         // data_countries.jsxi:256
-			
-		case 'el salvador':                                                        // data_countries.jsxi:257
-			
-		case 'equatorial guinea':                                                  // data_countries.jsxi:258
-			
-		case 'marshall islands':                                                   // data_countries.jsxi:259
-			
-		case 'new zealand':                                                        // data_countries.jsxi:260
-			
-		case 'san marino':                                                         // data_countries.jsxi:261
-			
-		case 'saudi arabia':                                                       // data_countries.jsxi:262
-			
-		case 'sierra leone':                                                       // data_countries.jsxi:263
-			
-		case 'sint maarten':                                                       // data_countries.jsxi:264
-			
-		case 'solomon islands':                                                    // data_countries.jsxi:265
-			
-		case 'south africa':                                                       // data_countries.jsxi:266
-			
-		case 'south sudan':                                                        // data_countries.jsxi:267
-			
-		case 'sri lanka':                                                          // data_countries.jsxi:268
-			
-		case 'trinidad and tobago':                                                // data_countries.jsxi:269
-			
-		case 'united arab emirates':                                               // data_countries.jsxi:270
-			return tag.replace(/\b(?!and)\w/g,                                     // data_countries.jsxi:271
-				function (arg){                                                    // data_countries.jsxi:271
-					return arg.toUpperCase();                                      // data_countries.jsxi:271
-				});
-		case 'cote d\'ivoire':                                                     // data_countries.jsxi:273
-			
-		case 'côte d\'ivoire':                                                     // data_countries.jsxi:274
-			
-		case 'cote d’ivoire':                                                      // data_countries.jsxi:275
-			
-		case 'côte d’ivoire':                                                      // data_countries.jsxi:276
-			return 'Côte d’Ivoire';                                                // data_countries.jsxi:277
-		case 'czech':                                                              // data_countries.jsxi:279
-			
-		case 'czech republic':                                                     // data_countries.jsxi:280
-			return 'Czech Republic';                                               // data_countries.jsxi:281
-		case 'gb':                                                                 // data_countries.jsxi:283
-			
-		case 'uk':                                                                 // data_countries.jsxi:284
-			
-		case 'united kingdom':                                                     // data_countries.jsxi:285
-			
-		case 'england':                                                            // data_countries.jsxi:286
-			
-		case 'britain':                                                            // data_countries.jsxi:287
-			
-		case 'great britain':                                                      // data_countries.jsxi:288
-			return 'Great Britain';                                                // data_countries.jsxi:289
-		case 'korea':                                                              // data_countries.jsxi:291
-			
-		case 'korea, south':                                                       // data_countries.jsxi:292
-			
-		case 'south korea':                                                        // data_countries.jsxi:293
-			return 'Korea';                                                        // data_countries.jsxi:294
-		case 'sweden':                                                             // data_countries.jsxi:296
-			
-		case 'swedish':                                                            // data_countries.jsxi:297
-			return 'Sweden';                                                       // data_countries.jsxi:298
-		case 'us':                                                                 // data_countries.jsxi:300
-			
-		case 'usa':                                                                // data_countries.jsxi:301
-			
-		case 'america':                                                            // data_countries.jsxi:302
-			return 'USA';                                                          // data_countries.jsxi:303
-		default:
-			return null;
-	}
-};
-Countries.fixTag = function (raw){                                                 // data_countries.jsxi:310
-	var tag = raw.toLowerCase();
+var Countries = (function (){                                                      // data_countries.jsxi:1
+	var Countries = function (){}, 
+		_initialized = false,                                                      // data_countries.jsxi:347
+		_database;                                                                 // data_countries.jsxi:348
 	
-	switch (tag){                                                                  // data_countries.jsxi:313
-		case 'gb':                                                                 // data_countries.jsxi:314
+	Countries.fromBrand = function (brand){                                        // data_countries.jsxi:2
+		switch (brand = brand.trim().toLowerCase()){                               // data_countries.jsxi:3
+			case 'abarth':                                                         // data_countries.jsxi:4
+				return 'Italy';                                                    // data_countries.jsxi:4
+			case 'alfa':                                                           // data_countries.jsxi:5
+				return 'Italy';                                                    // data_countries.jsxi:5
+			case 'alfa romeo':                                                     // data_countries.jsxi:6
+				return 'Italy';                                                    // data_countries.jsxi:6
+			case 'alpine':                                                         // data_countries.jsxi:7
+				return 'France';                                                   // data_countries.jsxi:7
+			case 'amc':                                                            // data_countries.jsxi:8
+				return 'USA';                                                      // data_countries.jsxi:8
+			case 'aston':                                                          // data_countries.jsxi:9
+				return 'Great Britain';                                            // data_countries.jsxi:9
+			case 'aston martin':                                                   // data_countries.jsxi:10
+				return 'Great Britain';                                            // data_countries.jsxi:10
+			case 'audi':                                                           // data_countries.jsxi:11
+				return 'Germany';                                                  // data_countries.jsxi:11
+			case 'bentley':                                                        // data_countries.jsxi:12
+				return 'Great Britain';                                            // data_countries.jsxi:12
+			case 'bmw':                                                            // data_countries.jsxi:13
+				return 'Germany';                                                  // data_countries.jsxi:13
+			case 'bugatti':                                                        // data_countries.jsxi:14
+				return 'France';                                                   // data_countries.jsxi:14
+			case 'buick':                                                          // data_countries.jsxi:15
+				return 'USA';                                                      // data_countries.jsxi:15
+			case 'cadillac':                                                       // data_countries.jsxi:16
+				return 'USA';                                                      // data_countries.jsxi:16
+			case 'chevrolet':                                                      // data_countries.jsxi:17
+				return 'USA';                                                      // data_countries.jsxi:17
+			case 'datsun':                                                         // data_countries.jsxi:18
+				return 'Japan';                                                    // data_countries.jsxi:18
+			case 'dodge':                                                          // data_countries.jsxi:19
+				return 'USA';                                                      // data_countries.jsxi:19
+			case 'ferrari':                                                        // data_countries.jsxi:20
+				return 'Italy';                                                    // data_countries.jsxi:20
+			case 'fiat':                                                           // data_countries.jsxi:21
+				return 'Italy';                                                    // data_countries.jsxi:21
+			case 'ford':                                                           // data_countries.jsxi:22
+				return 'USA';                                                      // data_countries.jsxi:22
+			case 'gemballa':                                                       // data_countries.jsxi:23
+				return 'Germany';                                                  // data_countries.jsxi:23
+			case 'ginetta':                                                        // data_countries.jsxi:24
+				return 'Great Britain';                                            // data_countries.jsxi:24
+			case 'gmc':                                                            // data_countries.jsxi:25
+				return 'USA';                                                      // data_countries.jsxi:25
+			case 'gumpert':                                                        // data_countries.jsxi:26
+				return 'Germany';                                                  // data_countries.jsxi:26
+			case 'hamann':                                                         // data_countries.jsxi:27
+				return 'Germany';                                                  // data_countries.jsxi:27
+			case 'holden':                                                         // data_countries.jsxi:28
+				return 'Australia';                                                // data_countries.jsxi:28
+			case 'honda':                                                          // data_countries.jsxi:29
+				return 'Japan';                                                    // data_countries.jsxi:29
+			case 'hyundai':                                                        // data_countries.jsxi:30
+				return 'Korea';                                                    // data_countries.jsxi:30
+			case 'infiniti':                                                       // data_countries.jsxi:31
+				return 'Japan';                                                    // data_countries.jsxi:31
+			case 'jaguar':                                                         // data_countries.jsxi:32
+				return 'Great Britain';                                            // data_countries.jsxi:32
+			case 'kia':                                                            // data_countries.jsxi:33
+				return 'Korea';                                                    // data_countries.jsxi:33
+			case 'koenigsegg':                                                     // data_countries.jsxi:34
+				return 'Sweden';                                                   // data_countries.jsxi:34
+			case 'ktm':                                                            // data_countries.jsxi:35
+				return 'Austria';                                                  // data_countries.jsxi:35
+			case 'lada':                                                           // data_countries.jsxi:36
+				return 'Russia';                                                   // data_countries.jsxi:36
+			case 'lamborghini':                                                    // data_countries.jsxi:37
+				return 'Italy';                                                    // data_countries.jsxi:37
+			case 'lancia':                                                         // data_countries.jsxi:38
+				return 'Italy';                                                    // data_countries.jsxi:38
+			case 'lexus':                                                          // data_countries.jsxi:39
+				return 'Japan';                                                    // data_countries.jsxi:39
+			case 'lotus':                                                          // data_countries.jsxi:40
+				return 'Great Britain';                                            // data_countries.jsxi:40
+			case 'maserati':                                                       // data_countries.jsxi:41
+				return 'Italy';                                                    // data_countries.jsxi:41
+			case 'mazda':                                                          // data_countries.jsxi:42
+				return 'Japan';                                                    // data_countries.jsxi:42
+			case 'mclaren':                                                        // data_countries.jsxi:43
+				return 'Great Britain';                                            // data_countries.jsxi:43
+			case 'mercedes':                                                       // data_countries.jsxi:44
+				return 'Germany';                                                  // data_countries.jsxi:44
+			case 'mercedes-benz':                                                  // data_countries.jsxi:45
+				return 'Germany';                                                  // data_countries.jsxi:45
+			case 'mg':                                                             // data_countries.jsxi:46
+				return 'Great Britain';                                            // data_countries.jsxi:46
+			case 'mini':                                                           // data_countries.jsxi:47
+				return 'Great Britain';                                            // data_countries.jsxi:47
+			case 'mitsubishi':                                                     // data_countries.jsxi:48
+				return 'Japan';                                                    // data_countries.jsxi:48
+			case 'nissan':                                                         // data_countries.jsxi:49
+				return 'Japan';                                                    // data_countries.jsxi:49
+			case 'noble':                                                          // data_countries.jsxi:50
+				return 'Great Britain';                                            // data_countries.jsxi:50
+			case 'opel':                                                           // data_countries.jsxi:51
+				return 'Germany';                                                  // data_countries.jsxi:51
+			case 'oreca':                                                          // data_countries.jsxi:52
+				return 'France';                                                   // data_countries.jsxi:52
+			case 'pagani':                                                         // data_countries.jsxi:53
+				return 'Italy';                                                    // data_countries.jsxi:53
+			case 'detomaso':                                                       // data_countries.jsxi:54
+				return 'Italy';                                                    // data_countries.jsxi:54
+			case 'de tomaso':                                                      // data_countries.jsxi:55
+				return 'Italy';                                                    // data_countries.jsxi:55
+			case 'plymouth':                                                       // data_countries.jsxi:56
+				return 'USA';                                                      // data_countries.jsxi:56
+			case 'pontiac':                                                        // data_countries.jsxi:57
+				return 'USA';                                                      // data_countries.jsxi:57
+			case 'porsche':                                                        // data_countries.jsxi:58
+				return 'Germany';                                                  // data_countries.jsxi:58
+			case 'radical':                                                        // data_countries.jsxi:59
+				return 'Great Britain';                                            // data_countries.jsxi:59
+			case 'reliant':                                                        // data_countries.jsxi:60
+				return 'Great Britain';                                            // data_countries.jsxi:60
+			case 'renault':                                                        // data_countries.jsxi:61
+				return 'France';                                                   // data_countries.jsxi:61
+			case 'rover':                                                          // data_countries.jsxi:62
+				return 'Great Britain';                                            // data_countries.jsxi:62
+			case 'ruf':                                                            // data_countries.jsxi:63
+				return 'Germany';                                                  // data_countries.jsxi:63
+			case 'saleen':                                                         // data_countries.jsxi:64
+				return 'USA';                                                      // data_countries.jsxi:64
+			case 'sareni':                                                         // data_countries.jsxi:65
+				return 'USA';                                                      // data_countries.jsxi:65
+			case 'scuderia glickenhaus':                                           // data_countries.jsxi:66
+				return 'Italy';                                                    // data_countries.jsxi:66
+			case 'seat':                                                           // data_countries.jsxi:67
+				return 'Spain';                                                    // data_countries.jsxi:67
+			case 'shelby':                                                         // data_countries.jsxi:68
+				return 'USA';                                                      // data_countries.jsxi:68
+			case 'subaru':                                                         // data_countries.jsxi:69
+				return 'Japan';                                                    // data_countries.jsxi:69
+			case 'suzuki':                                                         // data_countries.jsxi:70
+				return 'Japan';                                                    // data_countries.jsxi:70
+			case 'tatuus':                                                         // data_countries.jsxi:71
+				return 'Italy';                                                    // data_countries.jsxi:71
+			case 'tesla':                                                          // data_countries.jsxi:72
+				return 'USA';                                                      // data_countries.jsxi:72
+			case 'toyota':                                                         // data_countries.jsxi:73
+				return 'Japan';                                                    // data_countries.jsxi:73
+			case 'volkswagen':                                                     // data_countries.jsxi:74
+				return 'Germany';                                                  // data_countries.jsxi:74
+			case 'volvo':                                                          // data_countries.jsxi:75
+				return 'Sweden';                                                   // data_countries.jsxi:75
+			default:
+				return null;
+		}
+	};
+	Countries.fromTag = function (tag){                                            // data_countries.jsxi:80
+		switch (tag = tag.trim().toLowerCase()){                                   // data_countries.jsxi:81
+			case 'afghanistan':                                                    // data_countries.jsxi:82
+				
+			case 'albania':                                                        // data_countries.jsxi:83
+				
+			case 'algeria':                                                        // data_countries.jsxi:84
+				
+			case 'andorra':                                                        // data_countries.jsxi:85
+				
+			case 'angola':                                                         // data_countries.jsxi:86
+				
+			case 'argentina':                                                      // data_countries.jsxi:87
+				
+			case 'armenia':                                                        // data_countries.jsxi:88
+				
+			case 'aruba':                                                          // data_countries.jsxi:89
+				
+			case 'australia':                                                      // data_countries.jsxi:90
+				
+			case 'austria':                                                        // data_countries.jsxi:91
+				
+			case 'azerbaijan':                                                     // data_countries.jsxi:92
+				
+			case 'bahamas':                                                        // data_countries.jsxi:93
+				
+			case 'bahrain':                                                        // data_countries.jsxi:94
+				
+			case 'bangladesh':                                                     // data_countries.jsxi:95
+				
+			case 'barbados':                                                       // data_countries.jsxi:96
+				
+			case 'belarus':                                                        // data_countries.jsxi:97
+				
+			case 'belgium':                                                        // data_countries.jsxi:98
+				
+			case 'belize':                                                         // data_countries.jsxi:99
+				
+			case 'benin':                                                          // data_countries.jsxi:100
+				
+			case 'bhutan':                                                         // data_countries.jsxi:101
+				
+			case 'bolivia':                                                        // data_countries.jsxi:102
+				
+			case 'botswana':                                                       // data_countries.jsxi:103
+				
+			case 'brazil':                                                         // data_countries.jsxi:104
+				
+			case 'brunei':                                                         // data_countries.jsxi:105
+				
+			case 'bulgaria':                                                       // data_countries.jsxi:106
+				
+			case 'burma':                                                          // data_countries.jsxi:107
+				
+			case 'burundi':                                                        // data_countries.jsxi:108
+				
+			case 'cambodia':                                                       // data_countries.jsxi:109
+				
+			case 'cameroon':                                                       // data_countries.jsxi:110
+				
+			case 'canada':                                                         // data_countries.jsxi:111
+				
+			case 'chad':                                                           // data_countries.jsxi:112
+				
+			case 'chile':                                                          // data_countries.jsxi:113
+				
+			case 'china':                                                          // data_countries.jsxi:114
+				
+			case 'colombia':                                                       // data_countries.jsxi:115
+				
+			case 'comoros':                                                        // data_countries.jsxi:116
+				
+			case 'congo':                                                          // data_countries.jsxi:117
+				
+			case 'croatia':                                                        // data_countries.jsxi:118
+				
+			case 'cuba':                                                           // data_countries.jsxi:119
+				
+			case 'curacao':                                                        // data_countries.jsxi:120
+				
+			case 'cyprus':                                                         // data_countries.jsxi:121
+				
+			case 'denmark':                                                        // data_countries.jsxi:122
+				
+			case 'djibouti':                                                       // data_countries.jsxi:123
+				
+			case 'dominica':                                                       // data_countries.jsxi:124
+				
+			case 'ecuador':                                                        // data_countries.jsxi:125
+				
+			case 'egypt':                                                          // data_countries.jsxi:126
+				
+			case 'eritrea':                                                        // data_countries.jsxi:127
+				
+			case 'estonia':                                                        // data_countries.jsxi:128
+				
+			case 'ethiopia':                                                       // data_countries.jsxi:129
+				
+			case 'fiji':                                                           // data_countries.jsxi:130
+				
+			case 'finland':                                                        // data_countries.jsxi:131
+				
+			case 'france':                                                         // data_countries.jsxi:132
+				
+			case 'gabon':                                                          // data_countries.jsxi:133
+				
+			case 'gambia':                                                         // data_countries.jsxi:134
+				
+			case 'georgia':                                                        // data_countries.jsxi:135
+				
+			case 'germany':                                                        // data_countries.jsxi:136
+				
+			case 'ghana':                                                          // data_countries.jsxi:137
+				
+			case 'greece':                                                         // data_countries.jsxi:138
+				
+			case 'grenada':                                                        // data_countries.jsxi:139
+				
+			case 'guatemala':                                                      // data_countries.jsxi:140
+				
+			case 'guinea':                                                         // data_countries.jsxi:141
+				
+			case 'guinea-bissau':                                                  // data_countries.jsxi:142
+				
+			case 'guyana':                                                         // data_countries.jsxi:143
+				
+			case 'haiti':                                                          // data_countries.jsxi:144
+				
+			case 'holy see':                                                       // data_countries.jsxi:145
+				
+			case 'honduras':                                                       // data_countries.jsxi:146
+				
+			case 'hong kong':                                                      // data_countries.jsxi:147
+				
+			case 'hungary':                                                        // data_countries.jsxi:148
+				
+			case 'iceland':                                                        // data_countries.jsxi:149
+				
+			case 'india':                                                          // data_countries.jsxi:150
+				
+			case 'indonesia':                                                      // data_countries.jsxi:151
+				
+			case 'iran':                                                           // data_countries.jsxi:152
+				
+			case 'iraq':                                                           // data_countries.jsxi:153
+				
+			case 'ireland':                                                        // data_countries.jsxi:154
+				
+			case 'israel':                                                         // data_countries.jsxi:155
+				
+			case 'italy':                                                          // data_countries.jsxi:156
+				
+			case 'jamaica':                                                        // data_countries.jsxi:157
+				
+			case 'japan':                                                          // data_countries.jsxi:158
+				
+			case 'jordan':                                                         // data_countries.jsxi:159
+				
+			case 'kazakhstan':                                                     // data_countries.jsxi:160
+				
+			case 'kenya':                                                          // data_countries.jsxi:161
+				
+			case 'kiribati':                                                       // data_countries.jsxi:162
+				
+			case 'kosovo':                                                         // data_countries.jsxi:163
+				
+			case 'kuwait':                                                         // data_countries.jsxi:164
+				
+			case 'kyrgyzstan':                                                     // data_countries.jsxi:165
+				
+			case 'laos':                                                           // data_countries.jsxi:166
+				
+			case 'latvia':                                                         // data_countries.jsxi:167
+				
+			case 'lebanon':                                                        // data_countries.jsxi:168
+				
+			case 'lesotho':                                                        // data_countries.jsxi:169
+				
+			case 'liberia':                                                        // data_countries.jsxi:170
+				
+			case 'libya':                                                          // data_countries.jsxi:171
+				
+			case 'liechtenstein':                                                  // data_countries.jsxi:172
+				
+			case 'lithuania':                                                      // data_countries.jsxi:173
+				
+			case 'luxembourg':                                                     // data_countries.jsxi:174
+				
+			case 'macau':                                                          // data_countries.jsxi:175
+				
+			case 'macedonia':                                                      // data_countries.jsxi:176
+				
+			case 'madagascar':                                                     // data_countries.jsxi:177
+				
+			case 'malawi':                                                         // data_countries.jsxi:178
+				
+			case 'malaysia':                                                       // data_countries.jsxi:179
+				
+			case 'maldives':                                                       // data_countries.jsxi:180
+				
+			case 'mali':                                                           // data_countries.jsxi:181
+				
+			case 'malta':                                                          // data_countries.jsxi:182
+				
+			case 'mauritania':                                                     // data_countries.jsxi:183
+				
+			case 'mauritius':                                                      // data_countries.jsxi:184
+				
+			case 'mexico':                                                         // data_countries.jsxi:185
+				
+			case 'micronesia':                                                     // data_countries.jsxi:186
+				
+			case 'moldova':                                                        // data_countries.jsxi:187
+				
+			case 'monaco':                                                         // data_countries.jsxi:188
+				
+			case 'mongolia':                                                       // data_countries.jsxi:189
+				
+			case 'montenegro':                                                     // data_countries.jsxi:190
+				
+			case 'morocco':                                                        // data_countries.jsxi:191
+				
+			case 'mozambique':                                                     // data_countries.jsxi:192
+				
+			case 'namibia':                                                        // data_countries.jsxi:193
+				
+			case 'nauru':                                                          // data_countries.jsxi:194
+				
+			case 'nepal':                                                          // data_countries.jsxi:195
+				
+			case 'netherlands':                                                    // data_countries.jsxi:196
+				
+			case 'nicaragua':                                                      // data_countries.jsxi:197
+				
+			case 'niger':                                                          // data_countries.jsxi:198
+				
+			case 'nigeria':                                                        // data_countries.jsxi:199
+				
+			case 'norway':                                                         // data_countries.jsxi:200
+				
+			case 'oman':                                                           // data_countries.jsxi:201
+				
+			case 'pakistan':                                                       // data_countries.jsxi:202
+				
+			case 'palau':                                                          // data_countries.jsxi:203
+				
+			case 'panama':                                                         // data_countries.jsxi:204
+				
+			case 'paraguay':                                                       // data_countries.jsxi:205
+				
+			case 'peru':                                                           // data_countries.jsxi:206
+				
+			case 'philippines':                                                    // data_countries.jsxi:207
+				
+			case 'poland':                                                         // data_countries.jsxi:208
+				
+			case 'portugal':                                                       // data_countries.jsxi:209
+				
+			case 'qatar':                                                          // data_countries.jsxi:210
+				
+			case 'romania':                                                        // data_countries.jsxi:211
+				
+			case 'russia':                                                         // data_countries.jsxi:212
+				
+			case 'rwanda':                                                         // data_countries.jsxi:213
+				
+			case 'samoa':                                                          // data_countries.jsxi:214
+				
+			case 'senegal':                                                        // data_countries.jsxi:215
+				
+			case 'serbia':                                                         // data_countries.jsxi:216
+				
+			case 'seychelles':                                                     // data_countries.jsxi:217
+				
+			case 'singapore':                                                      // data_countries.jsxi:218
+				
+			case 'slovakia':                                                       // data_countries.jsxi:219
+				
+			case 'slovenia':                                                       // data_countries.jsxi:220
+				
+			case 'somalia':                                                        // data_countries.jsxi:221
+				
+			case 'spain':                                                          // data_countries.jsxi:222
+				
+			case 'sudan':                                                          // data_countries.jsxi:223
+				
+			case 'suriname':                                                       // data_countries.jsxi:224
+				
+			case 'swaziland':                                                      // data_countries.jsxi:225
+				
+			case 'switzerland':                                                    // data_countries.jsxi:226
+				
+			case 'syria':                                                          // data_countries.jsxi:227
+				
+			case 'taiwan':                                                         // data_countries.jsxi:228
+				
+			case 'tajikistan':                                                     // data_countries.jsxi:229
+				
+			case 'tanzania':                                                       // data_countries.jsxi:230
+				
+			case 'thailand':                                                       // data_countries.jsxi:231
+				
+			case 'timor-leste':                                                    // data_countries.jsxi:232
+				
+			case 'togo':                                                           // data_countries.jsxi:233
+				
+			case 'tonga':                                                          // data_countries.jsxi:234
+				
+			case 'tunisia':                                                        // data_countries.jsxi:235
+				
+			case 'turkey':                                                         // data_countries.jsxi:236
+				
+			case 'turkmenistan':                                                   // data_countries.jsxi:237
+				
+			case 'tuvalu':                                                         // data_countries.jsxi:238
+				
+			case 'uganda':                                                         // data_countries.jsxi:239
+				
+			case 'ukraine':                                                        // data_countries.jsxi:240
+				
+			case 'uruguay':                                                        // data_countries.jsxi:241
+				
+			case 'uzbekistan':                                                     // data_countries.jsxi:242
+				
+			case 'vanuatu':                                                        // data_countries.jsxi:243
+				
+			case 'venezuela':                                                      // data_countries.jsxi:244
+				
+			case 'vietnam':                                                        // data_countries.jsxi:245
+				
+			case 'yemen':                                                          // data_countries.jsxi:246
+				
+			case 'zambia':                                                         // data_countries.jsxi:247
+				
+			case 'zimbabwe':                                                       // data_countries.jsxi:248
+				return tag[0].toUpperCase() + tag.slice(1);                        // data_countries.jsxi:249
+			case 'antigua and barbuda':                                            // data_countries.jsxi:251
+				
+			case 'bosnia and herzegovina':                                         // data_countries.jsxi:252
+				
+			case 'burkina faso':                                                   // data_countries.jsxi:253
+				
+			case 'cape verde':                                                     // data_countries.jsxi:254
+				
+			case 'central african republic':                                       // data_countries.jsxi:255
+				
+			case 'costa rica':                                                     // data_countries.jsxi:256
+				
+			case 'el salvador':                                                    // data_countries.jsxi:257
+				
+			case 'equatorial guinea':                                              // data_countries.jsxi:258
+				
+			case 'marshall islands':                                               // data_countries.jsxi:259
+				
+			case 'new zealand':                                                    // data_countries.jsxi:260
+				
+			case 'san marino':                                                     // data_countries.jsxi:261
+				
+			case 'saudi arabia':                                                   // data_countries.jsxi:262
+				
+			case 'sierra leone':                                                   // data_countries.jsxi:263
+				
+			case 'sint maarten':                                                   // data_countries.jsxi:264
+				
+			case 'solomon islands':                                                // data_countries.jsxi:265
+				
+			case 'south africa':                                                   // data_countries.jsxi:266
+				
+			case 'south sudan':                                                    // data_countries.jsxi:267
+				
+			case 'sri lanka':                                                      // data_countries.jsxi:268
+				
+			case 'trinidad and tobago':                                            // data_countries.jsxi:269
+				
+			case 'united arab emirates':                                           // data_countries.jsxi:270
+				return tag.replace(/\b(?!and)\w/g,                                 // data_countries.jsxi:271
+					function (arg){                                                // data_countries.jsxi:271
+						return arg.toUpperCase();                                  // data_countries.jsxi:271
+					});
+			case 'cote d\'ivoire':                                                 // data_countries.jsxi:273
+				
+			case 'côte d\'ivoire':                                                 // data_countries.jsxi:274
+				
+			case 'cote d’ivoire':                                                  // data_countries.jsxi:275
+				
+			case 'côte d’ivoire':                                                  // data_countries.jsxi:276
+				return 'Côte d’Ivoire';                                            // data_countries.jsxi:277
+			case 'czech':                                                          // data_countries.jsxi:279
+				
+			case 'czech republic':                                                 // data_countries.jsxi:280
+				return 'Czech Republic';                                           // data_countries.jsxi:281
+			case 'gb':                                                             // data_countries.jsxi:283
+				
+			case 'uk':                                                             // data_countries.jsxi:284
+				
+			case 'united kingdom':                                                 // data_countries.jsxi:285
+				
+			case 'england':                                                        // data_countries.jsxi:286
+				
+			case 'britain':                                                        // data_countries.jsxi:287
+				
+			case 'great britain':                                                  // data_countries.jsxi:288
+				return 'Great Britain';                                            // data_countries.jsxi:289
+			case 'korea':                                                          // data_countries.jsxi:291
+				
+			case 'korea, south':                                                   // data_countries.jsxi:292
+				
+			case 'south korea':                                                    // data_countries.jsxi:293
+				return 'Korea';                                                    // data_countries.jsxi:294
+			case 'sweden':                                                         // data_countries.jsxi:296
+				
+			case 'swedish':                                                        // data_countries.jsxi:297
+				return 'Sweden';                                                   // data_countries.jsxi:298
+			case 'us':                                                             // data_countries.jsxi:300
+				
+			case 'usa':                                                            // data_countries.jsxi:301
+				
+			case 'america':                                                        // data_countries.jsxi:302
+				return 'USA';                                                      // data_countries.jsxi:303
+			default:
+				return null;
+		}
+	};
+	Countries.fixTag = function (raw){                                             // data_countries.jsxi:310
+		var tag = raw.toLowerCase();
+		
+		switch (tag){                                                              // data_countries.jsxi:313
+			case 'gb':                                                             // data_countries.jsxi:314
+				
+			case 'uk':                                                             // data_countries.jsxi:315
+				
+			case 'united kingdom':                                                 // data_countries.jsxi:316
+				
+			case 'england':                                                        // data_countries.jsxi:317
+				
+			case 'britain':                                                        // data_countries.jsxi:318
+				return 'great britain';                                            // data_countries.jsxi:319
+			case 'cote d\'ivoire':                                                 // data_countries.jsxi:321
+				
+			case 'côte d\'ivoire':                                                 // data_countries.jsxi:322
+				
+			case 'cote d’ivoire':                                                  // data_countries.jsxi:323
+				return 'côte d’ivoire';                                            // data_countries.jsxi:324
+			case 'czech':                                                          // data_countries.jsxi:326
+				
+			case 'czech republic':                                                 // data_countries.jsxi:327
+				return 'czech republic';                                           // data_countries.jsxi:328
+			case 'korea':                                                          // data_countries.jsxi:330
+				
+			case 'korea, south':                                                   // data_countries.jsxi:331
+				
+			case 'south korea':                                                    // data_countries.jsxi:332
+				return 'korea';                                                    // data_countries.jsxi:333
+			case 'swedish':                                                        // data_countries.jsxi:335
+				return 'sweden';                                                   // data_countries.jsxi:336
+			case 'us':                                                             // data_countries.jsxi:338
+				
+			case 'america':                                                        // data_countries.jsxi:339
+				return 'usa';                                                      // data_countries.jsxi:340
+			default:
+				return raw;                                                        // data_countries.jsxi:343
+		}
+	};
+	Countries.fromDatabase = function (id){                                        // data_countries.jsxi:350
+		if (!_initialized){                                                        // data_countries.jsxi:351
+			Countries.init();
+		}
+		
+		if (_database && _database.hasOwnProperty(id)){                            // data_countries.jsxi:355
+			return _database[id];                                                  // data_countries.jsxi:356
+		} else {
+			return null;
+		}
+	};
+	Countries.init = function (){                                                  // data_countries.jsxi:362
+		_database = DataStorage.readContentJsonFile('Details (Preload)', 'countries.json');
+	};
+	return Countries;
+})();
+
+/* Class "Sfx" declaration */
+var Sfx = (function (){                                                            // data_sfx.jsxi:1
+	var Sfx = function (){}, 
+		_origIds, _origGuids;
+	
+	Sfx.isCarOriginal = function (id){                                             // data_sfx.jsxi:4
+		if (!_origIds)                                                             // data_sfx.jsxi:5
+			Sfx.init();
+		return _origIds.hasOwnProperty(id);                                        // data_sfx.jsxi:6
+	};
+	Sfx.getSfxOriginal_inner = function (id, guids){                               // data_sfx.jsxi:9
+		{
+			var __n = guids.split(/\n/);
 			
-		case 'uk':                                                                 // data_countries.jsxi:315
+			for (var __m = 0; __m < __n.length; __m ++){
+				var l = __n[__m];
+				
+				var m = l.match(/^\{(\w{8}(?:-\w{4}){3}-\w{12})\}\s+event:\/cars\/(\w+)\/e/);
+				
+				if (m && m[2] === id && _origGuids[m[1]]){                         // data_sfx.jsxi:12
+					return _origGuids[m[1]];                                       // data_sfx.jsxi:13
+				}
+			}
 			
-		case 'united kingdom':                                                     // data_countries.jsxi:316
+			__n = undefined;
+		}
+	};
+	Sfx.getSfxOriginal = function (id, path, __callback){                          // data_sfx.jsxi:18
+		var g;
+		
+		var __block_0 = (function (){
+			if (Sfx.isCarOriginal(id))
+				return __callback(null);
 			
-		case 'england':                                                            // data_countries.jsxi:317
+			fs.readFile(path + '/sfx/GUIDs.txt',                                   // data_sfx.jsxi:21
+				function (__err, 
+					__result){
+					g = __result;                                                  // data_sfx.jsxi:21
+					
+					__block_1()
+				})
+		}).bind(this);
+		
+		var __block_1 = (function (){
+			if (!g)                                                                // data_sfx.jsxi:22
+				return __callback(null);
+			return __callback(Sfx.getSfxOriginal_inner(id, g.toString()));
 			
-		case 'britain':                                                            // data_countries.jsxi:318
-			return 'great britain';                                                // data_countries.jsxi:319
-		case 'cote d\'ivoire':                                                     // data_countries.jsxi:321
+			if (__callback)
+				__callback();
+		}).bind(this);
+		
+		__block_0();
+	};
+	Sfx.init = function (){                                                        // data_sfx.jsxi:27
+		_origIds = {};                                                             // data_sfx.jsxi:28
+		_origGuids = {};                                                           // data_sfx.jsxi:29
+		
+		var file = AcDir.root + '/content/sfx/GUIDs.txt';
+		
+		if (fs.existsSync(file)){                                                  // data_sfx.jsxi:32
+			{
+				var __p = fs.readFileSync(file).toString().split(/\n/);
+				
+				for (var __o = 0; __o < __p.length; __o ++){
+					var l = __p[__o];
+					
+					var m = l.match(/^\{(\w{8}(?:-\w{4}){3}-\w{12})\}\s+event:\/cars\/(\w+)\/e/);
+					
+					if (m){                                                        // data_sfx.jsxi:35
+						_origGuids[m[1]] = m[2];                                   // data_sfx.jsxi:36
+						_origIds[m[2]] = true;                                     // data_sfx.jsxi:37
+					}
+				}
+				
+				__p = undefined;
+			}
+		}
+	};
+	Sfx.getGuidsById = function (id){                                              // data_sfx.jsxi:43
+		var file = Cars.byId(id).path + '/sfx/GUIDs.txt';
+		
+		if (!fs.existsSync(file))                                                  // data_sfx.jsxi:45
+			file = AcDir.root + '/content/sfx/GUIDs.txt';                          // data_sfx.jsxi:45
+		
+		var result = [];
+		
+		{
+			var __r = fs.readFileSync(file).toString().split(/\n/);
 			
-		case 'côte d\'ivoire':                                                     // data_countries.jsxi:322
+			for (var __q = 0; __q < __r.length; __q ++){
+				var l = __r[__q];
+				
+				var m = l.match(/^\{(\w{8}(?:-\w{4}){3}-\w{12})\}\s+event:\/cars\/(\w+)\/.+/);
+				
+				if (m && m[2] === id){                                             // data_sfx.jsxi:50
+					result.push(m[0]);                                             // data_sfx.jsxi:51
+				}
+			}
 			
-		case 'cote d’ivoire':                                                      // data_countries.jsxi:323
-			return 'côte d’ivoire';                                                // data_countries.jsxi:324
-		case 'czech':                                                              // data_countries.jsxi:326
-			
-		case 'czech republic':                                                     // data_countries.jsxi:327
-			return 'czech republic';                                               // data_countries.jsxi:328
-		case 'korea':                                                              // data_countries.jsxi:330
-			
-		case 'korea, south':                                                       // data_countries.jsxi:331
-			
-		case 'south korea':                                                        // data_countries.jsxi:332
-			return 'korea';                                                        // data_countries.jsxi:333
-		case 'swedish':                                                            // data_countries.jsxi:335
-			return 'sweden';                                                       // data_countries.jsxi:336
-		case 'us':                                                                 // data_countries.jsxi:338
-			
-		case 'america':                                                            // data_countries.jsxi:339
-			return 'usa';                                                          // data_countries.jsxi:340
-		default:
-			return raw;                                                            // data_countries.jsxi:343
-	}
-};
+			__r = undefined;
+		}
+		return result.join('\n');                                                  // data_sfx.jsxi:55
+	};
+	Sfx.getBankFilenameById = function (id){                                       // data_sfx.jsxi:58
+		return Cars.byId(id).path + ('/sfx/' + id + '.bank');                      // data_sfx.jsxi:59
+	};
+	Sfx.getDefaultGuids = function (id){                                           // data_sfx.jsxi:62
+		return fs.readFileSync('data/GUIDs.txt').toString().replace(/\{\{CAR_ID\}\}/g, id);
+	};
+	return Sfx;
+})();
 
 /* Class "Tips" declaration */
 var Tips = (function (){                                                           // data_tips.jsxi:1
@@ -4052,7 +4662,7 @@ var Tips = (function (){                                                        
 			"Before using <b>Auto-update Preview</b> please disable all graphics mods (such as SweetFX).\nWe want original-looking screenshots, don't we?", 
 			"Use manual skin previews auto-update to control camera position.\nIn manual skin previews auto-update press F8 when camera position is adjusted.", 
 			"Press Esc to abort <b>Auto-update Preview</b>.",                      // data_tips.jsxi:2
-			"All manually added badges are located in <a href=\"#\" onclick=\"Shell.openItem(DataStorage.getDataDir('Badges (User)'))\"><i>…\\AppData\\Local\\AcTools Cars Manager\\Data Storage\\Badges (User)</i></a>.", 
+			"All manually added badges are located in <a href=\"#\" onclick=\"Shell.openItem(DataStorage.getUserContentDir('Badges'))\"><i>…\\AppData\\Local\\AcTools Cars Manager\\Data Storage\\Badges (User)</i></a>.", 
 			"If you want to use <b>Quick Practive</b>, make sure AcTools Ui Json has access to rename <a href=\"#\" onclick=\"Shell.showItemInFolder(path.join(AcDir.root,'AssettoCorsa.exe'))\"><i>AssettoCorsa.exe</i></a>.\nJust open file properties and edit permissions on the Security tab. Or you can run AcTools Ui Json as Administrator.\nBut it's a terrible way", 
 			"<b>Auto-update Preview</b> requires access to <a href=\"#\" onclick=\"Shell.showItemInFolder(path.join(AcDir.root,'content/gui/logo_ac_app.png'))\"><i>content\\\\gui\\\\logo_ac_app.png</i></a>. Don't worry, it'll revert back all changes.", 
 			""
@@ -4069,25 +4679,74 @@ var Tips = (function (){                                                        
 	return Tips;
 })();
 
-/* Class "Years" declaration */
-function Years(){}
-Years.nameContains = function (name){                                              // data_years.jsxi:2
-	return /\s(?:\W?(?:(?:\d\d){1,2})|((?:\d\d){1,2})\W)$/.test(name);             // data_years.jsxi:3
-};
-Years.fromName = function (name){                                                  // data_years.jsxi:6
-	if (/\s(?:\W?((?:\d\d){1,2})|((?:\d\d){1,2})\W)$/.test(name)){                 // data_years.jsxi:7
-		var year = + (RegExp.$1 || RegExp.$2);
-		
-		if (year < 30){                                                            // data_years.jsxi:9
-			year = 2e3 + year;                                                     // data_years.jsxi:10
-		} else if (year < 1e3){                                                    // data_years.jsxi:11
-			year = 1900 + year;                                                    // data_years.jsxi:12
+/* Class "Urls" declaration */
+var Urls = (function (){                                                           // data_urls.jsxi:1
+	var Urls = function (){}, 
+		_initialized = false, _database;
+	
+	Urls.fromDatabase = function (id){                                             // data_urls.jsxi:5
+		if (!_initialized){                                                        // data_urls.jsxi:6
+			Urls.init();
 		}
-		return year;                                                               // data_years.jsxi:15
-	} else {
-		return null;
-	}
-};
+		
+		if (_database && _database.hasOwnProperty(id)){                            // data_urls.jsxi:10
+			return _database[id];                                                  // data_urls.jsxi:11
+		} else {
+			return null;
+		}
+	};
+	Urls.init = function (){                                                       // data_urls.jsxi:17
+		_database = DataStorage.readContentJsonFile('Details (Preload)', 'urls.json');
+	};
+	return Urls;
+})();
+
+/* Class "Years" declaration */
+var Years = (function (){                                                          // data_years.jsxi:1
+	var Years = function (){}, 
+		_re = /\s['`]?(\d\d)$/,                                                    // data_years.jsxi:2
+		_initialized = false,                                                      // data_years.jsxi:31
+		_database;                                                                 // data_years.jsxi:32
+	
+	Years.nameContains = function (name){                                          // data_years.jsxi:4
+		return _re.test(name);                                                     // data_years.jsxi:5
+	};
+	Years.fromName = function (name){                                              // data_years.jsxi:8
+		if (_re.test(name)){                                                       // data_years.jsxi:9
+			var year = + RegExp.$1;
+			
+			if (year < 30){                                                        // data_years.jsxi:11
+				year = 2e3 + year;                                                 // data_years.jsxi:12
+			} else if (year < 1e3){                                                // data_years.jsxi:13
+				year = 1900 + year;                                                // data_years.jsxi:14
+			}
+			return year;                                                           // data_years.jsxi:17
+		} else {
+			return null;
+		}
+	};
+	Years.addToName = function (name, year){                                       // data_years.jsxi:23
+		return name + ' \'' + ('' + year).slice(2);                                // data_years.jsxi:24
+	};
+	Years.removeFromName = function (name){                                        // data_years.jsxi:27
+		return name.replace(_re, '');                                              // data_years.jsxi:28
+	};
+	Years.fromDatabase = function (id){                                            // data_years.jsxi:34
+		if (!_initialized){                                                        // data_years.jsxi:35
+			Years.init();
+		}
+		
+		if (_database && _database.hasOwnProperty(id)){                            // data_years.jsxi:39
+			return _database[id];                                                  // data_years.jsxi:40
+		} else {
+			return null;
+		}
+	};
+	Years.init = function (){                                                      // data_years.jsxi:46
+		_database = DataStorage.readContentJsonFile('Details (Preload)', 'years.json');
+	};
+	return Years;
+})();
 
 /* Class "DragDestination" declaration */
 var DragDestination = (function (){                                                // drag_destination.jsxi:1
@@ -4128,90 +4787,1077 @@ var DragDestination = (function (){                                             
 						function (arg){                                            // drag_destination.jsxi:36
 							return arg.path;                                       // drag_destination.jsxi:36
 						})));
+				mainForm.focus();                                                  // drag_destination.jsxi:37
 			}
 			return false;
 		};
-		$(window).on('dragover drop',                                              // drag_destination.jsxi:42
-			_node.ondragover = function (arg){                                     // drag_destination.jsxi:43
-				arg.preventDefault();                                              // drag_destination.jsxi:44
+		$(window).on('dragover drop',                                              // drag_destination.jsxi:43
+			_node.ondragover = function (arg){                                     // drag_destination.jsxi:44
+				arg.preventDefault();                                              // drag_destination.jsxi:45
 				
 				var entry = _registered[_registered.length - 1];
 				
-				if (entry){                                                        // drag_destination.jsxi:47
-					_node.children[0].textContent = entry.name;                    // drag_destination.jsxi:48
-					_node.style.display = null;                                    // drag_destination.jsxi:49
+				if (entry){                                                        // drag_destination.jsxi:48
+					_node.children[0].textContent = entry.text;                    // drag_destination.jsxi:49
+					_node.style.display = null;                                    // drag_destination.jsxi:50
 				}
 				return false;
 			});
-		_node.ondragleave = function (arg){                                        // drag_destination.jsxi:55
-			arg.preventDefault();                                                  // drag_destination.jsxi:56
-			_node.style.display = 'none';                                          // drag_destination.jsxi:57
+		_node.ondragleave = function (arg){                                        // drag_destination.jsxi:56
+			arg.preventDefault();                                                  // drag_destination.jsxi:57
+			_node.style.display = 'none';                                          // drag_destination.jsxi:58
 			return false;
 		};
 	})();
 	return DragDestination;
 })();
 
-/* Class "Settings" declaration */
-var Settings = (function (){                                                       // settings.jsxi:1
-	var Settings = function (){}, 
-		_settings,                                                                 // settings.jsxi:2
-		_defaults = {                                                              // settings.jsxi:4
-			disableTips: false,                                                    // settings.jsxi:4
-			updateDatabase: true,                                                  // settings.jsxi:6
-			uploadData: false,                                                     // settings.jsxi:7
-			updatesCheck: true,                                                    // settings.jsxi:8
-			updatesSource: 'stable',                                               // settings.jsxi:9
-			badgeAutoupdate: true,                                                 // settings.jsxi:11
-			aptMode: 'default',                                                    // settings.jsxi:13
-			aptShowroom: '',                                                       // settings.jsxi:14
-			aptFilter: 'S1-Dynamic',                                               // settings.jsxi:15
-			aptResize: true,                                                       // settings.jsxi:16
-			aptDisableSweetFx: true,                                               // settings.jsxi:17
-			aptCameraX: - 145,                                                     // settings.jsxi:18
-			aptCameraY: 36,                                                        // settings.jsxi:19
-			aptCameraDistance: 5.5,                                                // settings.jsxi:20
-			aptIncreaseDelays: false
-		};
+/* Class "DragMainHandler" declaration */
+var DragMainHandler = (function (){                                                // drag_main_handler.jsxi:1
+	var DragMainHandler = function (){}, 
+		_ddId,                                                                     // drag_main_handler.jsxi:2
+		_holders = [],                                                             // drag_main_handler.jsxi:2
+		_exec_inner;                                                               // drag_main_handler_archive.jsxi:2
 	
-	function save(){                                                               // settings.jsxi:26
-		localStorage.settings = JSON.stringify(_settings);                         // settings.jsxi:27
+	function handle(file){                                                         // drag_main_handler.jsxi:4
+		if (fs.statSync(file).isDirectory()){                                      // drag_main_handler.jsxi:5
+			return fromDirectory(file);                                            // drag_main_handler.jsxi:6
+		} else {
+			return fromArchive(file);                                              // drag_main_handler.jsxi:8
+		}
 	}
 	
-	Settings.get = function (k){                                                   // settings.jsxi:30
-		return _settings.hasOwnProperty(k) ? _settings[k] : _defaults[k];          // settings.jsxi:31
-	};
-	Settings.set = function (k, val){                                              // settings.jsxi:34
-		if (typeof k == 'object'){                                                 // settings.jsxi:35
-			for (var n in k){                                                      // settings.jsxi:36
-				_settings[n] = k[n];                                               // settings.jsxi:37
-			}
+	function detectContent(file, node, result){                                    // drag_main_handler.jsxi:12
+		if (result === undefined)                                                  // drag_main_handler.jsxi:12
+			result = [];                                                           // drag_main_handler.jsxi:12
+	
+		if (node.sub['body_shadow.png'] && node.sub['sfx'] && node.sub['skins'] && node.sub['ui'] && node.sub['ui'].sub && node.sub['ui'].sub['ui_car.json']){
+			result.push({                                                          // drag_main_handler.jsxi:15
+				type: 'car',                                                       // drag_main_handler.jsxi:15
+				id: node.path === '' ? file.replace(/^.+[\\\/]|\.\w+$/g, '') : node.id, 
+				root: node,                                                        // drag_main_handler.jsxi:15
+				data: node.sub['ui'].sub['ui_car.json']
+			});
+		} else if (node.sub['ui_skin.json']){                                      // drag_main_handler.jsxi:17
+			result.push({                                                          // drag_main_handler.jsxi:18
+				type: 'skin',                                                      // drag_main_handler.jsxi:18
+				id: node.path === '' ? file.replace(/^.+[\\\/]|\.\w+$/g, '') : node.id, 
+				root: node,                                                        // drag_main_handler.jsxi:18
+				data: node.sub['ui_skin.json']
+			});
 		} else {
-			_settings[k] = val;                                                    // settings.jsxi:40
+			{
+				var __s = node.sub;
+				
+				for (var id in __s)
+					if (__s.hasOwnProperty(id)){
+						var child = __s[id];
+						
+						if (child.sub){                                            // drag_main_handler.jsxi:22
+							detectContent(file, child, result);                    // drag_main_handler.jsxi:23
+						}
+					}
+				
+				__s = undefined;
+			}
+		}
+		return result;                                                             // drag_main_handler.jsxi:28
+	}
+	
+	function showDialog(found){                                                    // drag_main_handler.jsxi:31
+		if (found.length === 0){                                                   // drag_main_handler.jsxi:32
+			new Dialog('Installation', [ 'Nothing to install.' ]);                 // drag_main_handler.jsxi:33
+			return;
 		}
 		
-		save();                                                                    // settings.jsxi:43
-	};
-	Settings.update = function (f){                                                // settings.jsxi:46
-		f(_settings);                                                              // settings.jsxi:47
-		save();                                                                    // settings.jsxi:48
-	};
-	Object.defineProperty(Settings,                                                // settings.jsxi:1
-		'defaults', 
+		var d = new Dialog('Installation',                                         // drag_main_handler.jsxi:37
+			found.map(function (entry, id){                                        // drag_main_handler.jsxi:37
+				return '<h6>' + entry.type + ': ' + entry.name + '</h6><p>' + entry.actions.map(function (a, i){
+					return '<label style="display:block"><input name="found-' + id + '" data-id="' + entry.id + '" data-action="' + i + '" type="radio">' + a.name + '</label>';
+				}).join('') + '<label style="display:block"><input name="found-' + id + '" data-id="' + entry.id + '" type="radio" checked>Skip</label></p>';
+			}), 
+			function (){                                                           // drag_main_handler.jsxi:42
+				var actions = found.map((function (entry, id){                     // drag_main_handler.jsxi:43
+					var action = entry.actions[this.content.find('[name="found-' + id + '"]:checked').data('action')];
+					return action && action.action;                                // drag_main_handler.jsxi:45
+				}).bind(this)).filter(function (arg){                              // drag_main_handler.jsxi:46
+					return arg;                                                    // drag_main_handler.jsxi:46
+				});
+				
+				if (actions.length){                                               // drag_main_handler.jsxi:48
+					setTimeout(applyActions.bind(null, actions));                  // drag_main_handler.jsxi:49
+				}
+			}, 
+			freeHolders).setButton('Install');                                     // drag_main_handler.jsxi:51
+		
+		d.content.find('input[data-action]').change(function (){                   // drag_main_handler.jsxi:53
+			var t = this;
+			
+			d.content.find('input[data-id="' + this.getAttribute('data-id') + '"]:not([data-action])').each(function (arg){
+				if (this !== t)                                                    // drag_main_handler.jsxi:56
+					this.checked = true;                                           // drag_main_handler.jsxi:56
+			});
+			this.checked = true;                                                   // drag_main_handler.jsxi:59
+		});
+		
+		var lastId;
+		
+		for (var id = 0; id < found.length; id ++){                                // drag_main_handler.jsxi:63
+			var entry = found[id];
+			
+			var el = d.content.find('[name="found-' + id + '"]')[0];
+			
+			if (lastId !== el.getAttribute('data-id')){                            // drag_main_handler.jsxi:65
+				el.checked = true;                                                 // drag_main_handler.jsxi:66
+				lastId = el.getAttribute('data-id');                               // drag_main_handler.jsxi:67
+			}
+		}
+	}
+	
+	function freeHolders(){                                                        // drag_main_handler.jsxi:72
+		for (var __t = 0; __t < _holders.length; __t ++){                          // drag_main_handler.jsxi:73
+			var holder = _holders[__t];
+			
+			holder.stream.end();                                                   // drag_main_handler.jsxi:74
+			fs.unlinkSync(holder.filename);                                        // drag_main_handler.jsxi:75
+		}
+	}
+	
+	function applyActions(actions){                                                // drag_main_handler.jsxi:79
+		var d = new Dialog('Installation',                                         // drag_main_handler.jsxi:80
+				[ '<progress max="' + actions.length + '"></progress>' ], 
+				false, 
+				false), 
+			p = d.find('progress')[0];                                             // drag_main_handler.jsxi:82
+		
+		var i = 0,                                                                 // drag_main_handler.jsxi:84
+			step = function (arg){                                                 // drag_main_handler.jsxi:85
+				if (i >= actions.length){                                          // drag_main_handler.jsxi:86
+					d.close();                                                     // drag_main_handler.jsxi:87
+					freeHolders();                                                 // drag_main_handler.jsxi:88
+				} else {
+					actions[p.value = i ++](function (arg){                        // drag_main_handler.jsxi:90
+						setTimeout(step, 100);                                     // drag_main_handler.jsxi:91
+					});
+				}
+			};
+		
+		setTimeout(step, 100);                                                     // drag_main_handler.jsxi:96
+	}
+	
+	function exec(){                                                               // drag_main_handler_archive.jsxi:5
+		return '' + DragMainHandler.__DragMainHandler__exec.apply(null, arguments, { encoding: 'utf8' });
+	}
+	
+	function fromArchive_getFiles(file){                                           // drag_main_handler_archive.jsxi:9
+		var list = exec('native\\7z', [ 'l', '-sccUTF-8', file ]).split(/\r?\n/).map(function (arg){
+			return /^[-\d]+\s+[:\d]+\s+[\.\w]+\s+(\d+)\s+(?:\d+\s+)?(.+)/.test(arg) && { path: RegExp.$2, size: + RegExp.$1 };
+		}).filter(function (arg){                                                  // drag_main_handler_archive.jsxi:11
+			return arg;                                                            // drag_main_handler_archive.jsxi:11
+		});
+		
+		var root = { sub: {}, path: '' };
+		
+		for (var __12 = 0; __12 < list.length; __12 ++){                           // drag_main_handler_archive.jsxi:14
+			var entry = list[__12];
+			
+			var path = entry.path.split('\\');
+			
+			var loc = root;
+			
+			for (var __11 = 0; __11 < path.length; __11 ++){                       // drag_main_handler_archive.jsxi:17
+				var part = path[__11];
+				
+				if (!loc.sub)                                                      // drag_main_handler_archive.jsxi:18
+					loc.sub = {};                                                  // drag_main_handler_archive.jsxi:18
+				
+				loc = loc.sub[part] || (loc.sub[part] = { id: part });             // drag_main_handler_archive.jsxi:19
+			}
+			
+			loc.path = entry.path;                                                 // drag_main_handler_archive.jsxi:22
+			loc.size = entry.size;                                                 // drag_main_handler_archive.jsxi:23
+		}
+		return root;                                                               // drag_main_handler_archive.jsxi:26
+	}
+	
+	function fromArchive_extractData(file, content){                               // drag_main_handler_archive.jsxi:29
+		var files = content.map(function (arg){                                    // drag_main_handler_archive.jsxi:30
+			return arg.data;                                                       // drag_main_handler_archive.jsxi:30
+		}).filter(function (arg){                                                  // drag_main_handler_archive.jsxi:30
+			return arg;                                                            // drag_main_handler_archive.jsxi:30
+		});
+		
+		var output = exec('native\\7z',                                            // drag_main_handler_archive.jsxi:31
+			[ 'e', '-sccUTF-8', file, '-so' ].concat(files.map(function (arg){     // drag_main_handler_archive.jsxi:31
+				return arg.path;                                                   // drag_main_handler_archive.jsxi:31
+			})));
+		
+		for (var __13 = 0; __13 < files.length; __13 ++){                          // drag_main_handler_archive.jsxi:33
+			var file = files[__13];
+			
+			try {
+				file.content = JSON.flexibleParse(output.substr(0, file.size));    // drag_main_handler_archive.jsxi:34
+			} catch (e){} 
+			
+			output = output.slice(file.size);                                      // drag_main_handler_archive.jsxi:35
+		}
+	}
+	
+	function fromArchive_prepareFound(file, entry){                                // drag_main_handler_archive.jsxi:39
+		var path = '/' + entry.root.path.replace(/\\/g, '/'),                      // drag_main_handler_archive.jsxi:40
+			name = entry.data && entry.data.content && (entry.data.content.name || entry.data.content.skinname);
+		
+		name = name ? name + ' (' + path + ')' : path;                             // drag_main_handler_archive.jsxi:43
+		
+		switch (entry.type){                                                       // drag_main_handler_archive.jsxi:45
+			case 'car':                                                            // drag_main_handler_archive.jsxi:46
+				return Cars.byId(entry.id) == null ? {                             // drag_main_handler_archive.jsxi:47
+					id: entry.id,                                                  // drag_main_handler_archive.jsxi:47
+					type: 'New Car',                                               // drag_main_handler_archive.jsxi:49
+					name: name,                                                    // drag_main_handler_archive.jsxi:50
+					actions: [                                                     // drag_main_handler_archive.jsxi:51
+						{                                                          // drag_main_handler_archive.jsxi:51
+							name: 'Install',                                       // drag_main_handler_archive.jsxi:51
+							action: (function (arg){                               // drag_main_handler_archive.jsxi:52
+								return fromArchive_installCar(file, entry, arg);   // drag_main_handler_archive.jsxi:52
+							})
+						}
+					]
+				} : {
+					id: entry.id,                                                  // drag_main_handler_archive.jsxi:55
+					type: 'Update Existing Car',                                   // drag_main_handler_archive.jsxi:56
+					name: name,                                                    // drag_main_handler_archive.jsxi:57
+					actions: [                                                     // drag_main_handler_archive.jsxi:58
+						{                                                          // drag_main_handler_archive.jsxi:58
+							name: 'Keep current skins & information',              // drag_main_handler_archive.jsxi:58
+							action: (function (arg){                               // drag_main_handler_archive.jsxi:59
+								return fromArchive_updateCarKeepSkinsUi(file, entry, arg);
+							})
+						}, 
+						{
+							name: 'Update only data & sfx',                        // drag_main_handler_archive.jsxi:60
+							action: (function (arg){                               // drag_main_handler_archive.jsxi:60
+								return fromArchive_updateCarOnlyDataSfx(file, entry, arg);
+							})
+						}, 
+						{
+							name: 'Full update',                                   // drag_main_handler_archive.jsxi:61
+							action: (function (arg){                               // drag_main_handler_archive.jsxi:61
+								return fromArchive_updateCarFull(file, entry, arg);
+							})
+						}
+					]
+				};
+			case 'skin':                                                           // drag_main_handler_archive.jsxi:65
+				var selected = ViewList.selected;
+				
+				if (!selected)                                                     // drag_main_handler_archive.jsxi:67
+					return;
+				
+				var _unique;
+				
+				function unique(){                                                 // drag_main_handler_archive.jsxi:70
+					for (var i = 1; selected.getSkin(_unique = entry.id + '-' + i) != null; i ++);
+					return _unique;                                                // drag_main_handler_archive.jsxi:72
+				}
+				return selected.getSkin(entry.id) == null ? {                      // drag_main_handler_archive.jsxi:75
+					id: entry.id,                                                  // drag_main_handler_archive.jsxi:75
+					type: 'New Skin For ' + selected.displayName,                  // drag_main_handler_archive.jsxi:77
+					name: name,                                                    // drag_main_handler_archive.jsxi:78
+					actions: [                                                     // drag_main_handler_archive.jsxi:79
+						{                                                          // drag_main_handler_archive.jsxi:79
+							name: 'Install',                                       // drag_main_handler_archive.jsxi:79
+							action: (function (arg){                               // drag_main_handler_archive.jsxi:80
+								return fromArchive_installSkin(selected, file, entry, arg);
+							})
+						}
+					]
+				} : {
+					id: entry.id,                                                  // drag_main_handler_archive.jsxi:83
+					type: 'Update Existing Skin Of ' + selected.displayName,       // drag_main_handler_archive.jsxi:84
+					name: name,                                                    // drag_main_handler_archive.jsxi:85
+					actions: [                                                     // drag_main_handler_archive.jsxi:86
+						{                                                          // drag_main_handler_archive.jsxi:86
+							name: 'Full update',                                   // drag_main_handler_archive.jsxi:86
+							action: (function (arg){                               // drag_main_handler_archive.jsxi:87
+								return fromArchive_updateSkinFull(selected, file, entry, arg);
+							})
+						}, 
+						{
+							name: 'Install as ' + unique(),                        // drag_main_handler_archive.jsxi:88
+							action: (function (arg){                               // drag_main_handler_archive.jsxi:88
+								return fromArchive_installSkinAs(selected, _unique, file, entry, arg);
+							})
+						}, 
+						{
+							name: 'Keep current preview & information',            // drag_main_handler_archive.jsxi:89
+							action: (function (arg){                               // drag_main_handler_archive.jsxi:89
+								return fromArchive_updateSkinKeepUi(selected, file, entry, arg);
+							})
+						}
+					]
+				};
+			default:
+				throw new Error('Unsupported type: ' + entry.type);                // drag_main_handler_archive.jsxi:94
+		}
+	}
+	
+	function fromArchive_unpack(file, node, target){                               // drag_main_handler_archive.jsxi:98
+		if (!fs.existsSync(target)){                                               // drag_main_handler_archive.jsxi:99
+			fs.mkdirSync(target);                                                  // drag_main_handler_archive.jsxi:100
+		}
+		
+		if (node.path === ''){                                                     // drag_main_handler_archive.jsxi:103
+			var files = fromArchive_collectSub(node);
+			
+			exec('native\\7z',                                                     // drag_main_handler_archive.jsxi:105
+				[ 'x', '-sccUTF-8', '-o' + target, file ].concat(files));          // drag_main_handler_archive.jsxi:105
+		} else {
+			var tmpDir = target + '/__tmp_' + Date.now();
+			
+			fs.mkdirSync(tmpDir);                                                  // drag_main_handler_archive.jsxi:108
+			
+			var files = fromArchive_collectSub(node);
+			
+			exec('native\\7z',                                                     // drag_main_handler_archive.jsxi:111
+				[ 'x', '-sccUTF-8', '-o' + tmpDir, file ].concat(files));          // drag_main_handler_archive.jsxi:111
+			
+			for (var __14 = 0; __14 < files.length; __14 ++){                      // drag_main_handler_archive.jsxi:113
+				var f = files[__14];
+				
+				var dest = target + '/' + f.slice(node.path.length + 1);
+				
+				fs.mkdirpSync(path.dirname(dest));                                 // drag_main_handler_archive.jsxi:115
+				fs.renameSync(tmpDir + '/' + f, dest);                             // drag_main_handler_archive.jsxi:116
+			}
+			
+			fs.removeDirSync(tmpDir);                                              // drag_main_handler_archive.jsxi:119
+		}
+	}
+	
+	function fromArchive_collectSub(node, result){                                 // drag_main_handler_archive.jsxi:123
+		if (result === undefined)                                                  // drag_main_handler_archive.jsxi:123
+			result = [];                                                           // drag_main_handler_archive.jsxi:123
+	
+		{
+			var __15 = node.sub;
+			
+			for (var id in __15)
+				if (__15.hasOwnProperty(id)){
+					var child = __15[id];
+					
+					if (child.sub){                                                // drag_main_handler_archive.jsxi:125
+						fromArchive_collectSub(child, result);                     // drag_main_handler_archive.jsxi:126
+					} else {
+						result.push(child.path);                                   // drag_main_handler_archive.jsxi:128
+					}
+				}
+			
+			__15 = undefined;
+		}
+		return result;                                                             // drag_main_handler_archive.jsxi:132
+	}
+	
+	function fromArchive_installCar(file, entry, callback){                        // drag_main_handler_archive.jsxi:135
+		var destination = path.join(AcDir.cars, entry.id);
+		
+		if (fs.existsSync(destination)){                                           // drag_main_handler_archive.jsxi:137
+			return ErrorHandler.handled('Folder “' + destination + '” already exists.');
+		}
+		
+		fromArchive_unpack(file, entry.root, destination);                         // drag_main_handler_archive.jsxi:141
+		Cars.loadById(entry.id,                                                    // drag_main_handler_archive.jsxi:142
+			function (arg){                                                        // drag_main_handler_archive.jsxi:142
+				ViewList.select(entry.id);                                         // drag_main_handler_archive.jsxi:143
+				
+				if (callback)                                                      // drag_main_handler_archive.jsxi:144
+					callback();                                                    // drag_main_handler_archive.jsxi:144
+			});
+	}
+	
+	function fromArchive_updateCarFull(file, entry, callback){                     // drag_main_handler_archive.jsxi:148
+		var destination = Cars.byId(entry.id).path;
+		
+		if (!fs.existsSync(destination)){                                          // drag_main_handler_archive.jsxi:150
+			return ErrorHandler.handled('Folder “' + destination + '” doesn\'t exist.');
+		}
+		
+		AcTools.Utils.FileUtils.Recycle(destination);                              // drag_main_handler_archive.jsxi:154
+		fromArchive_unpack(file, entry.root, destination);                         // drag_main_handler_archive.jsxi:155
+		Cars.loadById(entry.id,                                                    // drag_main_handler_archive.jsxi:156
+			function (arg){                                                        // drag_main_handler_archive.jsxi:156
+				ViewList.select(entry.id);                                         // drag_main_handler_archive.jsxi:157
+				
+				if (callback)                                                      // drag_main_handler_archive.jsxi:158
+					callback();                                                    // drag_main_handler_archive.jsxi:158
+			});
+	}
+	
+	function fromArchive_updateCarKeepSkinsUi(file, entry, callback){              // drag_main_handler_archive.jsxi:162
+		var destination = Cars.byId(entry.id).path,                                // drag_main_handler_archive.jsxi:163
+			skins = destination + '/skins',                                        // drag_main_handler_archive.jsxi:164
+			ui = destination + '/ui';                                              // drag_main_handler_archive.jsxi:165
+		
+		if (!fs.existsSync(destination)){                                          // drag_main_handler_archive.jsxi:166
+			return ErrorHandler.handled('Folder “' + destination + '” doesn\'t exist.');
+		}
+		
+		var tmpDir = AcDir.temp;
+		
+		fs.mkdirSync(tmpDir);                                                      // drag_main_handler_archive.jsxi:171
+		
+		if (fs.existsSync(skins))                                                  // drag_main_handler_archive.jsxi:173
+			fs.renameSync(skins, tmpDir + '/skins');                               // drag_main_handler_archive.jsxi:173
+		
+		if (fs.existsSync(ui))                                                     // drag_main_handler_archive.jsxi:174
+			fs.renameSync(ui, tmpDir + '/ui');                                     // drag_main_handler_archive.jsxi:174
+		
+		AcTools.Utils.FileUtils.Recycle(destination);                              // drag_main_handler_archive.jsxi:176
+		fromArchive_unpack(file, entry.root, destination);                         // drag_main_handler_archive.jsxi:177
+		
+		if (fs.existsSync(skins))                                                  // drag_main_handler_archive.jsxi:179
+			fs.removeDirSync(skins);                                               // drag_main_handler_archive.jsxi:179
+		
+		if (fs.existsSync(ui))                                                     // drag_main_handler_archive.jsxi:180
+			fs.removeDirSync(ui);                                                  // drag_main_handler_archive.jsxi:180
+		
+		if (fs.existsSync(tmpDir + '/skins'))                                      // drag_main_handler_archive.jsxi:182
+			fs.renameSync(tmpDir + '/skins', skins);                               // drag_main_handler_archive.jsxi:182
+		
+		if (fs.existsSync(tmpDir + '/ui'))                                         // drag_main_handler_archive.jsxi:183
+			fs.renameSync(tmpDir + '/ui', ui);                                     // drag_main_handler_archive.jsxi:183
+		
+		fs.removeDirSync(tmpDir);                                                  // drag_main_handler_archive.jsxi:184
+		Cars.loadById(entry.id,                                                    // drag_main_handler_archive.jsxi:186
+			function (arg){                                                        // drag_main_handler_archive.jsxi:186
+				ViewList.select(entry.id);                                         // drag_main_handler_archive.jsxi:187
+				
+				if (callback)                                                      // drag_main_handler_archive.jsxi:188
+					callback();                                                    // drag_main_handler_archive.jsxi:188
+			});
+	}
+	
+	function fromArchive_updateCarOnlyDataSfx(file, entry, callback){              // drag_main_handler_archive.jsxi:192
+		var destination = Cars.byId(entry.id).path;
+		
+		if (!fs.existsSync(destination)){                                          // drag_main_handler_archive.jsxi:194
+			return ErrorHandler.handled('Folder “' + destination + '” doesn\'t exist.');
+		}
+		
+		if (fs.existsSync(destination + '/sfx'))                                   // drag_main_handler_archive.jsxi:198
+			AcTools.Utils.FileUtils.Recycle(destination + '/sfx');                 // drag_main_handler_archive.jsxi:198
+		
+		if (fs.existsSync(destination + '/data'))                                  // drag_main_handler_archive.jsxi:199
+			AcTools.Utils.FileUtils.Recycle(destination + '/data');                // drag_main_handler_archive.jsxi:199
+		
+		if (fs.existsSync(destination + '/data.acd'))                              // drag_main_handler_archive.jsxi:200
+			AcTools.Utils.FileUtils.Recycle(destination + '/data.acd');            // drag_main_handler_archive.jsxi:200
+		
+		fromArchive_unpack(file, entry.root.sub['sfx'], destination + '/sfx');     // drag_main_handler_archive.jsxi:202
+		
+		if (entry.root.sub['data'])                                                // drag_main_handler_archive.jsxi:203
+			fromArchive_unpack(file, entry.root.sub['data'], destination + '/data');
+		
+		if (entry.root.sub['data.acd'])                                            // drag_main_handler_archive.jsxi:204
+			fromArchive_unpack(file, entry.root.sub['data.acd'], destination + '/data.acd');
+		
+		Cars.loadById(entry.id,                                                    // drag_main_handler_archive.jsxi:206
+			function (arg){                                                        // drag_main_handler_archive.jsxi:206
+				ViewList.select(entry.id);                                         // drag_main_handler_archive.jsxi:207
+				
+				if (callback)                                                      // drag_main_handler_archive.jsxi:208
+					callback();                                                    // drag_main_handler_archive.jsxi:208
+			});
+	}
+	
+	function fromArchive_installSkin(car, file, entry, callback){                  // drag_main_handler_archive.jsxi:212
+		var destination = path.join(car.path, 'skins', entry.id);
+		
+		if (fs.existsSync(destination)){                                           // drag_main_handler_archive.jsxi:214
+			return ErrorHandler.handled('Folder “' + destination + '” already exists.');
+		}
+		
+		fromArchive_unpack(file, entry.root, destination);                         // drag_main_handler_archive.jsxi:218
+		car.loadSkins(callback);                                                   // drag_main_handler_archive.jsxi:219
+	}
+	
+	function fromArchive_installSkinAs(car, id, file, entry, callback){            // drag_main_handler_archive.jsxi:222
+		var destination = path.join(car.path, 'skins', id);
+		
+		if (fs.existsSync(destination)){                                           // drag_main_handler_archive.jsxi:224
+			return ErrorHandler.handled('Folder “' + destination + '” already exists.');
+		}
+		
+		fromArchive_unpack(file, entry.root, destination);                         // drag_main_handler_archive.jsxi:228
+		car.loadSkins(callback);                                                   // drag_main_handler_archive.jsxi:229
+	}
+	
+	function fromArchive_updateSkinFull(car, file, entry, callback){               // drag_main_handler_archive.jsxi:232
+		var destination = path.join(car.path, 'skins', entry.id);
+		
+		if (!fs.existsSync(destination)){                                          // drag_main_handler_archive.jsxi:234
+			callback();                                                            // drag_main_handler_archive.jsxi:235
+			return ErrorHandler.handled('Folder “' + destination + '” doesn\'t exist.');
+		}
+		
+		AcTools.Utils.FileUtils.Recycle(destination);                              // drag_main_handler_archive.jsxi:239
+		fromArchive_unpack(file, entry.root, destination);                         // drag_main_handler_archive.jsxi:240
+		car.loadSkins(callback);                                                   // drag_main_handler_archive.jsxi:241
+	}
+	
+	function fromArchive_updateSkinKeepUi(car, file, entry, callback){             // drag_main_handler_archive.jsxi:244
+		var destination = path.join(car.path, 'skins', entry.id),                  // drag_main_handler_archive.jsxi:245
+			preview = destination + '/preview.jpg',                                // drag_main_handler_archive.jsxi:246
+			ui = destination + '/ui_skin.json';                                    // drag_main_handler_archive.jsxi:247
+		
+		if (!fs.existsSync(destination)){                                          // drag_main_handler_archive.jsxi:248
+			callback();                                                            // drag_main_handler_archive.jsxi:249
+			return ErrorHandler.handled('Folder “' + destination + '” doesn\'t exist.');
+		}
+		
+		var tmpDir = AcDir.temp;
+		
+		fs.mkdirSync(tmpDir);                                                      // drag_main_handler_archive.jsxi:254
+		
+		if (fs.existsSync(preview))                                                // drag_main_handler_archive.jsxi:256
+			fs.renameSync(preview, tmpDir + '/p');                                 // drag_main_handler_archive.jsxi:256
+		
+		if (fs.existsSync(ui))                                                     // drag_main_handler_archive.jsxi:257
+			fs.renameSync(ui, tmpDir + '/u');                                      // drag_main_handler_archive.jsxi:257
+		
+		AcTools.Utils.FileUtils.Recycle(destination);                              // drag_main_handler_archive.jsxi:259
+		fromArchive_unpack(file, entry.root, destination);                         // drag_main_handler_archive.jsxi:260
+		
+		if (fs.existsSync(preview))                                                // drag_main_handler_archive.jsxi:262
+			fs.removeDirSync(preview);                                             // drag_main_handler_archive.jsxi:262
+		
+		if (fs.existsSync(ui))                                                     // drag_main_handler_archive.jsxi:263
+			fs.removeDirSync(ui);                                                  // drag_main_handler_archive.jsxi:263
+		
+		if (fs.existsSync(tmpDir + '/p'))                                          // drag_main_handler_archive.jsxi:265
+			fs.renameSync(tmpDir + '/p', preview);                                 // drag_main_handler_archive.jsxi:265
+		
+		if (fs.existsSync(tmpDir + '/u'))                                          // drag_main_handler_archive.jsxi:266
+			fs.renameSync(tmpDir + '/u', ui);                                      // drag_main_handler_archive.jsxi:266
+		
+		fs.removeDirSync(tmpDir);                                                  // drag_main_handler_archive.jsxi:267
+		car.loadSkins(callback);                                                   // drag_main_handler_archive.jsxi:269
+	}
+	
+	function fromArchive(file){                                                    // drag_main_handler_archive.jsxi:272
+		var tree = fromArchive_getFiles(file);
+		
+		var content = detectContent(file, tree);
+		
+		fromArchive_extractData(file, content);                                    // drag_main_handler_archive.jsxi:275
+		return content.map(function (arg){                                         // drag_main_handler_archive.jsxi:276
+			return fromArchive_prepareFound(file, arg);                            // drag_main_handler_archive.jsxi:276
+		});
+	}
+	
+	function fromDirectory_getFiles(dir){                                          // drag_main_handler_directory.jsxi:2
+		var list = fs.readdirRecursiveSync(dir, 10e3);
+		
+		Shell.openItem(dir);                                                       // drag_main_handler_directory.jsxi:5
+		
+		var root = { sub: {}, path: '' };
+		
+		for (var __17 = 0; __17 < list.length; __17 ++){                           // drag_main_handler_directory.jsxi:8
+			var entry = list[__17];
+			
+			var path = entry.split('\\');
+			
+			var loc = root;
+			
+			for (var __16 = 0; __16 < path.length; __16 ++){                       // drag_main_handler_directory.jsxi:11
+				var part = path[__16];
+				
+				if (!loc.sub)                                                      // drag_main_handler_directory.jsxi:12
+					loc.sub = {};                                                  // drag_main_handler_directory.jsxi:12
+				
+				loc = loc.sub[part] || (loc.sub[part] = { id: part });             // drag_main_handler_directory.jsxi:13
+			}
+			
+			loc.path = entry;                                                      // drag_main_handler_directory.jsxi:16
+		}
+		
+		console.log(root);                                                         // drag_main_handler_directory.jsxi:19
+		return root;                                                               // drag_main_handler_directory.jsxi:21
+	}
+	
+	function fromDirectory_extractData(dir, content){                              // drag_main_handler_directory.jsxi:24
+		var files = content.map(function (arg){                                    // drag_main_handler_directory.jsxi:25
+			return arg.data;                                                       // drag_main_handler_directory.jsxi:25
+		}).filter(function (arg){                                                  // drag_main_handler_directory.jsxi:25
+			return arg;                                                            // drag_main_handler_directory.jsxi:25
+		});
+		
+		for (var __18 = 0; __18 < files.length; __18 ++){                          // drag_main_handler_directory.jsxi:26
+			var file = files[__18];
+			
+			try {
+				file.content = JSON.flexibleParse(fs.readFileSync(dir + '/' + file.path));
+			} catch (e){} 
+		}
+	}
+	
+	function fromDirectory_prepareFound(file, entry){                              // drag_main_handler_directory.jsxi:31
+		var path = '/' + entry.root.path.replace(/\\/g, '/'),                      // drag_main_handler_directory.jsxi:32
+			name = entry.data && entry.data.content && (entry.data.content.name || entry.data.content.skinname);
+		
+		name = name ? name + ' (' + path + ')' : path;                             // drag_main_handler_directory.jsxi:35
+		
+		switch (entry.type){                                                       // drag_main_handler_directory.jsxi:37
+			case 'car':                                                            // drag_main_handler_directory.jsxi:38
+				return Cars.byId(entry.id) == null ? {                             // drag_main_handler_directory.jsxi:39
+					id: entry.id,                                                  // drag_main_handler_directory.jsxi:39
+					type: 'New Car',                                               // drag_main_handler_directory.jsxi:41
+					name: name,                                                    // drag_main_handler_directory.jsxi:42
+					actions: [                                                     // drag_main_handler_directory.jsxi:43
+						{                                                          // drag_main_handler_directory.jsxi:43
+							name: 'Install',                                       // drag_main_handler_directory.jsxi:43
+							action: (function (arg){                               // drag_main_handler_directory.jsxi:44
+								return fromDirectory_installCar(file, entry, arg);
+							})
+						}
+					]
+				} : {
+					id: entry.id,                                                  // drag_main_handler_directory.jsxi:47
+					type: 'Update Existing Car',                                   // drag_main_handler_directory.jsxi:48
+					name: name,                                                    // drag_main_handler_directory.jsxi:49
+					actions: [                                                     // drag_main_handler_directory.jsxi:50
+						{                                                          // drag_main_handler_directory.jsxi:50
+							name: 'Keep current skins & information',              // drag_main_handler_directory.jsxi:50
+							action: (function (arg){                               // drag_main_handler_directory.jsxi:51
+								return fromDirectory_updateCarKeepSkinsUi(file, entry, arg);
+							})
+						}, 
+						{
+							name: 'Update only data & sfx',                        // drag_main_handler_directory.jsxi:52
+							action: (function (arg){                               // drag_main_handler_directory.jsxi:52
+								return fromDirectory_updateCarOnlyDataSfx(file, entry, arg);
+							})
+						}, 
+						{
+							name: 'Full update',                                   // drag_main_handler_directory.jsxi:53
+							action: (function (arg){                               // drag_main_handler_directory.jsxi:53
+								return fromDirectory_updateCarFull(file, entry, arg);
+							})
+						}
+					]
+				};
+			case 'skin':                                                           // drag_main_handler_directory.jsxi:57
+				var selected = ViewList.selected;
+				
+				if (!selected)                                                     // drag_main_handler_directory.jsxi:59
+					return;
+				
+				var _unique;
+				
+				function unique(){                                                 // drag_main_handler_directory.jsxi:62
+					for (var i = 1; selected.getSkin(_unique = entry.id + '-' + i) != null; i ++);
+					return _unique;                                                // drag_main_handler_directory.jsxi:64
+				}
+				return selected.getSkin(entry.id) == null ? {                      // drag_main_handler_directory.jsxi:67
+					id: entry.id,                                                  // drag_main_handler_directory.jsxi:67
+					type: 'New Skin For ' + selected.displayName,                  // drag_main_handler_directory.jsxi:69
+					name: name,                                                    // drag_main_handler_directory.jsxi:70
+					actions: [                                                     // drag_main_handler_directory.jsxi:71
+						{                                                          // drag_main_handler_directory.jsxi:71
+							name: 'Install',                                       // drag_main_handler_directory.jsxi:71
+							action: (function (arg){                               // drag_main_handler_directory.jsxi:72
+								return fromDirectory_installSkin(selected, file, entry, arg);
+							})
+						}
+					]
+				} : {
+					id: entry.id,                                                  // drag_main_handler_directory.jsxi:75
+					type: 'Update Existing Skin Of ' + selected.displayName,       // drag_main_handler_directory.jsxi:76
+					name: name,                                                    // drag_main_handler_directory.jsxi:77
+					actions: [                                                     // drag_main_handler_directory.jsxi:78
+						{                                                          // drag_main_handler_directory.jsxi:78
+							name: 'Full update',                                   // drag_main_handler_directory.jsxi:78
+							action: (function (arg){                               // drag_main_handler_directory.jsxi:79
+								return fromDirectory_updateSkinFull(selected, file, entry, arg);
+							})
+						}, 
+						{
+							name: 'Install as ' + unique(),                        // drag_main_handler_directory.jsxi:80
+							action: (function (arg){                               // drag_main_handler_directory.jsxi:80
+								return fromDirectory_installSkinAs(selected, _unique, file, entry, arg);
+							})
+						}, 
+						{
+							name: 'Keep current preview & information',            // drag_main_handler_directory.jsxi:81
+							action: (function (arg){                               // drag_main_handler_directory.jsxi:81
+								return fromDirectory_updateSkinKeepUi(selected, file, entry, arg);
+							})
+						}
+					]
+				};
+			default:
+				throw new Error('Unsupported type: ' + entry.type);                // drag_main_handler_directory.jsxi:86
+		}
+	}
+	
+	function fromDirectory_unpack(dir, node, target){                              // drag_main_handler_directory.jsxi:90
+		if (!fs.existsSync(target)){                                               // drag_main_handler_directory.jsxi:91
+			fs.mkdirSync(target);                                                  // drag_main_handler_directory.jsxi:92
+		}
+		
+		var files = fromDirectory_collectSub(node);
+		
+		for (var __19 = 0; __19 < files.length; __19 ++){                          // drag_main_handler_directory.jsxi:96
+			var file = files[__19];
+			
+			var dest = target + '/' + file.slice(node.path.length + 1);
+			
+			fs.mkdirpSync(path.dirname(dest));                                     // drag_main_handler_directory.jsxi:98
+			fs.copyFileSync(dir + '/' + file, dest);                               // drag_main_handler_directory.jsxi:99
+		}
+	}
+	
+	function fromDirectory_collectSub(node, result){                               // drag_main_handler_directory.jsxi:103
+		if (result === undefined)                                                  // drag_main_handler_directory.jsxi:103
+			result = [];                                                           // drag_main_handler_directory.jsxi:103
+	
+		{
+			var __1a = node.sub;
+			
+			for (var id in __1a)
+				if (__1a.hasOwnProperty(id)){
+					var child = __1a[id];
+					
+					if (child.sub){                                                // drag_main_handler_directory.jsxi:105
+						fromDirectory_collectSub(child, result);                   // drag_main_handler_directory.jsxi:106
+					} else {
+						result.push(child.path);                                   // drag_main_handler_directory.jsxi:108
+					}
+				}
+			
+			__1a = undefined;
+		}
+		return result;                                                             // drag_main_handler_directory.jsxi:112
+	}
+	
+	function fromDirectory_installCar(file, entry, callback){                      // drag_main_handler_directory.jsxi:115
+		var destination = path.join(AcDir.cars, entry.id);
+		
+		if (fs.existsSync(destination)){                                           // drag_main_handler_directory.jsxi:117
+			return ErrorHandler.handled('Folder “' + destination + '” already exists.');
+		}
+		
+		fromDirectory_unpack(file, entry.root, destination);                       // drag_main_handler_directory.jsxi:121
+		Cars.loadById(entry.id,                                                    // drag_main_handler_directory.jsxi:122
+			function (arg){                                                        // drag_main_handler_directory.jsxi:122
+				ViewList.select(entry.id);                                         // drag_main_handler_directory.jsxi:123
+				
+				if (callback)                                                      // drag_main_handler_directory.jsxi:124
+					callback();                                                    // drag_main_handler_directory.jsxi:124
+			});
+	}
+	
+	function fromDirectory_updateCarFull(file, entry, callback){                   // drag_main_handler_directory.jsxi:128
+		var destination = Cars.byId(entry.id).path;
+		
+		if (!fs.existsSync(destination)){                                          // drag_main_handler_directory.jsxi:130
+			return ErrorHandler.handled('Folder “' + destination + '” doesn\'t exist.');
+		}
+		
+		AcTools.Utils.FileUtils.Recycle(destination);                              // drag_main_handler_directory.jsxi:134
+		fromDirectory_unpack(file, entry.root, destination);                       // drag_main_handler_directory.jsxi:135
+		Cars.loadById(entry.id,                                                    // drag_main_handler_directory.jsxi:136
+			function (arg){                                                        // drag_main_handler_directory.jsxi:136
+				ViewList.select(entry.id);                                         // drag_main_handler_directory.jsxi:137
+				
+				if (callback)                                                      // drag_main_handler_directory.jsxi:138
+					callback();                                                    // drag_main_handler_directory.jsxi:138
+			});
+	}
+	
+	function fromDirectory_updateCarKeepSkinsUi(file, entry, callback){            // drag_main_handler_directory.jsxi:142
+		var destination = Cars.byId(entry.id).path,                                // drag_main_handler_directory.jsxi:143
+			skins = destination + '/skins',                                        // drag_main_handler_directory.jsxi:144
+			ui = destination + '/ui';                                              // drag_main_handler_directory.jsxi:145
+		
+		if (!fs.existsSync(destination)){                                          // drag_main_handler_directory.jsxi:146
+			return ErrorHandler.handled('Folder “' + destination + '” doesn\'t exist.');
+		}
+		
+		var tmpDir = AcDir.temp;
+		
+		fs.mkdirSync(tmpDir);                                                      // drag_main_handler_directory.jsxi:151
+		
+		if (fs.existsSync(skins))                                                  // drag_main_handler_directory.jsxi:153
+			fs.renameSync(skins, tmpDir + '/skins');                               // drag_main_handler_directory.jsxi:153
+		
+		if (fs.existsSync(ui))                                                     // drag_main_handler_directory.jsxi:154
+			fs.renameSync(ui, tmpDir + '/ui');                                     // drag_main_handler_directory.jsxi:154
+		
+		AcTools.Utils.FileUtils.Recycle(destination);                              // drag_main_handler_directory.jsxi:156
+		fromDirectory_unpack(file, entry.root, destination);                       // drag_main_handler_directory.jsxi:157
+		
+		if (fs.existsSync(skins))                                                  // drag_main_handler_directory.jsxi:159
+			fs.removeDirSync(skins);                                               // drag_main_handler_directory.jsxi:159
+		
+		if (fs.existsSync(ui))                                                     // drag_main_handler_directory.jsxi:160
+			fs.removeDirSync(ui);                                                  // drag_main_handler_directory.jsxi:160
+		
+		if (fs.existsSync(tmpDir + '/skins'))                                      // drag_main_handler_directory.jsxi:162
+			fs.renameSync(tmpDir + '/skins', skins);                               // drag_main_handler_directory.jsxi:162
+		
+		if (fs.existsSync(tmpDir + '/ui'))                                         // drag_main_handler_directory.jsxi:163
+			fs.renameSync(tmpDir + '/ui', ui);                                     // drag_main_handler_directory.jsxi:163
+		
+		fs.removeDirSync(tmpDir);                                                  // drag_main_handler_directory.jsxi:164
+		Cars.loadById(entry.id,                                                    // drag_main_handler_directory.jsxi:166
+			function (arg){                                                        // drag_main_handler_directory.jsxi:166
+				ViewList.select(entry.id);                                         // drag_main_handler_directory.jsxi:167
+				
+				if (callback)                                                      // drag_main_handler_directory.jsxi:168
+					callback();                                                    // drag_main_handler_directory.jsxi:168
+			});
+	}
+	
+	function fromDirectory_updateCarOnlyDataSfx(file, entry, callback){            // drag_main_handler_directory.jsxi:172
+		var destination = Cars.byId(entry.id).path;
+		
+		if (!fs.existsSync(destination)){                                          // drag_main_handler_directory.jsxi:174
+			return ErrorHandler.handled('Folder “' + destination + '” doesn\'t exist.');
+		}
+		
+		if (fs.existsSync(destination + '/sfx'))                                   // drag_main_handler_directory.jsxi:178
+			AcTools.Utils.FileUtils.Recycle(destination + '/sfx');                 // drag_main_handler_directory.jsxi:178
+		
+		if (fs.existsSync(destination + '/data'))                                  // drag_main_handler_directory.jsxi:179
+			AcTools.Utils.FileUtils.Recycle(destination + '/data');                // drag_main_handler_directory.jsxi:179
+		
+		if (fs.existsSync(destination + '/data.acd'))                              // drag_main_handler_directory.jsxi:180
+			AcTools.Utils.FileUtils.Recycle(destination + '/data.acd');            // drag_main_handler_directory.jsxi:180
+		
+		fromDirectory_unpack(file, entry.root.sub['sfx'], destination + '/sfx');   // drag_main_handler_directory.jsxi:182
+		
+		if (entry.root.sub['data'])                                                // drag_main_handler_directory.jsxi:183
+			fromDirectory_unpack(file, entry.root.sub['data'], destination + '/data');
+		
+		if (entry.root.sub['data.acd'])                                            // drag_main_handler_directory.jsxi:184
+			fromDirectory_unpack(file, entry.root.sub['data.acd'], destination + '/data.acd');
+		
+		Cars.loadById(entry.id,                                                    // drag_main_handler_directory.jsxi:186
+			function (arg){                                                        // drag_main_handler_directory.jsxi:186
+				ViewList.select(entry.id);                                         // drag_main_handler_directory.jsxi:187
+				
+				if (callback)                                                      // drag_main_handler_directory.jsxi:188
+					callback();                                                    // drag_main_handler_directory.jsxi:188
+			});
+	}
+	
+	function fromDirectory_installSkin(car, file, entry, callback){                // drag_main_handler_directory.jsxi:192
+		var destination = path.join(car.path, 'skins', entry.id);
+		
+		if (fs.existsSync(destination)){                                           // drag_main_handler_directory.jsxi:194
+			return ErrorHandler.handled('Folder “' + destination + '” already exists.');
+		}
+		
+		fromDirectory_unpack(file, entry.root, destination);                       // drag_main_handler_directory.jsxi:198
+		car.loadSkins(callback);                                                   // drag_main_handler_directory.jsxi:199
+	}
+	
+	function fromDirectory_installSkinAs(car, id, file, entry, callback){          // drag_main_handler_directory.jsxi:202
+		var destination = path.join(car.path, 'skins', id);
+		
+		if (fs.existsSync(destination)){                                           // drag_main_handler_directory.jsxi:204
+			return ErrorHandler.handled('Folder “' + destination + '” already exists.');
+		}
+		
+		fromDirectory_unpack(file, entry.root, destination);                       // drag_main_handler_directory.jsxi:208
+		car.loadSkins(callback);                                                   // drag_main_handler_directory.jsxi:209
+	}
+	
+	function fromDirectory_updateSkinFull(car, file, entry, callback){             // drag_main_handler_directory.jsxi:212
+		var destination = path.join(car.path, 'skins', entry.id);
+		
+		if (!fs.existsSync(destination)){                                          // drag_main_handler_directory.jsxi:214
+			callback();                                                            // drag_main_handler_directory.jsxi:215
+			return ErrorHandler.handled('Folder “' + destination + '” doesn\'t exist.');
+		}
+		
+		AcTools.Utils.FileUtils.Recycle(destination);                              // drag_main_handler_directory.jsxi:219
+		fromDirectory_unpack(file, entry.root, destination);                       // drag_main_handler_directory.jsxi:220
+		car.loadSkins(callback);                                                   // drag_main_handler_directory.jsxi:221
+	}
+	
+	function fromDirectory_updateSkinKeepUi(car, file, entry, callback){           // drag_main_handler_directory.jsxi:224
+		var destination = path.join(car.path, 'skins', entry.id),                  // drag_main_handler_directory.jsxi:225
+			preview = destination + '/preview.jpg',                                // drag_main_handler_directory.jsxi:226
+			ui = destination + '/ui_skin.json';                                    // drag_main_handler_directory.jsxi:227
+		
+		if (!fs.existsSync(destination)){                                          // drag_main_handler_directory.jsxi:228
+			callback();                                                            // drag_main_handler_directory.jsxi:229
+			return ErrorHandler.handled('Folder “' + destination + '” doesn\'t exist.');
+		}
+		
+		var tmpDir = AcDir.temp;
+		
+		fs.mkdirSync(tmpDir);                                                      // drag_main_handler_directory.jsxi:234
+		
+		if (fs.existsSync(preview))                                                // drag_main_handler_directory.jsxi:236
+			fs.renameSync(preview, tmpDir + '/p');                                 // drag_main_handler_directory.jsxi:236
+		
+		if (fs.existsSync(ui))                                                     // drag_main_handler_directory.jsxi:237
+			fs.renameSync(ui, tmpDir + '/u');                                      // drag_main_handler_directory.jsxi:237
+		
+		AcTools.Utils.FileUtils.Recycle(destination);                              // drag_main_handler_directory.jsxi:239
+		fromDirectory_unpack(file, entry.root, destination);                       // drag_main_handler_directory.jsxi:240
+		
+		if (fs.existsSync(preview))                                                // drag_main_handler_directory.jsxi:242
+			fs.removeDirSync(preview);                                             // drag_main_handler_directory.jsxi:242
+		
+		if (fs.existsSync(ui))                                                     // drag_main_handler_directory.jsxi:243
+			fs.removeDirSync(ui);                                                  // drag_main_handler_directory.jsxi:243
+		
+		if (fs.existsSync(tmpDir + '/p'))                                          // drag_main_handler_directory.jsxi:245
+			fs.renameSync(tmpDir + '/p', preview);                                 // drag_main_handler_directory.jsxi:245
+		
+		if (fs.existsSync(tmpDir + '/u'))                                          // drag_main_handler_directory.jsxi:246
+			fs.renameSync(tmpDir + '/u', ui);                                      // drag_main_handler_directory.jsxi:246
+		
+		fs.removeDirSync(tmpDir);                                                  // drag_main_handler_directory.jsxi:247
+		car.loadSkins(callback);                                                   // drag_main_handler_directory.jsxi:249
+	}
+	
+	function fromDirectory(dir){                                                   // drag_main_handler_directory.jsxi:252
+		var holder = dir + '/__tmp_' + Date.now();
+		
+		_holders.push({ stream: fs.createWriteStream(holder), filename: holder });
+		
+		var tree = fromDirectory_getFiles(dir);
+		
+		var content = detectContent(dir, tree);
+		
+		fromDirectory_extractData(dir, content);                                   // drag_main_handler_directory.jsxi:258
+		return content.map(function (arg){                                         // drag_main_handler_directory.jsxi:259
+			return fromDirectory_prepareFound(dir, arg);                           // drag_main_handler_directory.jsxi:259
+		});
+	}
+	
+	Object.defineProperty(DragMainHandler,                                         // drag_main_handler.jsxi:1
+		'__DragMainHandler__exec', 
 		{
 			get: (function (){
-				return _defaults;                                                  // settings.jsxi:24
+				return _exec_inner || (_exec_inner = require('child_process').execFileSync);
 			})
 		});
-	(function (){                                                                  // settings.jsxi:51
-		_settings = {};                                                            // settings.jsxi:52
-		
-		try {
-			_settings = JSON.parse(localStorage.settings) || {};                   // settings.jsxi:55
-		} catch (e){} 
+	(function (){                                                                  // drag_main_handler.jsxi:99
+		_ddId = DragDestination.register('New Car Or Skin',                        // drag_main_handler.jsxi:100
+			function (files){                                                      // drag_main_handler.jsxi:100
+				var d = new Dialog('Searching',                                    // drag_main_handler.jsxi:101
+					[ '<progress indeterminate></progress>' ], 
+					false, 
+					false);
+				
+				setTimeout(function (arg){                                         // drag_main_handler.jsxi:105
+					d.close();                                                     // drag_main_handler.jsxi:106
+					
+					try {
+						var found = [];
+						
+						for (var __10 = 0; __10 < files.length; __10 ++){          // drag_main_handler.jsxi:110
+							var file = files[__10];
+							
+							{
+								var __v = handle(file);
+								
+								for (var __u = 0; __u < __v.length; __u ++){
+									var entry = __v[__u];
+									
+									if (entry)                                     // drag_main_handler.jsxi:112
+										found.push(entry);                         // drag_main_handler.jsxi:112
+								}
+								
+								__v = undefined;
+							}
+						}
+						
+						showDialog(found);                                         // drag_main_handler.jsxi:116
+					} catch (err){                                                 // drag_main_handler.jsxi:117
+						ErrorHandler.handled('Cannot process dragged files.', err);
+					} 
+				}, 
+				30);
+			});
 	})();
-	return Settings;
+	return DragMainHandler;
 })();
+
+;
+
+;
+
+/* Class "ObjLocalStorage" declaration */
+function ObjLocalStorage(key, defaults){                                           // settings.jsxi:1
+	this.key = key;                                                                // settings.jsxi:6
+	this.defaults = defaults;                                                      // settings.jsxi:7
+	this.__ObjLocalStorage_load();
+}
+ObjLocalStorage.prototype.__ObjLocalStorage_load = function (){                    // settings.jsxi:11
+	try {
+		this.__ObjLocalStorage__obj = JSON.parse(localStorage[this.key]);          // settings.jsxi:12
+	} catch (e){} 
+	
+	if (!this.__ObjLocalStorage__obj)
+		this.__ObjLocalStorage__obj = {};
+	
+	for (var k in this.defaults)
+		if (this.defaults.hasOwnProperty(k)){
+			var v = this.defaults[k];
+			
+			if (typeof v === 'object' && v != null && (typeof this.__ObjLocalStorage__obj[k] !== 'object' || this.__ObjLocalStorage__obj[k] == null)){
+				this.__ObjLocalStorage__obj[k] = v;                                // settings.jsxi:17
+			}
+		}
+};
+ObjLocalStorage.prototype.__ObjLocalStorage_save = function (){                    // settings.jsxi:22
+	localStorage[this.key] = JSON.stringify(this.__ObjLocalStorage__obj);          // settings.jsxi:23
+};
+ObjLocalStorage.prototype.get = function (k){                                      // settings.jsxi:26
+	return this.__ObjLocalStorage__obj.hasOwnProperty(k) ? this.__ObjLocalStorage__obj[k] : this.defaults[k];
+};
+ObjLocalStorage.prototype.set = function (k, val){                                 // settings.jsxi:30
+	if (typeof k == 'object'){                                                     // settings.jsxi:31
+		for (var n in k){                                                          // settings.jsxi:32
+			this.__ObjLocalStorage__obj[n] = k[n];                                 // settings.jsxi:33
+		}
+	} else {
+		this.__ObjLocalStorage__obj[k] = val;                                      // settings.jsxi:36
+	}
+	
+	this.__ObjLocalStorage_save();
+};
+ObjLocalStorage.prototype.update = function (f){                                   // settings.jsxi:42
+	f(this.__ObjLocalStorage__obj);                                                // settings.jsxi:43
+	this.__ObjLocalStorage_save();
+};
+
+var Settings = new ObjLocalStorage('settings',                                     // settings.jsxi:48
+	{
+		disableTips: false,                                                        // settings.jsxi:49
+		updateDatabase: true,                                                      // settings.jsxi:50
+		uploadData: false,                                                         // settings.jsxi:51
+		updatesCheck: true,                                                        // settings.jsxi:52
+		updatesSource: 'stable',                                                   // settings.jsxi:53
+		badgeAutoupdate: true,                                                     // settings.jsxi:55
+		yearAutoupdate: false,                                                     // settings.jsxi:56
+		aptMode: 'default',                                                        // settings.jsxi:58
+		aptShowroom: '',                                                           // settings.jsxi:59
+		aptFilter: 'AT-Previews Special',                                          // settings.jsxi:60
+		aptResize: true,                                                           // settings.jsxi:61
+		aptDisableSweetFx: true,                                                   // settings.jsxi:62
+		aptCameraX: - 145,                                                         // settings.jsxi:63
+		aptCameraY: 36,                                                            // settings.jsxi:64
+		aptCameraDistance: 5.5,                                                    // settings.jsxi:65
+		aptIncreaseDelays: false
+	});
 
 /* Class "BadgeEditor" declaration */
 var BadgeEditor = (function (){                                                    // badge_editor.jsxi:1
@@ -4232,106 +5878,130 @@ var BadgeEditor = (function (){                                                 
 			}
 			
 			callback();                                                            // badge_editor.jsxi:13
-		} catch (err){                                                             // badge_editor.jsxi:14
-			callback(err);                                                         // badge_editor.jsxi:15
+			new Dialog('Add Badge To User Base',                                   // badge_editor.jsxi:15
+				[
+					'<label>Brand Name: <input value="' + Cars.byId(_currentCarId).data.brand + '"></label>'
+				], 
+				function (){                                                       // badge_editor.jsxi:17
+					fs.copyFileSync(file,                                          // badge_editor.jsxi:18
+						DataStorage.getUserContentDir('Badges') + '/' + this.content.find('input').val() + '.png');
+					Brands.init();                                                 // badge_editor.jsxi:19
+				});
+		} catch (err){                                                             // badge_editor.jsxi:21
+			callback(err);                                                         // badge_editor.jsxi:22
 		} 
 	};
-	BadgeEditor.autoupdate = function (car, force){                                // badge_editor.jsxi:19
-		if (!force && !Settings.get('badgeAutoupdate'))                            // badge_editor.jsxi:20
+	BadgeEditor.autoupdate = function (car, force, callback){                      // badge_editor.jsxi:26
+		if (!force && !Settings.get('badgeAutoupdate')){                           // badge_editor.jsxi:27
+			if (callback)                                                          // badge_editor.jsxi:28
+				callback();                                                        // badge_editor.jsxi:28
 			return;
+		}
 		
 		var image = Brands.getBadge(car.data.brand);
 		
-		if (image){                                                                // badge_editor.jsxi:23
-			saveFromLibrary(image,                                                 // badge_editor.jsxi:24
-				car.badge,                                                         // badge_editor.jsxi:24
-				function (arg){                                                    // badge_editor.jsxi:24
-					return arg || car.updateBadge();                               // badge_editor.jsxi:24
+		if (image){                                                                // badge_editor.jsxi:33
+			saveFromLibrary(image,                                                 // badge_editor.jsxi:34
+				car.badge,                                                         // badge_editor.jsxi:34
+				function (arg){                                                    // badge_editor.jsxi:34
+					if (!arg){                                                     // badge_editor.jsxi:35
+						car.updateBadge();                                         // badge_editor.jsxi:36
+					}
+					
+					if (callback)                                                  // badge_editor.jsxi:39
+						callback(arg);                                             // badge_editor.jsxi:39
 				});
+		} else {
+			if (callback)                                                          // badge_editor.jsxi:42
+				callback();                                                        // badge_editor.jsxi:42
 		}
 	};
-	BadgeEditor.start = function (car, callback){                                  // badge_editor.jsxi:28
-		_currentCarId = car.id;                                                    // badge_editor.jsxi:29
+	BadgeEditor.start = function (car, callback){                                  // badge_editor.jsxi:46
+		if (!car.data)                                                             // badge_editor.jsxi:47
+			return;
 		
-		function cb(e){                                                            // badge_editor.jsxi:31
-			if (e){                                                                // badge_editor.jsxi:32
-				ErrorHandler.handled('Cannot save badge icon.', e);                // badge_editor.jsxi:33
+		_currentCarId = car.id;                                                    // badge_editor.jsxi:49
+		Brands.init();                                                             // badge_editor.jsxi:50
+		
+		function cb(e){                                                            // badge_editor.jsxi:52
+			if (e){                                                                // badge_editor.jsxi:53
+				ErrorHandler.handled('Cannot save badge icon.', e);                // badge_editor.jsxi:54
 			} else {
-				car.updateBadge();                                                 // badge_editor.jsxi:35
+				car.updateBadge();                                                 // badge_editor.jsxi:56
 			}
 			
-			if (callback)                                                          // badge_editor.jsxi:37
-				callback();                                                        // badge_editor.jsxi:37
+			if (callback)                                                          // badge_editor.jsxi:58
+				callback();                                                        // badge_editor.jsxi:58
 		}
 		
-		var logosHtml = '',                                                        // badge_editor.jsxi:40
-			carBrand = car.data && car.data.brand,                                 // badge_editor.jsxi:41
-			carBrandBadge = carBrand && Brands.getBadge(carBrand);                 // badge_editor.jsxi:42
+		var logosHtml = '',                                                        // badge_editor.jsxi:61
+			carBrand = car.data && car.data.brand,                                 // badge_editor.jsxi:62
+			carBrandBadge = carBrand && Brands.getBadge(carBrand);                 // badge_editor.jsxi:63
 		
 		{
-			var __f = Brands.list;
+			var __1c = Brands.list;
 			
-			for (var __e = 0; __e < __f.length; __e ++){
-				var brand = __f[__e];
+			for (var __1b = 0; __1b < __1c.length; __1b ++){
+				var brand = __1c[__1b];
 				
 				var file = Brands.getBadge(brand);
 				
-				if (file){                                                         // badge_editor.jsxi:45
-					logosHtml += '<span class="car-library-element' + (!carBrandBadge && !logosHtml.length || carBrand === brand ? ' selected' : '') + '" data-file="' + file.cssUrl() + '" title="' + brand + '" style=\'display:inline-block;width:64px;height:64px;\
+				if (file){                                                         // badge_editor.jsxi:66
+					logosHtml += '<span class="car-library-element' + (!carBrandBadge && !logosHtml.length || carBrand === brand ? ' selected' : '') + '" data-file="' + file + '" title="' + brand + '" style=\'display:inline-block;width:64px;height:64px;\
                     background:center url("' + file.cssUrl() + '") no-repeat;background-size:54px\'></span>';
 				}
 			}
 			
-			__f = undefined;
+			__1c = undefined;
 		}
 		
-		var d = new Dialog('Change Badge',                                         // badge_editor.jsxi:52
+		var d = new Dialog('Change Badge',                                         // badge_editor.jsxi:73
 			[
 				'<div style="max-height:70vh;overflow-y:auto;line-height:0">' + logosHtml + '</div>'
 			], 
-			function (){                                                           // badge_editor.jsxi:54
+			function (){                                                           // badge_editor.jsxi:75
 				saveFromLibrary(this.content.find('.selected').data('file'), car.badge, cb);
-			}).addButton('Select File',                                            // badge_editor.jsxi:56
-			function (){                                                           // badge_editor.jsxi:56
+			}).addButton('Select File',                                            // badge_editor.jsxi:77
+			function (){                                                           // badge_editor.jsxi:77
 				var a = document.createElement('input');
 				
-				a.type = 'file';                                                   // badge_editor.jsxi:58
-				a.setAttribute('accept', '.png');                                  // badge_editor.jsxi:59
-				a.onchange = function (){                                          // badge_editor.jsxi:60
-					if (a.files[0]){                                               // badge_editor.jsxi:61
+				a.type = 'file';                                                   // badge_editor.jsxi:79
+				a.setAttribute('accept', '.png');                                  // badge_editor.jsxi:80
+				a.onchange = function (){                                          // badge_editor.jsxi:81
+					if (a.files[0]){                                               // badge_editor.jsxi:82
 						BadgeEditor.saveFromFile(a.files[0].path, car.badge, cb);
-						d.close();                                                 // badge_editor.jsxi:63
+						d.close();                                                 // badge_editor.jsxi:84
 					}
 				};
-				a.click();                                                         // badge_editor.jsxi:66
+				a.click();                                                         // badge_editor.jsxi:87
 				return false;
-			}).onEnd(function (arg){                                               // badge_editor.jsxi:68
-			DragDestination.unregister(ddId);                                      // badge_editor.jsxi:69
+			}).onEnd(function (arg){                                               // badge_editor.jsxi:89
+			DragDestination.unregister(ddId);                                      // badge_editor.jsxi:90
 		});
 		
-		var ddId = DragDestination.register('New Badge',                           // badge_editor.jsxi:72
-			function (files){                                                      // badge_editor.jsxi:72
-				if (files[0]){                                                     // badge_editor.jsxi:73
+		var ddId = DragDestination.register('New Badge',                           // badge_editor.jsxi:93
+			function (files){                                                      // badge_editor.jsxi:93
+				if (files[0]){                                                     // badge_editor.jsxi:94
 					BadgeEditor.saveFromFile(files[0], car.badge, cb);
-					d.close();                                                     // badge_editor.jsxi:75
+					d.close();                                                     // badge_editor.jsxi:96
 				}
 			});
 		
-		d.el.addClass('dark');                                                     // badge_editor.jsxi:79
-		d.content.find('.car-library-element').click(function (){                  // badge_editor.jsxi:80
-			$(this.parentNode).find('.selected').removeClass('selected');          // badge_editor.jsxi:81
-			this.classList.add('selected');                                        // badge_editor.jsxi:82
-		}).dblclick(function (){                                                   // badge_editor.jsxi:83
-			d.buttons.find('[data-id="dialog-ok"]')[0].click();                    // badge_editor.jsxi:84
+		d.el.addClass('dark');                                                     // badge_editor.jsxi:100
+		d.content.find('.car-library-element').click(function (){                  // badge_editor.jsxi:101
+			$(this.parentNode).find('.selected').removeClass('selected');          // badge_editor.jsxi:102
+			this.classList.add('selected');                                        // badge_editor.jsxi:103
+		}).dblclick(function (){                                                   // badge_editor.jsxi:104
+			d.buttons.find('[data-id="dialog-ok"]')[0].click();                    // badge_editor.jsxi:105
 		});
 	};
 	
-	function init(){                                                               // badge_editor.jsxi:88
-		Cars.on('update.car.data:brand', BadgeEditor.autoupdate);                  // badge_editor.jsxi:89
+	function init(){                                                               // badge_editor.jsxi:109
+		Cars.on('update.car.data:brand', BadgeEditor.autoupdate);                  // badge_editor.jsxi:110
 	}
 	
-	(function (){                                                                  // badge_editor.jsxi:93
-		$(init);                                                                   // badge_editor.jsxi:94
+	(function (){                                                                  // badge_editor.jsxi:114
+		$(init);                                                                   // badge_editor.jsxi:115
 	})();
 	return BadgeEditor;
 })();
@@ -4361,185 +6031,263 @@ JsBatchProcessor.prototype.process = function (car, callback){                  
 	callback();                                                                    // batch_processing.jsxi:22
 };
 
+/* Class "JsBatchCallbackProcessor" declaration */
+function JsBatchCallbackProcessor(fn){                                             // batch_processing.jsxi:26
+	this.__JsBatchCallbackProcessor__fn = fn;                                      // batch_processing.jsxi:30
+}
+__prototypeExtend(JsBatchCallbackProcessor, 
+	AbstractBatchProcessor);
+JsBatchCallbackProcessor.prototype.process = function (car, callback){             // batch_processing.jsxi:33
+	try {
+		this.__JsBatchCallbackProcessor__fn(car, callback);
+	} catch (err){                                                                 // batch_processing.jsxi:36
+		callback(err);                                                             // batch_processing.jsxi:37
+	} 
+};
+
 /* Class "ExportDbProcessor" declaration */
 function ExportDbProcessor(){}
 __prototypeExtend(ExportDbProcessor, 
 	AbstractBatchProcessor);
-ExportDbProcessor.prototype.start = function (){                                   // batch_processing.jsxi:32
-	this.__ExportDbProcessor_data = {};
+ExportDbProcessor.prototype.start = function (){                                   // batch_processing.jsxi:48
+	this.__ExportDbProcessor_data = { years: {}, countries: {}, authors: {}, urls: {} };
 };
-ExportDbProcessor.prototype.end = function (){                                     // batch_processing.jsxi:36
-	fs.writeFileSync(gui.App.dataPath + '/exported-data.json',                     // batch_processing.jsxi:37
-		JSON.stringify(this.__ExportDbProcessor_data));                            // batch_processing.jsxi:37
+ExportDbProcessor.prototype.end = function (){                                     // batch_processing.jsxi:57
+	var dir = DataStorage.getUserContentDir('Details (Preload)');
+	
+	for (var k in this.__ExportDbProcessor_data)
+		if (this.__ExportDbProcessor_data.hasOwnProperty(k)){
+			var a = this.__ExportDbProcessor_data[k];
+			
+			fs.writeFileSync(dir + '/' + k + '.json', JSON.stringify(a));          // batch_processing.jsxi:60
+		}
 };
-ExportDbProcessor.prototype.process = function (car, callback){                    // batch_processing.jsxi:40
-	this.__ExportDbProcessor_data[car.id] = car[car instanceof ExportDbProcessor ? '__ExportDbProcessor_data' : 'data'];
-	callback();                                                                    // batch_processing.jsxi:42
+ExportDbProcessor.prototype.process = function (car, callback){                    // batch_processing.jsxi:64
+	if (car[car instanceof ExportDbProcessor ? '__ExportDbProcessor_data' : 'data'].year)
+		this.__ExportDbProcessor_data.years[car.id] = car[car instanceof ExportDbProcessor ? '__ExportDbProcessor_data' : 'data'].year;
+	
+	if (car[car instanceof ExportDbProcessor ? '__ExportDbProcessor_data' : 'data'].country)
+		this.__ExportDbProcessor_data.countries[car.id] = car[car instanceof ExportDbProcessor ? '__ExportDbProcessor_data' : 'data'].country;
+	
+	if (car[car instanceof ExportDbProcessor ? '__ExportDbProcessor_data' : 'data'].author && car[car instanceof ExportDbProcessor ? '__ExportDbProcessor_data' : 'data'].author !== 'Kunos')
+		this.__ExportDbProcessor_data.authors[car.id] = car[car instanceof ExportDbProcessor ? '__ExportDbProcessor_data' : 'data'].author;
+	
+	if (car[car instanceof ExportDbProcessor ? '__ExportDbProcessor_data' : 'data'].url)
+		this.__ExportDbProcessor_data.urls[car.id] = car[car instanceof ExportDbProcessor ? '__ExportDbProcessor_data' : 'data'].url;
+	
+	callback();                                                                    // batch_processing.jsxi:69
 };
 
 /* Class "BatchProcessing" declaration */
-var BatchProcessing = (function (){                                                // batch_processing.jsxi:46
+var BatchProcessing = (function (){                                                // batch_processing.jsxi:73
 	var BatchProcessing = function (){}, 
-		mediator = new Mediator(),                                                 // batch_processing.jsxi:47
-		_procs;                                                                    // batch_processing.jsxi:49
+		mediator = new Mediator(),                                                 // batch_processing.jsxi:74
+		_procs;                                                                    // batch_processing.jsxi:76
 	
-	BatchProcessing.process = function (cars, processor){                          // batch_processing.jsxi:51
-		AppServerRequest.sendDataDisabled = true;                                  // batch_processing.jsxi:52
+	BatchProcessing.process = function (cars, processor){                          // batch_processing.jsxi:78
+		if (!_procs)                                                               // batch_processing.jsxi:79
+			init();                                                                // batch_processing.jsxi:79
+		
+		AppServerRequest.sendDataDisabled = true;                                  // batch_processing.jsxi:80
+		
+		if (typeof processor === 'string'){                                        // batch_processing.jsxi:82
+			for (var __1d = 0; __1d < _procs.length; __1d ++){                     // batch_processing.jsxi:83
+				var p = _procs[__1d];
+				
+				if (p.name === processor){                                         // batch_processing.jsxi:84
+					processor = p.proc;                                            // batch_processing.jsxi:85
+					
+					break;
+				}
+			}
+			
+			if (typeof processor === 'string'){                                    // batch_processing.jsxi:90
+				ErrorHandler.handled('Processor “' + processor + '” not found.');
+				return;
+			}
+		}
 		
 		var abort = false;
 		
-		var d = new Dialog('Batch Processing',                                     // batch_processing.jsxi:56
+		var d = new Dialog('Batch Processing',                                     // batch_processing.jsxi:98
 			[ '<progress></progress>' ], 
-			function (){                                                           // batch_processing.jsxi:56
-				AppServerRequest.sendDataDisabled = false;                         // batch_processing.jsxi:57
-				abort = true;                                                      // batch_processing.jsxi:58
+			function (){                                                           // batch_processing.jsxi:98
+				AppServerRequest.sendDataDisabled = false;                         // batch_processing.jsxi:99
+				abort = true;                                                      // batch_processing.jsxi:100
 			}, 
-			false);
+			false).setButton('Abort');                                             // batch_processing.jsxi:101
 		
 		var progress = d.find('progress');
 		
-		progress[0].max = cars.length;                                             // batch_processing.jsxi:62
+		progress[0].max = cars.length;                                             // batch_processing.jsxi:104
 		
 		var i = 0, k = 0;
 		
-		function next(){                                                           // batch_processing.jsxi:65
-			if (abort)                                                             // batch_processing.jsxi:66
+		function next(){                                                           // batch_processing.jsxi:107
+			if (abort)                                                             // batch_processing.jsxi:108
 				return;
 			
-			if (cars[i]){                                                          // batch_processing.jsxi:68
+			if (cars[i]){                                                          // batch_processing.jsxi:110
 				var j = i ++;
 				
-				progress[0].value = j;                                             // batch_processing.jsxi:70
-				processor.process(cars[j], nextDelayed);                           // batch_processing.jsxi:71
+				progress[0].value = j;                                             // batch_processing.jsxi:112
+				processor.process(cars[j], nextDelayed);                           // batch_processing.jsxi:113
 			} else {
-				AppServerRequest.sendDataDisabled = false;                         // batch_processing.jsxi:73
-				d.close();                                                         // batch_processing.jsxi:74
-				processor.end();                                                   // batch_processing.jsxi:75
-				mediator.dispatch('end', processor);                               // batch_processing.jsxi:76
+				AppServerRequest.sendDataDisabled = false;                         // batch_processing.jsxi:115
+				d.close();                                                         // batch_processing.jsxi:116
+				processor.end();                                                   // batch_processing.jsxi:117
+				mediator.dispatch('end', processor);                               // batch_processing.jsxi:118
 			}
 		}
 		
-		function nextDelayed(){                                                    // batch_processing.jsxi:80
-			if (++ k < 10){                                                        // batch_processing.jsxi:81
-				next();                                                            // batch_processing.jsxi:82
+		function nextDelayed(){                                                    // batch_processing.jsxi:122
+			if (++ k < 10){                                                        // batch_processing.jsxi:123
+				next();                                                            // batch_processing.jsxi:124
 			} else {
-				setTimeout(next);                                                  // batch_processing.jsxi:84
-				k = 0;                                                             // batch_processing.jsxi:85
+				setTimeout(next);                                                  // batch_processing.jsxi:126
+				k = 0;                                                             // batch_processing.jsxi:127
 			}
 		}
 		
-		mediator.dispatch('start', processor);                                     // batch_processing.jsxi:89
-		processor.start();                                                         // batch_processing.jsxi:90
-		next();                                                                    // batch_processing.jsxi:91
+		mediator.dispatch('start', processor);                                     // batch_processing.jsxi:131
+		processor.start();                                                         // batch_processing.jsxi:132
+		next();                                                                    // batch_processing.jsxi:133
 	};
-	BatchProcessing.add = function (name, proc){                                   // batch_processing.jsxi:94
-		if (!_procs)                                                               // batch_processing.jsxi:95
-			_procs = [];                                                           // batch_processing.jsxi:95
+	BatchProcessing.add = function (name, proc){                                   // batch_processing.jsxi:136
+		if (!_procs)                                                               // batch_processing.jsxi:137
+			_procs = [];                                                           // batch_processing.jsxi:137
 		
-		_procs.push({ name: name, proc: proc });                                   // batch_processing.jsxi:96
+		_procs.push({ name: name, proc: proc });                                   // batch_processing.jsxi:138
 	};
-	BatchProcessing.select = function (cars){                                      // batch_processing.jsxi:99
-		if (!_procs)                                                               // batch_processing.jsxi:100
-			init();                                                                // batch_processing.jsxi:100
+	BatchProcessing.select = function (cars){                                      // batch_processing.jsxi:141
+		if (!_procs)                                                               // batch_processing.jsxi:142
+			init();                                                                // batch_processing.jsxi:142
 		
-		new Dialog('Batch Processing',                                             // batch_processing.jsxi:101
+		new Dialog('Batch Processing',                                             // batch_processing.jsxi:143
 			[
-				'<h6>Cars</h6>',                                                   // batch_processing.jsxi:102
-				cars.length + ' cars to process',                                  // batch_processing.jsxi:103
-				'<h6>Processor</h6>',                                              // batch_processing.jsxi:104
-				'<select>' + _procs.map(function (e, i){                           // batch_processing.jsxi:105
-					return '<option value="' + i + '">' + e.name + '</option>';    // batch_processing.jsxi:105
+				'<h6>Cars</h6>',                                                   // batch_processing.jsxi:144
+				cars.length + ' cars to process',                                  // batch_processing.jsxi:145
+				'<h6>Processor</h6>',                                              // batch_processing.jsxi:146
+				'<select>' + _procs.map(function (e, i){                           // batch_processing.jsxi:147
+					return '<option value="' + i + '">' + e.name + '</option>';    // batch_processing.jsxi:147
 				}) + '</select>', 
-				'<div id="proc-options"></div>',                                   // batch_processing.jsxi:106
+				'<div id="proc-options"></div>',                                   // batch_processing.jsxi:148
 				'If you have any ideas about different processors, you can use Feedback Form in Settings.'
 			], 
-			function (){                                                           // batch_processing.jsxi:108
-				setTimeout((function (){                                           // batch_processing.jsxi:109
+			function (){                                                           // batch_processing.jsxi:150
+				setTimeout((function (){                                           // batch_processing.jsxi:151
 					BatchProcessing.process(cars, _procs[this.find('select').val()].proc);
-				}).bind(this));                                                    // batch_processing.jsxi:111
-			}).find('select').val(0);                                              // batch_processing.jsxi:112
+				}).bind(this));                                                    // batch_processing.jsxi:153
+			}).find('select').val(0);                                              // batch_processing.jsxi:154
 	};
 	
-	function init(){                                                               // batch_processing.jsxi:115
-		BatchProcessing.add('Add missing brand names to car names',                // batch_processing.jsxi:116
-			new JsBatchProcessor(function (car){                                   // batch_processing.jsxi:116
-				if (!car.data || !car.data.name || !car.data.brand)                // batch_processing.jsxi:117
+	function init(){                                                               // batch_processing.jsxi:157
+		BatchProcessing.add('Add missing brand names to car names',                // batch_processing.jsxi:158
+			new JsBatchProcessor(function (car){                                   // batch_processing.jsxi:158
+				if (!car.data || !car.data.name || !car.data.brand)                // batch_processing.jsxi:159
 					return;
 				
-				if (car.data.brand === 'Kunos')                                    // batch_processing.jsxi:119
+				if (car.data.brand === 'Various')                                  // batch_processing.jsxi:161
 					return;
 				
-				if (Brands.nameContains(car.data.name, car.data.brand))            // batch_processing.jsxi:120
+				if (Brands.nameContains(car.data.name, car.data.brand))            // batch_processing.jsxi:162
 					return;
 				
-				car.changeData('name',                                             // batch_processing.jsxi:122
-					Brands.toNamePart(car.data.brand) + ' ' + car.data.name);      // batch_processing.jsxi:122
+				car.changeData('name',                                             // batch_processing.jsxi:164
+					Brands.toNamePart(car.data.brand) + ' ' + car.data.name);      // batch_processing.jsxi:164
 			}));
-		BatchProcessing.add('Remove brand names from car names',                   // batch_processing.jsxi:125
-			new JsBatchProcessor(function (car){                                   // batch_processing.jsxi:125
-				if (!car.data || !car.data.name || !car.data.brand)                // batch_processing.jsxi:126
+		BatchProcessing.add('Remove brand names from car names',                   // batch_processing.jsxi:167
+			new JsBatchProcessor(function (car){                                   // batch_processing.jsxi:167
+				if (!car.data || !car.data.name || !car.data.brand)                // batch_processing.jsxi:168
 					return;
 				
-				if (!Brands.nameContains(car.data.name, car.data.brand))           // batch_processing.jsxi:128
+				if (!Brands.nameContains(car.data.name, car.data.brand))           // batch_processing.jsxi:170
 					return;
 				
-				car.changeData('name',                                             // batch_processing.jsxi:130
+				car.changeData('name',                                             // batch_processing.jsxi:172
 					car.data.name.substr(Brands.toNamePart(car.data.brand).length + 1));
 			}));
-		BatchProcessing.add('Lowercase classes',                                   // batch_processing.jsxi:133
-			new JsBatchProcessor(function (car){                                   // batch_processing.jsxi:133
-				if (!car.data || !car.data.class)                                  // batch_processing.jsxi:134
+		BatchProcessing.add('Add missing years to car names',                      // batch_processing.jsxi:175
+			new JsBatchProcessor(function (car){                                   // batch_processing.jsxi:175
+				if (!car.data || !car.data.name || !car.data.year)                 // batch_processing.jsxi:176
 					return;
 				
-				car.changeData('class', car.data.class.toLowerCase());             // batch_processing.jsxi:135
+				if (car.data.brand === 'Various')                                  // batch_processing.jsxi:178
+					return;
+				
+				if (Years.nameContains(car.data.name))                             // batch_processing.jsxi:179
+					return;
+				
+				car.changeData('name',                                             // batch_processing.jsxi:181
+					car.data.name + ' \'' + ('' + car.data.year).slice(- 2));      // batch_processing.jsxi:181
 			}));
-		BatchProcessing.add('Lowercase & fix tags',                                // batch_processing.jsxi:138
-			new JsBatchProcessor(function (car){                                   // batch_processing.jsxi:138
-				if (!car.data || !car.data.tags)                                   // batch_processing.jsxi:139
+		BatchProcessing.add('Remove years from car names',                         // batch_processing.jsxi:184
+			new JsBatchProcessor(function (car){                                   // batch_processing.jsxi:184
+				if (!car.data || !car.data.name)                                   // batch_processing.jsxi:185
 					return;
 				
-				var temp = 0,                                                      // batch_processing.jsxi:140
-					tags = car.data.tags.map(function (raw){                       // batch_processing.jsxi:141
-						var tag = Countries.fixTag(raw.toLowerCase());
+				if (!Years.nameContains(car.data.name))                            // batch_processing.jsxi:187
+					return;
+				
+				car.changeData('name', Years.removeFromName(car.data.name));       // batch_processing.jsxi:188
+			}));
+		BatchProcessing.add('Lowercase classes',                                   // batch_processing.jsxi:191
+			new JsBatchProcessor(function (car){                                   // batch_processing.jsxi:191
+				if (!car.data || !car.data.class)                                  // batch_processing.jsxi:192
+					return;
+				
+				car.changeData('class', car.data.class.toLowerCase());             // batch_processing.jsxi:193
+			}));
+		BatchProcessing.add('Lowercase & fix tags',                                // batch_processing.jsxi:196
+			new JsBatchProcessor(function (car){                                   // batch_processing.jsxi:196
+				if (!car.data || !car.data.tags)                                   // batch_processing.jsxi:197
+					return;
+				
+				var temp = 0,                                                      // batch_processing.jsxi:198
+					tags = car.data.tags.map(function (raw){                       // batch_processing.jsxi:199
+						var tag;
 						
-						if (/^#?(a\d+)$/.test(tag)){                               // batch_processing.jsxi:144
-							return '#' + RegExp.$1.toUpperCase();                  // batch_processing.jsxi:145
+						if (/^(?:#(a\d+)|([aA]\d+))$/.test(tag)){                  // batch_processing.jsxi:201
+							tag = '#' + (RegExp.$1 || RegExp.$2).toUpperCase();    // batch_processing.jsxi:202
+						} else {
+							tag = Countries.fixTag(raw.toLowerCase());             // batch_processing.jsxi:204
 						}
 						
-						if (tag === raw){                                          // batch_processing.jsxi:148
-							temp ++;                                               // batch_processing.jsxi:149
+						if (tag === raw){                                          // batch_processing.jsxi:207
+							temp ++;                                               // batch_processing.jsxi:208
 						}
-						return tag;                                                // batch_processing.jsxi:152
+						return tag;                                                // batch_processing.jsxi:211
 					});
 				
-				if (temp !== car.data.tags.length){                                // batch_processing.jsxi:155
-					car.changeData('tags', tags);                                  // batch_processing.jsxi:156
+				if (temp !== car.data.tags.length){                                // batch_processing.jsxi:214
+					car.changeData('tags', tags);                                  // batch_processing.jsxi:215
 				}
 			}));
-		BatchProcessing.add('Remove logo.png',                                     // batch_processing.jsxi:160
-			new JsBatchProcessor(function (car){                                   // batch_processing.jsxi:160
-				if (fs.existsSync(car.path + '/logo.png')){                        // batch_processing.jsxi:161
-					fs.unlinkSync(car.path + '/logo.png');                         // batch_processing.jsxi:162
+		BatchProcessing.add('Remove logo.png',                                     // batch_processing.jsxi:219
+			new JsBatchProcessor(function (car){                                   // batch_processing.jsxi:219
+				if (fs.existsSync(car.path + '/logo.png')){                        // batch_processing.jsxi:220
+					fs.unlinkSync(car.path + '/logo.png');                         // batch_processing.jsxi:221
 				}
 			}));
-		BatchProcessing.add('Replace logo.png by ui/badge.png',                    // batch_processing.jsxi:166
-			new JsBatchProcessor(function (car){                                   // batch_processing.jsxi:166
-				if (!fs.existsSync(car.badge))                                     // batch_processing.jsxi:167
+		BatchProcessing.add('Replace logo.png by ui/badge.png',                    // batch_processing.jsxi:225
+			new JsBatchProcessor(function (car){                                   // batch_processing.jsxi:225
+				if (!fs.existsSync(car.badge))                                     // batch_processing.jsxi:226
 					return;
 				
 				fs.writeFileSync(car.path + '/logo.png', fs.readFileSync(car.badge));
 			}));
-		BatchProcessing.add('Set default badges',                                  // batch_processing.jsxi:171
-			new JsBatchProcessor(function (car){                                   // batch_processing.jsxi:171
-				BadgeEditor.autoupdate(car, true);                                 // batch_processing.jsxi:172
+		BatchProcessing.add('Set default badges',                                  // batch_processing.jsxi:230
+			new JsBatchCallbackProcessor(function (car, callback){                 // batch_processing.jsxi:230
+				BadgeEditor.autoupdate(car, true, 
+					callback);                                                     // batch_processing.jsxi:231
 			}));
 		
-		if (localStorage.developerMode)                                            // batch_processing.jsxi:175
+		if (localStorage.developerMode)                                            // batch_processing.jsxi:234
 			BatchProcessing.add('Export database', new ExportDbProcessor());
 	}
 	
-	(function (){                                                                  // batch_processing.jsxi:178
-		mediator.extend(BatchProcessing);                                          // batch_processing.jsxi:179
+	(function (){                                                                  // batch_processing.jsxi:237
+		mediator.extend(BatchProcessing);                                          // batch_processing.jsxi:238
 	})();
 	return BatchProcessing;
 })();
@@ -4567,7 +6315,7 @@ var RestorationWizard = (function (){                                           
 			
 			fixer.run();                                                           // restoration_wizard.jsxi:19
 		} else {
-			ErrorHandler.handled('Not supported error: ' + errorId);               // restoration_wizard.jsxi:21
+			ErrorHandler.handled('Solutions for “' + errorId + '” not found.');    // restoration_wizard.jsxi:21
 		}
 	};
 	RestorationWizard.createFixer = function (car, error){                         // restoration_wizard.jsxi:25
@@ -4815,87 +6563,108 @@ var UpgradeEditor = (function (){                                               
 			}
 			
 			callback();                                                            // upgrade_editor.jsxi:97
-		} catch (err){                                                             // upgrade_editor.jsxi:98
-			callback(err);                                                         // upgrade_editor.jsxi:99
+			new Dialog('Add Upgrade Icon To User Base',                            // upgrade_editor.jsxi:99
+				[
+					'<label>Name: <input value="' + path.basename(filename, '.png') + '"></label>'
+				], 
+				function (){                                                       // upgrade_editor.jsxi:101
+					fs.copyFileSync(file,                                          // upgrade_editor.jsxi:102
+						DataStorage.getUserContentDir('Upgrades') + '/' + this.content.find('input').val() + '.png');
+					Brands.init();                                                 // upgrade_editor.jsxi:103
+				});
+		} catch (err){                                                             // upgrade_editor.jsxi:105
+			callback(err);                                                         // upgrade_editor.jsxi:106
 		} 
 	};
-	UpgradeEditor.start = function (car, callback){                                // upgrade_editor.jsxi:103
-		function cb(e){                                                            // upgrade_editor.jsxi:104
-			if (e){                                                                // upgrade_editor.jsxi:105
-				ErrorHandler.handled('Cannot save upgrade icon.', e);              // upgrade_editor.jsxi:106
+	UpgradeEditor.start = function (car, callback){                                // upgrade_editor.jsxi:110
+		function cb(e){                                                            // upgrade_editor.jsxi:111
+			if (e){                                                                // upgrade_editor.jsxi:112
+				ErrorHandler.handled('Cannot save upgrade icon.', e);              // upgrade_editor.jsxi:113
 			} else {
-				car.updateUpgrade();                                               // upgrade_editor.jsxi:108
+				car.updateUpgrade();                                               // upgrade_editor.jsxi:115
 			}
 			
-			if (callback)                                                          // upgrade_editor.jsxi:110
-				callback();                                                        // upgrade_editor.jsxi:110
+			if (callback)                                                          // upgrade_editor.jsxi:117
+				callback();                                                        // upgrade_editor.jsxi:117
 		}
 		
-		var d = new Dialog('Upgrade Icon Editor',                                  // upgrade_editor.jsxi:113
+		var d = new Dialog('Upgrade Icon Editor',                                  // upgrade_editor.jsxi:120
 			[
 				'<div class="left"><h6>Current</h6><img class="car-upgrade"></div>', 
 				'<div class="right"><h6>New</h6><div id="car-upgrade-editor"></div></div>', 
 				'<p><i>Ctrl+I: Italic, Ctrl+B: Bold</i></p>'
 			], 
-			function (){                                                           // upgrade_editor.jsxi:117
+			function (){                                                           // upgrade_editor.jsxi:124
 				var label = this.content.find('#car-upgrade-editor')[0].innerHTML;
 				
-				car.data.upgradeLabel = $('#editable-focus').html();               // upgrade_editor.jsxi:119
+				car.data.upgradeLabel = $('#editable-focus').html();               // upgrade_editor.jsxi:126
 				
-				if (!car.changed){                                                 // upgrade_editor.jsxi:120
-					car.save();                                                    // upgrade_editor.jsxi:121
+				if (!car.changed){                                                 // upgrade_editor.jsxi:127
+					car.save();                                                    // upgrade_editor.jsxi:128
 				}
 				
-				saveFromHtml(label, car.upgrade, cb);                              // upgrade_editor.jsxi:123
-			}).addButton('Select File',                                            // upgrade_editor.jsxi:124
-			function (){                                                           // upgrade_editor.jsxi:124
+				saveFromHtml(label, car.upgrade, cb);                              // upgrade_editor.jsxi:130
+			}).addButton('Select File',                                            // upgrade_editor.jsxi:131
+			function (){                                                           // upgrade_editor.jsxi:131
 				var a = document.createElement('input');
 				
-				a.type = 'file';                                                   // upgrade_editor.jsxi:126
-				a.setAttribute('accept', '.png');                                  // upgrade_editor.jsxi:127
-				a.onchange = function (){                                          // upgrade_editor.jsxi:128
-					if (a.files[0]){                                               // upgrade_editor.jsxi:129
+				a.type = 'file';                                                   // upgrade_editor.jsxi:133
+				a.setAttribute('accept', '.png');                                  // upgrade_editor.jsxi:134
+				a.onchange = function (){                                          // upgrade_editor.jsxi:135
+					if (a.files[0]){                                               // upgrade_editor.jsxi:136
 						UpgradeEditor.saveFromFile(a.files[0].path, car.upgrade, cb);
-						d.close();                                                 // upgrade_editor.jsxi:131
+						d.close();                                                 // upgrade_editor.jsxi:138
 					}
 				};
-				a.click();                                                         // upgrade_editor.jsxi:134
+				a.click();                                                         // upgrade_editor.jsxi:141
 				return false;
-			}).onEnd(function (arg){                                               // upgrade_editor.jsxi:136
-			DragDestination.unregister(ddId);                                      // upgrade_editor.jsxi:137
+			}).onEnd(function (arg){                                               // upgrade_editor.jsxi:143
+			DragDestination.unregister(ddId);                                      // upgrade_editor.jsxi:144
 		});
 		
-		var ddId = DragDestination.register('New Upgrade Icon',                    // upgrade_editor.jsxi:140
-			function (files){                                                      // upgrade_editor.jsxi:140
-				if (files[0]){                                                     // upgrade_editor.jsxi:141
+		var ddId = DragDestination.register('New Upgrade Icon',                    // upgrade_editor.jsxi:147
+			function (files){                                                      // upgrade_editor.jsxi:147
+				if (files[0]){                                                     // upgrade_editor.jsxi:148
 					UpgradeEditor.saveFromFile(files[0], car.upgrade, cb);
-					d.close();                                                     // upgrade_editor.jsxi:143
+					d.close();                                                     // upgrade_editor.jsxi:150
 				}
 			});
 		
-		d.el.addClass('dark');                                                     // upgrade_editor.jsxi:147
+		d.el.addClass('dark');                                                     // upgrade_editor.jsxi:154
 		
-		if (fs.existsSync(car.upgrade)){                                           // upgrade_editor.jsxi:148
-			d.content.find('img').attr('src', car.upgrade);                        // upgrade_editor.jsxi:149
+		if (fs.existsSync(car.upgrade)){                                           // upgrade_editor.jsxi:155
+			d.content.find('img').attr('src', car.upgrade);                        // upgrade_editor.jsxi:156
 		} else {
-			d.content.find('.left').remove();                                      // upgrade_editor.jsxi:151
+			d.content.find('.left').remove();                                      // upgrade_editor.jsxi:158
 		}
 		
 		d.content.find('#car-upgrade-editor').append(editable(car.data.upgradeLabel || 'S1'));
-		focus(d.content.find('#editable-focus')[0]);                               // upgrade_editor.jsxi:155
+		focus(d.content.find('#editable-focus')[0]);                               // upgrade_editor.jsxi:162
 		
-		var t = d.addTab('Library',                                                // upgrade_editor.jsxi:157
-			"",                                                                    // upgrade_editor.jsxi:157
-			function (){                                                           // upgrade_editor.jsxi:157
-				saveFromLibrary(t.content.find('.selected').attr('src'), car.upgrade, cb);
-			}).setButton('Select').addButton('Cancel');                            // upgrade_editor.jsxi:159
+		var upgradesLib = DataStorage.readContentDir('Upgrades', 'png');
 		
-		t.content.css('margin', '10px 0');                                         // upgrade_editor.jsxi:160
-		t.find('.car-library-element').click(function (){                          // upgrade_editor.jsxi:161
-			$(this.parentNode).find('.selected').removeClass('selected');          // upgrade_editor.jsxi:162
-			this.classList.add('selected');                                        // upgrade_editor.jsxi:163
-		}).dblclick(function (){                                                   // upgrade_editor.jsxi:164
-			t.buttons.find('[data-id="dialog-ok"]')[0].click();                    // upgrade_editor.jsxi:165
+		var upgradesLibHtml = '';
+		
+		for (var name in upgradesLib)                                              // upgrade_editor.jsxi:166
+			if (upgradesLib.hasOwnProperty(name)){                                 // upgrade_editor.jsxi:166
+				var file = upgradesLib[name];
+				
+				upgradesLibHtml += '<span class="car-library-element' + (upgradesLibHtml.length ? '' : ' selected') + '" data-file="' + file + '" title="' + name + '" style=\'display:inline-block;width:74px;height:74px;\
+                    background:center url("' + file.cssUrl() + '") no-repeat;background-size:64px\'></span>';
+			}
+		
+		var t = d.addTab('Library',                                                // upgrade_editor.jsxi:171
+			upgradesLibHtml,                                                       // upgrade_editor.jsxi:171
+			function (){                                                           // upgrade_editor.jsxi:171
+				saveFromLibrary(t.content.find('.selected').data('file'), car.upgrade, cb);
+			}).setButton('Select').addButton('Cancel');                            // upgrade_editor.jsxi:173
+		
+		t.content.css('margin', '10px 0');                                         // upgrade_editor.jsxi:174
+		t.find('.car-library-element').click(function (){                          // upgrade_editor.jsxi:175
+			$(this.parentNode).find('.selected').removeClass('selected');          // upgrade_editor.jsxi:176
+			this.classList.add('selected');                                        // upgrade_editor.jsxi:177
+		}).dblclick(function (){                                                   // upgrade_editor.jsxi:178
+			t.buttons.find('[data-id="dialog-ok"]')[0].click();                    // upgrade_editor.jsxi:179
 		});
 	};
 	return UpgradeEditor;
@@ -4938,7 +6707,7 @@ AbstractFixer.prototype.__removeError = function (){                            
 AbstractFixer.prototype.__reloadAfter = function (){};
 AbstractFixer.prototype.__AbstractFixer_error = function (err){                    // abstract_fixer.jsxi:39
 	this.__AbstractFixer__error = true;
-	ErrorHandler.handled('Cannot fix error: ' + this.__errorId, err);              // abstract_fixer.jsxi:41
+	ErrorHandler.handled('Cannot fix error: ' + this.__errorId + '.', err);        // abstract_fixer.jsxi:41
 };
 AbstractFixer.prototype.__AbstractFixer_work = function (c){                       // abstract_fixer.jsxi:44
 	var __that = this, 
@@ -4982,8 +6751,8 @@ AbstractFixer.prototype.__AbstractFixer_work = function (c){                    
 					
 					s[id].fn(c);                                                   // abstract_fixer.jsxi:68
 					
-					for (var __g = 0; __g < __that.__simularErrors.length; __g ++){
-						var simularError = __that.__simularErrors[__g];
+					for (var __1e = 0; __1e < __that.__simularErrors.length; __1e ++){
+						var simularError = __that.__simularErrors[__1e];
 						
 						var fixer = RestorationWizard.createFixer(__that.__car, simularError);
 						
@@ -5080,8 +6849,8 @@ AbstractFixer.__simularFiles = function (filename, filter, deep, rec){          
 			false, 
 			true);
 		
-		for (var __h = 0; __h < s.length; __h ++){                                 // abstract_fixer.jsxi:140
-			var d = s[__h];
+		for (var __1f = 0; __1f < s.length; __1f ++){                              // abstract_fixer.jsxi:140
+			var d = s[__1f];
 			
 			r.push.call(r,                                                         // abstract_fixer.jsxi:141
 				AbstractFixer.__simularFiles(d + '/' + basename, filter, false, 
@@ -5542,13 +7311,15 @@ __prototypeExtend(Kn5SuspXxErrorFixer,
 	AbstractFixer);
 Kn5SuspXxErrorFixer.prototype.__Kn5SuspXxErrorFixer_emptyPlaceholders = function (c){
 	AcTools.Utils.Kn5Fixer.FixSuspensionWrapper(AcDir.root, this.__car.id);        // error_kn5_file.jsxi:3
-	c();                                                                           // error_kn5_file.jsxi:4
+	Notification.info('Done',                                                      // error_kn5_file.jsxi:4
+		'Suspension fixed, empty placeholders have been added.');                  // error_kn5_file.jsxi:4
+	c();                                                                           // error_kn5_file.jsxi:5
 };
 Object.defineProperty(Kn5SuspXxErrorFixer.prototype, 
 	'title', 
 	{
 		get: (function (){
-			return 'Car\'s model doesn\'t have a proper suspension.';              // error_kn5_file.jsxi:7
+			return 'Car\'s model doesn\'t have a proper suspension.';              // error_kn5_file.jsxi:8
 		})
 	});
 Object.defineProperty(Kn5SuspXxErrorFixer.prototype, 
@@ -5557,14 +7328,73 @@ Object.defineProperty(Kn5SuspXxErrorFixer.prototype,
 		get: (function (){
 			return [
 				{
-					name: 'Add empty placeholders',                                // error_kn5_file.jsxi:9
+					name: 'Add empty placeholders',                                // error_kn5_file.jsxi:10
 					fn: __bindOnce(this, '__Kn5SuspXxErrorFixer_emptyPlaceholders')
 				}
 			];
 		})
 	});
 
-RestorationWizard.register('kn5-susp_xx-error', Kn5SuspXxErrorFixer);              // error_kn5_file.jsxi:13
+RestorationWizard.register('kn5-susp_xx-error', Kn5SuspXxErrorFixer);              // error_kn5_file.jsxi:14
+
+/* Class "SfxBankMissing" declaration */
+var SfxBankMissing = (function (){                                                 // error_sfx.jsxi:1
+	var SfxBankMissing = function (){                                              // error_sfx.jsxi:1
+			AbstractFixer.apply(this, 
+				arguments);
+		}, 
+		_kunosOnly = true;                                                         // error_sfx.jsxi:6
+	
+	__prototypeExtend(SfxBankMissing, 
+		AbstractFixer);
+	SfxBankMissing.prototype.__reloadAfter = function (){                          // error_sfx.jsxi:2
+		this.__car.loadSfx();                                                      // error_sfx.jsxi:3
+	};
+	SfxBankMissing.prototype.__SfxBankMissing_replaceSfxBank = function (c){       // error_sfx.jsxi:8
+		var __that = this;
+		
+		new Dialog('Select car',                                                   // error_sfx.jsxi:9
+			[
+				'<select>' + Cars.list.filter(function (arg){                      // error_sfx.jsxi:10
+					return !_kunosOnly || arg.data && arg.data.author === 'Kunos';
+				}).map(function (arg){                                             // error_sfx.jsxi:12
+					return '<option value="' + arg.id + '">' + arg.displayName + '</option>';
+				}) + '</select>'
+			], 
+			function (arg){                                                        // error_sfx.jsxi:13
+				var id = this.content.find('select').val();
+				
+				var guids = Sfx.getGuidsById(id).replace(/(event:\/cars\/)\w+/g, '$1' + __that.__car.id) + '\n' + Sfx.getDefaultGuids(__that.__car.id);
+				
+				fs.writeFileSync(__that.__car.path + '/sfx/GUIDs.txt', guids);     // error_sfx.jsxi:16
+				fs.copyFileSync(Sfx.getBankFilenameById(id),                       // error_sfx.jsxi:17
+					__that.__car.path + ('/sfx/' + __that.__car.id + '.bank'));    // error_sfx.jsxi:17
+				c();                                                               // error_sfx.jsxi:18
+			});
+	};
+	Object.defineProperty(SfxBankMissing.prototype, 
+		'title', 
+		{
+			get: (function (){
+				return 'Car doesn\'t have correct sfx bank.';                      // error_sfx.jsxi:22
+			})
+		});
+	Object.defineProperty(SfxBankMissing.prototype, 
+		'solutions', 
+		{
+			get: (function (){
+				return [
+					{
+						name: 'Use sfx bank from another car (not recommended)', 
+						fn: __bindOnce(this, '__SfxBankMissing_replaceSfxBank')
+					}
+				];
+			})
+		});
+	return SfxBankMissing;
+})();
+
+RestorationWizard.register('sfx-bank-missing', SfxBankMissing);                    // error_sfx.jsxi:28
 
 /* Class "MissingSkinsDirectoryFixer" declaration */
 function MissingSkinsDirectoryFixer(){                                             // error_skins_directory.jsxi:1
@@ -6009,913 +7839,1023 @@ var ViewDetails = (function (){                                                 
 		}
 	}
 	
-	function outDisabled(car){                                                     // view_details.jsxi:95
-		$('#selected-car-disable').text(car.disabled ? 'Enable' : 'Disable');      // view_details.jsxi:96
-		$('#selected-car-header').toggleClass('disabled', car.disabled);           // view_details.jsxi:97
-	}
-	
-	function outChanged(car){                                                      // view_details.jsxi:100
-		$('#selected-car-header').toggleClass('changed', car.changed);             // view_details.jsxi:101
-	}
-	
-	function outSkins(car){                                                        // view_details.jsxi:104
-		if (!car.skins || !car.skins[0])                                           // view_details.jsxi:105
+	function outSfxOriginal(car){                                                  // view_details.jsxi:95
+		var s = document.getElementById('selected-car-sound');
+		
+		if (!s)                                                                    // view_details.jsxi:97
 			return;
 		
-		if (!car.selectedSkin){                                                    // view_details.jsxi:106
-			car.selectSkin(car.skins[0].id);                                       // view_details.jsxi:107
+		s.value = car.originalSfxDisplayName;                                      // view_details.jsxi:99
+		s.parentNode.style.display = car.originalSfx ? null : 'none';              // view_details.jsxi:100
+	}
+	
+	function outDisabled(car){                                                     // view_details.jsxi:103
+		$('#selected-car-disable').text(car.disabled ? 'Enable' : 'Disable');      // view_details.jsxi:104
+		$('#selected-car-header').toggleClass('disabled', car.disabled);           // view_details.jsxi:105
+	}
+	
+	function outChanged(car){                                                      // view_details.jsxi:108
+		$('#selected-car-header').toggleClass('changed', car.changed);             // view_details.jsxi:109
+	}
+	
+	function outSkins(car){                                                        // view_details.jsxi:112
+		if (!car.skins || !car.skins[0])                                           // view_details.jsxi:113
+			return;
+		
+		if (!car.selectedSkin){                                                    // view_details.jsxi:114
+			car.selectSkin(car.skins[0].id);                                       // view_details.jsxi:115
 			return;
 		}
 		
-		setTimeout(function (){                                                    // view_details.jsxi:111
-			if (car !== _selected)                                                 // view_details.jsxi:112
+		setTimeout(function (){                                                    // view_details.jsxi:119
+			if (car !== _selected)                                                 // view_details.jsxi:120
 				return;
 			
-			var sa = $('#selected-car-skins-article'),                             // view_details.jsxi:113
-				sp = $('#selected-car-preview'),                                   // view_details.jsxi:114
-				ss = $('#selected-car-skins');                                     // view_details.jsxi:115
+			var sa = $('#selected-car-skins-article'),                             // view_details.jsxi:121
+				sp = $('#selected-car-preview'),                                   // view_details.jsxi:122
+				ss = $('#selected-car-skins');                                     // view_details.jsxi:123
 			
-			if (car.skins){                                                        // view_details.jsxi:116
-				sa.show();                                                         // view_details.jsxi:117
-				ss.empty();                                                        // view_details.jsxi:118
-				sp.attr({                                                          // view_details.jsxi:120
-					'data-id': car.selectedSkin.id,                                // view_details.jsxi:120
+			if (car.skins){                                                        // view_details.jsxi:124
+				sa.show();                                                         // view_details.jsxi:125
+				ss.empty();                                                        // view_details.jsxi:126
+				sp.attr({                                                          // view_details.jsxi:128
+					'data-id': car.selectedSkin.id,                                // view_details.jsxi:128
 					'src': (car.selectedSkin.preview + '?' + Math.random()).cssUrl()
 				});
-				car.skins.forEach(function (e){                                    // view_details.jsxi:125
-					var i = $('<img>').attr({                                      // view_details.jsxi:126
-						'data-id': e.id,                                           // view_details.jsxi:126
-						'title': e.displayName,                                    // view_details.jsxi:128
+				car.skins.forEach(function (e){                                    // view_details.jsxi:133
+					var i = $('<img>').attr({                                      // view_details.jsxi:134
+						'data-id': e.id,                                           // view_details.jsxi:134
+						'title': e.displayName,                                    // view_details.jsxi:136
 						'src': e.livery.cssUrl()
-					}).appendTo(ss);                                               // view_details.jsxi:130
+					}).appendTo(ss);                                               // view_details.jsxi:138
 					
-					if (e === car.selectedSkin){                                   // view_details.jsxi:131
-						i.addClass('selected');                                    // view_details.jsxi:132
+					if (e === car.selectedSkin){                                   // view_details.jsxi:139
+						i.addClass('selected');                                    // view_details.jsxi:140
 					}
 				});
 			} else {
-				sa.hide();                                                         // view_details.jsxi:136
+				sa.hide();                                                         // view_details.jsxi:144
 			}
 		}, 
 		50);
 	}
 	
-	function updateParents(car){                                                   // view_details.jsxi:141
+	function updateParents(car){                                                   // view_details.jsxi:149
 		var s = document.getElementById('selected-car-parent');
 		
-		if (!s)                                                                    // view_details.jsxi:144
+		if (!s)                                                                    // view_details.jsxi:152
 			return;
 		
-		if (car.children.length > 0){                                              // view_details.jsxi:146
-			s.parentNode.style.display = 'none';                                   // view_details.jsxi:147
+		if (car.children.length > 0){                                              // view_details.jsxi:154
+			s.parentNode.style.display = 'none';                                   // view_details.jsxi:155
 		} else {
-			s.parentNode.style.display = null;                                     // view_details.jsxi:149
+			s.parentNode.style.display = null;                                     // view_details.jsxi:157
 			s.innerHTML = '<option value="">None</option>' + Cars.list.filter(function (e){
 				return e.data && !e.disabled && e.parent == null && e.id != car.id && (!car.parent || car.parent.id != car.id);
-			}).map(function (e){                                                   // view_details.jsxi:153
+			}).map(function (e){                                                   // view_details.jsxi:161
 				return '<option value="{0}">{1}</option>'.format(e.id, e.data.name);
-			}).join('');                                                           // view_details.jsxi:155
-			s.value = car.parent && car.parent.id || '';                           // view_details.jsxi:157
+			}).join('');                                                           // view_details.jsxi:163
+			s.value = car.parent && car.parent.id || '';                           // view_details.jsxi:165
 		}
 	}
 	
-	function updateTags(l){                                                        // view_details.jsxi:161
+	function updateTags(l){                                                        // view_details.jsxi:169
 		var t = document.getElementById('tags-filtered');
 		
-		if (t){                                                                    // view_details.jsxi:164
-			document.body.removeChild(t);                                          // view_details.jsxi:165
+		if (t){                                                                    // view_details.jsxi:172
+			document.body.removeChild(t);                                          // view_details.jsxi:173
 		}
 		
-		t = document.body.appendChild(document.createElement('datalist'));         // view_details.jsxi:168
-		t.id = 'tags-filtered';                                                    // view_details.jsxi:169
+		t = document.body.appendChild(document.createElement('datalist'));         // view_details.jsxi:176
+		t.id = 'tags-filtered';                                                    // view_details.jsxi:177
 		
-		var n = l.map(function (e){                                                // view_details.jsxi:171
-			return e.toLowerCase();                                                // view_details.jsxi:172
+		var n = l.map(function (e){                                                // view_details.jsxi:179
+			return e.toLowerCase();                                                // view_details.jsxi:180
 		});
 		
-		Cars.tags.forEach(function (v){                                            // view_details.jsxi:175
-			if (n.indexOf(v.toLowerCase()) < 0){                                   // view_details.jsxi:176
+		Cars.tags.forEach(function (v){                                            // view_details.jsxi:183
+			if (n.indexOf(v.toLowerCase()) < 0){                                   // view_details.jsxi:184
 				t.appendChild(document.createElement('option')).setAttribute('value', v);
 			}
 		});
 	}
 	
-	function applyTags(){                                                          // view_details.jsxi:182
-		if (!_selected || !_selected.data)                                         // view_details.jsxi:183
+	function applyTags(){                                                          // view_details.jsxi:190
+		if (!_selected || !_selected.data)                                         // view_details.jsxi:191
 			return;
 		
-		Cars.changeData(_selected,                                                 // view_details.jsxi:184
-			'tags',                                                                // view_details.jsxi:184
+		Cars.changeData(_selected,                                                 // view_details.jsxi:192
+			'tags',                                                                // view_details.jsxi:192
 			Array.prototype.map.call(document.querySelectorAll('#selected-car-tags li'), 
-				function (a){                                                      // view_details.jsxi:185
-					return a.textContent;                                          // view_details.jsxi:185
+				function (a){                                                      // view_details.jsxi:193
+					return a.textContent;                                          // view_details.jsxi:193
 				}));
-		updateTags(_selected.data.tags);                                           // view_details.jsxi:186
+		updateTags(_selected.data.tags);                                           // view_details.jsxi:194
 	}
 	
-	function init(){                                                               // view_details.jsxi:189
-		Cars.on('scan:ready',                                                      // view_details.jsxi:190
-			function (list){                                                       // view_details.jsxi:191
-				if (list.length == 0){                                             // view_details.jsxi:192
-					outMsg('Hmm...', 'Cars not found');                            // view_details.jsxi:193
+	function init(){                                                               // view_details.jsxi:197
+		Cars.on('scan:ready',                                                      // view_details.jsxi:198
+			function (list){                                                       // view_details.jsxi:199
+				if (list.length == 0){                                             // view_details.jsxi:200
+					outMsg('Hmm...', 'Cars not found');                            // view_details.jsxi:201
 				}
 				
-				$('main').show();                                                  // view_details.jsxi:196
-			}).on('error',                                                         // view_details.jsxi:198
-			function (car){                                                        // view_details.jsxi:198
-				if (_selected != car)                                              // view_details.jsxi:199
-					return;
-				
-				outErrors(car);                                                    // view_details.jsxi:200
-			}).on('update.car.badge',                                              // view_details.jsxi:202
-			function (car){                                                        // view_details.jsxi:202
-				if (_selected != car)                                              // view_details.jsxi:203
-					return;
-				
-				outBadge(car);                                                     // view_details.jsxi:204
-			}).on('update.car.data',                                               // view_details.jsxi:206
+				$('main').show();                                                  // view_details.jsxi:204
+			}).on('error',                                                         // view_details.jsxi:206
 			function (car){                                                        // view_details.jsxi:206
 				if (_selected != car)                                              // view_details.jsxi:207
 					return;
 				
-				outData(car);                                                      // view_details.jsxi:208
-			}).on('update.car.skins',                                              // view_details.jsxi:210
+				outErrors(car);                                                    // view_details.jsxi:208
+			}).on('update.car.badge',                                              // view_details.jsxi:210
 			function (car){                                                        // view_details.jsxi:210
 				if (_selected != car)                                              // view_details.jsxi:211
 					return;
 				
-				outSkins(car);                                                     // view_details.jsxi:212
-			}).on('update.car.disabled',                                           // view_details.jsxi:214
+				outBadge(car);                                                     // view_details.jsxi:212
+			}).on('update.car.data',                                               // view_details.jsxi:214
 			function (car){                                                        // view_details.jsxi:214
 				if (_selected != car)                                              // view_details.jsxi:215
 					return;
 				
-				outDisabled(car);                                                  // view_details.jsxi:216
-			}).on('update.car.changed',                                            // view_details.jsxi:218
+				outData(car);                                                      // view_details.jsxi:216
+			}).on('update.car.sfx:original',                                       // view_details.jsxi:218
 			function (car){                                                        // view_details.jsxi:218
 				if (_selected != car)                                              // view_details.jsxi:219
 					return;
 				
-				outChanged(car);                                                   // view_details.jsxi:220
-			});
-		ViewList.on('select',                                                      // view_details.jsxi:223
-			function (car){                                                        // view_details.jsxi:224
-				$('main').show();                                                  // view_details.jsxi:225
-				_selected = car;                                                   // view_details.jsxi:227
-				car.loadEnsure();                                                  // view_details.jsxi:228
+				outSfxOriginal(car);                                               // view_details.jsxi:220
+			}).on('update.car.skins',                                              // view_details.jsxi:222
+			function (car){                                                        // view_details.jsxi:222
+				if (_selected != car)                                              // view_details.jsxi:223
+					return;
 				
-				if (car){                                                          // view_details.jsxi:230
-					outMsg(null);                                                  // view_details.jsxi:231
+				outSkins(car);                                                     // view_details.jsxi:224
+			}).on('update.car.disabled',                                           // view_details.jsxi:226
+			function (car){                                                        // view_details.jsxi:226
+				if (_selected != car)                                              // view_details.jsxi:227
+					return;
+				
+				outDisabled(car);                                                  // view_details.jsxi:228
+			}).on('update.car.changed',                                            // view_details.jsxi:230
+			function (car){                                                        // view_details.jsxi:230
+				if (_selected != car)                                              // view_details.jsxi:231
+					return;
+				
+				outChanged(car);                                                   // view_details.jsxi:232
+			});
+		ViewList.on('select',                                                      // view_details.jsxi:235
+			function (car){                                                        // view_details.jsxi:236
+				$('main').show();                                                  // view_details.jsxi:237
+				_selected = car;                                                   // view_details.jsxi:239
+				car.loadEnsure();                                                  // view_details.jsxi:240
+				
+				if (car){                                                          // view_details.jsxi:242
+					outMsg(null);                                                  // view_details.jsxi:243
 				} else {
 					return;
 				}
 				
-				outData(car);                                                      // view_details.jsxi:236
-				outBadge(car);                                                     // view_details.jsxi:237
-				outDisabled(car);                                                  // view_details.jsxi:238
-				outChanged(car);                                                   // view_details.jsxi:239
-				outErrors(car);                                                    // view_details.jsxi:240
-				outSkins(car);                                                     // view_details.jsxi:241
+				outData(car);                                                      // view_details.jsxi:248
+				outSfxOriginal(car);                                               // view_details.jsxi:249
+				outBadge(car);                                                     // view_details.jsxi:250
+				outDisabled(car);                                                  // view_details.jsxi:251
+				outChanged(car);                                                   // view_details.jsxi:252
+				outErrors(car);                                                    // view_details.jsxi:253
+				outSkins(car);                                                     // view_details.jsxi:254
+				$('#selected-car-update-data').attr('disabled',                    // view_details.jsxi:256
+					car && Cars.databaseContains(car.id) ? null : true);           // view_details.jsxi:256
 			});
-		$('#selected-car').on('keydown',                                           // view_details.jsxi:245
-			function (e){                                                          // view_details.jsxi:246
-				if (e.keyCode == 13){                                              // view_details.jsxi:247
-					this.blur();                                                   // view_details.jsxi:248
+		$('#selected-car').on('keydown',                                           // view_details.jsxi:260
+			function (e){                                                          // view_details.jsxi:261
+				if (e.keyCode == 13){                                              // view_details.jsxi:262
+					this.blur();                                                   // view_details.jsxi:263
 					return false;
 				}
-			}).on('change',                                                        // view_details.jsxi:252
-			function (){                                                           // view_details.jsxi:252
-				if (!_selected || this.readonly || !this.value)                    // view_details.jsxi:253
+			}).on('change',                                                        // view_details.jsxi:267
+			function (){                                                           // view_details.jsxi:267
+				if (!_selected || this.readonly || !this.value)                    // view_details.jsxi:268
 					return;
 				
-				this.value = this.value.slice(0, 64);                              // view_details.jsxi:254
-				Cars.changeData(_selected, 'name', this.value);                    // view_details.jsxi:255
+				this.value = this.value.slice(0, 64);                              // view_details.jsxi:269
+				Cars.changeData(_selected, 'name', this.value);                    // view_details.jsxi:270
 			});
-		$('#selected-car-tags').on('click',                                        // view_details.jsxi:258
-			function (e){                                                          // view_details.jsxi:259
+		$('#selected-car-tags').on('click',                                        // view_details.jsxi:273
+			function (e){                                                          // view_details.jsxi:274
 				if (e.target.tagName === 'LI' && e.target.offsetWidth - e.offsetX < 20){
-					e.target.parentNode.removeChild(e.target);                     // view_details.jsxi:261
-					applyTags();                                                   // view_details.jsxi:262
+					e.target.parentNode.removeChild(e.target);                     // view_details.jsxi:276
+					applyTags();                                                   // view_details.jsxi:277
 				} else {
-					this.querySelector('input').focus();                           // view_details.jsxi:264
+					this.querySelector('input').focus();                           // view_details.jsxi:279
 				}
-			}).on('contextmenu',                                                   // view_details.jsxi:267
-			function (e){                                                          // view_details.jsxi:267
-				if (!_selected || !_selected.data)                                 // view_details.jsxi:268
+			}).on('contextmenu',                                                   // view_details.jsxi:282
+			function (e){                                                          // view_details.jsxi:282
+				if (!_selected || !_selected.data)                                 // view_details.jsxi:283
 					return;
 				
-				if (e.target.tagName !== 'LI')                                     // view_details.jsxi:269
+				if (e.target.tagName !== 'LI')                                     // view_details.jsxi:284
 					return;
 				
 				var menu = new gui.Menu();
 				
-				menu.append(new gui.MenuItem({                                     // view_details.jsxi:272
-					label: 'Filter Tag',                                           // view_details.jsxi:272
-					key: 'F',                                                      // view_details.jsxi:272
-					click: (function (){                                           // view_details.jsxi:272
-						if (!_selected)                                            // view_details.jsxi:273
+				menu.append(new gui.MenuItem({                                     // view_details.jsxi:287
+					label: 'Filter Tag',                                           // view_details.jsxi:287
+					key: 'F',                                                      // view_details.jsxi:287
+					click: (function (){                                           // view_details.jsxi:287
+						if (!_selected)                                            // view_details.jsxi:288
 							return;
 						
-						ViewList.addFilter('tag:' + e.target.textContent);         // view_details.jsxi:274
+						ViewList.addFilter('tag:' + e.target.textContent);         // view_details.jsxi:289
 					})
 				}));
-				menu.popup(e.clientX, e.clientY);                                  // view_details.jsxi:277
+				menu.popup(e.clientX, e.clientY);                                  // view_details.jsxi:292
 				return false;
 			});
-		$('#selected-car-tags input').on('change',                                 // view_details.jsxi:281
-			function (){                                                           // view_details.jsxi:282
-				if (this.value){                                                   // view_details.jsxi:283
-					this.parentNode.insertBefore(document.createElement('li'), this).textContent = this.value;
-					this.value = '';                                               // view_details.jsxi:285
-					applyTags();                                                   // view_details.jsxi:286
-				}
-			}).on('keydown',                                                       // view_details.jsxi:289
-			function (e){                                                          // view_details.jsxi:289
-				if (e.keyCode == 8 && this.value == ''){                           // view_details.jsxi:290
-					this.parentNode.removeChild(this.parentNode.querySelector('li:last-of-type'));
-					applyTags();                                                   // view_details.jsxi:292
-				}
-			});
-		$('#selected-car-desc').elastic().on('change',                             // view_details.jsxi:296
+		$('#selected-car-tags input').on('change',                                 // view_details.jsxi:296
 			function (){                                                           // view_details.jsxi:297
-				if (!_selected || this.readonly)                                   // view_details.jsxi:298
+				if (this.value){                                                   // view_details.jsxi:298
+					this.parentNode.insertBefore(document.createElement('li'), this).textContent = this.value;
+					this.value = '';                                               // view_details.jsxi:300
+					applyTags();                                                   // view_details.jsxi:301
+				}
+			}).on('keydown',                                                       // view_details.jsxi:304
+			function (e){                                                          // view_details.jsxi:304
+				if (e.keyCode == 8 && this.value == ''){                           // view_details.jsxi:305
+					this.parentNode.removeChild(this.parentNode.querySelector('li:last-of-type'));
+					applyTags();                                                   // view_details.jsxi:307
+				}
+			});
+		$('#selected-car-desc').elastic().on('change',                             // view_details.jsxi:311
+			function (){                                                           // view_details.jsxi:312
+				if (!_selected || this.readonly)                                   // view_details.jsxi:313
 					return;
 				
-				Cars.changeData(_selected, 'description', this.value);             // view_details.jsxi:299
+				Cars.changeData(_selected, 'description', this.value);             // view_details.jsxi:314
 			});
-		$('#selected-car-brand').on('keydown',                                     // view_details.jsxi:302
-			function (e){                                                          // view_details.jsxi:303
-				if (e.keyCode == 13){                                              // view_details.jsxi:304
-					this.blur();                                                   // view_details.jsxi:305
+		$('#selected-car-brand').on('keydown',                                     // view_details.jsxi:317
+			function (e){                                                          // view_details.jsxi:318
+				if (e.keyCode == 13){                                              // view_details.jsxi:319
+					this.blur();                                                   // view_details.jsxi:320
 					return false;
 				}
-			}).on('change',                                                        // view_details.jsxi:309
-			function (e){                                                          // view_details.jsxi:309
-				if (!_selected || this.readonly || !this.value)                    // view_details.jsxi:310
+			}).on('change',                                                        // view_details.jsxi:324
+			function (e){                                                          // view_details.jsxi:324
+				if (!_selected || this.readonly || !this.value)                    // view_details.jsxi:325
 					return;
 				
-				Cars.changeData(_selected, 'brand', this.value);                   // view_details.jsxi:311
-			}).on('contextmenu',                                                   // view_details.jsxi:313
-			function (e){                                                          // view_details.jsxi:313
-				if (!_selected || !_selected.data)                                 // view_details.jsxi:314
+				Cars.changeData(_selected, 'brand', this.value);                   // view_details.jsxi:326
+			}).on('contextmenu',                                                   // view_details.jsxi:328
+			function (e){                                                          // view_details.jsxi:328
+				if (!_selected || !_selected.data)                                 // view_details.jsxi:329
 					return;
 				
 				var menu = new gui.Menu();
 				
-				menu.append(new gui.MenuItem({                                     // view_details.jsxi:317
-					label: 'Filter Brand',                                         // view_details.jsxi:317
-					key: 'F',                                                      // view_details.jsxi:317
-					click: (function (){                                           // view_details.jsxi:317
-						if (!_selected)                                            // view_details.jsxi:318
+				menu.append(new gui.MenuItem({                                     // view_details.jsxi:332
+					label: 'Filter Brand',                                         // view_details.jsxi:332
+					key: 'F',                                                      // view_details.jsxi:332
+					click: (function (){                                           // view_details.jsxi:332
+						if (!_selected)                                            // view_details.jsxi:333
 							return;
 						
-						ViewList.addFilter('brand:' + _selected.data.brand);       // view_details.jsxi:319
+						ViewList.addFilter('brand:' + _selected.data.brand);       // view_details.jsxi:334
 					})
 				}));
-				menu.popup(e.clientX, e.clientY);                                  // view_details.jsxi:322
+				menu.popup(e.clientX, e.clientY);                                  // view_details.jsxi:337
 				return false;
 			});
-		$('#selected-car-class').on('keydown',                                     // view_details.jsxi:326
-			function (e){                                                          // view_details.jsxi:327
-				if (e.keyCode == 13){                                              // view_details.jsxi:328
-					this.blur();                                                   // view_details.jsxi:329
+		$('#selected-car-class').on('keydown',                                     // view_details.jsxi:341
+			function (e){                                                          // view_details.jsxi:342
+				if (e.keyCode == 13){                                              // view_details.jsxi:343
+					this.blur();                                                   // view_details.jsxi:344
 					return false;
 				}
-			}).on('change',                                                        // view_details.jsxi:333
-			function (){                                                           // view_details.jsxi:333
-				if (!_selected || this.readonly)                                   // view_details.jsxi:334
+			}).on('change',                                                        // view_details.jsxi:348
+			function (){                                                           // view_details.jsxi:348
+				if (!_selected || this.readonly)                                   // view_details.jsxi:349
 					return;
 				
-				Cars.changeData(_selected, 'class', this.value);                   // view_details.jsxi:335
-			}).on('contextmenu',                                                   // view_details.jsxi:337
-			function (e){                                                          // view_details.jsxi:337
-				if (!_selected || !_selected.data || !_selected.data.class)        // view_details.jsxi:338
+				Cars.changeData(_selected, 'class', this.value);                   // view_details.jsxi:350
+			}).on('contextmenu',                                                   // view_details.jsxi:352
+			function (e){                                                          // view_details.jsxi:352
+				if (!_selected || !_selected.data || !_selected.data.class)        // view_details.jsxi:353
 					return;
 				
 				var menu = new gui.Menu();
 				
-				menu.append(new gui.MenuItem({                                     // view_details.jsxi:341
-					label: 'Filter Class',                                         // view_details.jsxi:341
-					key: 'F',                                                      // view_details.jsxi:341
-					click: (function (){                                           // view_details.jsxi:341
-						if (!_selected)                                            // view_details.jsxi:342
+				menu.append(new gui.MenuItem({                                     // view_details.jsxi:356
+					label: 'Filter Class',                                         // view_details.jsxi:356
+					key: 'F',                                                      // view_details.jsxi:356
+					click: (function (){                                           // view_details.jsxi:356
+						if (!_selected)                                            // view_details.jsxi:357
 							return;
 						
-						ViewList.addFilter('class:' + _selected.data.class);       // view_details.jsxi:343
+						ViewList.addFilter('class:' + _selected.data.class);       // view_details.jsxi:358
 					})
 				}));
-				menu.popup(e.clientX, e.clientY);                                  // view_details.jsxi:346
+				menu.popup(e.clientX, e.clientY);                                  // view_details.jsxi:361
 				return false;
 			});
-		$('#selected-car-year').on('keydown',                                      // view_details.jsxi:350
-			function (e){                                                          // view_details.jsxi:351
-				if (e.keyCode == 13){                                              // view_details.jsxi:352
-					this.blur();                                                   // view_details.jsxi:353
+		$('#selected-car-year').on('keydown',                                      // view_details.jsxi:365
+			function (e){                                                          // view_details.jsxi:366
+				if (e.keyCode == 13){                                              // view_details.jsxi:367
+					this.blur();                                                   // view_details.jsxi:368
 					return false;
 				}
 				
-				if (e.keyCode == 37){                                              // view_details.jsxi:357
-					this.value = + this.value + 1;                                 // view_details.jsxi:358
+				if (e.keyCode == 37){                                              // view_details.jsxi:372
+					this.value = + this.value + 1;                                 // view_details.jsxi:373
 					return false;
 				}
 				
-				if (e.keyCode == 39){                                              // view_details.jsxi:362
-					this.value = + this.value - 1;                                 // view_details.jsxi:363
+				if (e.keyCode == 39){                                              // view_details.jsxi:377
+					this.value = + this.value - 1;                                 // view_details.jsxi:378
 					return false;
 				}
-			}).on('change',                                                        // view_details.jsxi:367
-			function (){                                                           // view_details.jsxi:367
-				if (!_selected || this.readonly)                                   // view_details.jsxi:368
+			}).on('change',                                                        // view_details.jsxi:382
+			function (){                                                           // view_details.jsxi:382
+				if (!_selected || this.readonly)                                   // view_details.jsxi:383
 					return;
 				
-				Cars.changeData(_selected, 'year', this.value);                    // view_details.jsxi:369
-			}).on('contextmenu',                                                   // view_details.jsxi:371
-			function (e){                                                          // view_details.jsxi:371
-				if (!_selected || !_selected.data || !_selected.data.year)         // view_details.jsxi:372
+				Cars.changeData(_selected, 'year', this.value);                    // view_details.jsxi:384
+			}).on('contextmenu',                                                   // view_details.jsxi:386
+			function (e){                                                          // view_details.jsxi:386
+				if (!_selected || !_selected.data || !_selected.data.year)         // view_details.jsxi:387
 					return;
 				
 				var menu = new gui.Menu();
 				
-				menu.append(new gui.MenuItem({                                     // view_details.jsxi:375
-					label: 'Filter Year',                                          // view_details.jsxi:375
-					key: 'F',                                                      // view_details.jsxi:375
-					click: (function (){                                           // view_details.jsxi:375
-						if (!_selected)                                            // view_details.jsxi:376
+				menu.append(new gui.MenuItem({                                     // view_details.jsxi:390
+					label: 'Filter Year',                                          // view_details.jsxi:390
+					key: 'F',                                                      // view_details.jsxi:390
+					click: (function (){                                           // view_details.jsxi:390
+						if (!_selected)                                            // view_details.jsxi:391
 							return;
 						
-						ViewList.addFilter('year:' + _selected.data.year);         // view_details.jsxi:377
+						ViewList.addFilter('year:' + _selected.data.year);         // view_details.jsxi:392
 					})
 				}));
-				menu.append(new gui.MenuItem({                                     // view_details.jsxi:379
-					label: 'Filter Decade',                                        // view_details.jsxi:379
-					click: (function (){                                           // view_details.jsxi:379
-						if (!_selected)                                            // view_details.jsxi:380
+				menu.append(new gui.MenuItem({                                     // view_details.jsxi:394
+					label: 'Filter Decade',                                        // view_details.jsxi:394
+					click: (function (){                                           // view_details.jsxi:394
+						if (!_selected)                                            // view_details.jsxi:395
 							return;
 						
 						ViewList.addFilter('year:' + (('' + _selected.data.year).slice(0, - 1) + '?'));
 					})
 				}));
-				menu.popup(e.clientX, e.clientY);                                  // view_details.jsxi:384
+				menu.popup(e.clientX, e.clientY);                                  // view_details.jsxi:399
 				return false;
 			});
-		$('#selected-car-country').on('keydown',                                   // view_details.jsxi:388
-			function (e){                                                          // view_details.jsxi:389
-				if (e.keyCode == 13){                                              // view_details.jsxi:390
-					this.blur();                                                   // view_details.jsxi:391
+		$('#selected-car-country').on('keydown',                                   // view_details.jsxi:403
+			function (e){                                                          // view_details.jsxi:404
+				if (e.keyCode == 13){                                              // view_details.jsxi:405
+					this.blur();                                                   // view_details.jsxi:406
 					return false;
 				}
-			}).on('change',                                                        // view_details.jsxi:395
-			function (){                                                           // view_details.jsxi:395
-				if (!_selected || this.readonly)                                   // view_details.jsxi:396
+			}).on('change',                                                        // view_details.jsxi:410
+			function (){                                                           // view_details.jsxi:410
+				if (!_selected || this.readonly)                                   // view_details.jsxi:411
 					return;
 				
-				Cars.changeData(_selected, 'country', this.value);                 // view_details.jsxi:397
-			}).on('contextmenu',                                                   // view_details.jsxi:399
-			function (e){                                                          // view_details.jsxi:399
-				if (!_selected || !_selected.data || !_selected.data.country)      // view_details.jsxi:400
+				Cars.changeData(_selected, 'country', this.value);                 // view_details.jsxi:412
+			}).on('contextmenu',                                                   // view_details.jsxi:414
+			function (e){                                                          // view_details.jsxi:414
+				if (!_selected || !_selected.data || !_selected.data.country)      // view_details.jsxi:415
 					return;
 				
 				var menu = new gui.Menu();
 				
-				menu.append(new gui.MenuItem({                                     // view_details.jsxi:403
-					label: 'Filter Country',                                       // view_details.jsxi:403
-					key: 'F',                                                      // view_details.jsxi:403
-					click: (function (){                                           // view_details.jsxi:403
-						if (!_selected)                                            // view_details.jsxi:404
+				menu.append(new gui.MenuItem({                                     // view_details.jsxi:418
+					label: 'Filter Country',                                       // view_details.jsxi:418
+					key: 'F',                                                      // view_details.jsxi:418
+					click: (function (){                                           // view_details.jsxi:418
+						if (!_selected)                                            // view_details.jsxi:419
 							return;
 						
-						ViewList.addFilter('country:' + _selected.data.country);   // view_details.jsxi:405
+						ViewList.addFilter('country:' + _selected.data.country);   // view_details.jsxi:420
 					})
 				}));
-				menu.popup(e.clientX, e.clientY);                                  // view_details.jsxi:408
+				menu.popup(e.clientX, e.clientY);                                  // view_details.jsxi:423
 				return false;
 			});
-		$('#selected-car-parent').on('change',                                     // view_details.jsxi:412
-			function (e){                                                          // view_details.jsxi:413
-				if (!_selected)                                                    // view_details.jsxi:414
+		$('#selected-car-parent').on('change',                                     // view_details.jsxi:427
+			function (e){                                                          // view_details.jsxi:428
+				if (!_selected)                                                    // view_details.jsxi:429
 					return;
 				
 				var t = this, v = this.value || null;
 				
-				if (v && !fs.existsSync(_selected.upgrade)){                       // view_details.jsxi:417
-					UpgradeEditor.start(_selected,                                 // view_details.jsxi:418
-						function (arg){                                            // view_details.jsxi:418
-							if (fs.existsSync(_selected.upgrade)){                 // view_details.jsxi:419
-								fn();                                              // view_details.jsxi:420
+				if (v && !fs.existsSync(_selected.upgrade)){                       // view_details.jsxi:432
+					UpgradeEditor.start(_selected,                                 // view_details.jsxi:433
+						function (arg){                                            // view_details.jsxi:433
+							if (fs.existsSync(_selected.upgrade)){                 // view_details.jsxi:434
+								fn();                                              // view_details.jsxi:435
 							} else {
-								t.value = '';                                      // view_details.jsxi:422
+								t.value = '';                                      // view_details.jsxi:437
 							}
 						});
 				} else {
-					fn();                                                          // view_details.jsxi:426
+					fn();                                                          // view_details.jsxi:441
 				}
 				
-				function fn(){                                                     // view_details.jsxi:429
-					_selected.changeParent(v);                                     // view_details.jsxi:430
+				function fn(){                                                     // view_details.jsxi:444
+					_selected.changeParent(v);                                     // view_details.jsxi:445
 				}
 			});
-		$('#selected-car-author').on('click',                                      // view_details.jsxi:434
-			function (){                                                           // view_details.jsxi:435
-				if (!_selected || !_selected.data)                                 // view_details.jsxi:436
+		$('#selected-car-author').on('click',                                      // view_details.jsxi:449
+			function (){                                                           // view_details.jsxi:450
+				if (!_selected || !_selected.data)                                 // view_details.jsxi:451
 					return;
 				
 				var a, v, u;
 				
-				var d = new Dialog('In-Game Car Model',                            // view_details.jsxi:440
+				var d = new Dialog('In-Game Car Model',                            // view_details.jsxi:455
 					[
 						'<label>Author: <input id="car-details-edit-author" autocomplete list="authors" placeholder="?" value="' + (_selected.data.author || '') + '"></label>', 
 						'<label>Version: <input id="car-details-edit-version" placeholder="?" value="' + (_selected.data.version || '') + '"></label>', 
 						'<label>URL: <input id="car-details-edit-url" placeholder="?" value="' + (_selected.data.url || '') + '"></label>'
 					], 
-					function (){                                                   // view_details.jsxi:444
-						if (!_selected)                                            // view_details.jsxi:445
+					function (){                                                   // view_details.jsxi:459
+						if (!_selected)                                            // view_details.jsxi:460
 							return;
 						
-						if (a != null)                                             // view_details.jsxi:446
-							_selected.changeData('author', a);                     // view_details.jsxi:446
+						if (a != null)                                             // view_details.jsxi:461
+							_selected.changeData('author', a);                     // view_details.jsxi:461
 						
-						if (v != null)                                             // view_details.jsxi:447
-							_selected.changeData('version', v);                    // view_details.jsxi:447
+						if (v != null)                                             // view_details.jsxi:462
+							_selected.changeData('version', v);                    // view_details.jsxi:462
 						
-						if (u != null)                                             // view_details.jsxi:448
-							_selected.changeData('url', u);                        // view_details.jsxi:448
+						if (u != null)                                             // view_details.jsxi:463
+							_selected.changeData('url', u);                        // view_details.jsxi:463
 					});
 				
 				d.content.find('#car-details-edit-author').change(function (arg){
-					return a = this.value;                                         // view_details.jsxi:451
+					return a = this.value;                                         // view_details.jsxi:466
 				});
 				d.content.find('#car-details-edit-version').change(function (arg){
-					return v = this.value;                                         // view_details.jsxi:452
+					return v = this.value;                                         // view_details.jsxi:467
 				});
-				d.content.find('#car-details-edit-url').change(function (arg){     // view_details.jsxi:453
-					return u = this.value;                                         // view_details.jsxi:453
+				d.content.find('#car-details-edit-url').change(function (arg){     // view_details.jsxi:468
+					return u = this.value;                                         // view_details.jsxi:468
 				});
-			}).on('dblclick',                                                      // view_details.jsxi:455
-			function (){                                                           // view_details.jsxi:455
-				if (!_selected || !_selected.data || !_selected.data.url)          // view_details.jsxi:456
+			}).on('dblclick',                                                      // view_details.jsxi:470
+			function (){                                                           // view_details.jsxi:470
+				if (!_selected || !_selected.data || !_selected.data.url)          // view_details.jsxi:471
 					return;
 				
-				Shell.openItem(_selected.data.url);                                // view_details.jsxi:457
-			}).on('contextmenu',                                                   // view_details.jsxi:459
-			function (e){                                                          // view_details.jsxi:459
-				if (!_selected || !_selected.data || !_selected.data.author)       // view_details.jsxi:460
+				Shell.openItem(_selected.data.url);                                // view_details.jsxi:472
+			}).on('contextmenu',                                                   // view_details.jsxi:474
+			function (e){                                                          // view_details.jsxi:474
+				if (!_selected || !_selected.data || !_selected.data.author)       // view_details.jsxi:475
 					return;
 				
 				var menu = new gui.Menu();
 				
-				menu.append(new gui.MenuItem({                                     // view_details.jsxi:463
-					label: 'Filter Author',                                        // view_details.jsxi:463
-					key: 'F',                                                      // view_details.jsxi:463
-					click: (function (){                                           // view_details.jsxi:463
-						if (!_selected)                                            // view_details.jsxi:464
+				menu.append(new gui.MenuItem({                                     // view_details.jsxi:478
+					label: 'Filter Author',                                        // view_details.jsxi:478
+					key: 'F',                                                      // view_details.jsxi:478
+					click: (function (){                                           // view_details.jsxi:478
+						if (!_selected)                                            // view_details.jsxi:479
 							return;
 						
-						ViewList.addFilter('author:' + _selected.data.author);     // view_details.jsxi:465
+						ViewList.addFilter('author:' + _selected.data.author);     // view_details.jsxi:480
 					})
 				}));
-				menu.popup(e.clientX, e.clientY);                                  // view_details.jsxi:468
+				menu.popup(e.clientX, e.clientY);                                  // view_details.jsxi:483
 				return false;
 			});
 		[
-			'bhp',                                                                 // view_details.jsxi:472
-			'torque',                                                              // view_details.jsxi:472
-			'weight',                                                              // view_details.jsxi:472
-			'topspeed',                                                            // view_details.jsxi:472
-			'acceleration',                                                        // view_details.jsxi:472
+			'bhp',                                                                 // view_details.jsxi:487
+			'torque',                                                              // view_details.jsxi:487
+			'weight',                                                              // view_details.jsxi:487
+			'topspeed',                                                            // view_details.jsxi:487
+			'acceleration',                                                        // view_details.jsxi:487
 			'pwratio'
-		].forEach(function (e){                                                    // view_details.jsxi:472
-			$('#selected-car-' + e).on('keydown',                                  // view_details.jsxi:473
-				function (e){                                                      // view_details.jsxi:473
-					if (e.keyCode == 13){                                          // view_details.jsxi:474
-						this.blur();                                               // view_details.jsxi:475
+		].forEach(function (e){                                                    // view_details.jsxi:487
+			$('#selected-car-' + e).on('keydown',                                  // view_details.jsxi:488
+				function (e){                                                      // view_details.jsxi:488
+					if (e.keyCode == 13){                                          // view_details.jsxi:489
+						this.blur();                                               // view_details.jsxi:490
 						return false;
 					}
-				}).on('keyup keydown keypress',                                    // view_details.jsxi:478
-				function (e){                                                      // view_details.jsxi:478
-					if (e.keyCode == 32){                                          // view_details.jsxi:479
-						e.stopPropagation();                                       // view_details.jsxi:480
+				}).on('keyup keydown keypress',                                    // view_details.jsxi:493
+				function (e){                                                      // view_details.jsxi:493
+					if (e.keyCode == 32){                                          // view_details.jsxi:494
+						e.stopPropagation();                                       // view_details.jsxi:495
 						
-						if (e.type === 'keyup'){                                   // view_details.jsxi:481
+						if (e.type === 'keyup'){                                   // view_details.jsxi:496
 							return false;
 						}
 					}
-				}).on('change',                                                    // view_details.jsxi:485
-				function (){                                                       // view_details.jsxi:485
-					if (!_selected || this.readonly)                               // view_details.jsxi:486
+				}).on('change',                                                    // view_details.jsxi:500
+				function (){                                                       // view_details.jsxi:500
+					if (!_selected || this.readonly)                               // view_details.jsxi:501
 						return;
 					
-					Cars.changeDataSpecs(_selected, e, this.value);                // view_details.jsxi:487
+					Cars.changeDataSpecs(_selected, e, this.value);                // view_details.jsxi:502
 				});
 		});
-		$('#selected-car-pwratio').on('dblclick contextmenu',                      // view_details.jsxi:491
-			function (e){                                                          // view_details.jsxi:492
-				if (!_selected || !_selected.data || this.readonly)                // view_details.jsxi:493
+		$('#selected-car-pwratio').on('dblclick contextmenu',                      // view_details.jsxi:506
+			function (e){                                                          // view_details.jsxi:507
+				if (!_selected || !_selected.data || this.readonly)                // view_details.jsxi:508
 					return;
 				
-				function r(){                                                      // view_details.jsxi:495
-					if (!_selected || this.readonly)                               // view_details.jsxi:496
+				function r(){                                                      // view_details.jsxi:510
+					if (!_selected || this.readonly)                               // view_details.jsxi:511
 						return;
 					
-					_selected.recalculatePwRatio();                                // view_details.jsxi:497
+					_selected.recalculatePwRatio();                                // view_details.jsxi:512
 				}
 				
-				if (e.type === 'dblclick'){                                        // view_details.jsxi:500
-					r();                                                           // view_details.jsxi:501
+				if (e.type === 'dblclick'){                                        // view_details.jsxi:515
+					r();                                                           // view_details.jsxi:516
 				} else {
 					var menu = new gui.Menu();
 					
 					menu.append(new gui.MenuItem({ label: 'Recalculate', key: 'R', click: r }));
-					menu.popup(e.clientX, e.clientY);                              // view_details.jsxi:505
+					menu.popup(e.clientX, e.clientY);                              // view_details.jsxi:520
 					return false;
 				}
 			});
-		$('#selected-car-logo').on('click',                                        // view_details.jsxi:511
-			function (){                                                           // view_details.jsxi:512
-				if (!_selected)                                                    // view_details.jsxi:513
+		$('#selected-car-logo').on('click',                                        // view_details.jsxi:526
+			function (){                                                           // view_details.jsxi:527
+				if (!_selected)                                                    // view_details.jsxi:528
 					return;
 				
-				BadgeEditor.start(_selected);                                      // view_details.jsxi:514
+				BadgeEditor.start(_selected);                                      // view_details.jsxi:529
 			});
-		$('#selected-car-upgrade').on('click',                                     // view_details.jsxi:517
-			function (){                                                           // view_details.jsxi:518
-				if (!_selected)                                                    // view_details.jsxi:519
+		$('#selected-car-upgrade').on('click',                                     // view_details.jsxi:532
+			function (){                                                           // view_details.jsxi:533
+				if (!_selected)                                                    // view_details.jsxi:534
 					return;
 				
-				UpgradeEditor.start(_selected);                                    // view_details.jsxi:520
+				UpgradeEditor.start(_selected);                                    // view_details.jsxi:535
 			});
-		$('#selected-car-skins-article').dblclick(function (e){                    // view_details.jsxi:524
-			if (!_selected)                                                        // view_details.jsxi:526
+		$('#selected-car-skins-article').dblclick(function (e){                    // view_details.jsxi:539
+			if (!_selected)                                                        // view_details.jsxi:541
 				return;
 			
-			AcShowroom.start(_selected);                                           // view_details.jsxi:527
-		}).on('contextmenu',                                                       // view_details.jsxi:529
-			function (e){                                                          // view_details.jsxi:529
-				if (!_selected)                                                    // view_details.jsxi:530
+			AcShowroom.start(_selected);                                           // view_details.jsxi:542
+		}).on('contextmenu',                                                       // view_details.jsxi:544
+			function (e){                                                          // view_details.jsxi:544
+				if (!_selected)                                                    // view_details.jsxi:545
 					return;
 				
 				var id = e.target.getAttribute('data-id');
 				
-				if (!id)                                                           // view_details.jsxi:533
+				if (!id)                                                           // view_details.jsxi:548
 					return;
 				
 				var menu = new gui.Menu();
 				
-				menu.append(new gui.MenuItem({                                     // view_details.jsxi:536
-					label: 'Open in Showroom',                                     // view_details.jsxi:536
-					key: 'S',                                                      // view_details.jsxi:536
-					click: (function (){                                           // view_details.jsxi:536
-						if (!_selected)                                            // view_details.jsxi:537
+				menu.append(new gui.MenuItem({                                     // view_details.jsxi:551
+					label: 'Open in Showroom',                                     // view_details.jsxi:551
+					key: 'S',                                                      // view_details.jsxi:551
+					click: (function (){                                           // view_details.jsxi:551
+						if (!_selected)                                            // view_details.jsxi:552
 							return;
 						
-						AcShowroom.start(_selected, id);                           // view_details.jsxi:538
+						AcShowroom.start(_selected, id);                           // view_details.jsxi:553
 					})
 				}));
-				menu.append(new gui.MenuItem({                                     // view_details.jsxi:540
-					label: 'Open in Custom Showroom (Experimental)',               // view_details.jsxi:540
-					click: (function (){                                           // view_details.jsxi:540
-						if (!_selected)                                            // view_details.jsxi:541
+				menu.append(new gui.MenuItem({                                     // view_details.jsxi:555
+					label: 'Open in Custom Showroom (Experimental)',               // view_details.jsxi:555
+					click: (function (){                                           // view_details.jsxi:555
+						if (!_selected)                                            // view_details.jsxi:556
 							return;
 						
 						try {
 							AcTools.Utils.Kn5RenderWrapper.StartDarkRoomPreview(_selected.path, id);
-						} catch (err){                                             // view_details.jsxi:544
+						} catch (err){                                             // view_details.jsxi:559
 							ErrorHandler.handled('Cannot start Custom Showroom.', err);
 							return;
 						} 
 					})
 				}));
-				menu.append(new gui.MenuItem({                                     // view_details.jsxi:549
-					label: 'Start Practice',                                       // view_details.jsxi:549
-					key: 'P',                                                      // view_details.jsxi:549
-					click: (function (){                                           // view_details.jsxi:549
-						if (!_selected)                                            // view_details.jsxi:550
+				menu.append(new gui.MenuItem({                                     // view_details.jsxi:564
+					label: 'Start Practice',                                       // view_details.jsxi:564
+					key: 'P',                                                      // view_details.jsxi:564
+					click: (function (){                                           // view_details.jsxi:564
+						if (!_selected)                                            // view_details.jsxi:565
 							return;
 						
-						AcPractice.start(_selected, id);                           // view_details.jsxi:551
+						AcPractice.start(_selected, id);                           // view_details.jsxi:566
 					})
 				}));
-				menu.append(new gui.MenuItem({                                     // view_details.jsxi:553
-					label: 'Folder',                                               // view_details.jsxi:553
-					click: (function (){                                           // view_details.jsxi:553
-						if (!_selected)                                            // view_details.jsxi:554
+				menu.append(new gui.MenuItem({                                     // view_details.jsxi:568
+					label: 'Folder',                                               // view_details.jsxi:568
+					click: (function (){                                           // view_details.jsxi:568
+						if (!_selected)                                            // view_details.jsxi:569
 							return;
 						
-						Shell.openItem(_selected.getSkin(id).path);                // view_details.jsxi:555
+						Shell.openItem(_selected.getSkin(id).path);                // view_details.jsxi:570
 					})
 				}));
-				menu.append(new gui.MenuItem({ type: 'separator' }));              // view_details.jsxi:558
+				menu.append(new gui.MenuItem({ type: 'separator' }));              // view_details.jsxi:573
 				
 				var autoUpdateLivery = new gui.MenuItem({ label: 'Update Livery', submenu: new gui.Menu() });
 				
-				menu.append(autoUpdateLivery);                                     // view_details.jsxi:561
-				autoUpdateLivery = autoUpdateLivery.submenu;                       // view_details.jsxi:562
-				autoUpdateLivery.append(new gui.MenuItem({                         // view_details.jsxi:564
-					label: 'From Preview',                                         // view_details.jsxi:564
-					click: (function (){                                           // view_details.jsxi:564
-						if (!_selected)                                            // view_details.jsxi:565
+				menu.append(autoUpdateLivery);                                     // view_details.jsxi:576
+				autoUpdateLivery = autoUpdateLivery.submenu;                       // view_details.jsxi:577
+				autoUpdateLivery.append(new gui.MenuItem({                         // view_details.jsxi:579
+					label: 'From Preview',                                         // view_details.jsxi:579
+					click: (function (){                                           // view_details.jsxi:579
+						if (!_selected)                                            // view_details.jsxi:580
 							return;
 						
 						var skin = _selected.getSkin(id);
 						
 						try {
 							AcTools.Utils.ImageUtils.GenerateLivery(skin.preview, skin.livery);
-							_selected.loadSkins();                                 // view_details.jsxi:569
-						} catch (err){                                             // view_details.jsxi:570
-							ErrorHandler.handled('Cannot update livery.', err);    // view_details.jsxi:571
+							_selected.loadSkins();                                 // view_details.jsxi:584
+						} catch (err){                                             // view_details.jsxi:585
+							ErrorHandler.handled('Cannot update livery.', err);    // view_details.jsxi:586
 							return;
 						} 
 					})
 				}));
-				autoUpdateLivery.append(new gui.MenuItem({                         // view_details.jsxi:576
-					label: 'With Custom Showroom',                                 // view_details.jsxi:576
-					click: (function (){                                           // view_details.jsxi:576
-						if (!_selected)                                            // view_details.jsxi:577
+				autoUpdateLivery.append(new gui.MenuItem({                         // view_details.jsxi:591
+					label: 'With Custom Showroom',                                 // view_details.jsxi:591
+					click: (function (){                                           // view_details.jsxi:591
+						if (!_selected)                                            // view_details.jsxi:592
 							return;
 						
 						var skin = _selected.getSkin(id);
 						
 						try {
 							AcTools.Utils.Kn5RenderWrapper.GenerateLivery(_selected.path, skin.id, skin.livery);
-							_selected.loadSkins();                                 // view_details.jsxi:581
-						} catch (err){                                             // view_details.jsxi:582
-							ErrorHandler.handled('Cannot update livery.', err);    // view_details.jsxi:583
+							_selected.loadSkins();                                 // view_details.jsxi:596
+						} catch (err){                                             // view_details.jsxi:597
+							ErrorHandler.handled('Cannot update livery.', err);    // view_details.jsxi:598
 							return;
 						} 
 					})
 				}));
-				menu.popup(e.clientX, e.clientY);                                  // view_details.jsxi:592
+				menu.append(new gui.MenuItem({                                     // view_details.jsxi:603
+					label: 'Delete skin',                                          // view_details.jsxi:603
+					click: (function (){                                           // view_details.jsxi:603
+						if (!_selected)                                            // view_details.jsxi:604
+							return;
+						
+						var skin = _selected.getSkin(id);
+						
+						new Dialog('Delete ' + skin.displayName,                   // view_details.jsxi:607
+							'Folder will be removed to the Recycle Bin. Are you sure?', 
+							function (arg){                                        // view_details.jsxi:607
+								if (!skin)                                         // view_details.jsxi:608
+									return;
+								
+								AcTools.Utils.FileUtils.Recycle(skin.path);        // view_details.jsxi:609
+								_selected.loadSkins();                             // view_details.jsxi:610
+							});
+					})
+				}));
+				menu.popup(e.clientX, e.clientY);                                  // view_details.jsxi:617
 				return false;
 			});
-		$('#selected-car-skins').on('click',                                       // view_details.jsxi:597
-			function (e){                                                          // view_details.jsxi:598
-				if (!_selected)                                                    // view_details.jsxi:599
+		$('#selected-car-skins').on('click',                                       // view_details.jsxi:622
+			function (e){                                                          // view_details.jsxi:623
+				if (!_selected)                                                    // view_details.jsxi:624
 					return;
 				
 				var id = e.target.getAttribute('data-id');
 				
-				if (!id)                                                           // view_details.jsxi:602
+				if (!id)                                                           // view_details.jsxi:627
 					return;
 				
-				_selected.selectSkin(id);                                          // view_details.jsxi:604
+				_selected.selectSkin(id);                                          // view_details.jsxi:629
 			});
-		$('#selected-car-error').click(function (e){                               // view_details.jsxi:608
-			if (!_selected)                                                        // view_details.jsxi:609
+		$('#selected-car-error').click(function (e){                               // view_details.jsxi:633
+			if (!_selected)                                                        // view_details.jsxi:634
 				return;
 			
 			var id = e.target.getAttribute('data-error-id');
 			
-			if (id){                                                               // view_details.jsxi:611
-				RestorationWizard.fix(_selected, id);                              // view_details.jsxi:612
+			if (id){                                                               // view_details.jsxi:636
+				RestorationWizard.fix(_selected, id);                              // view_details.jsxi:637
 			}
 		});
-		$(window).on('keydown',                                                    // view_details.jsxi:617
-			function (e){                                                          // view_details.jsxi:618
-				if (!_selected)                                                    // view_details.jsxi:619
+		$(window).on('keydown',                                                    // view_details.jsxi:642
+			function (e){                                                          // view_details.jsxi:643
+				if (!_selected)                                                    // view_details.jsxi:644
 					return;
 				
-				if (e.keyCode == 83 && e.ctrlKey){                                 // view_details.jsxi:621
-					_selected.save();                                              // view_details.jsxi:623
+				if (e.keyCode === 'S'.charCodeAt(0) && e.ctrlKey && e.altKey){     // view_details.jsxi:646
+					try {
+						AcTools.Utils.Kn5RenderWrapper.UpdateAmbientShadows(_selected.path);
+					} catch (err){                                                 // view_details.jsxi:649
+						ErrorHandler.handled('Cannot update shadows.', err);       // view_details.jsxi:650
+						return;
+					} 
+					
+					AcShowroom.shot(_selected);                                    // view_details.jsxi:653
+					return false;
+				}
+				
+				if (e.keyCode === 'S'.charCodeAt(0) && e.ctrlKey){                 // view_details.jsxi:657
+					$(':focus').each(function (arg){                               // view_details.jsxi:658
+						return this.blur();                                        // view_details.jsxi:658
+					});
+					_selected.save();                                              // view_details.jsxi:659
+					return false;
+				}
+				
+				if (e.keyCode === 'F'.charCodeAt(0) && e.ctrlKey){                 // view_details.jsxi:663
+					UpdateDescription.update(_selected);                           // view_details.jsxi:664
+					return false;
+				}
+				
+				if (e.keyCode === 'T'.charCodeAt(0) && e.ctrlKey){                 // view_details.jsxi:668
+					_selected.toggle();                                            // view_details.jsxi:669
+					return false;
+				}
+				
+				if (e.keyCode === 'B'.charCodeAt(0) && e.ctrlKey && e.shiftKey){   // view_details.jsxi:673
+					$('#selected-car-logo')[0].click();                            // view_details.jsxi:674
+					return false;
+				}
+				
+				if (e.keyCode === 'U'.charCodeAt(0) && e.ctrlKey && e.shiftKey){   // view_details.jsxi:678
+					if (_selected.parent)                                          // view_details.jsxi:679
+						$('#selected-car-upgrade')[0].click();                     // view_details.jsxi:679
+					return false;
+				}
+				
+				if (localStorage.developerMode && e.keyCode === 'E'.charCodeAt(0) && e.ctrlKey && e.shiftKey){
+					_selected.exportDatabase();                                    // view_details.jsxi:684
 					return false;
 				}
 			});
 		
 		var cmIgnore = false;
 		
-		$('main').on('contextmenu',                                                // view_details.jsxi:630
-			function (){                                                           // view_details.jsxi:631
-				this.querySelector('footer').classList.toggle('active');           // view_details.jsxi:632
-				cmIgnore = true;                                                   // view_details.jsxi:633
+		$('main').on('contextmenu',                                                // view_details.jsxi:691
+			function (){                                                           // view_details.jsxi:692
+				this.querySelector('footer').classList.toggle('active');           // view_details.jsxi:693
+				cmIgnore = true;                                                   // view_details.jsxi:694
 			});
-		$(window).on('click contextmenu',                                          // view_details.jsxi:636
-			(function (e){                                                         // view_details.jsxi:637
-				if (cmIgnore){                                                     // view_details.jsxi:638
-					cmIgnore = false;                                              // view_details.jsxi:639
-				} else if (e.target !== this){                                     // view_details.jsxi:640
-					this.classList.remove('active');                               // view_details.jsxi:641
+		$(window).on('click contextmenu',                                          // view_details.jsxi:697
+			(function (e){                                                         // view_details.jsxi:698
+				if (cmIgnore){                                                     // view_details.jsxi:699
+					cmIgnore = false;                                              // view_details.jsxi:700
+				} else if (e.target !== this){                                     // view_details.jsxi:701
+					this.classList.remove('active');                               // view_details.jsxi:702
 				}
-			}).bind($('main footer')[0]));                                         // view_details.jsxi:643
-		$('#selected-car-open-directory').click(function (){                       // view_details.jsxi:646
-			if (!_selected)                                                        // view_details.jsxi:647
+			}).bind($('main footer')[0]));                                         // view_details.jsxi:704
+		$('#selected-car-open-directory').click(function (){                       // view_details.jsxi:707
+			if (!_selected)                                                        // view_details.jsxi:708
 				return;
 			
-			Shell.openItem(_selected.path);                                        // view_details.jsxi:648
+			Shell.openItem(_selected.path);                                        // view_details.jsxi:709
 		});
-		$('#selected-car-showroom').click(function (){                             // view_details.jsxi:651
-			if (!_selected)                                                        // view_details.jsxi:652
+		$('#selected-car-showroom').click(function (){                             // view_details.jsxi:712
+			if (!_selected)                                                        // view_details.jsxi:713
 				return;
 			
-			AcShowroom.start(_selected);                                           // view_details.jsxi:653
+			AcShowroom.start(_selected);                                           // view_details.jsxi:714
 		});
-		$('#selected-car-showroom-select').click(function (){                      // view_details.jsxi:656
-			if (!_selected)                                                        // view_details.jsxi:657
+		$('#selected-car-showroom-select').click(function (){                      // view_details.jsxi:717
+			if (!_selected)                                                        // view_details.jsxi:718
 				return;
 			
-			AcShowroom.select(_selected);                                          // view_details.jsxi:658
+			AcShowroom.select(_selected);                                          // view_details.jsxi:719
 		});
-		$('#selected-car-showroom-select').click(function (){                      // view_details.jsxi:661
-			if (!_selected)                                                        // view_details.jsxi:662
+		$('#selected-car-practice').click(function (){                             // view_details.jsxi:722
+			if (!_selected)                                                        // view_details.jsxi:723
 				return;
 			
-			AcShowroom.select(_selected);                                          // view_details.jsxi:663
+			AcPractice.start(_selected);                                           // view_details.jsxi:724
 		});
-		$('#selected-car-showroom-select').click(function (){                      // view_details.jsxi:666
-			if (!_selected)                                                        // view_details.jsxi:667
+		$('#selected-car-practice-select').click(function (){                      // view_details.jsxi:727
+			if (!_selected)                                                        // view_details.jsxi:728
 				return;
 			
-			AcShowroom.select(_selected);                                          // view_details.jsxi:668
+			AcPractice.select(_selected);                                          // view_details.jsxi:729
 		});
-		$('#selected-car-practice').click(function (){                             // view_details.jsxi:671
-			if (!_selected)                                                        // view_details.jsxi:672
+		$('#selected-car-reload').click(function (){                               // view_details.jsxi:732
+			if (!_selected)                                                        // view_details.jsxi:733
 				return;
 			
-			AcPractice.start(_selected);                                           // view_details.jsxi:673
-		});
-		$('#selected-car-practice-select').click(function (){                      // view_details.jsxi:676
-			if (!_selected)                                                        // view_details.jsxi:677
-				return;
-			
-			AcPractice.select(_selected);                                          // view_details.jsxi:678
-		});
-		$('#selected-car-reload').click(function (){                               // view_details.jsxi:681
-			if (!_selected)                                                        // view_details.jsxi:682
-				return;
-			
-			if (_selected.changed){                                                // view_details.jsxi:684
-				new Dialog('Reload',                                               // view_details.jsxi:685
+			if (_selected.changed){                                                // view_details.jsxi:735
+				new Dialog('Reload',                                               // view_details.jsxi:736
 					[ 'Your changes will be lost. Are you sure?' ], 
-					reload);                                                       // view_details.jsxi:687
+					reload);                                                       // view_details.jsxi:738
 			} else {
-				reload();                                                          // view_details.jsxi:689
+				reload();                                                          // view_details.jsxi:740
 			}
 			
-			function reload(){                                                     // view_details.jsxi:692
-				if (!_selected)                                                    // view_details.jsxi:693
+			function reload(){                                                     // view_details.jsxi:743
+				if (!_selected)                                                    // view_details.jsxi:744
 					return;
 				
-				_selected.reload();                                                // view_details.jsxi:694
+				_selected.reload();                                                // view_details.jsxi:745
 			}
 		});
-		$('#selected-car-test').click(function (){                                 // view_details.jsxi:698
-			if (!_selected)                                                        // view_details.jsxi:699
+		$('#selected-car-test').click(function (){                                 // view_details.jsxi:749
+			if (!_selected)                                                        // view_details.jsxi:750
 				return;
 			
-			_selected.testAcd();                                                   // view_details.jsxi:700
+			_selected.testAcd();                                                   // view_details.jsxi:751
 		});
-		$('#selected-car-save').click(function (){                                 // view_details.jsxi:704
-			if (!_selected)                                                        // view_details.jsxi:705
+		$('#selected-car-save').click(function (){                                 // view_details.jsxi:755
+			if (!_selected)                                                        // view_details.jsxi:756
 				return;
 			
-			_selected.save();                                                      // view_details.jsxi:706
+			_selected.save();                                                      // view_details.jsxi:757
 		});
-		$('#selected-car-update-description').click(function (){                   // view_details.jsxi:709
-			if (!_selected)                                                        // view_details.jsxi:710
+		$('#selected-car-update-data').click(function (){                          // view_details.jsxi:760
+			if (!_selected)                                                        // view_details.jsxi:761
 				return;
 			
-			UpdateDescription.update(_selected);                                   // view_details.jsxi:711
+			var updated = Cars.fromDatabase(_selected.id);
+			
+			if (!updated){                                                         // view_details.jsxi:764
+				return Notification.warn('Error', 'Data is missing.');             // view_details.jsxi:765
+			}
+			
+			var fields = [];
+			
+			for (var k in updated)                                                 // view_details.jsxi:769
+				if (updated.hasOwnProperty(k)){                                    // view_details.jsxi:769
+					var v = updated[k];
+					
+					if (JSON.stringify(v) === JSON.stringify(_selected.data[k])){
+						continue;
+					}
+					
+					fields.push({ key: k, value: v });                             // view_details.jsxi:774
+				}
+			
+			if (fields.length === 0){                                              // view_details.jsxi:777
+				return Notification.warn('Error', 'Nothing to update.');           // view_details.jsxi:778
+			}
+			
+			var d = new Dialog('Update Data',                                      // view_details.jsxi:781
+				[
+					'<h6>Select fields to update</h6>',                            // view_details.jsxi:782
+					fields.map(function (arg){                                     // view_details.jsxi:783
+						return '<label><input data-key="' + arg.key + '" type="checkbox" checked>' + (arg.key === 'url' ? 'URL' : arg.key[0].toUpperCase() + arg.key.slice(1).replace(/(?=[A-Z])/g, ' ')) + '</label>';
+					}).join('')
+				], 
+				function (){                                                       // view_details.jsxi:786
+					if (!_selected)                                                // view_details.jsxi:787
+						return;
+					
+					this.content.find(':checked').each(function (arg){             // view_details.jsxi:789
+						var k = this.getAttribute('data-key');
+						
+						_selected.changeData(k, updated[k], true);                 // view_details.jsxi:791
+					});
+				});
 		});
-		$('#selected-car-update-previews').click(function (){                      // view_details.jsxi:714
-			if (!_selected)                                                        // view_details.jsxi:715
+		$('#selected-car-update-description').click(function (){                   // view_details.jsxi:796
+			if (!_selected)                                                        // view_details.jsxi:797
 				return;
 			
-			AcShowroom.shot(_selected);                                            // view_details.jsxi:716
+			UpdateDescription.update(_selected);                                   // view_details.jsxi:798
 		});
-		$('#selected-car-update-previews-manual').click(function (){               // view_details.jsxi:719
-			if (!_selected)                                                        // view_details.jsxi:720
+		$('#selected-car-update-previews').click(function (){                      // view_details.jsxi:801
+			if (!_selected)                                                        // view_details.jsxi:802
 				return;
 			
-			AcShowroom.shot(_selected, true);                                      // view_details.jsxi:721
+			AcShowroom.shot(_selected);                                            // view_details.jsxi:803
 		});
-		$('#selected-car-disable').click(function (){                              // view_details.jsxi:724
-			if (!_selected)                                                        // view_details.jsxi:725
+		$('#selected-car-update-previews-manual').click(function (){               // view_details.jsxi:806
+			if (!_selected)                                                        // view_details.jsxi:807
 				return;
 			
-			_selected.toggle();                                                    // view_details.jsxi:726
+			AcShowroom.shot(_selected, true);                                      // view_details.jsxi:808
 		});
-		$('#selected-car-additional').on('click contextmenu',                      // view_details.jsxi:729
-			function (e){                                                          // view_details.jsxi:729
-				if (!_selected)                                                    // view_details.jsxi:730
+		$('#selected-car-disable').click(function (){                              // view_details.jsxi:811
+			if (!_selected)                                                        // view_details.jsxi:812
+				return;
+			
+			_selected.toggle();                                                    // view_details.jsxi:813
+		});
+		$('#selected-car-additional').on('click contextmenu',                      // view_details.jsxi:816
+			function (e){                                                          // view_details.jsxi:816
+				if (!_selected)                                                    // view_details.jsxi:817
 					return;
 				
 				var menu = new gui.Menu();
 				
-				menu.append(new gui.MenuItem({                                     // view_details.jsxi:734
-					label: 'Update Ambient Shadows',                               // view_details.jsxi:734
-					click: (function (){                                           // view_details.jsxi:734
-						$('main footer').removeClass('active');                    // view_details.jsxi:735
-						
-						if (!_selected)                                            // view_details.jsxi:736
-							return;
-						
+				function add(label, fn, to){                                       // view_details.jsxi:821
+					if (to === undefined)                                          // view_details.jsxi:821
+						to = menu;                                                 // view_details.jsxi:821
+				
+					to.append(new gui.MenuItem({                                   // view_details.jsxi:822
+						label: label,                                              // view_details.jsxi:822
+						click: (function (){                                       // view_details.jsxi:822
+							$('main footer').removeClass('active');                // view_details.jsxi:823
+							
+							if (_selected)                                         // view_details.jsxi:824
+								fn();                                              // view_details.jsxi:824
+						})
+					}));
+				}
+				
+				add('Update Ambient Shadows',                                      // view_details.jsxi:828
+					function (){                                                   // view_details.jsxi:828
 						try {
 							AcTools.Utils.Kn5RenderWrapper.UpdateAmbientShadows(_selected.path);
-						} catch (err){                                             // view_details.jsxi:740
-							ErrorHandler.handled('Cannot update shadows.', err);   // view_details.jsxi:741
+						} catch (err){                                             // view_details.jsxi:831
+							ErrorHandler.handled('Cannot update shadows.', err);   // view_details.jsxi:832
 							return;
 						} 
-					})
-				}));
-				menu.append(new gui.MenuItem({                                     // view_details.jsxi:746
-					label: 'Change Body Ambient Shadow Size',                      // view_details.jsxi:746
-					click: (function (){                                           // view_details.jsxi:746
-						$('main footer').removeClass('active');                    // view_details.jsxi:747
-						
-						if (!_selected)                                            // view_details.jsxi:748
-							return;
-						
+					});
+				add('Change Body Ambient Shadow Size',                             // view_details.jsxi:837
+					function (){                                                   // view_details.jsxi:837
 						var currentSize = AcTools.Utils.Kn5RenderWrapper.GetBodyAmbientShadowSize(_selected.path).split(',');
 						
-						var d = new Dialog('Body Ambient Shadow',                  // view_details.jsxi:751
+						var d = new Dialog('Body Ambient Shadow',                  // view_details.jsxi:839
 							[
-								'<h6>Size (in meters)</h6>',                       // view_details.jsxi:752
+								'<h6>Size (in meters)</h6>',                       // view_details.jsxi:840
 								'<label style="display:inline-block;width:160px;line-height:24px">Width: <input id="body-ambient-shadow-width" type="number" step="0.1" min="0.8" max="6.0" style="width: 80px;float: right;margin-right: 20px;"></label>', 
 								'<label style="display:inline-block;width:160px;line-height:24px">Length: <input id="body-ambient-shadow-height" type="number" step="0.1" min="0.8" max="6.0" style="width: 80px;float: right;margin-right: 20px;"></label>'
 							], 
-							function (){                                           // view_details.jsxi:755
+							function (){                                           // view_details.jsxi:843
 								var w = + d.content.find('#body-ambient-shadow-width').val();
 								
-								if (Number.isNaN(w))                               // view_details.jsxi:757
-									w = currentSize[0];                            // view_details.jsxi:757
+								if (Number.isNaN(w))                               // view_details.jsxi:845
+									w = currentSize[0];                            // view_details.jsxi:845
 								
 								var h = + d.content.find('#body-ambient-shadow-height').val();
 								
-								if (Number.isNaN(h))                               // view_details.jsxi:760
-									h = currentSize[1];                            // view_details.jsxi:760
+								if (Number.isNaN(h))                               // view_details.jsxi:848
+									h = currentSize[1];                            // view_details.jsxi:848
 								
 								AcTools.Utils.Kn5RenderWrapper.SetBodyAmbientShadowSize(_selected.path, w, h);
 							});
 						
 						d.content.find('#body-ambient-shadow-width').val(currentSize[0]);
 						d.content.find('#body-ambient-shadow-height').val(currentSize[1]);
-					})
-				}));
+					});
 				
-				if (localStorage.developerMode){                                   // view_details.jsxi:780
+				if (localStorage.developerMode){                                   // view_details.jsxi:857
 					var devMenu = new gui.MenuItem({ label: 'Developer Tools', submenu: new gui.Menu() });
 					
-					menu.append(devMenu);                                          // view_details.jsxi:782
-					devMenu = devMenu.submenu;                                     // view_details.jsxi:783
-					devMenu.append(new gui.MenuItem({                              // view_details.jsxi:785
-						label: 'Unpack KN5',                                       // view_details.jsxi:785
-						click: (function (){                                       // view_details.jsxi:785
-							$('main footer').removeClass('active');                // view_details.jsxi:786
-							
-							if (!_selected)                                        // view_details.jsxi:787
+					menu.append(devMenu);                                          // view_details.jsxi:859
+					devMenu = devMenu.submenu;                                     // view_details.jsxi:860
+					add('Export to database',                                      // view_details.jsxi:862
+						function (){                                               // view_details.jsxi:862
+							_selected.exportDatabase();                            // view_details.jsxi:863
+						}, 
+						devMenu);                                                  // view_details.jsxi:864
+					add('Fix SUSP_XX error',                                       // view_details.jsxi:866
+						function (){                                               // view_details.jsxi:866
+							try {
+								AcTools.Utils.Kn5Fixer.FixSuspensionWrapper(AcDir.root, _selected.id);
+							} catch (err){                                         // view_details.jsxi:869
+								ErrorHandler.handled('Cannot fix car.', err);      // view_details.jsxi:870
 								return;
-							
+							} 
+						}, 
+						devMenu);                                                  // view_details.jsxi:873
+					add('Unpack KN5',                                              // view_details.jsxi:875
+						function (){                                               // view_details.jsxi:875
 							try {
 								var kn5 = AcTools.Kn5File.Kn5.FromFile(AcTools.Utils.FileUtils.GetMainCarFile(AcDir.root, _selected.id));
 								
 								var dest = _selected.path + '/unpacked';
 								
-								if (fs.existsSync(dest))                           // view_details.jsxi:792
-									AcTools.Utils.FileUtils.Recycle(dest);         // view_details.jsxi:792
+								if (fs.existsSync(dest))                           // view_details.jsxi:879
+									AcTools.Utils.FileUtils.Recycle(dest);         // view_details.jsxi:879
 								
-								kn5.ExportDirectory(dest, false);                  // view_details.jsxi:793
+								kn5.ExportDirectory(dest, false);                  // view_details.jsxi:880
 								
-								if (kn5.RootNode != null){                         // view_details.jsxi:794
+								if (kn5.RootNode != null){                         // view_details.jsxi:881
 									kn5.Export(AcTools.Kn5File.Kn5.ExportType.Collada, dest + '/model.dae');
 								}
 								
-								Shell.openItem(dest);                              // view_details.jsxi:797
-							} catch (err){                                         // view_details.jsxi:798
-								ErrorHandler.handled('Failed.', err);              // view_details.jsxi:799
+								Shell.openItem(dest);                              // view_details.jsxi:884
+							} catch (err){                                         // view_details.jsxi:885
+								ErrorHandler.handled('Failed.', err);              // view_details.jsxi:886
 							} 
-						})
-					}));
+						}, 
+						devMenu);                                                  // view_details.jsxi:888
 					
-					if (fs.existsSync(_selected.path + '/unpacked'))               // view_details.jsxi:803
-						devMenu.append(new gui.MenuItem({                          // view_details.jsxi:803
-							label: 'Repack KN5',                                   // view_details.jsxi:803
-							click: (function (){                                   // view_details.jsxi:803
-								$('main footer').removeClass('active');            // view_details.jsxi:804
-								
-								if (!_selected)                                    // view_details.jsxi:805
-									return;
-								
+					if (fs.existsSync(_selected.path + '/unpacked'))               // view_details.jsxi:890
+						add('Repack KN5',                                          // view_details.jsxi:890
+							function (){                                           // view_details.jsxi:890
 								try {
 									var kn5 = AcTools.Kn5File.Kn5.FromDirectory(_selected.path + '/unpacked', false);
 									
 									var dest = AcTools.Utils.FileUtils.GetMainCarFile(AcDir.root, _selected.id);
 									
-									if (fs.existsSync(dest))                       // view_details.jsxi:810
-										AcTools.Utils.FileUtils.Recycle(dest);     // view_details.jsxi:810
+									if (fs.existsSync(dest))                       // view_details.jsxi:894
+										AcTools.Utils.FileUtils.Recycle(dest);     // view_details.jsxi:894
 									
-									kn5.Save(dest, false);                         // view_details.jsxi:811
-								} catch (err){                                     // view_details.jsxi:812
-									ErrorHandler.handled('Failed.', err);          // view_details.jsxi:813
+									kn5.Save(dest, false);                         // view_details.jsxi:895
+								} catch (err){                                     // view_details.jsxi:896
+									ErrorHandler.handled('Failed.', err);          // view_details.jsxi:897
 								} 
-							})
-						}));
+							}, 
+							devMenu);                                              // view_details.jsxi:899
 					
-					if (fs.existsSync(_selected.path + '/data.acd'))               // view_details.jsxi:817
-						devMenu.append(new gui.MenuItem({                          // view_details.jsxi:817
-							label: 'Unpack data',                                  // view_details.jsxi:817
-							click: (function (){                                   // view_details.jsxi:817
-								$('main footer').removeClass('active');            // view_details.jsxi:818
-								
-								if (!_selected)                                    // view_details.jsxi:819
-									return;
-								
+					if (fs.existsSync(_selected.path + '/data.acd'))               // view_details.jsxi:901
+						add('Unpack data',                                         // view_details.jsxi:901
+							function (){                                           // view_details.jsxi:901
 								try {
 									var source = _selected.path + '/data.acd';
 									
@@ -6923,27 +8863,21 @@ var ViewDetails = (function (){                                                 
 									
 									var dest = _selected.path + '/data';
 									
-									if (fs.existsSync(dest))                       // view_details.jsxi:825
-										AcTools.Utils.FileUtils.Recycle(dest);     // view_details.jsxi:825
+									if (fs.existsSync(dest))                       // view_details.jsxi:906
+										AcTools.Utils.FileUtils.Recycle(dest);     // view_details.jsxi:906
 									
-									acd.ExportDirectory(dest);                     // view_details.jsxi:826
-									Shell.openItem(dest);                          // view_details.jsxi:827
-									AcTools.Utils.FileUtils.Recycle(source);       // view_details.jsxi:828
-								} catch (err){                                     // view_details.jsxi:829
-									ErrorHandler.handled('Failed.', err);          // view_details.jsxi:830
+									acd.ExportDirectory(dest);                     // view_details.jsxi:907
+									Shell.openItem(dest);                          // view_details.jsxi:908
+									AcTools.Utils.FileUtils.Recycle(source);       // view_details.jsxi:909
+								} catch (err){                                     // view_details.jsxi:910
+									ErrorHandler.handled('Failed.', err);          // view_details.jsxi:911
 								} 
-							})
-						}));
+							}, 
+							devMenu);                                              // view_details.jsxi:913
 					
-					if (fs.existsSync(_selected.path + '/data'))                   // view_details.jsxi:834
-						devMenu.append(new gui.MenuItem({                          // view_details.jsxi:834
-							label: 'Pack data',                                    // view_details.jsxi:834
-							click: (function (){                                   // view_details.jsxi:834
-								$('main footer').removeClass('active');            // view_details.jsxi:835
-								
-								if (!_selected)                                    // view_details.jsxi:836
-									return;
-								
+					if (fs.existsSync(_selected.path + '/data'))                   // view_details.jsxi:915
+						add('Pack data',                                           // view_details.jsxi:915
+							function (){                                           // view_details.jsxi:915
 								try {
 									var source = _selected.path + '/data';
 									
@@ -6951,43 +8885,36 @@ var ViewDetails = (function (){                                                 
 									
 									var dest = _selected.path + '/data.acd';
 									
-									if (fs.existsSync(dest))                       // view_details.jsxi:842
-										AcTools.Utils.FileUtils.Recycle(dest);     // view_details.jsxi:842
+									if (fs.existsSync(dest))                       // view_details.jsxi:920
+										AcTools.Utils.FileUtils.Recycle(dest);     // view_details.jsxi:920
 									
-									acd.Save(dest);                                // view_details.jsxi:843
-									AcTools.Utils.FileUtils.Recycle(source);       // view_details.jsxi:844
-								} catch (err){                                     // view_details.jsxi:845
-									ErrorHandler.handled('Failed.', err);          // view_details.jsxi:846
+									acd.Save(dest);                                // view_details.jsxi:921
+									AcTools.Utils.FileUtils.Recycle(source);       // view_details.jsxi:922
+								} catch (err){                                     // view_details.jsxi:923
+									ErrorHandler.handled('Failed.', err);          // view_details.jsxi:924
 								} 
-							})
-						}));
+							}, 
+							devMenu);                                              // view_details.jsxi:926
 				}
 				
-				menu.append(new gui.MenuItem({                                     // view_details.jsxi:851
-					label: 'Delete car',                                           // view_details.jsxi:851
-					click: (function (){                                           // view_details.jsxi:851
-						$('main footer').removeClass('active');                    // view_details.jsxi:852
-						
-						if (!_selected)                                            // view_details.jsxi:853
-							return;
-						
-						new Dialog('Delete ' + _selected.displayName,              // view_details.jsxi:855
+				add('Delete car',                                                  // view_details.jsxi:929
+					function (){                                                   // view_details.jsxi:929
+						new Dialog('Delete ' + _selected.displayName,              // view_details.jsxi:930
 							'Folder will be removed to the Recycle Bin. Are you sure?', 
-							function (arg){                                        // view_details.jsxi:855
-								if (!_selected)                                    // view_details.jsxi:856
+							function (arg){                                        // view_details.jsxi:930
+								if (!_selected)                                    // view_details.jsxi:931
 									return;
 								
-								Cars.remove(_selected);                            // view_details.jsxi:857
+								Cars.remove(_selected);                            // view_details.jsxi:932
 							});
-					})
-				}));
-				menu.popup(e.clientX, e.clientY);                                  // view_details.jsxi:861
+					});
+				menu.popup(e.clientX, e.clientY);                                  // view_details.jsxi:936
 				return false;
 			});
 	}
 	
-	(function (){                                                                  // view_details.jsxi:866
-		$(init);                                                                   // view_details.jsxi:867
+	(function (){                                                                  // view_details.jsxi:941
+		$(init);                                                                   // view_details.jsxi:942
 	})();
 	return ViewDetails;
 })();
@@ -6999,15 +8926,15 @@ var ViewList = (function (){                                                    
 		_selected,                                                                 // view_list.jsxi:4
 		_aside = $(document.getElementsByTagName('aside')[0]),                     // view_list.jsxi:5
 		_node = $(document.getElementById('cars-list')),                           // view_list.jsxi:6
-		_sortFn = {                                                                // view_list.jsxi:147
-			id: (function (a, b){                                                  // view_list.jsxi:147
+		_sortFn = {                                                                // view_list.jsxi:149
+			id: (function (a, b){                                                  // view_list.jsxi:149
 				return !a.disabled && b.disabled ? - 1 : a.disabled && !b.disabled ? 1 : a.id.localeCompare(b.id);
 			}), 
-			displayName: (function (a, b){                                         // view_list.jsxi:151
+			displayName: (function (a, b){                                         // view_list.jsxi:153
 				return !a.disabled && b.disabled ? - 1 : a.disabled && !b.disabled ? 1 : a.displayName.localeCompare(b.displayName);
 			})
 		}, 
-		sortingEnabled = true;                                                     // view_list.jsxi:155
+		sortingEnabled = true;                                                     // view_list.jsxi:157
 	
 	function scrollToSelected(){                                                   // view_list.jsxi:10
 		var n = _node[0].querySelector('.selected');
@@ -7028,98 +8955,101 @@ var ViewList = (function (){                                                    
 	}
 	
 	ViewList.select = function (car){                                              // view_list.jsxi:25
-		_selected = car;                                                           // view_list.jsxi:26
-		_node.find('.expand').removeClass('expand');                               // view_list.jsxi:27
-		_node.find('.selected').removeClass('selected');                           // view_list.jsxi:28
+		if (typeof car === 'string')                                               // view_list.jsxi:26
+			car = Cars.byId(car);                                                  // view_list.jsxi:26
 		
-		if (car){                                                                  // view_list.jsxi:30
-			localStorage.selectedCar = car.id;                                     // view_list.jsxi:31
+		_selected = car;                                                           // view_list.jsxi:28
+		_node.find('.expand').removeClass('expand');                               // view_list.jsxi:29
+		_node.find('.selected').removeClass('selected');                           // view_list.jsxi:30
+		
+		if (car){                                                                  // view_list.jsxi:32
+			localStorage.selectedCar = car.id;                                     // view_list.jsxi:33
 			
 			var n = _node.find('[data-id="' + car.id + '"]').addClass('expand').parent().addClass('selected')[0];
 			
-			if (car.parent){                                                       // view_list.jsxi:34
+			if (car.parent){                                                       // view_list.jsxi:36
 				n = _node.find('[data-id="' + car.parent.id + '"]').addClass('expand')[0];
 			}
 			
-			scrollToSelected();                                                    // view_list.jsxi:38
+			scrollToSelected();                                                    // view_list.jsxi:40
 		}
 		
-		mediator.dispatch('select', car);                                          // view_list.jsxi:41
+		mediator.dispatch('select', car);                                          // view_list.jsxi:43
 	};
-	ViewList.selectNear = function (d){                                            // view_list.jsxi:44
-		if (d === undefined)                                                       // view_list.jsxi:44
-			d = 0;                                                                 // view_list.jsxi:44
+	ViewList.selectNear = function (d){                                            // view_list.jsxi:46
+		if (d === undefined)                                                       // view_list.jsxi:46
+			d = 0;                                                                 // view_list.jsxi:46
 	
-		if (!_selected)                                                            // view_list.jsxi:45
+		if (!_selected)                                                            // view_list.jsxi:47
 			return ViewList.select(Cars.list[0]);
 		
 		var n = _node[0].querySelectorAll('[data-id]');
 		
-		for (var p, i = 0; i < n.length; i ++){                                    // view_list.jsxi:48
-			if (n[i].getAttribute('data-id') === _selected.id){                    // view_list.jsxi:49
-				p = i;                                                             // view_list.jsxi:50
+		for (var p, i = 0; i < n.length; i ++){                                    // view_list.jsxi:50
+			if (n[i].getAttribute('data-id') === _selected.id){                    // view_list.jsxi:51
+				p = i;                                                             // view_list.jsxi:52
 				
 				break;
 			}
 		}
 		
-		if (p == null)                                                             // view_list.jsxi:55
+		if (p == null)                                                             // view_list.jsxi:57
 			return;
 		
-		if (d === 0)                                                               // view_list.jsxi:56
-			d = p === n.length - 1 ? - 1 : 1;                                      // view_list.jsxi:56
+		if (d === 0)                                                               // view_list.jsxi:58
+			d = p === n.length - 1 ? - 1 : 1;                                      // view_list.jsxi:58
 		
 		var j = n[(p + d + n.length) % n.length].getAttribute('data-id');
 		
 		ViewList.select(Cars.byName(j));
 	};
-	ViewList.filter = function (v){                                                // view_list.jsxi:61
+	ViewList.filter = function (v){                                                // view_list.jsxi:63
 		var i = _aside.find('#cars-list-filter')[0];
 		
-		if (i.value != v){                                                         // view_list.jsxi:63
-			i.value = v;                                                           // view_list.jsxi:64
+		if (i.value != v){                                                         // view_list.jsxi:65
+			i.value = v;                                                           // view_list.jsxi:66
 		}
 		
-		if (v){                                                                    // view_list.jsxi:67
-			i.style.display = 'block';                                             // view_list.jsxi:68
+		if (v){                                                                    // view_list.jsxi:69
+			i.style.display = 'block';                                             // view_list.jsxi:70
 			
 			var s = v.trim().split(/\s+/);
 			
-			var brandFilter = '',                                                  // view_list.jsxi:71
-				classFilter = '',                                                  // view_list.jsxi:72
-				tagFilter = '',                                                    // view_list.jsxi:73
-				countryFilter = '',                                                // view_list.jsxi:74
-				yearFilter = '',                                                   // view_list.jsxi:75
-				authorFilter = '';                                                 // view_list.jsxi:76
+			var brandFilter = '',                                                  // view_list.jsxi:73
+				classFilter = '',                                                  // view_list.jsxi:74
+				tagFilter = '',                                                    // view_list.jsxi:75
+				countryFilter = '',                                                // view_list.jsxi:76
+				yearFilter = '',                                                   // view_list.jsxi:77
+				authorFilter = '';                                                 // view_list.jsxi:78
 			
-			var vv = s.filter(function (e){                                        // view_list.jsxi:78
-				if (/^brand:(.*)/.test(e)){                                        // view_list.jsxi:79
+			var vv = s.filter(function (e){                                        // view_list.jsxi:80
+				if (/^brand:(.*)/.test(e)){                                        // view_list.jsxi:81
 					brandFilter = (brandFilter && brandFilter + '|') + RegExp.$1;
 					return false;
 				}
 				
-				if (/^class:(.*)/.test(e)){                                        // view_list.jsxi:84
+				if (/^class:(.*)/.test(e)){                                        // view_list.jsxi:86
 					classFilter = (classFilter && classFilter + '|') + RegExp.$1;
 					return false;
 				}
 				
-				if (/^tag:(.*)/.test(e)){                                          // view_list.jsxi:89
-					tagFilter = (tagFilter && tagFilter + '|') + RegExp.$1;        // view_list.jsxi:90
+				if (/^tag:(.*)/.test(e)){                                          // view_list.jsxi:91
+					tagFilter = (tagFilter && tagFilter + '|') + RegExp.$1;        // view_list.jsxi:92
 					return false;
 				}
 				
-				if (/^country:(.*)/.test(e)){                                      // view_list.jsxi:94
+				if (/^country:(.*)/.test(e)){                                      // view_list.jsxi:96
 					countryFilter = (countryFilter && countryFilter + '|') + RegExp.$1;
 					return false;
 				}
 				
-				if (/^author:(.*)/.test(e)){                                       // view_list.jsxi:99
+				if (/^author:(.*)/.test(e)){                                       // view_list.jsxi:101
 					authorFilter = (authorFilter && authorFilter + '|') + RegExp.$1;
 					return false;
 				}
 				
-				if (/^year:(.*)/.test(e)){                                         // view_list.jsxi:104
-					yearFilter = (yearFilter && yearFilter + '|') + RegExp.$1;     // view_list.jsxi:105
+				if (/^year:(.*)/.test(e)){                                         // view_list.jsxi:106
+					yearFilter = (yearFilter && yearFilter + '|') + RegExp.$1;     // view_list.jsxi:107
 					return false;
 				}
 				return true;
@@ -7135,11 +9065,11 @@ var ViewList = (function (){                                                    
 			
 			var countryRe = countryFilter && RegExp.fromQuery(countryFilter, true);
 			
-			var authorRe = authorFilter && RegExp.fromQuery(authorFilter, true);   // view_list.jsxi:117
+			var authorRe = authorFilter && RegExp.fromQuery(authorFilter, true);   // view_list.jsxi:119
 			
 			var yearRe = yearFilter && RegExp.fromQuery(yearFilter, true);
 			
-			var f = function (car){                                                // view_list.jsxi:120
+			var f = function (car){                                                // view_list.jsxi:122
 				if (brandRe && (!car.data || !brandRe.test(car.data.brand)) || classRe && (!car.data || !classRe.test(car.data.class)) || tagRe && (!car.data || !car.data.tags.some(tagRe.test.bind(tagRe))) || countryRe && (!car.data || !countryRe.test(car.data.country)) || yearRe && (!car.data || !yearRe.test(car.data.year)) || authorRe && (!car.data || !authorRe.test(car.data.author))){
 					return false;
 				} else {
@@ -7147,22 +9077,26 @@ var ViewList = (function (){                                                    
 				}
 			};
 			
-			_aside.find('#cars-list > div > [data-id]').each(function (){          // view_list.jsxi:133
+			_aside.find('#cars-list > div > [data-id]').each(function (){          // view_list.jsxi:135
 				this.parentNode.style.display = f(Cars.byName(this.getAttribute('data-id'))) ? null : 'none';
 			});
 		} else {
-			i.style.display = 'hide';                                              // view_list.jsxi:137
-			_aside.find('#cars-list > div').show();                                // view_list.jsxi:138
+			i.style.display = 'hide';                                              // view_list.jsxi:139
+			_aside.find('#cars-list > div').show();                                // view_list.jsxi:140
 		}
 	};
-	ViewList.addFilter = function (v){                                             // view_list.jsxi:142
+	ViewList.addFilter = function (v){                                             // view_list.jsxi:144
 		var a = _aside.find('#cars-list-filter')[0].value;
 		
 		ViewList.filter((a && a + ' ') + v);
 	};
-	ViewList.sort = function (){                                                   // view_list.jsxi:157
-		if (!sortingEnabled)                                                       // view_list.jsxi:158
+	ViewList.sort = function (){                                                   // view_list.jsxi:159
+		if (!sortingEnabled)                                                       // view_list.jsxi:160
 			return;
+		
+		_aside.find('#total-cars').text(Cars.list.filter(function (e){             // view_list.jsxi:162
+			return e.parent == null;                                               // view_list.jsxi:163
+		}).length).attr('title', 'Including modded versions: ' + Cars.list.length);
 		
 		var sorted = Cars.list.sort(_sortFn.displayName);
 		
@@ -7170,239 +9104,238 @@ var ViewList = (function (){                                                    
 		
 		var children = Array.prototype.slice.call(listNode.children);
 		
-		for (var __j = 0; __j < sorted.length; __j ++){                            // view_list.jsxi:164
-			var car = sorted[__j];
+		for (var __1h = 0; __1h < sorted.length; __1h ++){                         // view_list.jsxi:170
+			var car = sorted[__1h];
 			
-			for (var __i = 0; __i < children.length; __i ++){                      // view_list.jsxi:165
-				var entry = children[__i];
+			for (var __1g = 0; __1g < children.length; __1g ++){                   // view_list.jsxi:171
+				var entry = children[__1g];
 				
-				if (entry.children[0].getAttribute('data-id') === car.id){         // view_list.jsxi:166
-					listNode.appendChild(entry);                                   // view_list.jsxi:167
+				if (entry.children[0].getAttribute('data-id') === car.id){         // view_list.jsxi:172
+					listNode.appendChild(entry);                                   // view_list.jsxi:173
 					
 					break;
 				}
 			}
 		}
 		
-		scrollToSelected();                                                        // view_list.jsxi:173
+		scrollToSelected();                                                        // view_list.jsxi:179
 	};
 	
-	function init(){                                                               // view_list.jsxi:176
-		BatchProcessing.on('start',                                                // view_list.jsxi:177
-			function (arg){                                                        // view_list.jsxi:178
-				return sortingEnabled = false;                                     // view_list.jsxi:178
-			}).on('end',                                                           // view_list.jsxi:179
-			function (arg){                                                        // view_list.jsxi:179
-				sortingEnabled = true;                                             // view_list.jsxi:180
+	function init(){                                                               // view_list.jsxi:182
+		BatchProcessing.on('start',                                                // view_list.jsxi:183
+			function (arg){                                                        // view_list.jsxi:184
+				return sortingEnabled = false;                                     // view_list.jsxi:184
+			}).on('end',                                                           // view_list.jsxi:185
+			function (arg){                                                        // view_list.jsxi:185
+				sortingEnabled = true;                                             // view_list.jsxi:186
 				ViewList.sort();
 			});
-		Cars.on('scan:start',                                                      // view_list.jsxi:184
-			function (){                                                           // view_list.jsxi:185
-				_aside.find('#cars-list').empty();                                 // view_list.jsxi:186
-				document.body.removeChild(_aside[0]);                              // view_list.jsxi:187
-			}).on('scan:ready',                                                    // view_list.jsxi:189
-			function (list){                                                       // view_list.jsxi:189
-				_aside.find('#total-cars').text(list.filter(function (e){          // view_list.jsxi:190
-					return e.parent == null;                                       // view_list.jsxi:191
-				}).length).attr('title',                                           // view_list.jsxi:192
-					'Including modded versions: {0}'.format(list.length));         // view_list.jsxi:192
+		Cars.on('scan:start',                                                      // view_list.jsxi:190
+			function (){                                                           // view_list.jsxi:191
+				sortingEnabled = false;                                            // view_list.jsxi:192
+				_aside.find('#cars-list').empty();                                 // view_list.jsxi:194
+				document.body.removeChild(_aside[0]);                              // view_list.jsxi:195
+			}).on('scan:ready',                                                    // view_list.jsxi:197
+			function (list){                                                       // view_list.jsxi:197
+				sortingEnabled = true;                                             // view_list.jsxi:198
 				ViewList.sort();
-				document.body.appendChild(_aside[0]);                              // view_list.jsxi:195
+				document.body.appendChild(_aside[0]);                              // view_list.jsxi:201
 				
-				if (list.length > 0){                                              // view_list.jsxi:197
+				if (list.length > 0){                                              // view_list.jsxi:203
 					ViewList.select(Cars.byName(localStorage.selectedCar) || list[0]);
 				}
-			}).on('new.car',                                                       // view_list.jsxi:201
-			function (car){                                                        // view_list.jsxi:201
+			}).on('new.car',                                                       // view_list.jsxi:207
+			function (car){                                                        // view_list.jsxi:207
 				var s = document.createElement('span');
 				
-				s.textContent = car.displayName;                                   // view_list.jsxi:203
+				s.textContent = car.displayName;                                   // view_list.jsxi:209
 				
-				if (car.disabled)                                                  // view_list.jsxi:204
-					s.classList.add('disabled');                                   // view_list.jsxi:204
+				if (car.disabled)                                                  // view_list.jsxi:210
+					s.classList.add('disabled');                                   // view_list.jsxi:210
 				
-				s.setAttribute('title', car.path);                                 // view_list.jsxi:206
-				s.setAttribute('data-id', car.id);                                 // view_list.jsxi:207
-				s.setAttribute('data-name', car.id);                               // view_list.jsxi:208
-				s.setAttribute('data-path', car.path);                             // view_list.jsxi:209
+				s.setAttribute('title', car.path);                                 // view_list.jsxi:212
+				s.setAttribute('data-id', car.id);                                 // view_list.jsxi:213
+				s.setAttribute('data-name', car.id);                               // view_list.jsxi:214
+				s.setAttribute('data-path', car.path);                             // view_list.jsxi:215
 				
 				var d = document.createElement('div');
 				
-				d.appendChild(s);                                                  // view_list.jsxi:212
+				d.appendChild(s);                                                  // view_list.jsxi:218
 				
-				if (car.children.length > 0){                                      // view_list.jsxi:214
-					d.setAttribute('data-children', car.children.length + 1);      // view_list.jsxi:215
+				if (car.children.length > 0){                                      // view_list.jsxi:220
+					d.setAttribute('data-children', car.children.length + 1);      // view_list.jsxi:221
 				}
 				
-				_node[0].appendChild(d);                                           // view_list.jsxi:218
-			}).on('remove.car',                                                    // view_list.jsxi:220
-			function (car){                                                        // view_list.jsxi:220
-				if (car === _selected){                                            // view_list.jsxi:221
+				_node[0].appendChild(d);                                           // view_list.jsxi:224
+				ViewList.sort();
+			}).on('remove.car',                                                    // view_list.jsxi:227
+			function (car){                                                        // view_list.jsxi:227
+				if (car === _selected){                                            // view_list.jsxi:228
 					ViewList.selectNear();
 				}
 				
 				var d = _node[0].querySelector('[data-id="' + car.id + '"]').parentNode;
 				
-				d.parentNode.removeChild(d);                                       // view_list.jsxi:226
-			}).on('update.car.data',                                               // view_list.jsxi:228
-			function (car, upd){                                                   // view_list.jsxi:228
+				d.parentNode.removeChild(d);                                       // view_list.jsxi:233
+			}).on('update.car.data',                                               // view_list.jsxi:235
+			function (car, upd){                                                   // view_list.jsxi:235
 				_node.find('[data-id="' + car.id + '"]').text(car.displayName).attr('data-name', car.displayName.toLowerCase());
 				ViewList.filter(_aside.find('#cars-list-filter').val());
 				
-				if (upd === 'update.car.data:name'){                               // view_list.jsxi:233
+				if (upd === 'update.car.data:name'){                               // view_list.jsxi:240
 					ViewList.sort();
 				}
-			}).on('update.car.parent',                                             // view_list.jsxi:237
-			function (car){                                                        // view_list.jsxi:237
+			}).on('update.car.parent',                                             // view_list.jsxi:244
+			function (car){                                                        // view_list.jsxi:244
 				var d = _node[0].querySelector('[data-id="' + car.id + '"]').parentNode;
 				
-				if (car.error.length > 0){                                         // view_list.jsxi:239
+				if (car.error.length > 0){                                         // view_list.jsxi:246
 					var c = d.parentNode;
 					
 					if (c.tagName === 'DIV' && c.querySelectorAll('.error').length == 1){
-						c.classList.remove('error');                               // view_list.jsxi:242
+						c.classList.remove('error');                               // view_list.jsxi:249
 					}
 				}
 				
-				if (car.parent){                                                   // view_list.jsxi:246
+				if (car.parent){                                                   // view_list.jsxi:253
 					var p = _node[0].querySelector('[data-id="' + car.parent.id + '"]').parentNode;
 					
-					p.appendChild(d);                                              // view_list.jsxi:248
+					p.appendChild(d);                                              // view_list.jsxi:255
 					
-					if (d.classList.contains('error')){                            // view_list.jsxi:249
-						d.classList.remove('error');                               // view_list.jsxi:250
-						p.classList.add('error');                                  // view_list.jsxi:251
+					if (d.classList.contains('error')){                            // view_list.jsxi:256
+						d.classList.remove('error');                               // view_list.jsxi:257
+						p.classList.add('error');                                  // view_list.jsxi:258
 					}
 				} else {
-					_node[0].appendChild(d);                                       // view_list.jsxi:254
+					_node[0].appendChild(d);                                       // view_list.jsxi:261
 					ViewList.sort();
 				}
 				
-				scrollToSelected();                                                // view_list.jsxi:258
-			}).on('update.car.children',                                           // view_list.jsxi:260
-			function (car){                                                        // view_list.jsxi:260
+				scrollToSelected();                                                // view_list.jsxi:265
+			}).on('update.car.children',                                           // view_list.jsxi:267
+			function (car){                                                        // view_list.jsxi:267
 				var e = _node[0].querySelector('[data-id="' + car.id + '"]');
 				
-				if (!e)                                                            // view_list.jsxi:262
+				if (!e)                                                            // view_list.jsxi:269
 					return;
 				
-				if (car.children.length){                                          // view_list.jsxi:263
+				if (car.children.length){                                          // view_list.jsxi:270
 					e.parentNode.setAttribute('data-children', car.children.length + 1);
 				} else {
-					e.parentNode.removeAttribute('data-children');                 // view_list.jsxi:266
+					e.parentNode.removeAttribute('data-children');                 // view_list.jsxi:273
 				}
-			}).on('update.car.path',                                               // view_list.jsxi:269
-			function (car){                                                        // view_list.jsxi:269
+			}).on('update.car.path',                                               // view_list.jsxi:276
+			function (car){                                                        // view_list.jsxi:276
 				var e = _node[0].querySelector('[data-id="' + car.id + '"]');
 				
-				if (!e)                                                            // view_list.jsxi:271
+				if (!e)                                                            // view_list.jsxi:278
 					return;
 				
-				e.setAttribute('data-path', car.path);                             // view_list.jsxi:272
-				e.setAttribute('title', car.path);                                 // view_list.jsxi:273
-			}).on('update.car.disabled',                                           // view_list.jsxi:275
-			function (car){                                                        // view_list.jsxi:275
+				e.setAttribute('data-path', car.path);                             // view_list.jsxi:279
+				e.setAttribute('title', car.path);                                 // view_list.jsxi:280
+			}).on('update.car.disabled',                                           // view_list.jsxi:282
+			function (car){                                                        // view_list.jsxi:282
 				var e = _node[0].querySelector('[data-id="' + car.id + '"]');
 				
-				if (!e)                                                            // view_list.jsxi:277
+				if (!e)                                                            // view_list.jsxi:284
 					return;
 				
-				if (car.disabled){                                                 // view_list.jsxi:278
-					e.classList.add('disabled');                                   // view_list.jsxi:279
+				if (car.disabled){                                                 // view_list.jsxi:285
+					e.classList.add('disabled');                                   // view_list.jsxi:286
 				} else {
-					e.classList.remove('disabled');                                // view_list.jsxi:281
+					e.classList.remove('disabled');                                // view_list.jsxi:288
 				}
 				
 				ViewList.sort();
-			}).on('update.car.changed',                                            // view_list.jsxi:286
-			function (car){                                                        // view_list.jsxi:286
+			}).on('update.car.changed',                                            // view_list.jsxi:293
+			function (car){                                                        // view_list.jsxi:293
 				var e = _node[0].querySelector('[data-id="' + car.id + '"]');
 				
-				if (!e)                                                            // view_list.jsxi:288
+				if (!e)                                                            // view_list.jsxi:295
 					return;
 				
-				if (car.changed){                                                  // view_list.jsxi:289
-					e.classList.add('changed');                                    // view_list.jsxi:290
+				if (car.changed){                                                  // view_list.jsxi:296
+					e.classList.add('changed');                                    // view_list.jsxi:297
 				} else {
-					e.classList.remove('changed');                                 // view_list.jsxi:292
+					e.classList.remove('changed');                                 // view_list.jsxi:299
 				}
-			}).on('error',                                                         // view_list.jsxi:295
-			function (car){                                                        // view_list.jsxi:295
+			}).on('error',                                                         // view_list.jsxi:302
+			function (car){                                                        // view_list.jsxi:302
 				var e = _node[0].querySelector('[data-id="' + car.id + '"]');
 				
-				if (!e)                                                            // view_list.jsxi:297
+				if (!e)                                                            // view_list.jsxi:304
 					return;
 				
-				if (car.error.length > 0){                                         // view_list.jsxi:299
-					e.classList.add('error');                                      // view_list.jsxi:300
+				if (car.error.length > 0){                                         // view_list.jsxi:306
+					e.classList.add('error');                                      // view_list.jsxi:307
 				} else {
-					e.classList.remove('error');                                   // view_list.jsxi:302
+					e.classList.remove('error');                                   // view_list.jsxi:309
 				}
 				
-				while (e.parentNode.id !== 'cars-list'){                           // view_list.jsxi:305
-					e = e.parentNode;                                              // view_list.jsxi:306
+				while (e.parentNode.id !== 'cars-list'){                           // view_list.jsxi:312
+					e = e.parentNode;                                              // view_list.jsxi:313
 				}
 				
-				if (car.error.length > 0){                                         // view_list.jsxi:309
-					e.classList.add('error');                                      // view_list.jsxi:310
+				if (car.error.length > 0){                                         // view_list.jsxi:316
+					e.classList.add('error');                                      // view_list.jsxi:317
 				} else {
-					e.classList.remove('error');                                   // view_list.jsxi:312
+					e.classList.remove('error');                                   // view_list.jsxi:319
 				}
 			});
 		_aside.find('#cars-list-filter').on('change paste keyup keypress search', 
-			function (e){                                                          // view_list.jsxi:317
-				if (e.keyCode == 13){                                              // view_list.jsxi:318
-					this.blur();                                                   // view_list.jsxi:319
+			function (e){                                                          // view_list.jsxi:324
+				if (e.keyCode == 13){                                              // view_list.jsxi:325
+					this.blur();                                                   // view_list.jsxi:326
 				}
 				
-				if (e.keyCode == 27){                                              // view_list.jsxi:322
-					this.value = '';                                               // view_list.jsxi:323
-					this.blur();                                                   // view_list.jsxi:324
+				if (e.keyCode == 27){                                              // view_list.jsxi:329
+					this.value = '';                                               // view_list.jsxi:330
+					this.blur();                                                   // view_list.jsxi:331
 				}
 				
 				ViewList.filter(this.value);
-			}).on('keydown',                                                       // view_list.jsxi:329
-			function (e){                                                          // view_list.jsxi:329
-				if (e.keyCode == 8 && !this.value){                                // view_list.jsxi:330
-					this.blur();                                                   // view_list.jsxi:331
+			}).on('keydown',                                                       // view_list.jsxi:336
+			function (e){                                                          // view_list.jsxi:336
+				if (e.keyCode == 8 && !this.value){                                // view_list.jsxi:337
+					this.blur();                                                   // view_list.jsxi:338
 				}
-			}).on('blur',                                                          // view_list.jsxi:334
-			function (){                                                           // view_list.jsxi:334
-				if (!this.value){                                                  // view_list.jsxi:335
-					$(this).hide();                                                // view_list.jsxi:336
+			}).on('blur',                                                          // view_list.jsxi:341
+			function (){                                                           // view_list.jsxi:341
+				if (!this.value){                                                  // view_list.jsxi:342
+					$(this).hide();                                                // view_list.jsxi:343
 				}
 			});
-		$(window).on('keydown',                                                    // view_list.jsxi:341
-			function (e){                                                          // view_list.jsxi:342
-				if (Event.isSomeInput(e))                                          // view_list.jsxi:343
+		$(window).on('keydown',                                                    // view_list.jsxi:348
+			function (e){                                                          // view_list.jsxi:349
+				if (Event.isSomeInput(e))                                          // view_list.jsxi:350
 					return;
 				
-				if (e.ctrlKey || e.altKey || e.shiftKey)                           // view_list.jsxi:344
+				if (e.ctrlKey || e.altKey || e.shiftKey)                           // view_list.jsxi:351
 					return;
 				
 				var f = _aside.find('#cars-list-filter');
 				
 				if (/[a-zA-Z\d]/.test(String.fromCharCode(e.keyCode)) || e.keyCode == 8 && f.val()){
-					f.show()[0].focus();                                           // view_list.jsxi:348
+					f.show()[0].focus();                                           // view_list.jsxi:355
 				}
 				
-				if (e.keyCode === 38 && !$('#dialog')[0]){                         // view_list.jsxi:351
+				if (e.keyCode === 38 && !$('#dialog')[0]){                         // view_list.jsxi:358
 					ViewList.selectNear(- 1);
 					return false;
 				}
 				
-				if (e.keyCode === 40 && !$('#dialog')[0]){                         // view_list.jsxi:356
+				if (e.keyCode === 40 && !$('#dialog')[0]){                         // view_list.jsxi:363
 					ViewList.selectNear(1);
 					return false;
 				}
 			});
-		_aside.find('#cars-list-filter-focus').click(function (){                  // view_list.jsxi:362
-			_aside.find('#cars-list-filter').show()[0].focus();                    // view_list.jsxi:363
+		_aside.find('#cars-list-filter-focus').click(function (){                  // view_list.jsxi:369
+			_aside.find('#cars-list-filter').show()[0].focus();                    // view_list.jsxi:370
 		});
-		_aside.find('#cars-list').click(function (e){                              // view_list.jsxi:367
+		_aside.find('#cars-list').click(function (e){                              // view_list.jsxi:374
 			var car = Cars.byName(e.target.getAttribute('data-id'));
 			
-			if (!car)                                                              // view_list.jsxi:369
+			if (!car)                                                              // view_list.jsxi:376
 				return;
 			
 			ViewList.select(car);
@@ -7410,82 +9343,82 @@ var ViewList = (function (){                                                    
 		
 		var cmIgnore = false;
 		
-		_aside.on('contextmenu',                                                   // view_list.jsxi:375
-			function (){                                                           // view_list.jsxi:376
-				this.querySelector('footer').classList.toggle('active');           // view_list.jsxi:377
-				cmIgnore = true;                                                   // view_list.jsxi:378
+		_aside.on('contextmenu',                                                   // view_list.jsxi:382
+			function (){                                                           // view_list.jsxi:383
+				this.querySelector('footer').classList.toggle('active');           // view_list.jsxi:384
+				cmIgnore = true;                                                   // view_list.jsxi:385
 			});
-		$(window).on('click contextmenu',                                          // view_list.jsxi:381
-			(function (e){                                                         // view_list.jsxi:382
-				if (cmIgnore){                                                     // view_list.jsxi:383
-					cmIgnore = false;                                              // view_list.jsxi:384
-				} else if (e.target !== this){                                     // view_list.jsxi:385
-					this.classList.remove('active');                               // view_list.jsxi:386
+		$(window).on('click contextmenu',                                          // view_list.jsxi:388
+			(function (e){                                                         // view_list.jsxi:389
+				if (cmIgnore){                                                     // view_list.jsxi:390
+					cmIgnore = false;                                              // view_list.jsxi:391
+				} else if (e.target !== this){                                     // view_list.jsxi:392
+					this.classList.remove('active');                               // view_list.jsxi:393
 				}
-			}).bind(_aside.find('footer')[0]));                                    // view_list.jsxi:388
-		_aside.find('#cars-list-open-directory').click(function (){                // view_list.jsxi:391
-			if (!_selected)                                                        // view_list.jsxi:392
+			}).bind(_aside.find('footer')[0]));                                    // view_list.jsxi:395
+		_aside.find('#cars-list-open-directory').click(function (){                // view_list.jsxi:398
+			if (!_selected)                                                        // view_list.jsxi:399
 				return;
 			
-			Shell.openItem(AcDir.cars);                                            // view_list.jsxi:393
+			Shell.openItem(AcDir.cars);                                            // view_list.jsxi:400
 		});
-		_aside.find('#cars-list-reload').click(function (){                        // view_list.jsxi:396
-			if (Cars.list.some(function (e){                                       // view_list.jsxi:397
-				return e.changed;                                                  // view_list.jsxi:398
+		_aside.find('#cars-list-reload').click(function (){                        // view_list.jsxi:403
+			if (Cars.list.some(function (e){                                       // view_list.jsxi:404
+				return e.changed;                                                  // view_list.jsxi:405
 			})){
-				new Dialog('Reload',                                               // view_list.jsxi:400
+				new Dialog('Reload',                                               // view_list.jsxi:407
 					[
 						'<p>{0}</p>'.format('Your changes will be lost. Are you sure?')
 					], 
-					reload);                                                       // view_list.jsxi:402
+					reload);                                                       // view_list.jsxi:409
 			} else {
-				reload();                                                          // view_list.jsxi:404
+				reload();                                                          // view_list.jsxi:411
 			}
 			
-			function reload(){                                                     // view_list.jsxi:407
-				Cars.reloadAll();                                                  // view_list.jsxi:408
+			function reload(){                                                     // view_list.jsxi:414
+				Cars.reloadAll();                                                  // view_list.jsxi:415
 			}
 		});
-		_aside.find('#cars-list-test-acd').click(function (){                      // view_list.jsxi:412
-			Cars.acdTest();                                                        // view_list.jsxi:413
+		_aside.find('#cars-list-test-acd').click(function (){                      // view_list.jsxi:419
+			Cars.acdTest();                                                        // view_list.jsxi:420
 		});
-		_aside.find('#cars-list-batch').click(function (){                         // view_list.jsxi:417
-			if (_aside.find('#cars-list-filter').val()){                           // view_list.jsxi:418
+		_aside.find('#cars-list-batch').click(function (){                         // view_list.jsxi:424
+			if (_aside.find('#cars-list-filter').val()){                           // view_list.jsxi:425
 				var filtered = [];
 				
 				var n = _node[0].querySelectorAll('[data-id]');
 				
-				for (var i = 0; i < n.length; i ++){                               // view_list.jsxi:422
-					filtered.push(Cars.byName(n[i].getAttribute('data-id')));      // view_list.jsxi:423
+				for (var i = 0; i < n.length; i ++){                               // view_list.jsxi:429
+					filtered.push(Cars.byName(n[i].getAttribute('data-id')));      // view_list.jsxi:430
 				}
 				
-				BatchProcessing.select(filtered);                                  // view_list.jsxi:426
+				BatchProcessing.select(filtered);                                  // view_list.jsxi:433
 			} else {
-				BatchProcessing.select(Cars.list.slice());                         // view_list.jsxi:428
+				BatchProcessing.select(Cars.list.slice());                         // view_list.jsxi:435
 			}
 		});
-		_aside.find('#cars-list-save').click(function (){                          // view_list.jsxi:432
-			Cars.saveAll();                                                        // view_list.jsxi:433
+		_aside.find('#cars-list-save').click(function (){                          // view_list.jsxi:439
+			Cars.saveAll();                                                        // view_list.jsxi:440
 		});
 	}
 	
-	function lazyLoadingProgressInit(){                                            // view_list.jsxi:437
+	function lazyLoadingProgressInit(){                                            // view_list.jsxi:444
 		var p;
 		
-		Cars.on('lazyscan:start',                                                  // view_list.jsxi:439
-			function (list){                                                       // view_list.jsxi:440
-				p = _aside.find('progress').show()[0];                             // view_list.jsxi:441
-				p.indeterminate = false;                                           // view_list.jsxi:442
-				p.max = list.length;                                               // view_list.jsxi:443
-				p.value = 0;                                                       // view_list.jsxi:444
-				$('#cars-list-test-acd').attr('disabled', true);                   // view_list.jsxi:446
-			}).on('lazyscan:progress',                                             // view_list.jsxi:448
-			function (i, m){                                                       // view_list.jsxi:448
-				p.value = i;                                                       // view_list.jsxi:449
-			}).on('lazyscan:ready',                                                // view_list.jsxi:451
-			function (list){                                                       // view_list.jsxi:451
-				p.style.display = 'none';                                          // view_list.jsxi:452
-				$('#cars-list-test-acd').attr('disabled', null);                   // view_list.jsxi:454
+		Cars.on('lazyscan:start',                                                  // view_list.jsxi:446
+			function (list){                                                       // view_list.jsxi:447
+				p = _aside.find('progress').show()[0];                             // view_list.jsxi:448
+				p.indeterminate = false;                                           // view_list.jsxi:449
+				p.max = list.length;                                               // view_list.jsxi:450
+				p.value = 0;                                                       // view_list.jsxi:451
+				$('#cars-list-test-acd').attr('disabled', true);                   // view_list.jsxi:453
+			}).on('lazyscan:progress',                                             // view_list.jsxi:455
+			function (i, m){                                                       // view_list.jsxi:455
+				p.value = i;                                                       // view_list.jsxi:456
+			}).on('lazyscan:ready',                                                // view_list.jsxi:458
+			function (list){                                                       // view_list.jsxi:458
+				p.style.display = 'none';                                          // view_list.jsxi:459
+				$('#cars-list-test-acd').attr('disabled', null);                   // view_list.jsxi:461
 			});
 	}
 	
@@ -7496,10 +9429,10 @@ var ViewList = (function (){                                                    
 				return _selected;                                                  // view_list.jsxi:8
 			})
 		});
-	(function (){                                                                  // view_list.jsxi:458
-		init();                                                                    // view_list.jsxi:459
-		lazyLoadingProgressInit();                                                 // view_list.jsxi:460
-		mediator.extend(ViewList);                                                 // view_list.jsxi:461
+	(function (){                                                                  // view_list.jsxi:465
+		init();                                                                    // view_list.jsxi:466
+		lazyLoadingProgressInit();                                                 // view_list.jsxi:467
+		mediator.extend(ViewList);                                                 // view_list.jsxi:468
 	})();
 	return ViewList;
 })();
@@ -7514,28 +9447,54 @@ var ViewLoading = (function (){                                                 
 		_interval = null,                                                          // view_loading.jsxi:7
 		_dots;                                                                     // view_loading.jsxi:8
 	
-	(function (){                                                                  // view_loading.jsxi:10
-		Cars.on('scan:start',                                                      // view_loading.jsxi:11
-			function (){                                                           // view_loading.jsxi:12
-				clearInterval(_interval);                                          // view_loading.jsxi:13
-				_node.style.display = null;                                        // view_loading.jsxi:14
-				_dots = 0;                                                         // view_loading.jsxi:15
-				_interval = setInterval(function (){                               // view_loading.jsxi:16
+	function details(msg){                                                         // view_loading.jsxi:10
+		_node.querySelector('h6').textContent = msg;                               // view_loading.jsxi:11
+	}
+	
+	(function (){                                                                  // view_loading.jsxi:14
+		Data.on('installation:start',                                              // view_loading.jsxi:15
+			function (){                                                           // view_loading.jsxi:16
+				clearInterval(_interval);                                          // view_loading.jsxi:17
+				_node.style.display = null;                                        // view_loading.jsxi:18
+				_progress.indeterminate = true;                                    // view_loading.jsxi:19
+				_dots = 0;                                                         // view_loading.jsxi:20
+				_interval = setInterval(function (){                               // view_loading.jsxi:21
 					_h4.textContent = 'Please wait' + '...'.slice(0, 1 + _dots ++ % 3);
 				}, 
 				300);
-			}).on('scan:list',                                                     // view_loading.jsxi:20
-			function (list){                                                       // view_loading.jsxi:20
-				_node.querySelector('h6').textContent = 'Car{0} found: {1}'.format(list.length == 1 ? '' : 's', list.length);
-				_progress.indeterminate = false;                                   // view_loading.jsxi:22
-				_progress.max = list.length;                                       // view_loading.jsxi:23
-			}).on('scan:progress',                                                 // view_loading.jsxi:25
-			function (i, m){                                                       // view_loading.jsxi:25
-				_progress.value = i;                                               // view_loading.jsxi:26
-			}).on('scan:ready',                                                    // view_loading.jsxi:28
+				details('Data installation in process');                           // view_loading.jsxi:25
+				mainForm.setProgressBar(2);                                        // view_loading.jsxi:26
+			}).on('installation:ready',                                            // view_loading.jsxi:28
 			function (list){                                                       // view_loading.jsxi:28
 				clearInterval(_interval);                                          // view_loading.jsxi:29
 				_node.style.display = 'none';                                      // view_loading.jsxi:30
+				mainForm.setProgressBar(- 1);                                      // view_loading.jsxi:31
+			});
+		Cars.on('scan:start',                                                      // view_loading.jsxi:34
+			function (){                                                           // view_loading.jsxi:35
+				clearInterval(_interval);                                          // view_loading.jsxi:36
+				_node.style.display = null;                                        // view_loading.jsxi:37
+				_progress.indeterminate = true;                                    // view_loading.jsxi:38
+				_dots = 0;                                                         // view_loading.jsxi:39
+				_interval = setInterval(function (){                               // view_loading.jsxi:40
+					_h4.textContent = 'Please wait' + '...'.slice(0, 1 + _dots ++ % 3);
+				}, 
+				300);
+				mainForm.setProgressBar(0);                                        // view_loading.jsxi:43
+			}).on('scan:list',                                                     // view_loading.jsxi:45
+			function (list){                                                       // view_loading.jsxi:45
+				details('Car' + (list.length == 1 ? '' : 's') + ' found: ' + list.length);
+				_progress.indeterminate = false;                                   // view_loading.jsxi:47
+				_progress.max = list.length;                                       // view_loading.jsxi:48
+			}).on('scan:progress',                                                 // view_loading.jsxi:50
+			function (i, m){                                                       // view_loading.jsxi:50
+				_progress.value = i;                                               // view_loading.jsxi:51
+				mainForm.setProgressBar(i / m);                                    // view_loading.jsxi:52
+			}).on('scan:ready',                                                    // view_loading.jsxi:54
+			function (list){                                                       // view_loading.jsxi:54
+				clearInterval(_interval);                                          // view_loading.jsxi:55
+				_node.style.display = 'none';                                      // view_loading.jsxi:56
+				mainForm.setProgressBar(- 1);                                      // view_loading.jsxi:57
 			});
 	})();
 	return ViewLoading;
@@ -7655,122 +9614,153 @@ var ViewSettings = (function (){                                                
 			}
 			
 			Settings.update(function (s){                                          // view_settings.jsxi:12
-				s.disableTips = disableTips;                                       // view_settings.jsxi:13
-				s.updateDatabase = updateDatabase;                                 // view_settings.jsxi:14
-				s.uploadData = uploadData;                                         // view_settings.jsxi:15
-				s.updatesCheck = updatesCheck;                                     // view_settings.jsxi:16
-				s.updatesSource = updatesSource;                                   // view_settings.jsxi:17
-				s.aptShowroom = aptShowroom;                                       // view_settings.jsxi:19
-				s.aptMode = aptMode;                                               // view_settings.jsxi:20
-				s.aptFilter = aptFilter;                                           // view_settings.jsxi:21
-				s.aptDisableSweetFx = aptDisableSweetFx;                           // view_settings.jsxi:22
-				s.aptResize = aptResize;                                           // view_settings.jsxi:23
-				s.aptCameraX = aptCameraX;                                         // view_settings.jsxi:24
-				s.aptCameraY = aptCameraY;                                         // view_settings.jsxi:25
-				s.aptCameraDistance = aptCameraDistance;                           // view_settings.jsxi:26
-				s.aptIncreaseDelays = aptIncreaseDelays;                           // view_settings.jsxi:27
+				if (!s.yearAutoupdate && yearAutoupdate){                          // view_settings.jsxi:13
+					setTimeout(function (arg){                                     // view_settings.jsxi:14
+						return new Dialog('Year As Postfix',                       // view_settings.jsxi:14
+							'Would you like to add missing years to names now?', 
+							function (arg){                                        // view_settings.jsxi:15
+								BatchProcessing.process(Cars.list, 'Add missing years to car names');
+							});
+					});
+				}
+				
+				s.disableTips = disableTips;                                       // view_settings.jsxi:20
+				s.badgeAutoupdate = badgeAutoupdate;                               // view_settings.jsxi:21
+				s.yearAutoupdate = yearAutoupdate;                                 // view_settings.jsxi:22
+				s.updateDatabase = updateDatabase;                                 // view_settings.jsxi:23
+				s.uploadData = uploadData;                                         // view_settings.jsxi:24
+				s.updatesCheck = updatesCheck;                                     // view_settings.jsxi:25
+				s.updatesSource = updatesSource;                                   // view_settings.jsxi:26
+				s.aptShowroom = aptShowroom;                                       // view_settings.jsxi:28
+				s.aptMode = aptMode;                                               // view_settings.jsxi:29
+				s.aptFilter = aptFilter;                                           // view_settings.jsxi:30
+				s.aptDisableSweetFx = aptDisableSweetFx;                           // view_settings.jsxi:31
+				s.aptResize = aptResize;                                           // view_settings.jsxi:32
+				s.aptCameraX = aptCameraX;                                         // view_settings.jsxi:33
+				s.aptCameraY = aptCameraY;                                         // view_settings.jsxi:34
+				s.aptCameraDistance = aptCameraDistance;                           // view_settings.jsxi:35
+				s.aptIncreaseDelays = aptIncreaseDelays;                           // view_settings.jsxi:36
 			});
 		}
 		
-		var d = new Dialog('Settings',                                             // view_settings.jsxi:31
+		var d = new Dialog('Settings',                                             // view_settings.jsxi:40
 				[
-					'<h6>Assetto Corsa Folder</h6>',                               // view_settings.jsxi:32
+					'<h6>Assetto Corsa Folder</h6>',                               // view_settings.jsxi:41
 					'<button id="settings-acdir-select" style="float:right;width:30px">…</button>', 
 					'<input id="settings-acdir" placeholder="…/Assetto Corsa" style="width:calc(100% - 35px)">', 
-					'<h6>Tips</h6>',                                               // view_settings.jsxi:36
+					'<h6>Editing</h6>',                                            // view_settings.jsxi:45
+					'<label><input id="settings-badge-autoupdate" type="checkbox">Update badge with brand</label><br>', 
+					'<label><input id="settings-year-autoupdate" type="checkbox">Add year to name as postfix if missing</label>', 
+					'<h6>Tips</h6>',                                               // view_settings.jsxi:49
 					'<label><input id="settings-disable-tips" type="checkbox">Disable tips on launch</label>', 
-					'<h6>Database</h6>',                                           // view_settings.jsxi:39
-					'<label><input id="settings-update-database" type="checkbox" disabled>Update databases</label><br>', 
+					'<h6>Database</h6>',                                           // view_settings.jsxi:52
+					'<label><input id="settings-update-database" type="checkbox">Update databases</label><br>', 
 					'<label><input id="settings-upload-data" type="checkbox">Upload some changes</label>', 
-					'<h6>Updates</h6>',                                            // view_settings.jsxi:43
+					'<h6>Updates</h6>',                                            // view_settings.jsxi:56
 					'<label><input id="settings-updates-check" type="checkbox">Check for new versions on launch</label>', 
 					'<select id="settings-updates-source"><option value="stable">Stable</option><option value="last">Beta</option></select>'
 				], 
-				save,                                                              // view_settings.jsxi:49
-				false).setButton('Save').addButton('Cancel'),                      // view_settings.jsxi:49
-			c = 0;                                                                 // view_settings.jsxi:49
+				save,                                                              // view_settings.jsxi:62
+				false).setButton('Save').addButton('User Storage',                 // view_settings.jsxi:62
+				function (){                                                       // view_settings.jsxi:62
+					Shell.openItem(DataStorage.getUserContentDir());               // view_settings.jsxi:63
+					return false;
+				}).addButton('Cancel'),                                            // view_settings.jsxi:65
+			c = 0;                                                                 // view_settings.jsxi:65
 		
 		var acdirVal;
 		
-		function acdirChange(){                                                    // view_settings.jsxi:53
-			var err = AcDir.check(acdirVal = d.find('#settings-acdir').val());     // view_settings.jsxi:54
+		function acdirChange(){                                                    // view_settings.jsxi:69
+			var err = AcDir.check(acdirVal = d.find('#settings-acdir').val());     // view_settings.jsxi:70
 			
-			$(this).toggleClass('invalid', !!err).attr('title', err || null);      // view_settings.jsxi:55
+			$(this).toggleClass('invalid', !!err).attr('title', err || null);      // view_settings.jsxi:71
 			
-			if (err){                                                              // view_settings.jsxi:56
-				acdirVal = false;                                                  // view_settings.jsxi:57
+			if (err){                                                              // view_settings.jsxi:72
+				acdirVal = false;                                                  // view_settings.jsxi:73
 			}
 		}
 		
-		d.content.find('#settings-acdir').val(AcDir.root).change(acdirChange);     // view_settings.jsxi:61
-		d.content.find('#settings-acdir-select').click(function (){                // view_settings.jsxi:63
+		d.content.find('#settings-acdir').val(AcDir.root).change(acdirChange);     // view_settings.jsxi:77
+		d.content.find('#settings-acdir-select').click(function (){                // view_settings.jsxi:79
 			$('<input type="file" nwdirectory />').attr({ nwworkingdir: d.content.find('#settings-acdir').val() }).change(function (){
-				d.content.find('#settings-acdir').val(this.value);                 // view_settings.jsxi:67
-				acdirChange();                                                     // view_settings.jsxi:68
-			}).click();                                                            // view_settings.jsxi:69
+				d.content.find('#settings-acdir').val(this.value);                 // view_settings.jsxi:83
+				acdirChange();                                                     // view_settings.jsxi:84
+			}).click();                                                            // view_settings.jsxi:85
 		});
+		
+		var badgeAutoupdate = Settings.get('badgeAutoupdate');
+		
+		d.content.find('#settings-badge-autoupdate').change(function (arg){        // view_settings.jsxi:90
+			badgeAutoupdate = this.checked;                                        // view_settings.jsxi:90
+		})[0].checked = badgeAutoupdate;                                           // view_settings.jsxi:90
+		
+		var yearAutoupdate = Settings.get('yearAutoupdate');
+		
+		d.content.find('#settings-year-autoupdate').change(function (arg){         // view_settings.jsxi:93
+			yearAutoupdate = this.checked;                                         // view_settings.jsxi:93
+		})[0].checked = yearAutoupdate;                                            // view_settings.jsxi:93
 		
 		var disableTips = Settings.get('disableTips');
 		
-		d.content.find('#settings-disable-tips').change(function (arg){            // view_settings.jsxi:74
-			disableTips = this.checked;                                            // view_settings.jsxi:74
-		})[0].checked = disableTips;                                               // view_settings.jsxi:74
+		d.content.find('#settings-disable-tips').change(function (arg){            // view_settings.jsxi:97
+			disableTips = this.checked;                                            // view_settings.jsxi:97
+		})[0].checked = disableTips;                                               // view_settings.jsxi:97
 		
 		var updateDatabase = Settings.get('updateDatabase');
 		
-		d.content.find('#settings-update-database').change(function (arg){         // view_settings.jsxi:78
-			updateDatabase = this.checked;                                         // view_settings.jsxi:78
-		})[0].checked = updateDatabase;                                            // view_settings.jsxi:78
+		d.content.find('#settings-update-database').change(function (arg){         // view_settings.jsxi:101
+			updateDatabase = this.checked;                                         // view_settings.jsxi:101
+		})[0].checked = updateDatabase;                                            // view_settings.jsxi:101
 		
 		var uploadData = Settings.get('uploadData');
 		
-		d.content.find('#settings-upload-data').change(function (arg){             // view_settings.jsxi:81
-			uploadData = this.checked;                                             // view_settings.jsxi:81
-		})[0].checked = uploadData;                                                // view_settings.jsxi:81
+		d.content.find('#settings-upload-data').change(function (arg){             // view_settings.jsxi:104
+			uploadData = this.checked;                                             // view_settings.jsxi:104
+		})[0].checked = uploadData;                                                // view_settings.jsxi:104
 		
 		var updatesCheck = Settings.get('updatesCheck');
 		
-		d.content.find('#settings-updates-check').change(function (arg){           // view_settings.jsxi:85
-			updatesCheck = this.checked;                                           // view_settings.jsxi:85
-		})[0].checked = updatesCheck;                                              // view_settings.jsxi:85
+		d.content.find('#settings-updates-check').change(function (arg){           // view_settings.jsxi:108
+			updatesCheck = this.checked;                                           // view_settings.jsxi:108
+		})[0].checked = updatesCheck;                                              // view_settings.jsxi:108
 		
 		var updatesSource = Settings.get('updatesSource');
 		
-		d.content.find('#settings-updates-source').change(function (arg){          // view_settings.jsxi:88
-			updatesSource = this.value;                                            // view_settings.jsxi:88
-		})[0].value = updatesSource;                                               // view_settings.jsxi:88
+		d.content.find('#settings-updates-source').change(function (arg){          // view_settings.jsxi:111
+			updatesSource = this.value;                                            // view_settings.jsxi:111
+		})[0].value = updatesSource;                                               // view_settings.jsxi:111
 		
-		var apt = d.addTab('Auto-Preview',                                         // view_settings.jsxi:91
+		var apt = d.addTab('Auto-Preview',                                         // view_settings.jsxi:114
 			[
-				'<h6>Mode</h6>',                                                   // view_settings.jsxi:92
-				'<select id="apt-mode">' + AcShowroom.modes.map(function (e){      // view_settings.jsxi:93
+				'<h6>Mode</h6>',                                                   // view_settings.jsxi:115
+				'<select id="apt-mode">' + AcShowroom.modes.map(function (e){      // view_settings.jsxi:116
 					return '<option value="' + e.id + '">' + e.name + '</option>';
-				}).join('') + '</select>',                                         // view_settings.jsxi:95
-				'<h6>Showroom</h6>',                                               // view_settings.jsxi:97
+				}).join('') + '</select>',                                         // view_settings.jsxi:118
+				'<h6>Showroom</h6>',                                               // view_settings.jsxi:120
 				'<select id="apt-showroom"><option value="">Black Showroom (Recommended)</option>' + AcShowroom.list.map(function (e){
 					return '<option value="' + e.id + '">' + (e.data ? e.data.name : e.id) + '</option>';
-				}).join('') + '</select>',                                         // view_settings.jsxi:100
-				'<h6>Filter</h6>',                                                 // view_settings.jsxi:102
+				}).join('') + '</select>',                                         // view_settings.jsxi:123
+				'<h6>Filter</h6>',                                                 // view_settings.jsxi:125
 				'<select id="apt-filter"><option value="">Don\'t change</option>' + AcFilters.list.map(function (e){
-					return '<option value="' + e.id + '">' + e.id + '</option>';   // view_settings.jsxi:104
-				}).join('') + '</select>',                                         // view_settings.jsxi:105
+					return '<option value="' + e.id + '">' + e.id + '</option>';   // view_settings.jsxi:127
+				}).join('') + '</select>',                                         // view_settings.jsxi:128
 				'<label><input id="apt-disable-sweetfx" type="checkbox">Disable SweetFX (Recommended)</label>', 
-				'<h6>Resize</h6>',                                                 // view_settings.jsxi:108
+				'<h6>Resize</h6>',                                                 // view_settings.jsxi:131
 				'<label><input id="apt-resize" type="checkbox">Change size to default 1024×576 (Recommended)</label>', 
-				'<h6>Camera Position</h6>',                                        // view_settings.jsxi:111
+				'<h6>Camera Position</h6>',                                        // view_settings.jsxi:134
 				'<label style="display:inline-block;width:160px;line-height:24px" title="Actually, just simulate mouse move">Rotate X: <input id="apt-camera-x" type="number" step="1" style="width: 80px;float: right;margin-right: 20px;"></label>', 
 				'<label style="display:inline-block;width:160px;line-height:24px" title="Actually, just simulate mouse move">Rotate Y: <input id="apt-camera-y" type="number" step="1" style="width: 80px;float: right;margin-right: 20px;"></label>', 
 				'<label style="display:inline-block;width:160px;line-height:24px">Distance: <input id="apt-camera-distance" type="number" step="0.1" style="width: 80px;float: right;margin-right: 20px;"></label>', 
-				'<h6>Delays</h6>',                                                 // view_settings.jsxi:116
+				'<h6>Delays</h6>',                                                 // view_settings.jsxi:139
 				'<label><input id="apt-increase-delays" type="checkbox">Increased delays</label>'
 			], 
-			save).setButton('Save').addButton('Defaults',                          // view_settings.jsxi:118
-			function (){                                                           // view_settings.jsxi:118
+			save).setButton('Save').addButton('Defaults',                          // view_settings.jsxi:141
+			function (){                                                           // view_settings.jsxi:141
 				apt.content.find('#apt-mode')[0].value = (aptMode = Settings.defaults.aptMode);
 				apt.content.toggleClass('apt-nondefmode', aptMode !== 'default');
 				apt.content.find('#apt-showroom')[0].value = (aptShowroom = Settings.defaults.aptShowroom);
 				
-				if (AcFilters.list.length)                                         // view_settings.jsxi:123
+				if (AcFilters.list.length)                                         // view_settings.jsxi:146
 					apt.content.find('#apt-filter')[0].value = (aptFilter = Settings.defaults.aptFilter);
 				
 				apt.content.find('#apt-disable-sweetfx')[0].checked = (aptDisableSweetFx = Settings.defaults.aptDisableSweetFx);
@@ -7780,146 +9770,149 @@ var ViewSettings = (function (){                                                
 				apt.content.find('#apt-camera-distance')[0].value = (aptCameraDistance = Settings.defaults.aptCameraDistance);
 				apt.content.find('#apt-increase-delays')[0].checked = (aptIncreaseDelays = Settings.defaults.aptIncreaseDelays);
 				return false;
-			}).addButton('Cancel');                                                // view_settings.jsxi:131
+			}).addButton('Cancel');                                                // view_settings.jsxi:154
 		
 		var aptMode = Settings.get('aptMode');
 		
-		apt.content.find('#apt-mode').change(function (arg){                       // view_settings.jsxi:134
-			aptMode = this.value;                                                  // view_settings.jsxi:135
-			apt.content.toggleClass('apt-nondefmode', aptMode !== 'default');      // view_settings.jsxi:136
-		})[0].value = aptMode;                                                     // view_settings.jsxi:137
-		apt.content.toggleClass('apt-nondefmode', aptMode !== 'default');          // view_settings.jsxi:138
+		apt.content.find('#apt-mode').change(function (arg){                       // view_settings.jsxi:157
+			aptMode = this.value;                                                  // view_settings.jsxi:158
+			apt.content.toggleClass('apt-nondefmode', aptMode !== 'default');      // view_settings.jsxi:159
+		})[0].value = aptMode;                                                     // view_settings.jsxi:160
+		apt.content.toggleClass('apt-nondefmode', aptMode !== 'default');          // view_settings.jsxi:161
 		
 		var aptShowroom = Settings.get('aptShowroom');
 		
-		apt.content.find('#apt-showroom').change(function (arg){                   // view_settings.jsxi:141
-			aptShowroom = this.value;                                              // view_settings.jsxi:141
-		})[0].value = aptShowroom;                                                 // view_settings.jsxi:141
+		apt.content.find('#apt-showroom').change(function (arg){                   // view_settings.jsxi:164
+			aptShowroom = this.value;                                              // view_settings.jsxi:164
+		})[0].value = aptShowroom;                                                 // view_settings.jsxi:164
 		
 		var aptFilter = Settings.get('aptFilter');
 		
-		if (AcFilters.list.length){                                                // view_settings.jsxi:144
-			apt.content.find('#apt-filter').change(function (arg){                 // view_settings.jsxi:145
-				aptFilter = this.value;                                            // view_settings.jsxi:145
-			})[0].value = aptFilter;                                               // view_settings.jsxi:145
-			
+		if (AcFilters.list.length){                                                // view_settings.jsxi:167
 			var recFilter = apt.content.find('#apt-filter [value="' + Settings.defaults.aptFilter + '"]')[0];
 			
-			if (recFilter)                                                         // view_settings.jsxi:147
-				recFilter.textContent += ' (Recommended)';                         // view_settings.jsxi:147
+			if (recFilter){                                                        // view_settings.jsxi:169
+				recFilter.textContent += ' (Recommended)';                         // view_settings.jsxi:170
+			} else {
+				$('<option value="' + Settings.defaults.aptFilter + '">' + Settings.defaults.aptFilter + ' (Recommended)</option>').insertAfter(apt.content.find('#apt-filter option:first-child'));
+			}
+			
+			apt.content.find('#apt-filter').change(function (arg){                 // view_settings.jsxi:175
+				aptFilter = this.value;                                            // view_settings.jsxi:175
+			})[0].value = aptFilter;                                               // view_settings.jsxi:175
 		} else {
 			apt.content.find('#apt-filter').attr({ disabled: true, title: 'Filters not found' });
 		}
 		
 		var aptDisableSweetFx = Settings.get('aptDisableSweetFx');
 		
-		apt.content.find('#apt-disable-sweetfx').change(function (arg){            // view_settings.jsxi:156
-			aptDisableSweetFx = this.checked;                                      // view_settings.jsxi:156
-		})[0].checked = aptDisableSweetFx;                                         // view_settings.jsxi:156
+		apt.content.find('#apt-disable-sweetfx').change(function (arg){            // view_settings.jsxi:184
+			aptDisableSweetFx = this.checked;                                      // view_settings.jsxi:184
+		})[0].checked = aptDisableSweetFx;                                         // view_settings.jsxi:184
 		
 		var aptResize = Settings.get('aptResize');
 		
-		apt.content.find('#apt-resize').change(function (arg){                     // view_settings.jsxi:159
-			aptResize = this.checked;                                              // view_settings.jsxi:159
-		})[0].checked = aptResize;                                                 // view_settings.jsxi:159
+		apt.content.find('#apt-resize').change(function (arg){                     // view_settings.jsxi:187
+			aptResize = this.checked;                                              // view_settings.jsxi:187
+		})[0].checked = aptResize;                                                 // view_settings.jsxi:187
 		
 		var aptCameraX = Settings.get('aptCameraX');
 		
-		apt.content.find('#apt-camera-x').change(function (arg){                   // view_settings.jsxi:162
-			aptCameraX = this.value;                                               // view_settings.jsxi:162
-		})[0].value = aptCameraX;                                                  // view_settings.jsxi:162
+		apt.content.find('#apt-camera-x').change(function (arg){                   // view_settings.jsxi:190
+			aptCameraX = this.value;                                               // view_settings.jsxi:190
+		})[0].value = aptCameraX;                                                  // view_settings.jsxi:190
 		
 		var aptCameraY = Settings.get('aptCameraY');
 		
-		apt.content.find('#apt-camera-y').change(function (arg){                   // view_settings.jsxi:165
-			aptCameraY = this.value;                                               // view_settings.jsxi:165
-		})[0].value = aptCameraY;                                                  // view_settings.jsxi:165
+		apt.content.find('#apt-camera-y').change(function (arg){                   // view_settings.jsxi:193
+			aptCameraY = this.value;                                               // view_settings.jsxi:193
+		})[0].value = aptCameraY;                                                  // view_settings.jsxi:193
 		
 		var aptCameraDistance = Settings.get('aptCameraDistance');
 		
-		apt.content.find('#apt-camera-distance').change(function (arg){            // view_settings.jsxi:168
-			aptCameraDistance = this.value;                                        // view_settings.jsxi:168
-		})[0].value = aptCameraDistance;                                           // view_settings.jsxi:168
+		apt.content.find('#apt-camera-distance').change(function (arg){            // view_settings.jsxi:196
+			aptCameraDistance = this.value;                                        // view_settings.jsxi:196
+		})[0].value = aptCameraDistance;                                           // view_settings.jsxi:196
 		
 		var aptIncreaseDelays = Settings.get('aptIncreaseDelays');
 		
-		apt.content.find('#apt-increase-delays').change(function (arg){            // view_settings.jsxi:171
-			aptIncreaseDelays = this.checked;                                      // view_settings.jsxi:171
-		})[0].checked = aptIncreaseDelays;                                         // view_settings.jsxi:171
-		d.addTab('About',                                                          // view_settings.jsxi:174
+		apt.content.find('#apt-increase-delays').change(function (arg){            // view_settings.jsxi:199
+			aptIncreaseDelays = this.checked;                                      // view_settings.jsxi:199
+		})[0].checked = aptIncreaseDelays;                                         // view_settings.jsxi:199
+		d.addTab('About',                                                          // view_settings.jsxi:202
 			[
-				'<h6>Version</h6>',                                                // view_settings.jsxi:175
-				'<p id="version">' + gui.App.manifest.version + '</p>',            // view_settings.jsxi:176
-				'<h6>Details</h6>',                                                // view_settings.jsxi:177
+				'<h6>Version</h6>',                                                // view_settings.jsxi:203
+				'<p id="version">' + gui.App.manifest.version + '</p>',            // view_settings.jsxi:204
+				'<h6>Details</h6>',                                                // view_settings.jsxi:205
 				"<p><a href=\"#\" onclick=\"Shell.openItem('https://ascobash.wordpress.com/2015/06/14/actools-uijson/')\">https://ascobash.wordpress.com/…/actools-uijson/</a></p>", 
-				'<h6>Author</h6>',                                                 // view_settings.jsxi:179
+				'<h6>Author</h6>',                                                 // view_settings.jsxi:207
 				'x4fab'
-			]).addButton('Feedback',                                               // view_settings.jsxi:181
-			function (){                                                           // view_settings.jsxi:181
-				feedbackForm();                                                    // view_settings.jsxi:182
+			]).addButton('Feedback',                                               // view_settings.jsxi:209
+			function (){                                                           // view_settings.jsxi:209
+				feedbackForm();                                                    // view_settings.jsxi:210
 				return false;
-			}).addButton('Check for update',                                       // view_settings.jsxi:184
-			function (){                                                           // view_settings.jsxi:184
+			}).addButton('Check for update',                                       // view_settings.jsxi:212
+			function (){                                                           // view_settings.jsxi:212
 				var b = this.buttons.find('button:last-child').text('Please wait...').attr('disabled', true);
 				
-				CheckUpdate.check();                                               // view_settings.jsxi:186
-				CheckUpdate.one('check',                                           // view_settings.jsxi:187
-					function (arg){                                                // view_settings.jsxi:187
-						b.text('Check again').attr('disabled', null);              // view_settings.jsxi:188
+				CheckUpdate.check();                                               // view_settings.jsxi:214
+				CheckUpdate.one('check',                                           // view_settings.jsxi:215
+					function (arg){                                                // view_settings.jsxi:215
+						b.text('Check again').attr('disabled', null);              // view_settings.jsxi:216
 						
-						if (arg === 'check:failed'){                               // view_settings.jsxi:189
+						if (arg === 'check:failed'){                               // view_settings.jsxi:217
 							new Dialog('Check For Update', 'Cannot check for update.');
-						} else if (arg !== 'check:done:found'){                    // view_settings.jsxi:191
+						} else if (arg !== 'check:done:found'){                    // view_settings.jsxi:219
 							new Dialog('Check For Update', 'New version not found.');
 						}
 					});
 				return false;
-			}).content.find('#version').click(function (){                         // view_settings.jsxi:196
-			if (++ c > 10 && !localStorage.developerMode){                         // view_settings.jsxi:197
-				new Dialog('Developer Mode Enabled',                               // view_settings.jsxi:198
-					'Don\'t spread it around, ok?',                                // view_settings.jsxi:198
+			}).content.find('#version').click(function (){                         // view_settings.jsxi:224
+			if (++ c > 10 && !localStorage.developerMode){                         // view_settings.jsxi:225
+				new Dialog('Developer Mode Enabled',                               // view_settings.jsxi:226
+					'Don\'t spread it around, ok?',                                // view_settings.jsxi:226
 					function (arg){}, 
 					false);
-				localStorage.developerMode = true;                                 // view_settings.jsxi:199
+				localStorage.developerMode = true;                                 // view_settings.jsxi:227
 			}
 		});
 	}
 	
-	function feedbackForm(){                                                       // view_settings.jsxi:204
-		function sendFeedback(v){                                                  // view_settings.jsxi:205
+	function feedbackForm(){                                                       // view_settings.jsxi:232
+		function sendFeedback(v){                                                  // view_settings.jsxi:233
 			d.buttons.find('button:first-child').text('Please wait...').attr('disabled', true);
-			AppServerRequest.sendFeedback(v,                                       // view_settings.jsxi:208
-				function (arg){                                                    // view_settings.jsxi:208
-					d.close();                                                     // view_settings.jsxi:209
+			AppServerRequest.sendFeedback(v,                                       // view_settings.jsxi:236
+				function (arg){                                                    // view_settings.jsxi:236
+					d.close();                                                     // view_settings.jsxi:237
 					
-					if (arg){                                                      // view_settings.jsxi:210
-						new Dialog('Cannot Send Feedback', 'Sorry about that.');   // view_settings.jsxi:211
+					if (arg){                                                      // view_settings.jsxi:238
+						new Dialog('Cannot Send Feedback', 'Sorry about that.');   // view_settings.jsxi:239
 					} else {
-						_prevFeedback = null;                                      // view_settings.jsxi:213
-						new Dialog('Feedback Sent', 'Thank you.');                 // view_settings.jsxi:214
+						_prevFeedback = null;                                      // view_settings.jsxi:241
+						new Dialog('Feedback Sent', 'Thank you.');                 // view_settings.jsxi:242
 					}
 				});
 		}
 		
-		var d = new Dialog('Feedback',                                             // view_settings.jsxi:219
+		var d = new Dialog('Feedback',                                             // view_settings.jsxi:247
 			'<textarea style="width:350px;height:200px;resize:none" maxlength="5000"\
                 placeholder="If you have any ideas or suggestions please let me know"></textarea>', 
-			function (){                                                           // view_settings.jsxi:220
+			function (){                                                           // view_settings.jsxi:248
 				var v = this.content.find('textarea').val().trim();
 				
-				if (v)                                                             // view_settings.jsxi:222
-					sendFeedback(v);                                               // view_settings.jsxi:222
+				if (v)                                                             // view_settings.jsxi:250
+					sendFeedback(v);                                               // view_settings.jsxi:250
 				return false;
 			}, 
-			false).setButton('Send').addButton('Cancel').closeOnEnter(false);      // view_settings.jsxi:224
+			false).setButton('Send').addButton('Cancel').closeOnEnter(false);      // view_settings.jsxi:252
 		
 		d.content.find('textarea').val(_prevFeedback || '').change(function (arg){
-			return _prevFeedback = this.value;                                     // view_settings.jsxi:225
+			return _prevFeedback = this.value;                                     // view_settings.jsxi:253
 		});
 	}
 	
-	(function (){                                                                  // view_settings.jsxi:228
-		$('#settings-open').click(openDialog);                                     // view_settings.jsxi:229
+	(function (){                                                                  // view_settings.jsxi:256
+		$('#settings-open').click(openDialog);                                     // view_settings.jsxi:257
 	})();
 	return ViewSettings;
 })();
@@ -8026,8 +10019,13 @@ AcDir.on('change',                                                              
 			first = false;                                                         // app.jsxi:89
 		}
 	});
-Data.on('ready',                                                                   // app.jsxi:93
+Data.one('update',                                                                 // app.jsxi:93
 	function (){                                                                   // app.jsxi:94
 		AcDir.init();                                                              // app.jsxi:95
+	});
+CheckUpdate.on('check:failed',                                                     // app.jsxi:98
+	function (){                                                                   // app.jsxi:99
+		Notification.warn('Update Checking Failed',                                // app.jsxi:100
+			'Probably server is unavailable or something.');                       // app.jsxi:100
 	});
 

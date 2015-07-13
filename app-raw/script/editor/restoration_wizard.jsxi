@@ -18,7 +18,7 @@ static class RestorationWizard {
 
             fixer.run();
         } else {
-            ErrorHandler.handled('Not supported error: %0'(errorId));
+            ErrorHandler.handled('Solutions for “%0” not found.'(errorId));
         }
     }
 

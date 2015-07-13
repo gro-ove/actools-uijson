@@ -1,0 +1,20 @@
+static class Urls { 
+    var _initialized = false,
+        _database;
+
+    public fromDatabase(id){
+        if (!_initialized){
+            init();
+        }
+
+        if (_database && id in-object _database){
+            return _database[id];
+        } else {
+            return null;
+        }
+    }
+
+    public init(){
+        _database = DataStorage.readContentJsonFile('Details (Preload)', 'urls.json');
+    }
+}

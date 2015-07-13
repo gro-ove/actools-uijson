@@ -25,7 +25,7 @@ In manual skin previews auto-update press F8 when camera position is adjusted.
 
 Press Esc to abort <b>Auto-update Preview</b>.
 
-All manually added badges are located in <a href="#" onclick="Shell.openItem(DataStorage.getDataDir('Badges (User)'))"><i>…\AppData\Local\AcTools Cars Manager\Data Storage\Badges (User)</i></a>.
+All manually added badges are located in <a href="#" onclick="Shell.openItem(DataStorage.getUserContentDir('Badges'))"><i>…\AppData\Local\AcTools Cars Manager\Data Storage\Badges (User)</i></a>.
 
 If you want to use <b>Quick Practive</b>, make sure AcTools Ui Json has access to rename <a href="#" onclick="Shell.showItemInFolder(path.join(AcDir.root,'AssettoCorsa.exe'))"><i>AssettoCorsa.exe</i></a>.
 Just open file properties and edit permissions on the Security tab. Or you can run AcTools Ui Json as Administrator.

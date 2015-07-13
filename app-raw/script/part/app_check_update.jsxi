@@ -4,24 +4,12 @@ static class CheckUpdate {
     var _updateFile = path.join(path.dirname(process.execPath), 'carsmgr_update.next');
     var _details = 'https://ascobash.wordpress.com/2015/06/14/actools-uijson/';
 
-    private isInstallableYadisk(link){
-        return /^https:\/\/yadi.sk\/d\/\w+/.test(link);
-    }
-
-    private isInstallableRd(link){
-        return /^http:\/\/www.racedepartment.com\/downloads\//.test(link);
-    }
-
-    private isInstallable(link){
-        return isInstallableYadisk(link) || isInstallableRd(link);
-    }
-
     public check(c){
         mediator.dispatch('check:start');
 
         AppServerRequest.checkUpdate(
             gui.App.manifest.version,
-            Settings.get('updatesSource', 'stable'),
+            Settings.get('updatesSource'),
             function (err, data){
                 if (err){
                     console.warn(err);
@@ -35,7 +23,7 @@ static class CheckUpdate {
                         changelog: data.changes,
                         detailsUrl: _details,
                         downloadUrl: data.url,
-                        installUrl: data.download || isInstallable(data.url) && data.url,
+                        installUrl: data.download || Downloader.isAvailable(data.url) && data.url,
                     });
 
                     mediator.dispatch('check:done:found');
@@ -45,130 +33,28 @@ static class CheckUpdate {
             });
     }
 
-    var _updateInProcess;
-    private httpDownload(url, file, callback, progressCallback){
-        try {
-            if (typeof file === 'string'){
-                file = fs.createWriteStream(file);
-            }
-
-            _updateInProcess = require(url.match(/^https?/)[0]).get(url, function(r){
-                if (r.statusCode == 302){
-                    httpDownload(r.headers['location'], file, callback, progressCallback);
-                } else if (r.statusCode == 200){
-                    var m = r.headers['content-length'], p = 0;
-                    r.pipe(file);
-                    r.on('data', function(d) {
-                        progressCallback(p += d.length, m);
-                    }).on('end', function() {
-                        if (_updateInProcess){
-                            _updateInProcess = null;
-                            setTimeout(callback, 50);
-                        }
-                    });
-                } else {
-                    callback(r.statusCode);
-                }
-            }).on('error', function(e) {
-                callback(e);
-            });
-        } catch (e){
-            callback('DOWNLOAD:' + url);
-        }
-    }
-
-    private yadiskDownload(url, dest, callback, progressCallback){
-        _updateInProcess = true;
-        var ifr = $('<iframe nwdisable nwfaketop>').attr('src', url).on('load', function (e){
-            if (!_updateInProcess) return;
-
-            this.contentWindow._cb = function (e){
-                if (!_updateInProcess) return;
-                try {
-                    clearTimeout(to);
-                    httpDownload(e.models[0].data.file, dest, callback, progressCallback);
-                } catch callback('YADISK');
-                ifr.remove();
-            };
-            this.contentWindow.eval(`
-                _XMLHttpRequest = XMLHttpRequest;
-                XMLHttpRequest = function (){
-                    var r = new _XMLHttpRequest();
-                    r.onreadystatechange = function (e){
-                        if (r.status == 200 && r.readyState == 4)
-                            _cb(JSON.parse(r.responseText));
-                    };
-                    return {
-                        open: function (){ r.open.apply(r, arguments); },
-                        setRequestHeader: function (){ r.setRequestHeader.apply(r, arguments); },
-                        getAllResponseHeaders: function (){ r.getAllResponseHeaders.apply(r, arguments); },
-                        getResponseHeader: function (){ r.getResponseHeader.apply(r, arguments); },
-                        abort: function (){ r.abort.apply(r, arguments); },
-                        send: function (){ r.send.apply(r, arguments); },
-                    };
-                };`);
-            try {
-                this.contentWindow.document.querySelector('button[data-click-action="resource.download"]').click();
-            } catch {
-                ifr.remove();
-                callback('YADISK:BTN');
-            }
-        }).css({ position: 'fixed', top: '200vh', left: '200vw' }).appendTo('body');
-
-        var to = setTimeout(function (){
-            if (!_updateInProcess) return;
-            ifr.remove();
-            callback('YADISK:TO');
-        }, 10e3);
-    }
-
-    private rdDownload(url, dest, callback, progressCallback){
-        _updateInProcess = true;
-        var ifr = $('<iframe nwdisable nwfaketop>').attr('src', url).on('load', function (e){
-            if (!_updateInProcess) return;
-
-            try {
-                clearTimeout(to);
-                httpDownload(this.contentWindow.document.querySelector('.downloadButton a').href, dest, callback, progressCallback);
-            } catch (e){
-                ifr.remove();
-                callback('RD:BTN');
-            }
-        }).css({ position: 'fixed', top: '200vh', left: '200vw' }).appendTo('body');
-
-        var to = setTimeout(function (){
-            if (!_updateInProcess) return;
-            ifr.remove();
-            callback('RD:TO');
-        }, 10e3);
-    }
-
-    private download(url, dest, callback, progressCallback){
-        if (isInstallableYadisk(url)) yadiskDownload(url, dest, callback, progressCallback);
-        else if (isInstallableRd(url)) rdDownload(url, dest, callback, progressCallback);
-        else httpDownload(url, dest, callback, progressCallback);
-    }
-
+    var _downloadId;
     public install(url){
         mediator.dispatch('install:start');
-        download(url, _updateFile + '~tmp', function (error){
+        _downloadId = Downloader.download(url, _updateFile + '~tmp', function (error){
             if (error){
-                _updateInProcess = null;
                 mediator.dispatch('install:failed', error);
             } else {
                 fs.renameSync(_updateFile + '~tmp', _updateFile);
                 mediator.dispatch('install:ready');
             }
+
+            _downloadId = null;
         }, function (p, m){
             mediator.dispatch('install:progress', p, m);
         });    
     }
 
     public abort(){
-        if (!_updateInProcess) return;
-        if (_updateInProcess.abort) _updateInProcess.abort();
+        if (!_downloadId) return;
+        Downloader.abort(_downloadId);
+        _downloadId = null;
         
-        _updateInProcess = null;
         mediator.dispatch('install:interrupt');
 
         setTimeout(lambda {
@@ -177,26 +63,11 @@ static class CheckUpdate {
     }
 
     public autoupdate(){
-        function clearDir(dirPath) {
-            try {
-                var files = fs.readdirSync(dirPath);
-            } catch return;
-            for (var i = 0; i < files.length; i++) {
-                var filePath = dirPath + '/' + files[i];
-                if (fs.statSync(filePath).isFile()){
-                    fs.unlinkSync(filePath);
-                } else {
-                    clearDir(filePath);
-                    fs.rmdirSync(filePath);
-                }
-            }
-        };
-
         try {
             if (fs.existsSync(_updateFile)){
                 var d = path.join(path.dirname(process.execPath), 'carsmgr_update~next');
                 if (fs.existsSync(d)){
-                    clearDir(d);
+                    fs.removeDirSync(d, false);
                 } else {
                     fs.mkdirSync(d);
                 }

@@ -1,58 +1,67 @@
-static class Settings {
-    private var _settings;
+class ObjLocalStorage {
+    private var _obj;
+    public var key, defaults;
 
-    private var _defaults = {
-        disableTips:        false
-        updateDatabase:     true
-        uploadData:         false
-        updatesCheck:       true
-        updatesSource:      'stable'
-        
-        badgeAutoupdate:    true
+    (key, defaults){
+        this.key = key;
+        this.defaults = defaults;
+        load();
+    }
 
-        aptMode:            'default'
-        aptShowroom:        ''
-        aptFilter:          'S1-Dynamic'
-        aptResize:          true
-        aptDisableSweetFx:  true
-        aptCameraX:         -145
-        aptCameraY:         36
-        aptCameraDistance:  5.5
-        aptIncreaseDelays:  false
-    };
+    private load(){
+        try _obj = JSON.parse(localStorage[key]);
+        if (!_obj) _obj = {};
 
-    public get defaults _defaults;
+        for (var k, v in-object defaults){
+            if (typeof v === 'object' && v != null && (typeof _obj[k] !== 'object' || _obj[k] == null)){
+                _obj[k] = v;
+            }
+        }
+    }
 
     private save(){
-        localStorage.settings = JSON.stringify(_settings);
+        localStorage[key] = JSON.stringify(_obj);
     }
 
     public get(k){
-        return _settings.hasOwnProperty(k) ? _settings[k] : _defaults[k];
+        return _obj.hasOwnProperty(k) ? _obj[k] : defaults[k];
     }
 
     public set(k, val){
         if (typeof k == 'object'){
             for (var n in k){
-                _settings[n] = k[n];
+                _obj[n] = k[n];
             }
         } else {
-            _settings[k] = val;
+            _obj[k] = val;
         }
 
         save();
     }
 
     public update(f){
-        f(_settings);
+        f(_obj);
         save();
     }
-
-    {
-        _settings = {};
-
-        try {
-            _settings = JSON.parse(localStorage.settings) || {};
-        } catch (e){}
-    }
 }
+
+var Settings = new ObjLocalStorage('settings', {
+    disableTips:        false
+    updateDatabase:     true
+    uploadData:         false
+    updatesCheck:       true
+    updatesSource:      'stable'
+    
+    badgeAutoupdate:    true
+    yearAutoupdate:     false
+
+    aptMode:            'default'
+    aptShowroom:        ''
+    aptFilter:          'AT-Previews Special'
+    aptResize:          true
+    aptDisableSweetFx:  true
+    aptCameraX:         -145
+    aptCameraY:         36
+    aptCameraDistance:  5.5
+    aptIncreaseDelays:  false
+});

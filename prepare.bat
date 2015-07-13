@@ -1,5 +1,6 @@
 @echo off
 
+taskkill /f /im nw.exe 2>nul
 taskkill /f /im carsmgr.exe 2>nul
 
 rem type app-raw\lib\*.js > app-raw\libs.js 2>nul 

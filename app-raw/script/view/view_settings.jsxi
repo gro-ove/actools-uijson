@@ -10,7 +10,16 @@ static class ViewSettings {
             }
 
             Settings.update(function (s){
+                if (!s.yearAutoupdate && yearAutoupdate){
+                    setTimeout(lambda new Dialog('Year As Postfix', 
+                        'Would you like to add missing years to names now?', lambda {
+                        BatchProcessing.process(Cars.list, 'Add missing years to car names');
+                    }));
+                }
+
                 s.disableTips = disableTips;
+                s.badgeAutoupdate = badgeAutoupdate;
+                s.yearAutoupdate = yearAutoupdate;
                 s.updateDatabase = updateDatabase;
                 s.uploadData = uploadData;
                 s.updatesCheck = updatesCheck;
@@ -33,11 +42,15 @@ static class ViewSettings {
             '<button id="settings-acdir-select" style="float:right;width:30px">…</button>',
             '<input id="settings-acdir" placeholder="…/Assetto Corsa" style="width:calc(100% - 35px)">',
 
+            '<h6>Editing</h6>',
+            '<label><input id="settings-badge-autoupdate" type="checkbox">Update badge with brand</label><br>',
+            '<label><input id="settings-year-autoupdate" type="checkbox">Add year to name as postfix if missing</label>',
+
             '<h6>Tips</h6>',
             '<label><input id="settings-disable-tips" type="checkbox">Disable tips on launch</label>',
 
             '<h6>Database</h6>',
-            '<label><input id="settings-update-database" type="checkbox" disabled>Update databases</label><br>',
+            '<label><input id="settings-update-database" type="checkbox">Update databases</label><br>',
             '<label><input id="settings-upload-data" type="checkbox">Upload some changes</label>',
 
             '<h6>Updates</h6>',
@@ -46,7 +59,10 @@ static class ViewSettings {
 
             /*'<h6>Search Provider</h6>',
             '<label><select id="settings-search-provider"><option value="google"></option></select>',*/
-        ], save, false).setButton('Save').addButton('Cancel'), c = 0;
+        ], save, false).setButton('Save').addButton('User Storage', function (){
+            Shell.openItem(DataStorage.getUserContentDir());
+            return false;
+        }).addButton('Cancel'), c = 0;
 
         /* acdir */
         var acdirVal;
@@ -68,6 +84,13 @@ static class ViewSettings {
                 acdirChange();
             }).click();
         });
+
+        /* editing */
+        var badgeAutoupdate = Settings.get('badgeAutoupdate');
+        d.content.find('#settings-badge-autoupdate').change(lambda { badgeAutoupdate = this.checked })[0].checked = badgeAutoupdate;
+
+        var yearAutoupdate = Settings.get('yearAutoupdate');
+        d.content.find('#settings-year-autoupdate').change(lambda { yearAutoupdate = this.checked })[0].checked = yearAutoupdate;
 
         /* tips */
         var disableTips = Settings.get('disableTips');
@@ -142,9 +165,14 @@ static class ViewSettings {
 
         var aptFilter = Settings.get('aptFilter');
         if (AcFilters.list.length){
-            apt.content.find('#apt-filter').change(lambda { aptFilter = this.value })[0].value = aptFilter;
             var recFilter = apt.content.find('#apt-filter [value="%0"]'(Settings.defaults.aptFilter))[0];
-            if (recFilter) recFilter.textContent += ' (Recommended)';
+            if (recFilter){
+                recFilter.textContent += ' (Recommended)';
+            } else {
+                $('<option value="%0">%0 (Recommended)</option>'(Settings.defaults.aptFilter)).insertAfter(apt.content.find('#apt-filter option:first-child'));
+            }
+
+            apt.content.find('#apt-filter').change(lambda { aptFilter = this.value })[0].value = aptFilter;
         } else {
             apt.content.find('#apt-filter').attr({
                 disabled: true,

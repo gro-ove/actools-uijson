@@ -1,0 +1,46 @@
+class Notification {
+    static private _current;
+
+    public el;
+    private _timeout;
+
+    (message, details, type = 'info'){
+        if (_current) _current.close();
+
+        el = $('<notification class="%0">'(type)).html('<h4>%0</h4><p>%1</p>'(message, details)).click(function (e){
+            close();
+        }).appendTo('body');
+
+        _current = this;
+
+        window.setTimeout(lambda el.addClass('active'));
+        setTimeout(3e3);
+    }
+
+    public close(){
+        clearTimeout(_timeout);
+        _current = null;
+
+        el.removeClass('active');
+        window.setTimeout(lambda el.remove(), 500);
+        return this;
+    }
+
+    public setTimeout(timeout){
+        clearTimeout(_timeout);
+        _timeout = window.setTimeout(close, timeout);
+        return this;
+    }
+
+    public setButton(text, callback){
+        $('<button>%0</button>'(text)).click(function (e){
+            if (!callback || callback(e) !== false){
+                close();
+            }
+        }.bind(this)).prependTo(el);
+        return this;
+    }
+
+    public static info(m, d) new Notification(m, d, 'info');
+    public static warn(m, d) new Notification(m, d, 'warn');
+}

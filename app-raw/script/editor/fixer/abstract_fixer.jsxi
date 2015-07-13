@@ -38,7 +38,7 @@ class AbstractFixer {
     var _error;
     private error(err){
         _error = true;
-        ErrorHandler.handled('Cannot fix error: %0'(errorId), err);
+        ErrorHandler.handled('Cannot fix error: %0.'(errorId), err);
     }
 
     private work(c){

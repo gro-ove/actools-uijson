@@ -23,6 +23,8 @@ static class ViewList {
     }
 
     public select(car){
+        if (typeof car === 'string') car = Cars.byId(car);
+
         _selected = car;
         _node.find('.expand').removeClass('expand');
         _node.find('.selected').removeClass('selected');
@@ -157,6 +159,10 @@ static class ViewList {
     public sort(){
         if (!sortingEnabled) return;
 
+        _aside.find('#total-cars').text(Cars.list.filter(function (e){
+            return e.parent == null;
+        }).length).attr('title', 'Including modded versions: ' + Cars.list.length);
+
         var sorted = Cars.list.sort(_sortFn.displayName);
         var listNode = _node[0];
         var children = [].slice.call(listNode.children);
@@ -183,13 +189,13 @@ static class ViewList {
 
         Cars
             .on('scan:start', function (){
+                sortingEnabled = false;
+
                 _aside.find('#cars-list').empty();
                 document.body.removeChild(_aside[0]);
             })
             .on('scan:ready', function (list){
-                _aside.find('#total-cars').text(list.filter(function (e){
-                    return e.parent == null;
-                }).length).attr('title', 'Including modded versions: {0}'.format(list.length));
+                sortingEnabled = true;
 
                 sort();
                 document.body.appendChild(_aside[0]);
@@ -216,6 +222,7 @@ static class ViewList {
                 }
 
                 _node[0].appendChild(d);
+                sort();
             })
             .on('remove.car', function (car){
                 if (car === _selected){

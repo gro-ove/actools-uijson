@@ -106,6 +106,8 @@ static class AcDir {
         showrooms _showrooms,
         filters _filters;
 
+    public get temp _root + '/content/__at_tmp_' + Date.now();
+
     {
         mediator.extend(AcDir);
     }

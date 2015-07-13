@@ -99,6 +99,13 @@ static class UpgradeEditor {
                 AppServerRequest.sendBinary(_currentCarId, 'upgrade', fs.readFileSync(file));
             }
             callback();
+
+            new Dialog('Add Upgrade Icon To User Base', [
+                '<label>Name: <input value="%0"></label>'(path.basename(filename, '.png')),
+            ], function (){
+                fs.copyFileSync(file, DataStorage.getUserContentDir('Upgrades') + '/' + this.content.find('input').val() + '.png');
+                Brands.init();
+            });
         } catch (err){
             callback(err);
         }
@@ -158,8 +165,15 @@ static class UpgradeEditor {
 
         focus(d.content.find('#editable-focus')[0]);
 
-        var t = d.addTab('Library', @upgradeLib(), function (){
-            saveFromLibrary(t.content.find('.selected').attr('src'), car.upgrade, cb);
+        var upgradesLib = DataStorage.readContentDir('Upgrades', 'png');
+        var upgradesLibHtml = '';
+        for (var name, file in-object upgradesLib){
+            upgradesLibHtml += '<span class="car-library-element%0" data-file="%2" title="%1" style=\'display:inline-block;width:74px;height:74px;\
+                    background:center url("%3") no-repeat;background-size:64px\'></span>'(upgradesLibHtml.length ? '' : ' selected', name, file, file.cssUrl());
+        }
+
+        var t = d.addTab('Library', upgradesLibHtml, function (){
+            saveFromLibrary(t.content.find('.selected').data('file'), car.upgrade, cb);
         }).setButton('Select').addButton('Cancel');
         t.content.css('margin', '10px 0');
         t.find('.car-library-element').click(function (){

@@ -1,12 +1,62 @@
 static class DataStorage {
-    var _storage, _downloads;
+    var _contentDir, _userContentDir, _downloadsDir;
 
-    public getDataDir(id){
-        return mkdir('%0/%1'(_storage, id));
+    public getContentDir(id){
+        return id ? mkdir('%0/%1'(_contentDir, id)) : _contentDir;
+    }
+
+    public getUserContentDir(id){
+        return id ? mkdir('%0/%1'(_userContentDir, id)) : _userContentDir;
     }
 
     public getDownloadsDir(id){
-        return id ? mkdir('%0/%1'(_downloads, id)) : _downloads;
+        return id ? mkdir('%0/%1'(_downloadsDir, id)) : _downloadsDir;
+    }
+
+    public getDownloadsTemp(id = 'tmp'){
+        return '%0/%1'(_downloadsDir, '__%0_%1~tmp'(id, Date.now()));
+    }
+
+    public getContentFile(id, file){
+        var userOverride = '%0/%1/%2'(_userContentDir, id, file);
+        if (fs.existsSync(userOverride)) return userOverride;
+
+        var contentFile = '%0/%1/%2'(_contentDir, id, file);
+        if (fs.existsSync(contentFile)) return contentFile;
+
+        return null;
+    }
+
+    public readContentFile(id, file){
+        var filename = getContentFile(id, file);
+        return filename ? fs.readFileSync(filename) : null;
+    }
+
+    public readContentJsonFile(id, file){
+        var content = readContentFile(id, file);
+        return content ? JSON.parse('' + content) : null;
+    }
+
+    public readContentDir(id, extension){
+        extension = '.' + extension;
+
+        var dir = getContentDir(id);
+        var result = {};
+
+        for (var file in-array fs.readdirSync(dir)){
+            if (file.substr(file.length - extension.length) === extension){
+                result[file.substr(0, file.length - extension.length)] = dir + '/' + file;
+            }
+        }
+
+        dir = getUserContentDir(id);
+        for (var file in-array fs.readdirSync(dir)){
+            if (file.substr(file.length - extension.length) === extension){
+                result[file.substr(0, file.length - extension.length)] = dir + '/' + file;
+            }
+        }
+
+        return result;
     }
 
     private mkdir(p){
@@ -16,23 +66,118 @@ static class DataStorage {
         return p;
     }
 
+    public isEmpty(){
+        return fs.readdirSync(_contentDir).length === 0;
+    }
+
     {
         mkdir(gui.App.dataPath);
-        _storage = mkdir(path.join(gui.App.dataPath, 'Data Storage'));
-        _downloads = mkdir(path.join(gui.App.dataPath, 'Downloads'));
+        _contentDir = mkdir(path.join(gui.App.dataPath, 'Data Storage'));
+        _userContentDir = mkdir(path.join(gui.App.dataPath, 'Data Storage (User)'));
+        _downloadsDir = mkdir(path.join(gui.App.dataPath, 'Downloads'));
+
+        for (var file in-array fs.readdirSync(_downloadsDir)) {
+            if (/^__.+~tmp$/.test(file)){
+                fs.unlinkSync(_downloadsDir + '/' + file);
+            }
+        }
     }
 }
 
 static class Data {
     var mediator = new Mediator();
 
-    var _dataDir = DataStorage.getDataDir('Details'),
-        _userBadgesDir = DataStorage.getDataDir('Badges (User)');
+    var _builtInVersion = @macro :number { return fs.readFileSync('app-raw/content-version') }();
 
-    var _builtInVersion = @macro :number { return fs.readFileSync('content/version') }();
+    private get _currentVersion +(localStorage.installedDataVersion || -1); 
+    private set _currentVersion localStorage.installedDataVersion = arg; 
+
+    private installBuiltIn(){
+        console.time('installation');
+        try {
+            fs.removeDirSync(DataStorage.getContentDir(), false);
+            fs.copyDirRecursiveSync('content', DataStorage.getContentDir());
+        } catch (err){
+            throw new Error('Installation failed', err);
+        } finally {
+            console.timeEnd('installation');
+        }
+    }
+
+    private installUpdate(data){
+        mediator.dispatch('install:start');
+
+        var tmpFile = DataStorage.getDownloadsTemp();
+        Downloader.download(data.url, tmpFile, lambda {
+            if (arg){
+                mediator.dispatch('install:failed', arg);
+            } else {
+                var d = DataStorage.getContentDir();
+                fs.removeDirSync(d, false);
+                AcTools.Utils.FileUtils.Unzip(tmpFile, d);
+
+                _currentVersion = data.version;
+                mediator.dispatch('install:ready');
+                mediator.dispatch('update');
+
+                Notification.info('Database Updated', 'New version: %0'(data.version));
+            }
+
+            scheduleCheckUpdate();
+        });
+    }
 
     private init(){
-        
+        if (_currentVersion < _builtInVersion || DataStorage.isEmpty()){
+            mediator.dispatch('install:start');
+
+            setTimeout(function (){
+                installBuiltIn();
+                _currentVersion = _builtInVersion;
+                mediator.dispatch('install:ready');
+                mediator.dispatch('update');
+                checkUpdate();
+            }, 100);
+        } else {
+            mediator.dispatch('update');
+            checkUpdate();
+        }        
+    }
+
+    public checkUpdate(){
+        clearTimeout(_scheduled);
+
+        if (!Settings.get('updateDatabase')){
+            scheduleCheckUpdate();
+            return;
+        }
+
+        mediator.dispatch('check:start');
+
+        AppServerRequest.checkContentUpdate(_currentVersion, function (err, data){
+            if (err){
+                console.warn(err);
+                mediator.dispatch('check:failed');
+                scheduleCheckUpdate();
+                return;
+            }
+
+            if (data){
+                Notification.info('Database Update Is Available', 'Downloading in process...');
+
+                installUpdate(data);
+                mediator.dispatch('check:done:found');
+            } else {
+                mediator.dispatch('check:done');
+                scheduleCheckUpdate();
+            }
+        });
+    }
+
+    var _scheduled;
+    public scheduleCheckUpdate(){
+        clearTimeout(_scheduled);
+        _scheduled = setTimeout(checkUpdate, 2.5 * 3.6e6);
     }
 
     {

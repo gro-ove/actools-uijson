@@ -1,0 +1,261 @@
+partial static class DragMainHandler {
+    function fromDirectory_getFiles(dir){
+        var list = fs.readdirRecursiveSync(dir, 10e3);
+
+        Shell.openItem(dir);
+
+        var root = { sub: {}, path: '' };
+        for (var entry in-array list){
+            var path = entry.split('\\');
+            var loc = root;
+            for (var part in-array path){
+                if (!loc.sub) loc.sub = {};
+                loc = loc.sub[part] || (loc.sub[part] = { id: part });
+            }
+
+            loc.path = entry;
+        }
+
+        console.log(root);
+
+        return root;
+    }
+
+    function fromDirectory_extractData(dir, content){
+        var files = content.map(lambda arg.data).filter(lambda arg);
+        for (var file in-array files){
+            try file.content = JSON.flexibleParse(fs.readFileSync(dir + '/' + file.path));
+        }
+    }
+
+    function fromDirectory_prepareFound(file, entry){
+        var path = '/' + entry.root.path.replace(/\\/g, '/'),
+            name = entry.data && entry.data.content && (entry.data.content.name || entry.data.content.skinname);
+
+        name = name ? '%0 (%1)'(name, path) : path;
+
+        switch (entry.type){
+            case 'car':
+                return Cars.byId(entry.id) == null ? {
+                    id: entry.id,
+                    type: 'New Car',
+                    name: name,
+                    actions: [
+                        { name: 'Install', action: lambda fromDirectory_installCar(file, entry, arg) }
+                    ]
+                } : {
+                    id: entry.id,
+                    type: 'Update Existing Car',
+                    name: name,
+                    actions: [
+                        { name: 'Keep current skins & information', action: lambda fromDirectory_updateCarKeepSkinsUi(file, entry, arg) },
+                        { name: 'Update only data & sfx', action: lambda fromDirectory_updateCarOnlyDataSfx(file, entry, arg) },
+                        { name: 'Full update', action: lambda fromDirectory_updateCarFull(file, entry, arg) },
+                    ]
+                };
+
+            case 'skin':
+                var selected = ViewList.selected;
+                if (!selected) return;
+
+                var _unique;
+                function unique(){
+                    for (var i = 1; selected.getSkin(_unique = entry.id + '-' + i) != null; i++);
+                    return _unique;
+                }
+
+                return selected.getSkin(entry.id) == null ? {
+                    id: entry.id,
+                    type: 'New Skin For %0'(selected.displayName),
+                    name: name,
+                    actions: [
+                        { name: 'Install', action: lambda fromDirectory_installSkin(selected, file, entry, arg) }
+                    ]
+                } : {
+                    id: entry.id,
+                    type: 'Update Existing Skin Of %0'(selected.displayName),
+                    name: name,
+                    actions: [
+                        { name: 'Full update', action: lambda fromDirectory_updateSkinFull(selected, file, entry, arg) },
+                        { name: 'Install as ' + unique(), action: lambda fromDirectory_installSkinAs(selected, _unique, file, entry, arg) },
+                        { name: 'Keep current preview & information', action: lambda fromDirectory_updateSkinKeepUi(selected, file, entry, arg) },
+                    ]
+                };
+
+            default:
+                throw new Error('Unsupported type: %0'(entry.type));
+        }
+    }
+
+    function fromDirectory_unpack(dir, node, target){
+        if (!fs.existsSync(target)) {
+            fs.mkdirSync(target);
+        }
+
+        var files = fromDirectory_collectSub(node);
+        for (var file in-array files){
+            var dest = target + '/' + file.slice(node.path.length + 1);
+            fs.mkdirpSync(path.dirname(dest));
+            fs.copyFileSync(dir + '/' + file, dest);
+        }
+    }
+
+    function fromDirectory_collectSub(node, result = []){
+        for (var id, child in-object node.sub){
+            if (child.sub){
+                fromDirectory_collectSub(child, result);
+            } else {
+                result.push(child.path);
+            }
+        }
+
+        return result;
+    }
+
+    function fromDirectory_installCar(file, entry, callback){
+        var destination = path.join(AcDir.cars, entry.id);
+        if (fs.existsSync(destination)){
+            return ErrorHandler.handled('Folder “%0” already exists.'(destination));
+        }
+        
+        fromDirectory_unpack(file, entry.root, destination);
+        Cars.loadById(entry.id, lambda {
+            ViewList.select(entry.id);
+            if (callback) callback();
+        });
+    }
+
+    function fromDirectory_updateCarFull(file, entry, callback){
+        var destination = Cars.byId(entry.id).path;
+        if (!fs.existsSync(destination)){
+            return ErrorHandler.handled('Folder “%0” doesn\'t exist.'(destination));
+        }
+
+        AcTools.Utils.FileUtils.Recycle(destination);
+        fromDirectory_unpack(file, entry.root, destination);
+        Cars.loadById(entry.id, lambda {
+            ViewList.select(entry.id);
+            if (callback) callback();
+        });
+    }
+
+    function fromDirectory_updateCarKeepSkinsUi(file, entry, callback){
+        var destination = Cars.byId(entry.id).path,
+            skins = destination + '/skins',
+            ui = destination + '/ui';
+        if (!fs.existsSync(destination)){
+            return ErrorHandler.handled('Folder “%0” doesn\'t exist.'(destination));
+        }
+
+        var tmpDir = AcDir.temp;
+        fs.mkdirSync(tmpDir);
+
+        if (fs.existsSync(skins)) fs.renameSync(skins, tmpDir + '/skins');
+        if (fs.existsSync(ui)) fs.renameSync(ui, tmpDir + '/ui');
+
+        AcTools.Utils.FileUtils.Recycle(destination);
+        fromDirectory_unpack(file, entry.root, destination);
+
+        if (fs.existsSync(skins)) fs.removeDirSync(skins);
+        if (fs.existsSync(ui)) fs.removeDirSync(ui);
+
+        if (fs.existsSync(tmpDir + '/skins')) fs.renameSync(tmpDir + '/skins', skins);
+        if (fs.existsSync(tmpDir + '/ui')) fs.renameSync(tmpDir + '/ui', ui);
+        fs.removeDirSync(tmpDir);
+
+        Cars.loadById(entry.id, lambda {
+            ViewList.select(entry.id);
+            if (callback) callback();
+        });
+    }
+
+    function fromDirectory_updateCarOnlyDataSfx(file, entry, callback){
+        var destination = Cars.byId(entry.id).path;
+        if (!fs.existsSync(destination)){
+            return ErrorHandler.handled('Folder “%0” doesn\'t exist.'(destination));
+        }
+
+        if (fs.existsSync(destination + '/sfx')) AcTools.Utils.FileUtils.Recycle(destination + '/sfx');
+        if (fs.existsSync(destination + '/data')) AcTools.Utils.FileUtils.Recycle(destination + '/data');
+        if (fs.existsSync(destination + '/data.acd')) AcTools.Utils.FileUtils.Recycle(destination + '/data.acd');
+
+        fromDirectory_unpack(file, entry.root.sub['sfx'], destination + '/sfx');
+        if (entry.root.sub['data']) fromDirectory_unpack(file, entry.root.sub['data'], destination + '/data');
+        if (entry.root.sub['data.acd']) fromDirectory_unpack(file, entry.root.sub['data.acd'], destination + '/data.acd');
+
+        Cars.loadById(entry.id, lambda {
+            ViewList.select(entry.id);
+            if (callback) callback();
+        });
+    }
+
+    function fromDirectory_installSkin(car, file, entry, callback){
+        var destination = path.join(car.path, 'skins', entry.id);
+        if (fs.existsSync(destination)){
+            return ErrorHandler.handled('Folder “%0” already exists.'(destination));
+        }
+        
+        fromDirectory_unpack(file, entry.root, destination);
+        car.loadSkins(callback);
+    }
+
+    function fromDirectory_installSkinAs(car, id, file, entry, callback){
+        var destination = path.join(car.path, 'skins', id);
+        if (fs.existsSync(destination)){
+            return ErrorHandler.handled('Folder “%0” already exists.'(destination));
+        }
+        
+        fromDirectory_unpack(file, entry.root, destination);
+        car.loadSkins(callback);
+    }
+
+    function fromDirectory_updateSkinFull(car, file, entry, callback){
+        var destination = path.join(car.path, 'skins', entry.id);
+        if (!fs.existsSync(destination)){
+            callback();
+            return ErrorHandler.handled('Folder “%0” doesn\'t exist.'(destination));
+        }
+        
+        AcTools.Utils.FileUtils.Recycle(destination);
+        fromDirectory_unpack(file, entry.root, destination);
+        car.loadSkins(callback);
+    }
+
+    function fromDirectory_updateSkinKeepUi(car, file, entry, callback){
+        var destination = path.join(car.path, 'skins', entry.id),
+            preview = destination + '/preview.jpg',
+            ui = destination + '/ui_skin.json';
+        if (!fs.existsSync(destination)){
+            callback();
+            return ErrorHandler.handled('Folder “%0” doesn\'t exist.'(destination));
+        }
+
+        var tmpDir = AcDir.temp;
+        fs.mkdirSync(tmpDir);
+
+        if (fs.existsSync(preview)) fs.renameSync(preview, tmpDir + '/p');
+        if (fs.existsSync(ui)) fs.renameSync(ui, tmpDir + '/u');
+
+        AcTools.Utils.FileUtils.Recycle(destination);
+        fromDirectory_unpack(file, entry.root, destination);
+
+        if (fs.existsSync(preview)) fs.removeDirSync(preview);
+        if (fs.existsSync(ui)) fs.removeDirSync(ui);
+
+        if (fs.existsSync(tmpDir + '/p')) fs.renameSync(tmpDir + '/p', preview);
+        if (fs.existsSync(tmpDir + '/u')) fs.renameSync(tmpDir + '/u', ui);
+        fs.removeDirSync(tmpDir);
+
+        car.loadSkins(callback);
+    }
+
+    function fromDirectory(dir){
+        var holder = dir + '/__tmp_' + Date.now();
+        _holders.push({ stream: fs.createWriteStream(holder), filename: holder });
+
+        var tree = fromDirectory_getFiles(dir);
+        var content = detectContent(dir, tree);
+        fromDirectory_extractData(dir, content);
+        return content.map(lambda fromDirectory_prepareFound(dir, arg));
+    }
+}

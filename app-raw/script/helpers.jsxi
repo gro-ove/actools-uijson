@@ -144,11 +144,17 @@ String.prototype.decodeHtmlEntities = function (){
 };
 
 JSON.flexibleParse = function (d){
-    var r;
-    eval('r=' + d.toString().replace(/"(?:[^"\\]*(?:\\.)?)+"/g, function (_){
-        return _.replace(/\r?\n/g, '\\n');
-    }));
-    return r;
+    d = d.toString();
+
+    try {
+        return JSON.parse(d);
+    } catch {
+        var r;
+        eval('r=' + d.toString().replace(/"(?:[^"\\]*(?:\\.)?)+"/g, function (_){
+            return _.replace(/\r?\n/g, '\\n');
+        }));
+        return r;
+    }
 };
 
 JSON.restoreDamaged = function (data, fields){
@@ -172,7 +178,7 @@ JSON.restoreDamaged = function (data, fields){
 
     for (var key, value in-object result){
         if (fields[key] === 'string' || fields[key] === 'multiline'){
-            result[key] = value.replace(/^['"]/, '').replace(/['"]$/, '');
+            result[key] = value === 'null' ? null : value.replace(/^['"]/, '').replace(/['"]$/, '').replace(/\\(?=")/g, '');
         }
 
         if (fields[key] === 'array' || fields[key] === 'pairsArray'){
@@ -201,17 +207,21 @@ JSON.restoreDamaged = function (data, fields){
         }
 
         if (fields[key] === 'number'){
-            value = value.replace(/^['"]/, '').replace(/['"]$/, '');
+            if (value === 'null'){
+                value = null;
+            } else {
+                value = value.replace(/^['"]/, '').replace(/['"]$/, '');
 
-            value = value.replace(/[liI]/g, '1').replace(/[oO]/g, '0');
-            result[key] = +value;
+                value = value.replace(/[liI]/g, '1').replace(/[oO]/g, '0');
+                result[key] = +value;
 
-            if (Number.isNaN(result[key])){
-                result[key] = +value.replace(/[^-.\d]+/g, '');
-            }
+                if (Number.isNaN(result[key])){
+                    result[key] = +value.replace(/[^-.\d]+/g, '');
+                }
 
-            if (Number.isNaN(result[key])){
-                result[key] = +(value.replace(/[^\d]+/g, '') || '0');
+                if (Number.isNaN(result[key])){
+                    result[key] = +(value.replace(/[^\d]+/g, '') || '0');
+                }
             }
         }
     }

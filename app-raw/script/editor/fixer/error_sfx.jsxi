@@ -1,0 +1,28 @@
+class SfxBankMissing extends AbstractFixer {
+    protected reloadAfter(){
+        car.loadSfx();
+    }
+    
+    private static var _kunosOnly = true;
+
+    replaceSfxBank (c){
+        new Dialog('Select car', [
+            '<select>%0</select>'(Cars.list
+                .filter(lambda !_kunosOnly || arg.data && arg.data.author === 'Kunos')
+                .map(lambda '<option value="%0">%1</option>'(arg.id, arg.displayName)))
+        ], lambda {
+            var id = this.content.find('select').val();
+            var guids = Sfx.getGuidsById(id).replace(/(event:\/cars\/)\w+/g, '$1%0'(car.id)) + '\n' + Sfx.getDefaultGuids(car.id);
+            fs.writeFileSync(car.path + '/sfx/GUIDs.txt', guids);
+            fs.copyFileSync(Sfx.getBankFilenameById(id), car.path + '/sfx/%0.bank'(car.id));
+            c();
+        });
+    }
+
+    public get title 'Car doesn\'t have correct sfx bank.',
+        solutions [
+            { name: 'Use sfx bank from another car (not recommended)', fn: replaceSfxBank }
+        ];
+}
+
+RestorationWizard.register('sfx-bank-missing', SfxBankMissing);

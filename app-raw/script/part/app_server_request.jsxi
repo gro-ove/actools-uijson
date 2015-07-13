@@ -1,11 +1,25 @@
 static class AppServerRequest {
-    private _host = 'ascobash.comuf.com';
+    private _url = 'http://ascobash.comuf.com/api.php'; // (localStorage.developerMode ? '~' : '');
 
     private get http require('http');
 
-    public checkUpdate(version, source, callback){
+    public checkUpdate(version, branch, callback){
         $.ajax({
-            url: 'http://ascobash.comuf.com/api.php?0=check&v=%0&b=%1'(version, source),
+            url: _url + '?0=check&v=%0&b=%1'(version, branch),
+        }).fail(function() {
+            if (callback) callback('error:request');
+        }).done(function (data){
+            if (data == null || typeof data === 'object'){
+                if (callback) callback(null, data);
+            } else {
+                if (callback) callback('error:' + data);
+            }
+        });
+    }
+
+    public checkContentUpdate(version, callback){
+        $.ajax({
+            url: _url + '?0=check-content&v=%0'(version),
         }).fail(function() {
             if (callback) callback('error:request');
         }).done(function (data){
@@ -19,7 +33,7 @@ static class AppServerRequest {
 
     public sendBinary(car, file, buf, callback){
         var req = new XMLHttpRequest();
-        req.open('POST', 'http://ascobash.comuf.com/api.php?0=binary&c=%0&f=%1'(car, file), true);
+        req.open('POST', _url + '?0=binary&c=%0&f=%1'(car, file), true);
         req.setRequestHeader('Content-Type', 'application/octet-stream');
         
         req.onreadystatechange = function() {
@@ -33,7 +47,7 @@ static class AppServerRequest {
 
     public sendFeedback(feedback, callback){
         $.ajax({
-            url: 'http://ascobash.comuf.com/api.php?0=feedback',
+            url: _url + '?0=feedback',
             type: 'POST',
             contentType: 'text/plain',
             data: feedback,
@@ -47,7 +61,7 @@ static class AppServerRequest {
 
     public sendError(version, details, callback){
         $.ajax({
-            url: 'http://ascobash.comuf.com/api.php?0=error',
+            url: _url + '?0=error',
             type: 'POST',
             contentType: 'text/plain',
             data: version + ':' + details,
@@ -65,7 +79,7 @@ static class AppServerRequest {
 
     private sendDataInner(carId, key, value){
         $.ajax({
-            url: 'http://ascobash.comuf.com/api.php?0=database&c=%0&f=%1'(carId, key),
+            url: _url + '?0=database&c=%0&f=%1'(carId, key),
             type: 'POST',
             contentType: 'text/plain',
             data: value,

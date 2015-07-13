@@ -33,15 +33,20 @@
 
     progress {
         height: 3px;
-        background: #eee;
+
+        &, &::-webkit-progress-bar {
+            background: #eee;
+        }
+
+        &::-webkit-progress-value {
+            background: #59f;
+        }
     }
 
-    progress::-webkit-progress-bar {
-        background: #eee;
-    }
-
-    progress::-webkit-progress-value {
-        background: #59f;
+    progress:indeterminate {
+        &, &::-webkit-progress-bar {
+            background: #9be;
+        }
     }
 
     button:hover, footer span:hover > button:first-child {

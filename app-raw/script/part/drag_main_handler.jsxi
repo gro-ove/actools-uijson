@@ -1,0 +1,123 @@
+partial static class DragMainHandler {
+    var _ddId, _holders = [];
+
+    function handle(file){
+        if (fs.statSync(file).isDirectory()){
+            return fromDirectory(file);
+        } else {
+            return fromArchive(file);
+        }
+    }
+
+    function detectContent(file, node, result = []){
+        if (node.sub['body_shadow.png'] && node.sub['sfx'] && node.sub['skins'] && 
+            node.sub['ui'] && node.sub['ui'].sub && node.sub['ui'].sub['ui_car.json']){
+            result.push({ type: 'car', id: node.path === '' ? file.replace(/^.+[\\\/]|\.\w+$/g, '') : node.id, root: node,
+                data: node.sub['ui'].sub['ui_car.json'] });
+        } else if (node.sub['ui_skin.json']){
+            result.push({ type: 'skin', id: node.path === '' ? file.replace(/^.+[\\\/]|\.\w+$/g, '') : node.id, root: node,
+                data: node.sub['ui_skin.json'] });
+        } else {
+            for (var id, child in-object node.sub){
+                if (child.sub){
+                    detectContent(file, child, result);
+                }
+            }
+        }
+
+        return result;
+    }
+
+    function showDialog(found){
+        if (found.length === 0){
+            new Dialog('Installation', [ 'Nothing to install.' ]);
+            return;
+        }
+
+        var d = new Dialog('Installation', found.map(lambda (entry, id)
+            '<h6>%2: %3</h6><p>%4<label style="display:block"><input name="found-%0" data-id="%1" type="radio" checked>Skip</label></p>'(
+                id, entry.id, entry.type, entry.name, entry.actions.map(lambda (a, i) 
+                    '<label style="display:block"><input name="found-%0" data-id="%1" data-action="%2" type="radio">%3</label>'(id, entry.id, i, a.name)).join('')
+            )
+        ), function (){
+            var actions = found.map(lambda (entry, id){
+                var action = entry.actions[this.content.find('[name="found-%0"]:checked'(id)).data('action')];
+                return action && action.action;
+            }.bind(this)).filter(lambda arg);
+
+            if (actions.length){
+                setTimeout(applyActions.bind(null, actions));
+            }
+        }, freeHolders).setButton('Install');
+
+        d.content.find('input[data-action]').change(function (){
+            var t = this;
+            d.content.find('input[data-id="%0"]:not([data-action])'(this.getAttribute('data-id'))).each(lambda {
+                if (this !== t) this.checked = true;
+            });
+
+            this.checked = true;
+        });
+
+        var lastId;
+        for (var id, entry in-array found){
+            var el = d.content.find('[name="found-%0"]'(id))[0];
+            if (lastId !== el.getAttribute('data-id')){
+                el.checked = true;
+                lastId = el.getAttribute('data-id');
+            }
+        }
+    }
+
+    function freeHolders(){
+        for (var holder in-array _holders){
+            holder.stream.end();
+            fs.unlinkSync(holder.filename);
+        }
+    }
+
+    function applyActions(actions){
+        var d = new Dialog('Installation', [
+            '<progress max="%0"></progress>'(actions.length)
+        ], false, false), p = d.find('progress')[0];
+
+        var i = 0,
+            step = lambda {
+                if (i >= actions.length){
+                    d.close();
+                    freeHolders();
+                } else {
+                    actions[p.value = i++](lambda {
+                        setTimeout(step, 100);
+                    });
+                }
+            };
+
+        setTimeout(step, 100);
+    }
+
+    {
+        _ddId = DragDestination.register('New Car Or Skin', function (files){
+            var d = new Dialog('Searching', [
+                '<progress indeterminate></progress>'
+            ], false, false);
+
+            setTimeout(lambda {
+                d.close();
+
+                try {
+                    var found = [];
+                    for (var file in-array files){
+                        for (var entry in-array handle(file)){
+                            if (entry) found.push(entry);
+                        }
+                    }
+
+                    showDialog(found);
+                } catch (err){
+                    ErrorHandler.handled('Cannot process dragged files.', err);
+                }
+            }, 30);
+        });
+    }
+}

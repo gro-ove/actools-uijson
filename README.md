@@ -3,9 +3,11 @@ Small utility for easy editing *ui_car.json* files. Written using [NW.js](http:/
 
 #### Features
 * Enable/disable cars; edit name, brand, class, tags, description & specs
+* Install new cars or skins or update existing with drag'n'drop from archives or folders
+* New fields: year, country, author, version, url; autoupdatable database with values
 * Search for description online
 * Reassign parents, change and create new upgrade icons
-* View skins & liveries
+* View skins & liveries, auto-update liveries colors
 * Auto-update Previews to Kunos-style or something else
 * Body/Wheels Ambient Shadow Fixer
 * Open showroom, start quick practive
@@ -13,26 +15,40 @@ Small utility for easy editing *ui_car.json* files. Written using [NW.js](http:/
 * Delete cars to Recycle Bin
 
 #### TODO
-* Data Application
-* New mods installation
-* Auto-detect and fix sound errors
+* Brand: VW → Volkswagen
+* On load: check if year exists but not in the name
 * Fix memory consumption, make app more async
-* More hotkeys
+* Check for new car versions by URL
 * Optional sorting, sorting by brand/id/…
 * Skins Editor
     * Drag'n'Drop textures
     * Extend selected skins with selected files
+* Texture Optimizer
 * View/edit torque & powes curves, load from data/power.lut
 * Switchable & custom search providers (?)
 * Custom Batch Processing (?)
-* Clone cars, modify in-game specs (?)
+* Clone cars, modify open in-game specs (?)
 * Tracks/Showrooms Mode (?)
 * Custom Launcher (with GT-like career mode?)
 
 #### Changelog
+* 0.3.42
+    * New highly recommended PP Filter special for Auto-update Previews
+    * New drive modes: hotlap, drift
+    * Added support for tracks with different configurations
+    * Auto-detect original sfx uses
+    * Restoration Wizard:
+        * Missing sfx
+    * Bugfixes
+* 0.3.41
+    * Fixes and improvements for Kn5 and Custom Showroom
+* 0.3.40
+    * Drag'n'drop archive or folder to install new cars or skins or update existing
+        * *Warning!* When you're installing skins, you have to select target car first!
+    * Ctrl+F: search description; Ctrl+T: toggle; Ctrl+Alt+S: update shadow & previews
 * 0.3.36
-    * Introducing: Body/Wheels Ambient Shadow Fixer
-    * Introducing: Custom Showroom
+    * Introducing: Custom Showroom (body/wheels ambient shadows fixer, livery generator, new auto-update previews modes)
+    * Introducing: Data Application (auto-updatable user-extendable data storage)
     * Body ambient shadow size editing (works with packed data too!)
     * Auto-update Livery
     * Restoration Wizard:
@@ -151,19 +167,29 @@ Small utility for easy editing *ui_car.json* files. Written using [NW.js](http:/
 #### Requirements
 * [.NET Framework 4.5](https://www.microsoft.com/en-US/Download/details.aspx?id=30653)
 * [Visual C++ Redistributable 2013 (x86)](https://www.microsoft.com/en-us/download/details.aspx?id=40784)
+* Some free place (at least ≈0.5GB, just for in case)
+* DirectX 11 for custom showroom
 
 #### Download
-* [Last (0.3.35)](https://yadi.sk/d/fLG-SXmVhUFZG)
-* [Stable (0.3.20)](http://www.racedepartment.com/downloads/actools-cars-manager.6518/)
+* [Last (0.3.42)](https://yadi.sk/d/XEo38P_zhooik)
+* [Stable (0.3.41)](http://www.racedepartment.com/downloads/actools-cars-manager.6518/)
 * [Previous](http://www.racedepartment.com/downloads/actools-cars-manager.6518/history) [builds](https://yadi.sk/d/eHr0NCP4hSAfq)
 
 #### Tips
 * Double click on preview to launch showroom
-* Press RMB to open controls bar
-* Select found text in built-in browser and press “OK”
+* Press RMB to open controls bar or context menus
+* Select found text in built-in browser and press “OK”; hold Ctrl to add selected text instead of replacing
 * Don't forget to save changes (Ctrl+S)
 * In some cases (editing kn5, for example) app removes original files to Trash Bin, so you can easily restore them if something goes wrong.
     *Warning!* Ctrl+Z in Windows Explorer restores them, so be careful!
+* If you want to rebuild app, please, contact me first: it's written with Js-Ext, so, you know, it could be the problem
+
+#### Recommendations
+* Use “Various” as the brand name if there is no brand at all
+* Don't forget to use Body/Wheels Ambient Shadows Fixer when shadows is invalid; if results are messed up, fix them in some image editor
+* You can override brand's logos, upgrade icons and stuff
+* If you create new mods, please, add such fields as “author”, “version” and “url”
+    * Better enable “Upload some changes” and then those values eventually will be added in global database
 
 #### Troubleshooting
 * Error “App doesn't have access to this folder”
@@ -187,10 +213,10 @@ This feature allows to collect huge database with correct information (descripti
 * Practice: if Steam isn't running, default launcher will be opened instead
 
 #### Screenshots
-![Screenshot](http://i.imgur.com/kGJCn2L.png)
-![Upgrade Icon Editor](http://i.imgur.com/qhYp3Mp.png)
+![Screenshot](http://i.imgur.com/GH3Ydnj.png)
+![Upgrade Icon Editor](http://i.imgur.com/OXXxR9V.png)
 
-#### Auto-updated Previews
-![Porsche 944 Turbo S](https://pp.vk.me/c621730/v621730892/2e1e7/LO25pCMqvpg.jpg)
-![Aston Martin Vanquish V12](https://pp.vk.me/c621730/v621730048/29d84/Yzk1DN_rUI0.jpg)
-![Volvo S60R](https://pp.vk.me/c621730/v621730107/33687/j-n4apx1GA8.jpg)
+#### Auto-updated Previews & Shadows
+![Porsche 944 Turbo S](http://i.imgur.com/beyRgZz.jpg)
+![Aston Martin Vanquish V12](http://i.imgur.com/UF47Iqc.jpg)
+![Abarth 131](http://i.imgur.com/CBbnfoJ.jpg)

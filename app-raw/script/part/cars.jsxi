@@ -12,6 +12,7 @@ static partial class Cars {
 
         public add(v){
             if (!v) return;
+            v = '' + v;
             var l = v.toLowerCase();
             if (_lower.indexOf(l) < 0){
                 list.push(v);
@@ -34,7 +35,7 @@ static partial class Cars {
         classes _classes.list,
         tags _tags.list;
 
-    public byName(n){
+    public byId(n){
         for (var i = 0; i < _list.length; i++){
             if (_list[i].id === n){
                 return _list[i];
@@ -42,6 +43,10 @@ static partial class Cars {
         }
 
         return null;
+    }
+
+    public byName(n){
+        return byId(n); // TODO
     }
 
     public registerTags(tags){
@@ -81,7 +86,6 @@ static partial class Cars {
             return path.join(AcDir.carsOff, e);
         })).map(function (carPath){
             car = new Car(carPath);
-
             if (names[car.id]) return;
             mediator.dispatch('new.car', car);
             names[car.id] = true;
@@ -91,6 +95,29 @@ static partial class Cars {
         });
 
         asyncLoad();
+    }
+
+    public loadById(id, callback){
+        var car = byId(id);
+        if (car){
+            car.reload(callback);
+        } else {
+            var path = AcDir.cars + '/' + id;
+            if (fs.existsSync(path)){
+                car = new Car(path);
+            } else {
+                path = AcDir.carsOff + '/' + id;
+                if (fs.existsSync(path)){
+                    car = new Car(path);
+                } else {
+                    throw new Error('Car with id “%0” not found.'(id));
+                }
+            }
+
+            _list.push(car);
+            mediator.dispatch('new.car', car);
+            car.loadEnsure(callback);
+        }
     }
 
     private asyncLoad(){
@@ -213,6 +240,14 @@ static partial class Cars {
                 return;
             }
         }
+    }
+
+    public databaseContains(id){
+        return DataStorage.getContentFile('Details', id + '.json') != null;
+    }
+
+    public fromDatabase(id){
+        return DataStorage.readContentJsonFile('Details', id + '.json');
     }
 
     {

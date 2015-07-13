@@ -24,7 +24,7 @@ $(window)
         }
     });
 
-if (!localStorage.dataCollection){
+if (0&&!localStorage.dataCollection){
     new Dialog('Introducing: Data Collection', [
         '<h6>What is it?</h6>'
         'Data Collection – new feature, which allows to create huge database with correct information about every car, modded or not.'
@@ -91,6 +91,12 @@ AcDir
     });
 
 Data
-    .on('ready', function (){
+    .one('update', function (){
         AcDir.init();
     });
+
+CheckUpdate
+    .on('check:failed', function (){
+        Notification.warn('Update Checking Failed', 'Probably server is unavailable or something.');
+    });
+

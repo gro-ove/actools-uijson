@@ -1,6 +1,10 @@
 static class UiJsonDamaged {
     public parseSkinFile(filename){
-        var result = JSON.restoreDamaged(fs.readFileSync(filename), {
+        return parseSkinData(fs.readFileSync(filename));
+    }
+
+    public parseSkinData(data){
+        var result = JSON.restoreDamaged(data, {
             skinname: 'string'
             drivername: 'string'
             country: 'string'
@@ -16,7 +20,11 @@ static class UiJsonDamaged {
     }
 
     public parseCarFile(filename){
-        var result = JSON.restoreDamaged(fs.readFileSync(filename), {
+        return parseCarData(fs.readFileSync(filename));
+    }
+
+    public parseCarData(data){
+        var result = JSON.restoreDamaged(data, {
             name: 'string'
             brand: 'string'
             parent: 'string'

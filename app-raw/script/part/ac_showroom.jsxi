@@ -1,7 +1,7 @@
 static class AcShowroom {
     public var modes = [
         { id: 'default', name: 'Regular Showroom (Recommended)' }
-        { id: 'kunos', name: 'Kunos Style (Dark Room)' }
+        { id: 'kunos', name: 'Dark Room' }
         { id: 'seatleon', name: 'Seat Leon Eurocup Style' }
         { id: 'gt5', name: 'GT5-style' }
         { id: 'gt6', name: 'GT6-style' }
@@ -50,6 +50,17 @@ static class AcShowroom {
             var logFile = fs.readFileSync(AcTools.Utils.FileUtils.GetLogFile()).toString();
             if (/\bCOULD NOT FIND SUSPENSION OBJECT SUSP_[LR][FR]\b/.test(logFile)){
                 car.addError('kn5-susp_xx-error', 'Car\'s model doesn\'t have a proper suspension.');
+                ErrorHandler.handled('Car\'s model doesn\'t have a proper suspension.');
+                return true;
+            }
+
+            if (/\bCOULD NOT FIND SUSPENSION OBJECT WHEEL_[LR][FR]\b/.test(logFile)){
+                ErrorHandler.handled('Car\'s model doesn\'t have some of the wheels.');
+                return true;
+            }
+
+            if (/\\cameraforwardyebis\.cpp \(\d+\): CameraForwardYebis::render\b/.test(logFile)){
+                ErrorHandler.handled('Most likely selected filter is missing.');
                 return true;
             }
         }
@@ -66,7 +77,10 @@ static class AcShowroom {
         lastShowroomFilter localStorage.lastShowroomFilter || '';
 
     public start(c, s, room){
-        if (c.path.indexOf(AcDir.cars)) return;
+        if (c.disabled){
+            Notification.warn('No Way', 'Enable car first.');
+            return;
+        }
 
         if (s == null){
             s = c.selectedSkin.id;
@@ -78,12 +92,12 @@ static class AcShowroom {
         if (!exists(room)){
             ErrorHandler.handled('Showroom “%0” is missing.'(room));
             return;
-        } 
+        }
 
         if (filter && !AcFilters.exists(filter)){
             ErrorHandler.handled('Filter “%0” is missing.'(filter));
             return;
-        } 
+        }
 
         AcTools;
         try {
@@ -167,11 +181,14 @@ static class AcShowroom {
     }
 
     public shot(c, m){
-        if (c.path.indexOf(AcDir.cars)) return;
-
         var mode = Settings.get('aptMode');
 
         if (mode === 'default'){
+            if (c.disabled){
+                Notification.warn('No Way', 'Enable car first.');
+                return;
+            }
+
             var showroom = Settings.get('aptShowroom') || _blackShowroom;
             var x = -Settings.get('aptCameraX');
             var y = -Settings.get('aptCameraY');
@@ -203,7 +220,7 @@ static class AcShowroom {
                             if (blackShowroomTest()){
                                 setTimeout(proceed);
                             } else {
-                                new Dialog('Black Showroom Installation', 'Showroom is still missing. Are you sure?');
+                                new Dialog('Black Showroom Installation', 'Showroom is still missing. No way.');
                                 this.buttons.find('button:last-child').text('Really Done');
                                 return false;
                             }                        
@@ -217,6 +234,21 @@ static class AcShowroom {
         }
 
         function proceed(){
+            if (mode === 'default'){
+                if (filter === Settings.defaults.aptFilter){
+                    AcFilters.installFilter('data/ppfilter.ini', Settings.defaults.aptFilter);
+                    setTimeout(proceedShot, 500);
+                    return;
+                } else if (filter && !AcFilters.exists(filter)){
+                    ErrorHandler.handled('Filter “%0” is missing.'(filter));
+                    return;
+                }
+            }
+
+            proceedShot();
+        }
+
+        function proceedShot(){
             var output;
             try {
                 if (mode === 'default'){

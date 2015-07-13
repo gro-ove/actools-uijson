@@ -20,6 +20,13 @@ static partial class Cars {
         public parent = null;
         public children = [];
 
+        public originalSfx;
+        public get originalSfxDisplayName {
+            if (!originalSfx) return '';
+            var c = Cars.byId(originalSfx);
+            return c && c.displayName || originalSfx;
+        }
+
         (carPath){
             id = carPath.slice(Math.max(carPath.lastIndexOf('/'), carPath.lastIndexOf('\\')) + 1);
             path = carPath;
@@ -143,7 +150,11 @@ static partial class Cars {
 
                     if (i > -1){
                         var tags = data.tags.slice();
-                        tags[i] = value.toLowerCase();
+                        if (value){
+                            tags[i] = value.toLowerCase();
+                        } else {
+                            tags.splice(i, 1);
+                        }
                         changeData('tags', tags, true);
                     }
                 }
@@ -159,11 +170,9 @@ static partial class Cars {
                     if (value < 1800 || value > 2100) return;
 
                     if (Years.nameContains(data.name)){
-                        if (data.name.substr(-4) == data.year){
-                            data.name = data.name.slice(0, -4) + value;
-                        } else if (data.name.substr(-2) == ('' + data.year).slice(2)){
-                            data.name = data.name.slice(0, -2) + ('' + value).slice(2);
-                        }
+                        changeData('name', data.name.slice(0, -2) + ('' + value).slice(2), true);
+                    } else if (Settings.get('yearAutoupdate')){
+                        changeData('name', Years.addToName(data.name, value), true);
                     }
                 }
 
@@ -313,6 +322,14 @@ static partial class Cars {
                 changed = false;
                 mediator.dispatch('update.car.changed', this);
             }
+        }
+
+        public exportDatabase(){
+            var dir = DataStorage.getUserContentDir('Details');
+            var obj = Object.clone(data);
+            delete obj.version;
+
+            fs.writeFileSync(dir + '/' + id + '.json', JSON.stringify(obj));
         }
     }
 }
