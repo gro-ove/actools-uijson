@@ -72,7 +72,8 @@ partial static class DragMainHandler {
     function freeHolders(){
         for (var holder in-array _holders){
             holder.stream.end();
-            fs.unlinkSync(holder.filename);
+            if (fs.existsSync(holder.filename))
+                try fs.unlinkSync(holder.filename);
         }
     }
 

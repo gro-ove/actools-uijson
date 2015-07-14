@@ -64,14 +64,23 @@ static class AcPractice {
         }
     }
 
-    public start(c, s = c.selectedSkin.id){
+    public start(c, s, m = _storage.get('mode')){
         if (c.disabled){
             Notification.warn('No Way', 'Enable car first.');
             return;
         }
 
         if (!_tracks) init();
-        var m = _storage.get('mode');
+
+        if (c.skins.length === 0){
+            Notification.warn('No Way', 'At least one skin required.');
+            return;
+        }
+
+        if (s == null){
+            s = c.selectedSkin ? c.selectedSkin.id : c.skins[0].id;
+        }
+
         var r = _storage.get('track')[m];
 
         AcTools;

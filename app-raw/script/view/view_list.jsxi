@@ -349,18 +349,19 @@ static class ViewList {
             .on('keydown', function (e){
                 if (Event.isSomeInput(e)) return;
                 if (e.ctrlKey || e.altKey || e.shiftKey) return;
+                if ($('#dialog')[0]) return;
 
                 var f = _aside.find('#cars-list-filter');
                 if (/[a-zA-Z\d]/.test(String.fromCharCode(e.keyCode)) || e.keyCode == 8 && f.val()){
                     f.show()[0].focus();
                 }
 
-                if (e.keyCode === 38 && !$('#dialog')[0]){
+                if (e.keyCode === 38){
                     selectNear(-1);
                     return false;
                 }
 
-                if (e.keyCode === 40 && !$('#dialog')[0]){
+                if (e.keyCode === 40){
                     selectNear(1);
                     return false;
                 }

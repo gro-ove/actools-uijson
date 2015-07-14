@@ -111,7 +111,7 @@ static class Data {
         Downloader.download(data.url, tmpFile, lambda {
             if (arg){
                 mediator.dispatch('install:failed', arg);
-            } else {
+            } else try {
                 var d = DataStorage.getContentDir();
                 fs.removeDirSync(d, false);
                 AcTools.Utils.FileUtils.Unzip(tmpFile, d);
@@ -121,6 +121,8 @@ static class Data {
                 mediator.dispatch('update');
 
                 Notification.info('Database Updated', 'New version: %0'(data.version));
+            } catch (err){
+                Notification.warn('Database Update Failed', ('' + err).split('\n')[0]);
             }
 
             scheduleCheckUpdate();

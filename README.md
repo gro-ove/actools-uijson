@@ -15,8 +15,7 @@ Small utility for easy editing *ui_car.json* files. Written using [NW.js](http:/
 * Delete cars to Recycle Bin
 
 #### TODO
-* Brand: VW → Volkswagen
-* On load: check if year exists but not in the name
+* Check for updates in …\Documents\Assetto Corsa\cfg\cars\*\view.ini
 * Fix memory consumption, make app more async
 * Check for new car versions by URL
 * Optional sorting, sorting by brand/id/…
@@ -32,6 +31,8 @@ Small utility for easy editing *ui_car.json* files. Written using [NW.js](http:/
 * Custom Launcher (with GT-like career mode?)
 
 #### Changelog
+* 0.3.44
+    * Bugfixes
 * 0.3.42
     * New highly recommended PP Filter special for Auto-update Previews
     * New drive modes: hotlap, drift
@@ -171,7 +172,7 @@ Small utility for easy editing *ui_car.json* files. Written using [NW.js](http:/
 * DirectX 11 for custom showroom
 
 #### Download
-* [Last (0.3.42)](https://yadi.sk/d/XEo38P_zhooik)
+* [Last (0.3.44)](https://yadi.sk/d/8scdCAG-hrHhC)
 * [Stable (0.3.41)](http://www.racedepartment.com/downloads/actools-cars-manager.6518/)
 * [Previous](http://www.racedepartment.com/downloads/actools-cars-manager.6518/history) [builds](https://yadi.sk/d/eHr0NCP4hSAfq)
 
@@ -196,6 +197,8 @@ Small utility for easy editing *ui_car.json* files. Written using [NW.js](http:/
     You have to grant access to Assetto Corsa root folder. Overwise app won't be able to edit files, and it's its main purpose! To grand access you can run app as Administrator, but it's a worst way. Much better way is to change Security Properties of the folder. When app get access to game files and nothing else.
 * Error “Cannot get previews. Process exited.”
     If AC Showroom closes on launch, maybe there is a problem with the car. Open log file and check last lines.
+* Autoupdate doesn't work
+    Please check if app has access to his folder. If you drop carsmgr.exe into something like **C:\Program Files**, disable autoupdate at all (but I don't recommend it).
 
 #### Data Collection
 This feature allows to collect huge database with correct information (description, tags and etc.) about every car! All you have to do is open Settings, enable option “Upload some changes” (it's disabled by default because of privacy and stuff) and then some of your fixes will be uploaded on server! After that everybody will have access to clean, right and actual information!

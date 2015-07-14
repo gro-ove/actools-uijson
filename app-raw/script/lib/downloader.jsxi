@@ -26,6 +26,14 @@ static class Downloader {
     var _updateInProcess;
     private httpDownload(url, file, callback, progressCallback){
         try {
+            fs.writeFileSync(file, '');
+            fs.unlinkSync(file, '');
+        } catch (err){
+            callback('ACCESS:' + file);
+            return;
+        }
+
+        try {
             if (typeof file === 'string'){
                 file = fs.createWriteStream(file);
             }

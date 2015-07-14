@@ -37,8 +37,8 @@ static class Brands {
     }
 
     public nameContains(name, brand){
-        return brand == null ? _list.some(lambda name.indexOf(toNamePart(arg) + ' ') === 0) : 
-            name.indexOf(toNamePart(brand) + ' ') === 0;
+        return brand == null ? _list.some(lambda name.indexOf(toNamePartNc(arg) + ' ') === 0) : 
+            name.indexOf(toNamePartNc(brand) + ' ') === 0;
     }
 
     public fromName(name){
@@ -56,6 +56,9 @@ static class Brands {
             case 'Mercedes':
                 return 'Mercedes-Benz';
 
+            case 'VW':
+                return 'Volkswagen';
+
             default:
                 return brand;
         }
@@ -68,6 +71,16 @@ static class Brands {
 
             default:
                 return brand;
+        }
+    }
+
+    public toNamePartNc(brand){
+        switch (brand){
+            case 'VW':
+                return 'Volkswagen';
+
+            default:
+                return toNamePart(brand);
         }
     }
 }

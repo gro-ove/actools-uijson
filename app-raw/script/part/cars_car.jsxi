@@ -146,16 +146,18 @@ static partial class Cars {
                 }
 
                 if (key === 'country'){
-                    var i = data.tags.map(lambda arg.toLowerCase()).indexOf(data.country.toLowerCase());
+                    if (data.country != null){
+                        var i = data.tags.map(lambda arg.toLowerCase()).indexOf(data.country.toLowerCase());
 
-                    if (i > -1){
-                        var tags = data.tags.slice();
-                        if (value){
-                            tags[i] = value.toLowerCase();
-                        } else {
-                            tags.splice(i, 1);
+                        if (i > -1){
+                            var tags = data.tags.slice();
+                            if (value){
+                                tags[i] = value.toLowerCase();
+                            } else {
+                                tags.splice(i, 1);
+                            }
+                            changeData('tags', tags, true);
                         }
-                        changeData('tags', tags, true);
                     }
                 }
 
@@ -275,6 +277,8 @@ static partial class Cars {
         }
 
         public getSkin(skinId){
+            if (!skins) return;
+            
             for (var skin in-array skins){
                 if (skin.id === skinId){
                     return skin;
@@ -318,7 +322,15 @@ static partial class Cars {
                 var p = Object.clone(data);
                 p.description = p.description.replace(/\n/g, '<br>');
                 p.class = p.class.toLowerCase();
-                fs.writeFileSync(json, JSON.stringify(p, null, 4));
+                var d = JSON.stringify(p, null, 4);
+
+                try {
+                    fs.writeFileSync(json, d);
+                } catch (err){
+                    ErrorHandler.handled('Cannot save file %0.'(json), err);
+                    return;
+                }
+
                 changed = false;
                 mediator.dispatch('update.car.changed', this);
             }

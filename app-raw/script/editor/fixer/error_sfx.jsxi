@@ -13,6 +13,7 @@ class SfxBankMissing extends AbstractFixer {
         ], lambda {
             var id = this.content.find('select').val();
             var guids = Sfx.getGuidsById(id).replace(/(event:\/cars\/)\w+/g, '$1%0'(car.id)) + '\n' + Sfx.getDefaultGuids(car.id);
+            if (!fs.existsSync(car.path + '/sfx')) fs.mkdirSync(car.path + '/sfx');
             fs.writeFileSync(car.path + '/sfx/GUIDs.txt', guids);
             fs.copyFileSync(Sfx.getBankFilenameById(id), car.path + '/sfx/%0.bank'(car.id));
             c();

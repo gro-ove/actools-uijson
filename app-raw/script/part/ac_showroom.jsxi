@@ -82,8 +82,15 @@ static class AcShowroom {
             return;
         }
 
+        if (!c) return;
+
+        if (c.skins.length === 0){
+            Notification.warn('No Way', 'At least one skin required.');
+            return;
+        }
+
         if (s == null){
-            s = c.selectedSkin.id;
+            s = c.selectedSkin ? c.selectedSkin.id : c.skins[0].id;
         }
 
         room = room || lastShowroom;

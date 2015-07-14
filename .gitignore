@@ -10,6 +10,7 @@ output/download.txt
 output/locales
 output/debug.log
 content (user)
+FIXME.md
 
 *.bat
 

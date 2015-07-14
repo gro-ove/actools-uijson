@@ -111,6 +111,7 @@ static class ViewDetails {
 
     function outSkins(car){
         if (!car.skins || !car.skins[0]) return;
+
         if (!car.selectedSkin){
             car.selectSkin(car.skins[0].id);
             return;
@@ -118,10 +119,11 @@ static class ViewDetails {
 
         setTimeout(function (){
             if (car !== _selected) return;
+
             var sa = $('#selected-car-skins-article'),
                 sp = $('#selected-car-preview'),
                 ss = $('#selected-car-skins');
-            if (car.skins){
+            if (car.skins && car.skins[0] && car.selectedSkin){
                 sa.show();
                 ss.empty();
 
@@ -564,12 +566,21 @@ static class ViewDetails {
                     }
                 } }));
 
-                menu.append(new gui.MenuItem({ label: 'Drive', key: 'P', click: function (){
-                    if (!_selected) return;
-                    AcPractice.start(_selected, id);
+                var driveMenu = new gui.MenuItem({ label: 'Drive', submenu: new gui.Menu() });
+                menu.append(driveMenu);
+                driveMenu = driveMenu.submenu;
+
+                driveMenu.append(new gui.MenuItem({ label: 'Practice', click: function (){
+                    AcPractice.start(_selected, id, 'Practice');
                 } }));
 
-                // TODO
+                driveMenu.append(new gui.MenuItem({ label: 'Hotlap', click: function (){
+                    AcPractice.start(_selected, id, 'Hotlap');
+                } }));
+
+                driveMenu.append(new gui.MenuItem({ label: 'Drift', click: function (){
+                    AcPractice.start(_selected, id, 'Drift');
+                } }));
 
                 menu.append(new gui.MenuItem({ label: 'Folder', click: function (){
                     if (!_selected) return;

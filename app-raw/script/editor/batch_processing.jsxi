@@ -197,7 +197,7 @@ static class BatchProcessing {
             if (!car.data || !car.data.tags) return;
             var temp = 0,
                 tags = car.data.tags.map(function (raw){
-                    var tag;
+                    var tag = raw;
                     if (/^(?:#(a\d+)|([aA]\d+))$/.test(tag)){
                         tag = '#' + (RegExp.$1 || RegExp.$2).toUpperCase();
                     } else {

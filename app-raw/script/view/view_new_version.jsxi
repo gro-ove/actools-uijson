@@ -67,7 +67,8 @@ static class ViewNewVersion {
 
     function installFailed(e){
         if (!_upd) installStart();
-        _upd.setContent('Update failed: {0}.'.format(e));
+        if (e.indexOf('ACCESS:') === 0) e = 'access not permitted';
+        _upd.setContent('Update failed: %0.'(e));
         _upd.setButton('Nevermind', function (){}).addButton('Manual Update', function (){
             Shell.openItem(_inf.downloadUrl || _inf.detailsUrl);
         });
