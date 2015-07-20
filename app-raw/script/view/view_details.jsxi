@@ -110,7 +110,10 @@ static class ViewDetails {
     }
 
     function outSkins(car){
-        if (!car.skins || !car.skins[0]) return;
+        if (!car.skins || !car.skins[0]){
+            $('#selected-car-skins-article').hide();
+            return;
+        }
 
         if (!car.selectedSkin){
             car.selectSkin(car.skins[0].id);

@@ -64,7 +64,7 @@ static class AcPractice {
         }
     }
 
-    public start(c, s, m = _storage.get('mode')){
+    public start(c, s, m){
         if (c.disabled){
             Notification.warn('No Way', 'Enable car first.');
             return;
@@ -75,6 +75,10 @@ static class AcPractice {
         if (c.skins.length === 0){
             Notification.warn('No Way', 'At least one skin required.');
             return;
+        }
+
+        if (m == null){
+            m = _storage.get('mode');
         }
 
         if (s == null){

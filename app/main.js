@@ -5172,25 +5172,31 @@ var DragMainHandler = (function (){                                             
 			
 			var files = fromArchive_collectSub(node);
 			
-			exec('native\\7z',                                                     // drag_main_handler_archive.jsxi:111
-				[ 'x', '-sccUTF-8', '-o' + tmpDir, file ].concat(files));          // drag_main_handler_archive.jsxi:111
+			try {
+				exec('native\\7z',                                                 // drag_main_handler_archive.jsxi:112
+					[ 'x', '-sccUTF-8', '-o' + tmpDir, file ].concat(files));      // drag_main_handler_archive.jsxi:112
+			} catch (err){                                                         // drag_main_handler_archive.jsxi:113
+				console.debug(tmpDir, file, files);                                // drag_main_handler_archive.jsxi:114
+				ErrorHandler.handled('Cannot unpack archive.', err);               // drag_main_handler_archive.jsxi:115
+				return;
+			} 
 			
-			for (var __14 = 0; __14 < files.length; __14 ++){                      // drag_main_handler_archive.jsxi:113
+			for (var __14 = 0; __14 < files.length; __14 ++){                      // drag_main_handler_archive.jsxi:119
 				var f = files[__14];
 				
 				var dest = target + '/' + f.slice(node.path.length + 1);
 				
-				fs.mkdirpSync(path.dirname(dest));                                 // drag_main_handler_archive.jsxi:115
-				fs.renameSync(tmpDir + '/' + f, dest);                             // drag_main_handler_archive.jsxi:116
+				fs.mkdirpSync(path.dirname(dest));                                 // drag_main_handler_archive.jsxi:121
+				fs.renameSync(tmpDir + '/' + f, dest);                             // drag_main_handler_archive.jsxi:122
 			}
 			
-			fs.removeDirSync(tmpDir);                                              // drag_main_handler_archive.jsxi:119
+			fs.removeDirSync(tmpDir);                                              // drag_main_handler_archive.jsxi:125
 		}
 	}
 	
-	function fromArchive_collectSub(node, result){                                 // drag_main_handler_archive.jsxi:123
-		if (result === undefined)                                                  // drag_main_handler_archive.jsxi:123
-			result = [];                                                           // drag_main_handler_archive.jsxi:123
+	function fromArchive_collectSub(node, result){                                 // drag_main_handler_archive.jsxi:129
+		if (result === undefined)                                                  // drag_main_handler_archive.jsxi:129
+			result = [];                                                           // drag_main_handler_archive.jsxi:129
 	
 		{
 			var __15 = node.sub;
@@ -5199,212 +5205,212 @@ var DragMainHandler = (function (){                                             
 				if (__15.hasOwnProperty(id)){
 					var child = __15[id];
 					
-					if (child.sub){                                                // drag_main_handler_archive.jsxi:125
-						fromArchive_collectSub(child, result);                     // drag_main_handler_archive.jsxi:126
+					if (child.sub){                                                // drag_main_handler_archive.jsxi:131
+						fromArchive_collectSub(child, result);                     // drag_main_handler_archive.jsxi:132
 					} else {
-						result.push(child.path);                                   // drag_main_handler_archive.jsxi:128
+						result.push(child.path);                                   // drag_main_handler_archive.jsxi:134
 					}
 				}
 			
 			__15 = undefined;
 		}
-		return result;                                                             // drag_main_handler_archive.jsxi:132
+		return result;                                                             // drag_main_handler_archive.jsxi:138
 	}
 	
-	function fromArchive_installCar(file, entry, callback){                        // drag_main_handler_archive.jsxi:135
+	function fromArchive_installCar(file, entry, callback){                        // drag_main_handler_archive.jsxi:141
 		var destination = path.join(AcDir.cars, entry.id);
 		
-		if (fs.existsSync(destination)){                                           // drag_main_handler_archive.jsxi:137
+		if (fs.existsSync(destination)){                                           // drag_main_handler_archive.jsxi:143
 			return ErrorHandler.handled('Folder “' + destination + '” already exists.');
 		}
 		
-		fromArchive_unpack(file, entry.root, destination);                         // drag_main_handler_archive.jsxi:141
-		Cars.loadById(entry.id,                                                    // drag_main_handler_archive.jsxi:142
-			function (arg){                                                        // drag_main_handler_archive.jsxi:142
-				ViewList.select(entry.id);                                         // drag_main_handler_archive.jsxi:143
+		fromArchive_unpack(file, entry.root, destination);                         // drag_main_handler_archive.jsxi:147
+		Cars.loadById(entry.id,                                                    // drag_main_handler_archive.jsxi:148
+			function (arg){                                                        // drag_main_handler_archive.jsxi:148
+				ViewList.select(entry.id);                                         // drag_main_handler_archive.jsxi:149
 				
-				if (callback)                                                      // drag_main_handler_archive.jsxi:144
-					callback();                                                    // drag_main_handler_archive.jsxi:144
+				if (callback)                                                      // drag_main_handler_archive.jsxi:150
+					callback();                                                    // drag_main_handler_archive.jsxi:150
 			});
 	}
 	
-	function fromArchive_updateCarFull(file, entry, callback){                     // drag_main_handler_archive.jsxi:148
+	function fromArchive_updateCarFull(file, entry, callback){                     // drag_main_handler_archive.jsxi:154
 		var destination = Cars.byId(entry.id).path;
 		
-		if (!fs.existsSync(destination)){                                          // drag_main_handler_archive.jsxi:150
+		if (!fs.existsSync(destination)){                                          // drag_main_handler_archive.jsxi:156
 			return ErrorHandler.handled('Folder “' + destination + '” doesn\'t exist.');
 		}
 		
-		AcTools.Utils.FileUtils.Recycle(destination);                              // drag_main_handler_archive.jsxi:154
-		fromArchive_unpack(file, entry.root, destination);                         // drag_main_handler_archive.jsxi:155
-		Cars.loadById(entry.id,                                                    // drag_main_handler_archive.jsxi:156
-			function (arg){                                                        // drag_main_handler_archive.jsxi:156
-				ViewList.select(entry.id);                                         // drag_main_handler_archive.jsxi:157
+		AcTools.Utils.FileUtils.Recycle(destination);                              // drag_main_handler_archive.jsxi:160
+		fromArchive_unpack(file, entry.root, destination);                         // drag_main_handler_archive.jsxi:161
+		Cars.loadById(entry.id,                                                    // drag_main_handler_archive.jsxi:162
+			function (arg){                                                        // drag_main_handler_archive.jsxi:162
+				ViewList.select(entry.id);                                         // drag_main_handler_archive.jsxi:163
 				
-				if (callback)                                                      // drag_main_handler_archive.jsxi:158
-					callback();                                                    // drag_main_handler_archive.jsxi:158
+				if (callback)                                                      // drag_main_handler_archive.jsxi:164
+					callback();                                                    // drag_main_handler_archive.jsxi:164
 			});
 	}
 	
-	function fromArchive_updateCarKeepSkinsUi(file, entry, callback){              // drag_main_handler_archive.jsxi:162
-		var destination = Cars.byId(entry.id).path,                                // drag_main_handler_archive.jsxi:163
-			skins = destination + '/skins',                                        // drag_main_handler_archive.jsxi:164
-			ui = destination + '/ui';                                              // drag_main_handler_archive.jsxi:165
+	function fromArchive_updateCarKeepSkinsUi(file, entry, callback){              // drag_main_handler_archive.jsxi:168
+		var destination = Cars.byId(entry.id).path,                                // drag_main_handler_archive.jsxi:169
+			skins = destination + '/skins',                                        // drag_main_handler_archive.jsxi:170
+			ui = destination + '/ui';                                              // drag_main_handler_archive.jsxi:171
 		
-		if (!fs.existsSync(destination)){                                          // drag_main_handler_archive.jsxi:166
+		if (!fs.existsSync(destination)){                                          // drag_main_handler_archive.jsxi:172
 			return ErrorHandler.handled('Folder “' + destination + '” doesn\'t exist.');
 		}
 		
 		var tmpDir = AcDir.temp;
 		
-		fs.mkdirSync(tmpDir);                                                      // drag_main_handler_archive.jsxi:171
-		
-		if (fs.existsSync(skins))                                                  // drag_main_handler_archive.jsxi:173
-			fs.renameSync(skins, tmpDir + '/skins');                               // drag_main_handler_archive.jsxi:173
-		
-		if (fs.existsSync(ui))                                                     // drag_main_handler_archive.jsxi:174
-			fs.renameSync(ui, tmpDir + '/ui');                                     // drag_main_handler_archive.jsxi:174
-		
-		AcTools.Utils.FileUtils.Recycle(destination);                              // drag_main_handler_archive.jsxi:176
-		fromArchive_unpack(file, entry.root, destination);                         // drag_main_handler_archive.jsxi:177
+		fs.mkdirSync(tmpDir);                                                      // drag_main_handler_archive.jsxi:177
 		
 		if (fs.existsSync(skins))                                                  // drag_main_handler_archive.jsxi:179
-			fs.removeDirSync(skins);                                               // drag_main_handler_archive.jsxi:179
+			fs.renameSync(skins, tmpDir + '/skins');                               // drag_main_handler_archive.jsxi:179
 		
 		if (fs.existsSync(ui))                                                     // drag_main_handler_archive.jsxi:180
-			fs.removeDirSync(ui);                                                  // drag_main_handler_archive.jsxi:180
+			fs.renameSync(ui, tmpDir + '/ui');                                     // drag_main_handler_archive.jsxi:180
 		
-		if (fs.existsSync(tmpDir + '/skins'))                                      // drag_main_handler_archive.jsxi:182
-			fs.renameSync(tmpDir + '/skins', skins);                               // drag_main_handler_archive.jsxi:182
+		AcTools.Utils.FileUtils.Recycle(destination);                              // drag_main_handler_archive.jsxi:182
+		fromArchive_unpack(file, entry.root, destination);                         // drag_main_handler_archive.jsxi:183
 		
-		if (fs.existsSync(tmpDir + '/ui'))                                         // drag_main_handler_archive.jsxi:183
-			fs.renameSync(tmpDir + '/ui', ui);                                     // drag_main_handler_archive.jsxi:183
+		if (fs.existsSync(skins))                                                  // drag_main_handler_archive.jsxi:185
+			fs.removeDirSync(skins);                                               // drag_main_handler_archive.jsxi:185
 		
-		fs.removeDirSync(tmpDir);                                                  // drag_main_handler_archive.jsxi:184
-		Cars.loadById(entry.id,                                                    // drag_main_handler_archive.jsxi:186
-			function (arg){                                                        // drag_main_handler_archive.jsxi:186
-				ViewList.select(entry.id);                                         // drag_main_handler_archive.jsxi:187
+		if (fs.existsSync(ui))                                                     // drag_main_handler_archive.jsxi:186
+			fs.removeDirSync(ui);                                                  // drag_main_handler_archive.jsxi:186
+		
+		if (fs.existsSync(tmpDir + '/skins'))                                      // drag_main_handler_archive.jsxi:188
+			fs.renameSync(tmpDir + '/skins', skins);                               // drag_main_handler_archive.jsxi:188
+		
+		if (fs.existsSync(tmpDir + '/ui'))                                         // drag_main_handler_archive.jsxi:189
+			fs.renameSync(tmpDir + '/ui', ui);                                     // drag_main_handler_archive.jsxi:189
+		
+		fs.removeDirSync(tmpDir);                                                  // drag_main_handler_archive.jsxi:190
+		Cars.loadById(entry.id,                                                    // drag_main_handler_archive.jsxi:192
+			function (arg){                                                        // drag_main_handler_archive.jsxi:192
+				ViewList.select(entry.id);                                         // drag_main_handler_archive.jsxi:193
 				
-				if (callback)                                                      // drag_main_handler_archive.jsxi:188
-					callback();                                                    // drag_main_handler_archive.jsxi:188
+				if (callback)                                                      // drag_main_handler_archive.jsxi:194
+					callback();                                                    // drag_main_handler_archive.jsxi:194
 			});
 	}
 	
-	function fromArchive_updateCarOnlyDataSfx(file, entry, callback){              // drag_main_handler_archive.jsxi:192
+	function fromArchive_updateCarOnlyDataSfx(file, entry, callback){              // drag_main_handler_archive.jsxi:198
 		var destination = Cars.byId(entry.id).path;
 		
-		if (!fs.existsSync(destination)){                                          // drag_main_handler_archive.jsxi:194
+		if (!fs.existsSync(destination)){                                          // drag_main_handler_archive.jsxi:200
 			return ErrorHandler.handled('Folder “' + destination + '” doesn\'t exist.');
 		}
 		
-		if (fs.existsSync(destination + '/sfx'))                                   // drag_main_handler_archive.jsxi:198
-			AcTools.Utils.FileUtils.Recycle(destination + '/sfx');                 // drag_main_handler_archive.jsxi:198
+		if (fs.existsSync(destination + '/sfx'))                                   // drag_main_handler_archive.jsxi:204
+			AcTools.Utils.FileUtils.Recycle(destination + '/sfx');                 // drag_main_handler_archive.jsxi:204
 		
-		if (fs.existsSync(destination + '/data'))                                  // drag_main_handler_archive.jsxi:199
-			AcTools.Utils.FileUtils.Recycle(destination + '/data');                // drag_main_handler_archive.jsxi:199
+		if (fs.existsSync(destination + '/data'))                                  // drag_main_handler_archive.jsxi:205
+			AcTools.Utils.FileUtils.Recycle(destination + '/data');                // drag_main_handler_archive.jsxi:205
 		
-		if (fs.existsSync(destination + '/data.acd'))                              // drag_main_handler_archive.jsxi:200
-			AcTools.Utils.FileUtils.Recycle(destination + '/data.acd');            // drag_main_handler_archive.jsxi:200
+		if (fs.existsSync(destination + '/data.acd'))                              // drag_main_handler_archive.jsxi:206
+			AcTools.Utils.FileUtils.Recycle(destination + '/data.acd');            // drag_main_handler_archive.jsxi:206
 		
-		fromArchive_unpack(file, entry.root.sub['sfx'], destination + '/sfx');     // drag_main_handler_archive.jsxi:202
+		fromArchive_unpack(file, entry.root.sub['sfx'], destination + '/sfx');     // drag_main_handler_archive.jsxi:208
 		
-		if (entry.root.sub['data'])                                                // drag_main_handler_archive.jsxi:203
+		if (entry.root.sub['data'])                                                // drag_main_handler_archive.jsxi:209
 			fromArchive_unpack(file, entry.root.sub['data'], destination + '/data');
 		
-		if (entry.root.sub['data.acd'])                                            // drag_main_handler_archive.jsxi:204
+		if (entry.root.sub['data.acd'])                                            // drag_main_handler_archive.jsxi:210
 			fromArchive_unpack(file, entry.root.sub['data.acd'], destination + '/data.acd');
 		
-		Cars.loadById(entry.id,                                                    // drag_main_handler_archive.jsxi:206
-			function (arg){                                                        // drag_main_handler_archive.jsxi:206
-				ViewList.select(entry.id);                                         // drag_main_handler_archive.jsxi:207
+		Cars.loadById(entry.id,                                                    // drag_main_handler_archive.jsxi:212
+			function (arg){                                                        // drag_main_handler_archive.jsxi:212
+				ViewList.select(entry.id);                                         // drag_main_handler_archive.jsxi:213
 				
-				if (callback)                                                      // drag_main_handler_archive.jsxi:208
-					callback();                                                    // drag_main_handler_archive.jsxi:208
+				if (callback)                                                      // drag_main_handler_archive.jsxi:214
+					callback();                                                    // drag_main_handler_archive.jsxi:214
 			});
 	}
 	
-	function fromArchive_installSkin(car, file, entry, callback){                  // drag_main_handler_archive.jsxi:212
+	function fromArchive_installSkin(car, file, entry, callback){                  // drag_main_handler_archive.jsxi:218
 		var destination = path.join(car.path, 'skins', entry.id);
 		
-		if (fs.existsSync(destination)){                                           // drag_main_handler_archive.jsxi:214
+		if (fs.existsSync(destination)){                                           // drag_main_handler_archive.jsxi:220
 			return ErrorHandler.handled('Folder “' + destination + '” already exists.');
 		}
 		
-		fromArchive_unpack(file, entry.root, destination);                         // drag_main_handler_archive.jsxi:218
-		car.loadSkins(callback);                                                   // drag_main_handler_archive.jsxi:219
+		fromArchive_unpack(file, entry.root, destination);                         // drag_main_handler_archive.jsxi:224
+		car.loadSkins(callback);                                                   // drag_main_handler_archive.jsxi:225
 	}
 	
-	function fromArchive_installSkinAs(car, id, file, entry, callback){            // drag_main_handler_archive.jsxi:222
+	function fromArchive_installSkinAs(car, id, file, entry, callback){            // drag_main_handler_archive.jsxi:228
 		var destination = path.join(car.path, 'skins', id);
 		
-		if (fs.existsSync(destination)){                                           // drag_main_handler_archive.jsxi:224
+		if (fs.existsSync(destination)){                                           // drag_main_handler_archive.jsxi:230
 			return ErrorHandler.handled('Folder “' + destination + '” already exists.');
 		}
 		
-		fromArchive_unpack(file, entry.root, destination);                         // drag_main_handler_archive.jsxi:228
-		car.loadSkins(callback);                                                   // drag_main_handler_archive.jsxi:229
+		fromArchive_unpack(file, entry.root, destination);                         // drag_main_handler_archive.jsxi:234
+		car.loadSkins(callback);                                                   // drag_main_handler_archive.jsxi:235
 	}
 	
-	function fromArchive_updateSkinFull(car, file, entry, callback){               // drag_main_handler_archive.jsxi:232
+	function fromArchive_updateSkinFull(car, file, entry, callback){               // drag_main_handler_archive.jsxi:238
 		var destination = path.join(car.path, 'skins', entry.id);
 		
-		if (!fs.existsSync(destination)){                                          // drag_main_handler_archive.jsxi:234
-			callback();                                                            // drag_main_handler_archive.jsxi:235
+		if (!fs.existsSync(destination)){                                          // drag_main_handler_archive.jsxi:240
+			callback();                                                            // drag_main_handler_archive.jsxi:241
 			return ErrorHandler.handled('Folder “' + destination + '” doesn\'t exist.');
 		}
 		
-		AcTools.Utils.FileUtils.Recycle(destination);                              // drag_main_handler_archive.jsxi:239
-		fromArchive_unpack(file, entry.root, destination);                         // drag_main_handler_archive.jsxi:240
-		car.loadSkins(callback);                                                   // drag_main_handler_archive.jsxi:241
+		AcTools.Utils.FileUtils.Recycle(destination);                              // drag_main_handler_archive.jsxi:245
+		fromArchive_unpack(file, entry.root, destination);                         // drag_main_handler_archive.jsxi:246
+		car.loadSkins(callback);                                                   // drag_main_handler_archive.jsxi:247
 	}
 	
-	function fromArchive_updateSkinKeepUi(car, file, entry, callback){             // drag_main_handler_archive.jsxi:244
-		var destination = path.join(car.path, 'skins', entry.id),                  // drag_main_handler_archive.jsxi:245
-			preview = destination + '/preview.jpg',                                // drag_main_handler_archive.jsxi:246
-			ui = destination + '/ui_skin.json';                                    // drag_main_handler_archive.jsxi:247
+	function fromArchive_updateSkinKeepUi(car, file, entry, callback){             // drag_main_handler_archive.jsxi:250
+		var destination = path.join(car.path, 'skins', entry.id),                  // drag_main_handler_archive.jsxi:251
+			preview = destination + '/preview.jpg',                                // drag_main_handler_archive.jsxi:252
+			ui = destination + '/ui_skin.json';                                    // drag_main_handler_archive.jsxi:253
 		
-		if (!fs.existsSync(destination)){                                          // drag_main_handler_archive.jsxi:248
-			callback();                                                            // drag_main_handler_archive.jsxi:249
+		if (!fs.existsSync(destination)){                                          // drag_main_handler_archive.jsxi:254
+			callback();                                                            // drag_main_handler_archive.jsxi:255
 			return ErrorHandler.handled('Folder “' + destination + '” doesn\'t exist.');
 		}
 		
 		var tmpDir = AcDir.temp;
 		
-		fs.mkdirSync(tmpDir);                                                      // drag_main_handler_archive.jsxi:254
-		
-		if (fs.existsSync(preview))                                                // drag_main_handler_archive.jsxi:256
-			fs.renameSync(preview, tmpDir + '/p');                                 // drag_main_handler_archive.jsxi:256
-		
-		if (fs.existsSync(ui))                                                     // drag_main_handler_archive.jsxi:257
-			fs.renameSync(ui, tmpDir + '/u');                                      // drag_main_handler_archive.jsxi:257
-		
-		AcTools.Utils.FileUtils.Recycle(destination);                              // drag_main_handler_archive.jsxi:259
-		fromArchive_unpack(file, entry.root, destination);                         // drag_main_handler_archive.jsxi:260
+		fs.mkdirSync(tmpDir);                                                      // drag_main_handler_archive.jsxi:260
 		
 		if (fs.existsSync(preview))                                                // drag_main_handler_archive.jsxi:262
-			fs.removeDirSync(preview);                                             // drag_main_handler_archive.jsxi:262
+			fs.renameSync(preview, tmpDir + '/p');                                 // drag_main_handler_archive.jsxi:262
 		
 		if (fs.existsSync(ui))                                                     // drag_main_handler_archive.jsxi:263
-			fs.removeDirSync(ui);                                                  // drag_main_handler_archive.jsxi:263
+			fs.renameSync(ui, tmpDir + '/u');                                      // drag_main_handler_archive.jsxi:263
 		
-		if (fs.existsSync(tmpDir + '/p'))                                          // drag_main_handler_archive.jsxi:265
-			fs.renameSync(tmpDir + '/p', preview);                                 // drag_main_handler_archive.jsxi:265
+		AcTools.Utils.FileUtils.Recycle(destination);                              // drag_main_handler_archive.jsxi:265
+		fromArchive_unpack(file, entry.root, destination);                         // drag_main_handler_archive.jsxi:266
 		
-		if (fs.existsSync(tmpDir + '/u'))                                          // drag_main_handler_archive.jsxi:266
-			fs.renameSync(tmpDir + '/u', ui);                                      // drag_main_handler_archive.jsxi:266
+		if (fs.existsSync(preview))                                                // drag_main_handler_archive.jsxi:268
+			fs.removeDirSync(preview);                                             // drag_main_handler_archive.jsxi:268
 		
-		fs.removeDirSync(tmpDir);                                                  // drag_main_handler_archive.jsxi:267
-		car.loadSkins(callback);                                                   // drag_main_handler_archive.jsxi:269
+		if (fs.existsSync(ui))                                                     // drag_main_handler_archive.jsxi:269
+			fs.removeDirSync(ui);                                                  // drag_main_handler_archive.jsxi:269
+		
+		if (fs.existsSync(tmpDir + '/p'))                                          // drag_main_handler_archive.jsxi:271
+			fs.renameSync(tmpDir + '/p', preview);                                 // drag_main_handler_archive.jsxi:271
+		
+		if (fs.existsSync(tmpDir + '/u'))                                          // drag_main_handler_archive.jsxi:272
+			fs.renameSync(tmpDir + '/u', ui);                                      // drag_main_handler_archive.jsxi:272
+		
+		fs.removeDirSync(tmpDir);                                                  // drag_main_handler_archive.jsxi:273
+		car.loadSkins(callback);                                                   // drag_main_handler_archive.jsxi:275
 	}
 	
-	function fromArchive(file){                                                    // drag_main_handler_archive.jsxi:272
+	function fromArchive(file){                                                    // drag_main_handler_archive.jsxi:278
 		var tree = fromArchive_getFiles(file);
 		
 		var content = detectContent(file, tree);
 		
-		fromArchive_extractData(file, content);                                    // drag_main_handler_archive.jsxi:275
-		return content.map(function (arg){                                         // drag_main_handler_archive.jsxi:276
-			return fromArchive_prepareFound(file, arg);                            // drag_main_handler_archive.jsxi:276
+		fromArchive_extractData(file, content);                                    // drag_main_handler_archive.jsxi:281
+		return content.map(function (arg){                                         // drag_main_handler_archive.jsxi:282
+			return fromArchive_prepareFound(file, arg);                            // drag_main_handler_archive.jsxi:282
 		});
 	}
 	
@@ -7915,575 +7921,577 @@ var ViewDetails = (function (){                                                 
 	}
 	
 	function outSkins(car){                                                        // view_details.jsxi:112
-		if (!car.skins || !car.skins[0])                                           // view_details.jsxi:113
-			return;
-		
-		if (!car.selectedSkin){                                                    // view_details.jsxi:115
-			car.selectSkin(car.skins[0].id);                                       // view_details.jsxi:116
+		if (!car.skins || !car.skins[0]){                                          // view_details.jsxi:113
+			$('#selected-car-skins-article').hide();                               // view_details.jsxi:114
 			return;
 		}
 		
-		setTimeout(function (){                                                    // view_details.jsxi:120
-			if (car !== _selected)                                                 // view_details.jsxi:121
+		if (!car.selectedSkin){                                                    // view_details.jsxi:118
+			car.selectSkin(car.skins[0].id);                                       // view_details.jsxi:119
+			return;
+		}
+		
+		setTimeout(function (){                                                    // view_details.jsxi:123
+			if (car !== _selected)                                                 // view_details.jsxi:124
 				return;
 			
-			var sa = $('#selected-car-skins-article'),                             // view_details.jsxi:123
-				sp = $('#selected-car-preview'),                                   // view_details.jsxi:124
-				ss = $('#selected-car-skins');                                     // view_details.jsxi:125
+			var sa = $('#selected-car-skins-article'),                             // view_details.jsxi:126
+				sp = $('#selected-car-preview'),                                   // view_details.jsxi:127
+				ss = $('#selected-car-skins');                                     // view_details.jsxi:128
 			
-			if (car.skins && car.skins[0] && car.selectedSkin){                    // view_details.jsxi:126
-				sa.show();                                                         // view_details.jsxi:127
-				ss.empty();                                                        // view_details.jsxi:128
-				sp.attr({                                                          // view_details.jsxi:130
-					'data-id': car.selectedSkin.id,                                // view_details.jsxi:130
+			if (car.skins && car.skins[0] && car.selectedSkin){                    // view_details.jsxi:129
+				sa.show();                                                         // view_details.jsxi:130
+				ss.empty();                                                        // view_details.jsxi:131
+				sp.attr({                                                          // view_details.jsxi:133
+					'data-id': car.selectedSkin.id,                                // view_details.jsxi:133
 					'src': (car.selectedSkin.preview + '?' + Math.random()).cssUrl()
 				});
-				car.skins.forEach(function (e){                                    // view_details.jsxi:135
-					var i = $('<img>').attr({                                      // view_details.jsxi:136
-						'data-id': e.id,                                           // view_details.jsxi:136
-						'title': e.displayName,                                    // view_details.jsxi:138
+				car.skins.forEach(function (e){                                    // view_details.jsxi:138
+					var i = $('<img>').attr({                                      // view_details.jsxi:139
+						'data-id': e.id,                                           // view_details.jsxi:139
+						'title': e.displayName,                                    // view_details.jsxi:141
 						'src': e.livery.cssUrl()
-					}).appendTo(ss);                                               // view_details.jsxi:140
+					}).appendTo(ss);                                               // view_details.jsxi:143
 					
-					if (e === car.selectedSkin){                                   // view_details.jsxi:141
-						i.addClass('selected');                                    // view_details.jsxi:142
+					if (e === car.selectedSkin){                                   // view_details.jsxi:144
+						i.addClass('selected');                                    // view_details.jsxi:145
 					}
 				});
 			} else {
-				sa.hide();                                                         // view_details.jsxi:146
+				sa.hide();                                                         // view_details.jsxi:149
 			}
 		}, 
 		50);
 	}
 	
-	function updateParents(car){                                                   // view_details.jsxi:151
+	function updateParents(car){                                                   // view_details.jsxi:154
 		var s = document.getElementById('selected-car-parent');
 		
-		if (!s)                                                                    // view_details.jsxi:154
+		if (!s)                                                                    // view_details.jsxi:157
 			return;
 		
-		if (car.children.length > 0){                                              // view_details.jsxi:156
-			s.parentNode.style.display = 'none';                                   // view_details.jsxi:157
+		if (car.children.length > 0){                                              // view_details.jsxi:159
+			s.parentNode.style.display = 'none';                                   // view_details.jsxi:160
 		} else {
-			s.parentNode.style.display = null;                                     // view_details.jsxi:159
+			s.parentNode.style.display = null;                                     // view_details.jsxi:162
 			s.innerHTML = '<option value="">None</option>' + Cars.list.filter(function (e){
 				return e.data && !e.disabled && e.parent == null && e.id != car.id && (!car.parent || car.parent.id != car.id);
-			}).map(function (e){                                                   // view_details.jsxi:163
+			}).map(function (e){                                                   // view_details.jsxi:166
 				return '<option value="{0}">{1}</option>'.format(e.id, e.data.name);
-			}).join('');                                                           // view_details.jsxi:165
-			s.value = car.parent && car.parent.id || '';                           // view_details.jsxi:167
+			}).join('');                                                           // view_details.jsxi:168
+			s.value = car.parent && car.parent.id || '';                           // view_details.jsxi:170
 		}
 	}
 	
-	function updateTags(l){                                                        // view_details.jsxi:171
+	function updateTags(l){                                                        // view_details.jsxi:174
 		var t = document.getElementById('tags-filtered');
 		
-		if (t){                                                                    // view_details.jsxi:174
-			document.body.removeChild(t);                                          // view_details.jsxi:175
+		if (t){                                                                    // view_details.jsxi:177
+			document.body.removeChild(t);                                          // view_details.jsxi:178
 		}
 		
-		t = document.body.appendChild(document.createElement('datalist'));         // view_details.jsxi:178
-		t.id = 'tags-filtered';                                                    // view_details.jsxi:179
+		t = document.body.appendChild(document.createElement('datalist'));         // view_details.jsxi:181
+		t.id = 'tags-filtered';                                                    // view_details.jsxi:182
 		
-		var n = l.map(function (e){                                                // view_details.jsxi:181
-			return e.toLowerCase();                                                // view_details.jsxi:182
+		var n = l.map(function (e){                                                // view_details.jsxi:184
+			return e.toLowerCase();                                                // view_details.jsxi:185
 		});
 		
-		Cars.tags.forEach(function (v){                                            // view_details.jsxi:185
-			if (n.indexOf(v.toLowerCase()) < 0){                                   // view_details.jsxi:186
+		Cars.tags.forEach(function (v){                                            // view_details.jsxi:188
+			if (n.indexOf(v.toLowerCase()) < 0){                                   // view_details.jsxi:189
 				t.appendChild(document.createElement('option')).setAttribute('value', v);
 			}
 		});
 	}
 	
-	function applyTags(){                                                          // view_details.jsxi:192
-		if (!_selected || !_selected.data)                                         // view_details.jsxi:193
+	function applyTags(){                                                          // view_details.jsxi:195
+		if (!_selected || !_selected.data)                                         // view_details.jsxi:196
 			return;
 		
-		Cars.changeData(_selected,                                                 // view_details.jsxi:194
-			'tags',                                                                // view_details.jsxi:194
+		Cars.changeData(_selected,                                                 // view_details.jsxi:197
+			'tags',                                                                // view_details.jsxi:197
 			Array.prototype.map.call(document.querySelectorAll('#selected-car-tags li'), 
-				function (a){                                                      // view_details.jsxi:195
-					return a.textContent;                                          // view_details.jsxi:195
+				function (a){                                                      // view_details.jsxi:198
+					return a.textContent;                                          // view_details.jsxi:198
 				}));
-		updateTags(_selected.data.tags);                                           // view_details.jsxi:196
+		updateTags(_selected.data.tags);                                           // view_details.jsxi:199
 	}
 	
-	function init(){                                                               // view_details.jsxi:199
-		Cars.on('scan:ready',                                                      // view_details.jsxi:200
-			function (list){                                                       // view_details.jsxi:201
-				if (list.length == 0){                                             // view_details.jsxi:202
-					outMsg('Hmm...', 'Cars not found');                            // view_details.jsxi:203
+	function init(){                                                               // view_details.jsxi:202
+		Cars.on('scan:ready',                                                      // view_details.jsxi:203
+			function (list){                                                       // view_details.jsxi:204
+				if (list.length == 0){                                             // view_details.jsxi:205
+					outMsg('Hmm...', 'Cars not found');                            // view_details.jsxi:206
 				}
 				
-				$('main').show();                                                  // view_details.jsxi:206
-			}).on('error',                                                         // view_details.jsxi:208
-			function (car){                                                        // view_details.jsxi:208
-				if (_selected != car)                                              // view_details.jsxi:209
+				$('main').show();                                                  // view_details.jsxi:209
+			}).on('error',                                                         // view_details.jsxi:211
+			function (car){                                                        // view_details.jsxi:211
+				if (_selected != car)                                              // view_details.jsxi:212
 					return;
 				
-				outErrors(car);                                                    // view_details.jsxi:210
-			}).on('update.car.badge',                                              // view_details.jsxi:212
-			function (car){                                                        // view_details.jsxi:212
-				if (_selected != car)                                              // view_details.jsxi:213
+				outErrors(car);                                                    // view_details.jsxi:213
+			}).on('update.car.badge',                                              // view_details.jsxi:215
+			function (car){                                                        // view_details.jsxi:215
+				if (_selected != car)                                              // view_details.jsxi:216
 					return;
 				
-				outBadge(car);                                                     // view_details.jsxi:214
-			}).on('update.car.data',                                               // view_details.jsxi:216
-			function (car){                                                        // view_details.jsxi:216
-				if (_selected != car)                                              // view_details.jsxi:217
+				outBadge(car);                                                     // view_details.jsxi:217
+			}).on('update.car.data',                                               // view_details.jsxi:219
+			function (car){                                                        // view_details.jsxi:219
+				if (_selected != car)                                              // view_details.jsxi:220
 					return;
 				
-				outData(car);                                                      // view_details.jsxi:218
-			}).on('update.car.sfx:original',                                       // view_details.jsxi:220
-			function (car){                                                        // view_details.jsxi:220
-				if (_selected != car)                                              // view_details.jsxi:221
+				outData(car);                                                      // view_details.jsxi:221
+			}).on('update.car.sfx:original',                                       // view_details.jsxi:223
+			function (car){                                                        // view_details.jsxi:223
+				if (_selected != car)                                              // view_details.jsxi:224
 					return;
 				
-				outSfxOriginal(car);                                               // view_details.jsxi:222
-			}).on('update.car.skins',                                              // view_details.jsxi:224
-			function (car){                                                        // view_details.jsxi:224
-				if (_selected != car)                                              // view_details.jsxi:225
+				outSfxOriginal(car);                                               // view_details.jsxi:225
+			}).on('update.car.skins',                                              // view_details.jsxi:227
+			function (car){                                                        // view_details.jsxi:227
+				if (_selected != car)                                              // view_details.jsxi:228
 					return;
 				
-				outSkins(car);                                                     // view_details.jsxi:226
-			}).on('update.car.disabled',                                           // view_details.jsxi:228
-			function (car){                                                        // view_details.jsxi:228
-				if (_selected != car)                                              // view_details.jsxi:229
+				outSkins(car);                                                     // view_details.jsxi:229
+			}).on('update.car.disabled',                                           // view_details.jsxi:231
+			function (car){                                                        // view_details.jsxi:231
+				if (_selected != car)                                              // view_details.jsxi:232
 					return;
 				
-				outDisabled(car);                                                  // view_details.jsxi:230
-			}).on('update.car.changed',                                            // view_details.jsxi:232
-			function (car){                                                        // view_details.jsxi:232
-				if (_selected != car)                                              // view_details.jsxi:233
+				outDisabled(car);                                                  // view_details.jsxi:233
+			}).on('update.car.changed',                                            // view_details.jsxi:235
+			function (car){                                                        // view_details.jsxi:235
+				if (_selected != car)                                              // view_details.jsxi:236
 					return;
 				
-				outChanged(car);                                                   // view_details.jsxi:234
+				outChanged(car);                                                   // view_details.jsxi:237
 			});
-		ViewList.on('select',                                                      // view_details.jsxi:237
-			function (car){                                                        // view_details.jsxi:238
-				$('main').show();                                                  // view_details.jsxi:239
-				_selected = car;                                                   // view_details.jsxi:241
-				car.loadEnsure();                                                  // view_details.jsxi:242
+		ViewList.on('select',                                                      // view_details.jsxi:240
+			function (car){                                                        // view_details.jsxi:241
+				$('main').show();                                                  // view_details.jsxi:242
+				_selected = car;                                                   // view_details.jsxi:244
+				car.loadEnsure();                                                  // view_details.jsxi:245
 				
-				if (car){                                                          // view_details.jsxi:244
-					outMsg(null);                                                  // view_details.jsxi:245
+				if (car){                                                          // view_details.jsxi:247
+					outMsg(null);                                                  // view_details.jsxi:248
 				} else {
 					return;
 				}
 				
-				outData(car);                                                      // view_details.jsxi:250
-				outSfxOriginal(car);                                               // view_details.jsxi:251
-				outBadge(car);                                                     // view_details.jsxi:252
-				outDisabled(car);                                                  // view_details.jsxi:253
-				outChanged(car);                                                   // view_details.jsxi:254
-				outErrors(car);                                                    // view_details.jsxi:255
-				outSkins(car);                                                     // view_details.jsxi:256
-				$('#selected-car-update-data').attr('disabled',                    // view_details.jsxi:258
-					car && Cars.databaseContains(car.id) ? null : true);           // view_details.jsxi:258
+				outData(car);                                                      // view_details.jsxi:253
+				outSfxOriginal(car);                                               // view_details.jsxi:254
+				outBadge(car);                                                     // view_details.jsxi:255
+				outDisabled(car);                                                  // view_details.jsxi:256
+				outChanged(car);                                                   // view_details.jsxi:257
+				outErrors(car);                                                    // view_details.jsxi:258
+				outSkins(car);                                                     // view_details.jsxi:259
+				$('#selected-car-update-data').attr('disabled',                    // view_details.jsxi:261
+					car && Cars.databaseContains(car.id) ? null : true);           // view_details.jsxi:261
 			});
-		$('#selected-car').on('keydown',                                           // view_details.jsxi:262
-			function (e){                                                          // view_details.jsxi:263
-				if (e.keyCode == 13){                                              // view_details.jsxi:264
-					this.blur();                                                   // view_details.jsxi:265
+		$('#selected-car').on('keydown',                                           // view_details.jsxi:265
+			function (e){                                                          // view_details.jsxi:266
+				if (e.keyCode == 13){                                              // view_details.jsxi:267
+					this.blur();                                                   // view_details.jsxi:268
 					return false;
 				}
-			}).on('change',                                                        // view_details.jsxi:269
-			function (){                                                           // view_details.jsxi:269
-				if (!_selected || this.readonly || !this.value)                    // view_details.jsxi:270
+			}).on('change',                                                        // view_details.jsxi:272
+			function (){                                                           // view_details.jsxi:272
+				if (!_selected || this.readonly || !this.value)                    // view_details.jsxi:273
 					return;
 				
-				this.value = this.value.slice(0, 64);                              // view_details.jsxi:271
-				Cars.changeData(_selected, 'name', this.value);                    // view_details.jsxi:272
+				this.value = this.value.slice(0, 64);                              // view_details.jsxi:274
+				Cars.changeData(_selected, 'name', this.value);                    // view_details.jsxi:275
 			});
-		$('#selected-car-tags').on('click',                                        // view_details.jsxi:275
-			function (e){                                                          // view_details.jsxi:276
+		$('#selected-car-tags').on('click',                                        // view_details.jsxi:278
+			function (e){                                                          // view_details.jsxi:279
 				if (e.target.tagName === 'LI' && e.target.offsetWidth - e.offsetX < 20){
-					e.target.parentNode.removeChild(e.target);                     // view_details.jsxi:278
-					applyTags();                                                   // view_details.jsxi:279
+					e.target.parentNode.removeChild(e.target);                     // view_details.jsxi:281
+					applyTags();                                                   // view_details.jsxi:282
 				} else {
-					this.querySelector('input').focus();                           // view_details.jsxi:281
+					this.querySelector('input').focus();                           // view_details.jsxi:284
 				}
-			}).on('contextmenu',                                                   // view_details.jsxi:284
-			function (e){                                                          // view_details.jsxi:284
-				if (!_selected || !_selected.data)                                 // view_details.jsxi:285
+			}).on('contextmenu',                                                   // view_details.jsxi:287
+			function (e){                                                          // view_details.jsxi:287
+				if (!_selected || !_selected.data)                                 // view_details.jsxi:288
 					return;
 				
-				if (e.target.tagName !== 'LI')                                     // view_details.jsxi:286
+				if (e.target.tagName !== 'LI')                                     // view_details.jsxi:289
 					return;
 				
 				var menu = new gui.Menu();
 				
-				menu.append(new gui.MenuItem({                                     // view_details.jsxi:289
-					label: 'Filter Tag',                                           // view_details.jsxi:289
-					key: 'F',                                                      // view_details.jsxi:289
-					click: (function (){                                           // view_details.jsxi:289
-						if (!_selected)                                            // view_details.jsxi:290
+				menu.append(new gui.MenuItem({                                     // view_details.jsxi:292
+					label: 'Filter Tag',                                           // view_details.jsxi:292
+					key: 'F',                                                      // view_details.jsxi:292
+					click: (function (){                                           // view_details.jsxi:292
+						if (!_selected)                                            // view_details.jsxi:293
 							return;
 						
-						ViewList.addFilter('tag:' + e.target.textContent);         // view_details.jsxi:291
+						ViewList.addFilter('tag:' + e.target.textContent);         // view_details.jsxi:294
 					})
 				}));
-				menu.popup(e.clientX, e.clientY);                                  // view_details.jsxi:294
+				menu.popup(e.clientX, e.clientY);                                  // view_details.jsxi:297
 				return false;
 			});
-		$('#selected-car-tags input').on('change',                                 // view_details.jsxi:298
-			function (){                                                           // view_details.jsxi:299
-				if (this.value){                                                   // view_details.jsxi:300
+		$('#selected-car-tags input').on('change',                                 // view_details.jsxi:301
+			function (){                                                           // view_details.jsxi:302
+				if (this.value){                                                   // view_details.jsxi:303
 					this.parentNode.insertBefore(document.createElement('li'), this).textContent = this.value;
-					this.value = '';                                               // view_details.jsxi:302
-					applyTags();                                                   // view_details.jsxi:303
+					this.value = '';                                               // view_details.jsxi:305
+					applyTags();                                                   // view_details.jsxi:306
 				}
-			}).on('keydown',                                                       // view_details.jsxi:306
-			function (e){                                                          // view_details.jsxi:306
-				if (e.keyCode == 8 && this.value == ''){                           // view_details.jsxi:307
+			}).on('keydown',                                                       // view_details.jsxi:309
+			function (e){                                                          // view_details.jsxi:309
+				if (e.keyCode == 8 && this.value == ''){                           // view_details.jsxi:310
 					this.parentNode.removeChild(this.parentNode.querySelector('li:last-of-type'));
-					applyTags();                                                   // view_details.jsxi:309
+					applyTags();                                                   // view_details.jsxi:312
 				}
 			});
-		$('#selected-car-desc').elastic().on('change',                             // view_details.jsxi:313
-			function (){                                                           // view_details.jsxi:314
-				if (!_selected || this.readonly)                                   // view_details.jsxi:315
+		$('#selected-car-desc').elastic().on('change',                             // view_details.jsxi:316
+			function (){                                                           // view_details.jsxi:317
+				if (!_selected || this.readonly)                                   // view_details.jsxi:318
 					return;
 				
-				Cars.changeData(_selected, 'description', this.value);             // view_details.jsxi:316
+				Cars.changeData(_selected, 'description', this.value);             // view_details.jsxi:319
 			});
-		$('#selected-car-brand').on('keydown',                                     // view_details.jsxi:319
-			function (e){                                                          // view_details.jsxi:320
-				if (e.keyCode == 13){                                              // view_details.jsxi:321
-					this.blur();                                                   // view_details.jsxi:322
+		$('#selected-car-brand').on('keydown',                                     // view_details.jsxi:322
+			function (e){                                                          // view_details.jsxi:323
+				if (e.keyCode == 13){                                              // view_details.jsxi:324
+					this.blur();                                                   // view_details.jsxi:325
 					return false;
 				}
-			}).on('change',                                                        // view_details.jsxi:326
-			function (e){                                                          // view_details.jsxi:326
-				if (!_selected || this.readonly || !this.value)                    // view_details.jsxi:327
+			}).on('change',                                                        // view_details.jsxi:329
+			function (e){                                                          // view_details.jsxi:329
+				if (!_selected || this.readonly || !this.value)                    // view_details.jsxi:330
 					return;
 				
-				Cars.changeData(_selected, 'brand', this.value);                   // view_details.jsxi:328
-			}).on('contextmenu',                                                   // view_details.jsxi:330
-			function (e){                                                          // view_details.jsxi:330
-				if (!_selected || !_selected.data)                                 // view_details.jsxi:331
+				Cars.changeData(_selected, 'brand', this.value);                   // view_details.jsxi:331
+			}).on('contextmenu',                                                   // view_details.jsxi:333
+			function (e){                                                          // view_details.jsxi:333
+				if (!_selected || !_selected.data)                                 // view_details.jsxi:334
 					return;
 				
 				var menu = new gui.Menu();
 				
-				menu.append(new gui.MenuItem({                                     // view_details.jsxi:334
-					label: 'Filter Brand',                                         // view_details.jsxi:334
-					key: 'F',                                                      // view_details.jsxi:334
-					click: (function (){                                           // view_details.jsxi:334
-						if (!_selected)                                            // view_details.jsxi:335
+				menu.append(new gui.MenuItem({                                     // view_details.jsxi:337
+					label: 'Filter Brand',                                         // view_details.jsxi:337
+					key: 'F',                                                      // view_details.jsxi:337
+					click: (function (){                                           // view_details.jsxi:337
+						if (!_selected)                                            // view_details.jsxi:338
 							return;
 						
-						ViewList.addFilter('brand:' + _selected.data.brand);       // view_details.jsxi:336
+						ViewList.addFilter('brand:' + _selected.data.brand);       // view_details.jsxi:339
 					})
 				}));
-				menu.popup(e.clientX, e.clientY);                                  // view_details.jsxi:339
+				menu.popup(e.clientX, e.clientY);                                  // view_details.jsxi:342
 				return false;
 			});
-		$('#selected-car-class').on('keydown',                                     // view_details.jsxi:343
-			function (e){                                                          // view_details.jsxi:344
-				if (e.keyCode == 13){                                              // view_details.jsxi:345
-					this.blur();                                                   // view_details.jsxi:346
+		$('#selected-car-class').on('keydown',                                     // view_details.jsxi:346
+			function (e){                                                          // view_details.jsxi:347
+				if (e.keyCode == 13){                                              // view_details.jsxi:348
+					this.blur();                                                   // view_details.jsxi:349
 					return false;
 				}
-			}).on('change',                                                        // view_details.jsxi:350
-			function (){                                                           // view_details.jsxi:350
-				if (!_selected || this.readonly)                                   // view_details.jsxi:351
+			}).on('change',                                                        // view_details.jsxi:353
+			function (){                                                           // view_details.jsxi:353
+				if (!_selected || this.readonly)                                   // view_details.jsxi:354
 					return;
 				
-				Cars.changeData(_selected, 'class', this.value);                   // view_details.jsxi:352
-			}).on('contextmenu',                                                   // view_details.jsxi:354
-			function (e){                                                          // view_details.jsxi:354
-				if (!_selected || !_selected.data || !_selected.data.class)        // view_details.jsxi:355
+				Cars.changeData(_selected, 'class', this.value);                   // view_details.jsxi:355
+			}).on('contextmenu',                                                   // view_details.jsxi:357
+			function (e){                                                          // view_details.jsxi:357
+				if (!_selected || !_selected.data || !_selected.data.class)        // view_details.jsxi:358
 					return;
 				
 				var menu = new gui.Menu();
 				
-				menu.append(new gui.MenuItem({                                     // view_details.jsxi:358
-					label: 'Filter Class',                                         // view_details.jsxi:358
-					key: 'F',                                                      // view_details.jsxi:358
-					click: (function (){                                           // view_details.jsxi:358
-						if (!_selected)                                            // view_details.jsxi:359
+				menu.append(new gui.MenuItem({                                     // view_details.jsxi:361
+					label: 'Filter Class',                                         // view_details.jsxi:361
+					key: 'F',                                                      // view_details.jsxi:361
+					click: (function (){                                           // view_details.jsxi:361
+						if (!_selected)                                            // view_details.jsxi:362
 							return;
 						
-						ViewList.addFilter('class:' + _selected.data.class);       // view_details.jsxi:360
+						ViewList.addFilter('class:' + _selected.data.class);       // view_details.jsxi:363
 					})
 				}));
-				menu.popup(e.clientX, e.clientY);                                  // view_details.jsxi:363
+				menu.popup(e.clientX, e.clientY);                                  // view_details.jsxi:366
 				return false;
 			});
-		$('#selected-car-year').on('keydown',                                      // view_details.jsxi:367
-			function (e){                                                          // view_details.jsxi:368
-				if (e.keyCode == 13){                                              // view_details.jsxi:369
-					this.blur();                                                   // view_details.jsxi:370
+		$('#selected-car-year').on('keydown',                                      // view_details.jsxi:370
+			function (e){                                                          // view_details.jsxi:371
+				if (e.keyCode == 13){                                              // view_details.jsxi:372
+					this.blur();                                                   // view_details.jsxi:373
 					return false;
 				}
 				
-				if (e.keyCode == 37){                                              // view_details.jsxi:374
-					this.value = + this.value + 1;                                 // view_details.jsxi:375
+				if (e.keyCode == 37){                                              // view_details.jsxi:377
+					this.value = + this.value + 1;                                 // view_details.jsxi:378
 					return false;
 				}
 				
-				if (e.keyCode == 39){                                              // view_details.jsxi:379
-					this.value = + this.value - 1;                                 // view_details.jsxi:380
+				if (e.keyCode == 39){                                              // view_details.jsxi:382
+					this.value = + this.value - 1;                                 // view_details.jsxi:383
 					return false;
 				}
-			}).on('change',                                                        // view_details.jsxi:384
-			function (){                                                           // view_details.jsxi:384
-				if (!_selected || this.readonly)                                   // view_details.jsxi:385
+			}).on('change',                                                        // view_details.jsxi:387
+			function (){                                                           // view_details.jsxi:387
+				if (!_selected || this.readonly)                                   // view_details.jsxi:388
 					return;
 				
-				Cars.changeData(_selected, 'year', this.value);                    // view_details.jsxi:386
-			}).on('contextmenu',                                                   // view_details.jsxi:388
-			function (e){                                                          // view_details.jsxi:388
-				if (!_selected || !_selected.data || !_selected.data.year)         // view_details.jsxi:389
+				Cars.changeData(_selected, 'year', this.value);                    // view_details.jsxi:389
+			}).on('contextmenu',                                                   // view_details.jsxi:391
+			function (e){                                                          // view_details.jsxi:391
+				if (!_selected || !_selected.data || !_selected.data.year)         // view_details.jsxi:392
 					return;
 				
 				var menu = new gui.Menu();
 				
-				menu.append(new gui.MenuItem({                                     // view_details.jsxi:392
-					label: 'Filter Year',                                          // view_details.jsxi:392
-					key: 'F',                                                      // view_details.jsxi:392
-					click: (function (){                                           // view_details.jsxi:392
-						if (!_selected)                                            // view_details.jsxi:393
+				menu.append(new gui.MenuItem({                                     // view_details.jsxi:395
+					label: 'Filter Year',                                          // view_details.jsxi:395
+					key: 'F',                                                      // view_details.jsxi:395
+					click: (function (){                                           // view_details.jsxi:395
+						if (!_selected)                                            // view_details.jsxi:396
 							return;
 						
-						ViewList.addFilter('year:' + _selected.data.year);         // view_details.jsxi:394
+						ViewList.addFilter('year:' + _selected.data.year);         // view_details.jsxi:397
 					})
 				}));
-				menu.append(new gui.MenuItem({                                     // view_details.jsxi:396
-					label: 'Filter Decade',                                        // view_details.jsxi:396
-					click: (function (){                                           // view_details.jsxi:396
-						if (!_selected)                                            // view_details.jsxi:397
+				menu.append(new gui.MenuItem({                                     // view_details.jsxi:399
+					label: 'Filter Decade',                                        // view_details.jsxi:399
+					click: (function (){                                           // view_details.jsxi:399
+						if (!_selected)                                            // view_details.jsxi:400
 							return;
 						
 						ViewList.addFilter('year:' + (('' + _selected.data.year).slice(0, - 1) + '?'));
 					})
 				}));
-				menu.popup(e.clientX, e.clientY);                                  // view_details.jsxi:401
+				menu.popup(e.clientX, e.clientY);                                  // view_details.jsxi:404
 				return false;
 			});
-		$('#selected-car-country').on('keydown',                                   // view_details.jsxi:405
-			function (e){                                                          // view_details.jsxi:406
-				if (e.keyCode == 13){                                              // view_details.jsxi:407
-					this.blur();                                                   // view_details.jsxi:408
+		$('#selected-car-country').on('keydown',                                   // view_details.jsxi:408
+			function (e){                                                          // view_details.jsxi:409
+				if (e.keyCode == 13){                                              // view_details.jsxi:410
+					this.blur();                                                   // view_details.jsxi:411
 					return false;
 				}
-			}).on('change',                                                        // view_details.jsxi:412
-			function (){                                                           // view_details.jsxi:412
-				if (!_selected || this.readonly)                                   // view_details.jsxi:413
+			}).on('change',                                                        // view_details.jsxi:415
+			function (){                                                           // view_details.jsxi:415
+				if (!_selected || this.readonly)                                   // view_details.jsxi:416
 					return;
 				
-				Cars.changeData(_selected, 'country', this.value);                 // view_details.jsxi:414
-			}).on('contextmenu',                                                   // view_details.jsxi:416
-			function (e){                                                          // view_details.jsxi:416
-				if (!_selected || !_selected.data || !_selected.data.country)      // view_details.jsxi:417
+				Cars.changeData(_selected, 'country', this.value);                 // view_details.jsxi:417
+			}).on('contextmenu',                                                   // view_details.jsxi:419
+			function (e){                                                          // view_details.jsxi:419
+				if (!_selected || !_selected.data || !_selected.data.country)      // view_details.jsxi:420
 					return;
 				
 				var menu = new gui.Menu();
 				
-				menu.append(new gui.MenuItem({                                     // view_details.jsxi:420
-					label: 'Filter Country',                                       // view_details.jsxi:420
-					key: 'F',                                                      // view_details.jsxi:420
-					click: (function (){                                           // view_details.jsxi:420
-						if (!_selected)                                            // view_details.jsxi:421
+				menu.append(new gui.MenuItem({                                     // view_details.jsxi:423
+					label: 'Filter Country',                                       // view_details.jsxi:423
+					key: 'F',                                                      // view_details.jsxi:423
+					click: (function (){                                           // view_details.jsxi:423
+						if (!_selected)                                            // view_details.jsxi:424
 							return;
 						
-						ViewList.addFilter('country:' + _selected.data.country);   // view_details.jsxi:422
+						ViewList.addFilter('country:' + _selected.data.country);   // view_details.jsxi:425
 					})
 				}));
-				menu.popup(e.clientX, e.clientY);                                  // view_details.jsxi:425
+				menu.popup(e.clientX, e.clientY);                                  // view_details.jsxi:428
 				return false;
 			});
-		$('#selected-car-parent').on('change',                                     // view_details.jsxi:429
-			function (e){                                                          // view_details.jsxi:430
-				if (!_selected)                                                    // view_details.jsxi:431
+		$('#selected-car-parent').on('change',                                     // view_details.jsxi:432
+			function (e){                                                          // view_details.jsxi:433
+				if (!_selected)                                                    // view_details.jsxi:434
 					return;
 				
 				var t = this, v = this.value || null;
 				
-				if (v && !fs.existsSync(_selected.upgrade)){                       // view_details.jsxi:434
-					UpgradeEditor.start(_selected,                                 // view_details.jsxi:435
-						function (arg){                                            // view_details.jsxi:435
-							if (fs.existsSync(_selected.upgrade)){                 // view_details.jsxi:436
-								fn();                                              // view_details.jsxi:437
+				if (v && !fs.existsSync(_selected.upgrade)){                       // view_details.jsxi:437
+					UpgradeEditor.start(_selected,                                 // view_details.jsxi:438
+						function (arg){                                            // view_details.jsxi:438
+							if (fs.existsSync(_selected.upgrade)){                 // view_details.jsxi:439
+								fn();                                              // view_details.jsxi:440
 							} else {
-								t.value = '';                                      // view_details.jsxi:439
+								t.value = '';                                      // view_details.jsxi:442
 							}
 						});
 				} else {
-					fn();                                                          // view_details.jsxi:443
+					fn();                                                          // view_details.jsxi:446
 				}
 				
-				function fn(){                                                     // view_details.jsxi:446
-					_selected.changeParent(v);                                     // view_details.jsxi:447
+				function fn(){                                                     // view_details.jsxi:449
+					_selected.changeParent(v);                                     // view_details.jsxi:450
 				}
 			});
-		$('#selected-car-author').on('click',                                      // view_details.jsxi:451
-			function (){                                                           // view_details.jsxi:452
-				if (!_selected || !_selected.data)                                 // view_details.jsxi:453
+		$('#selected-car-author').on('click',                                      // view_details.jsxi:454
+			function (){                                                           // view_details.jsxi:455
+				if (!_selected || !_selected.data)                                 // view_details.jsxi:456
 					return;
 				
 				var a, v, u;
 				
-				var d = new Dialog('In-Game Car Model',                            // view_details.jsxi:457
+				var d = new Dialog('In-Game Car Model',                            // view_details.jsxi:460
 					[
 						'<label>Author: <input id="car-details-edit-author" autocomplete list="authors" placeholder="?" value="' + (_selected.data.author || '') + '"></label>', 
 						'<label>Version: <input id="car-details-edit-version" placeholder="?" value="' + (_selected.data.version || '') + '"></label>', 
 						'<label>URL: <input id="car-details-edit-url" placeholder="?" value="' + (_selected.data.url || '') + '"></label>'
 					], 
-					function (){                                                   // view_details.jsxi:461
-						if (!_selected)                                            // view_details.jsxi:462
+					function (){                                                   // view_details.jsxi:464
+						if (!_selected)                                            // view_details.jsxi:465
 							return;
 						
-						if (a != null)                                             // view_details.jsxi:463
-							_selected.changeData('author', a);                     // view_details.jsxi:463
+						if (a != null)                                             // view_details.jsxi:466
+							_selected.changeData('author', a);                     // view_details.jsxi:466
 						
-						if (v != null)                                             // view_details.jsxi:464
-							_selected.changeData('version', v);                    // view_details.jsxi:464
+						if (v != null)                                             // view_details.jsxi:467
+							_selected.changeData('version', v);                    // view_details.jsxi:467
 						
-						if (u != null)                                             // view_details.jsxi:465
-							_selected.changeData('url', u);                        // view_details.jsxi:465
+						if (u != null)                                             // view_details.jsxi:468
+							_selected.changeData('url', u);                        // view_details.jsxi:468
 					});
 				
 				d.content.find('#car-details-edit-author').change(function (arg){
-					return a = this.value;                                         // view_details.jsxi:468
+					return a = this.value;                                         // view_details.jsxi:471
 				});
 				d.content.find('#car-details-edit-version').change(function (arg){
-					return v = this.value;                                         // view_details.jsxi:469
+					return v = this.value;                                         // view_details.jsxi:472
 				});
-				d.content.find('#car-details-edit-url').change(function (arg){     // view_details.jsxi:470
-					return u = this.value;                                         // view_details.jsxi:470
+				d.content.find('#car-details-edit-url').change(function (arg){     // view_details.jsxi:473
+					return u = this.value;                                         // view_details.jsxi:473
 				});
-			}).on('dblclick',                                                      // view_details.jsxi:472
-			function (){                                                           // view_details.jsxi:472
-				if (!_selected || !_selected.data || !_selected.data.url)          // view_details.jsxi:473
+			}).on('dblclick',                                                      // view_details.jsxi:475
+			function (){                                                           // view_details.jsxi:475
+				if (!_selected || !_selected.data || !_selected.data.url)          // view_details.jsxi:476
 					return;
 				
-				Shell.openItem(_selected.data.url);                                // view_details.jsxi:474
-			}).on('contextmenu',                                                   // view_details.jsxi:476
-			function (e){                                                          // view_details.jsxi:476
-				if (!_selected || !_selected.data || !_selected.data.author)       // view_details.jsxi:477
+				Shell.openItem(_selected.data.url);                                // view_details.jsxi:477
+			}).on('contextmenu',                                                   // view_details.jsxi:479
+			function (e){                                                          // view_details.jsxi:479
+				if (!_selected || !_selected.data || !_selected.data.author)       // view_details.jsxi:480
 					return;
 				
 				var menu = new gui.Menu();
 				
-				menu.append(new gui.MenuItem({                                     // view_details.jsxi:480
-					label: 'Filter Author',                                        // view_details.jsxi:480
-					key: 'F',                                                      // view_details.jsxi:480
-					click: (function (){                                           // view_details.jsxi:480
-						if (!_selected)                                            // view_details.jsxi:481
+				menu.append(new gui.MenuItem({                                     // view_details.jsxi:483
+					label: 'Filter Author',                                        // view_details.jsxi:483
+					key: 'F',                                                      // view_details.jsxi:483
+					click: (function (){                                           // view_details.jsxi:483
+						if (!_selected)                                            // view_details.jsxi:484
 							return;
 						
-						ViewList.addFilter('author:' + _selected.data.author);     // view_details.jsxi:482
+						ViewList.addFilter('author:' + _selected.data.author);     // view_details.jsxi:485
 					})
 				}));
-				menu.popup(e.clientX, e.clientY);                                  // view_details.jsxi:485
+				menu.popup(e.clientX, e.clientY);                                  // view_details.jsxi:488
 				return false;
 			});
 		[
-			'bhp',                                                                 // view_details.jsxi:489
-			'torque',                                                              // view_details.jsxi:489
-			'weight',                                                              // view_details.jsxi:489
-			'topspeed',                                                            // view_details.jsxi:489
-			'acceleration',                                                        // view_details.jsxi:489
+			'bhp',                                                                 // view_details.jsxi:492
+			'torque',                                                              // view_details.jsxi:492
+			'weight',                                                              // view_details.jsxi:492
+			'topspeed',                                                            // view_details.jsxi:492
+			'acceleration',                                                        // view_details.jsxi:492
 			'pwratio'
-		].forEach(function (e){                                                    // view_details.jsxi:489
-			$('#selected-car-' + e).on('keydown',                                  // view_details.jsxi:490
-				function (e){                                                      // view_details.jsxi:490
-					if (e.keyCode == 13){                                          // view_details.jsxi:491
-						this.blur();                                               // view_details.jsxi:492
+		].forEach(function (e){                                                    // view_details.jsxi:492
+			$('#selected-car-' + e).on('keydown',                                  // view_details.jsxi:493
+				function (e){                                                      // view_details.jsxi:493
+					if (e.keyCode == 13){                                          // view_details.jsxi:494
+						this.blur();                                               // view_details.jsxi:495
 						return false;
 					}
-				}).on('keyup keydown keypress',                                    // view_details.jsxi:495
-				function (e){                                                      // view_details.jsxi:495
-					if (e.keyCode == 32){                                          // view_details.jsxi:496
-						e.stopPropagation();                                       // view_details.jsxi:497
+				}).on('keyup keydown keypress',                                    // view_details.jsxi:498
+				function (e){                                                      // view_details.jsxi:498
+					if (e.keyCode == 32){                                          // view_details.jsxi:499
+						e.stopPropagation();                                       // view_details.jsxi:500
 						
-						if (e.type === 'keyup'){                                   // view_details.jsxi:498
+						if (e.type === 'keyup'){                                   // view_details.jsxi:501
 							return false;
 						}
 					}
-				}).on('change',                                                    // view_details.jsxi:502
-				function (){                                                       // view_details.jsxi:502
-					if (!_selected || this.readonly)                               // view_details.jsxi:503
+				}).on('change',                                                    // view_details.jsxi:505
+				function (){                                                       // view_details.jsxi:505
+					if (!_selected || this.readonly)                               // view_details.jsxi:506
 						return;
 					
-					Cars.changeDataSpecs(_selected, e, this.value);                // view_details.jsxi:504
+					Cars.changeDataSpecs(_selected, e, this.value);                // view_details.jsxi:507
 				});
 		});
-		$('#selected-car-pwratio').on('dblclick contextmenu',                      // view_details.jsxi:508
-			function (e){                                                          // view_details.jsxi:509
-				if (!_selected || !_selected.data || this.readonly)                // view_details.jsxi:510
+		$('#selected-car-pwratio').on('dblclick contextmenu',                      // view_details.jsxi:511
+			function (e){                                                          // view_details.jsxi:512
+				if (!_selected || !_selected.data || this.readonly)                // view_details.jsxi:513
 					return;
 				
-				function r(){                                                      // view_details.jsxi:512
-					if (!_selected || this.readonly)                               // view_details.jsxi:513
+				function r(){                                                      // view_details.jsxi:515
+					if (!_selected || this.readonly)                               // view_details.jsxi:516
 						return;
 					
-					_selected.recalculatePwRatio();                                // view_details.jsxi:514
+					_selected.recalculatePwRatio();                                // view_details.jsxi:517
 				}
 				
-				if (e.type === 'dblclick'){                                        // view_details.jsxi:517
-					r();                                                           // view_details.jsxi:518
+				if (e.type === 'dblclick'){                                        // view_details.jsxi:520
+					r();                                                           // view_details.jsxi:521
 				} else {
 					var menu = new gui.Menu();
 					
 					menu.append(new gui.MenuItem({ label: 'Recalculate', key: 'R', click: r }));
-					menu.popup(e.clientX, e.clientY);                              // view_details.jsxi:522
+					menu.popup(e.clientX, e.clientY);                              // view_details.jsxi:525
 					return false;
 				}
 			});
-		$('#selected-car-logo').on('click',                                        // view_details.jsxi:528
-			function (){                                                           // view_details.jsxi:529
-				if (!_selected)                                                    // view_details.jsxi:530
+		$('#selected-car-logo').on('click',                                        // view_details.jsxi:531
+			function (){                                                           // view_details.jsxi:532
+				if (!_selected)                                                    // view_details.jsxi:533
 					return;
 				
-				BadgeEditor.start(_selected);                                      // view_details.jsxi:531
+				BadgeEditor.start(_selected);                                      // view_details.jsxi:534
 			});
-		$('#selected-car-upgrade').on('click',                                     // view_details.jsxi:534
-			function (){                                                           // view_details.jsxi:535
-				if (!_selected)                                                    // view_details.jsxi:536
+		$('#selected-car-upgrade').on('click',                                     // view_details.jsxi:537
+			function (){                                                           // view_details.jsxi:538
+				if (!_selected)                                                    // view_details.jsxi:539
 					return;
 				
-				UpgradeEditor.start(_selected);                                    // view_details.jsxi:537
+				UpgradeEditor.start(_selected);                                    // view_details.jsxi:540
 			});
-		$('#selected-car-skins-article').dblclick(function (e){                    // view_details.jsxi:541
-			if (!_selected)                                                        // view_details.jsxi:543
+		$('#selected-car-skins-article').dblclick(function (e){                    // view_details.jsxi:544
+			if (!_selected)                                                        // view_details.jsxi:546
 				return;
 			
-			AcShowroom.start(_selected);                                           // view_details.jsxi:544
-		}).on('contextmenu',                                                       // view_details.jsxi:546
-			function (e){                                                          // view_details.jsxi:546
-				if (!_selected)                                                    // view_details.jsxi:547
+			AcShowroom.start(_selected);                                           // view_details.jsxi:547
+		}).on('contextmenu',                                                       // view_details.jsxi:549
+			function (e){                                                          // view_details.jsxi:549
+				if (!_selected)                                                    // view_details.jsxi:550
 					return;
 				
 				var id = e.target.getAttribute('data-id');
 				
-				if (!id)                                                           // view_details.jsxi:550
+				if (!id)                                                           // view_details.jsxi:553
 					return;
 				
 				var menu = new gui.Menu();
 				
-				menu.append(new gui.MenuItem({                                     // view_details.jsxi:554
-					label: 'Open in Showroom',                                     // view_details.jsxi:554
-					key: 'S',                                                      // view_details.jsxi:554
-					click: (function (){                                           // view_details.jsxi:554
-						if (!_selected)                                            // view_details.jsxi:555
+				menu.append(new gui.MenuItem({                                     // view_details.jsxi:557
+					label: 'Open in Showroom',                                     // view_details.jsxi:557
+					key: 'S',                                                      // view_details.jsxi:557
+					click: (function (){                                           // view_details.jsxi:557
+						if (!_selected)                                            // view_details.jsxi:558
 							return;
 						
-						AcShowroom.start(_selected, id);                           // view_details.jsxi:556
+						AcShowroom.start(_selected, id);                           // view_details.jsxi:559
 					})
 				}));
-				menu.append(new gui.MenuItem({                                     // view_details.jsxi:559
-					label: 'Open in Custom Showroom (Experimental)',               // view_details.jsxi:559
-					click: (function (){                                           // view_details.jsxi:559
-						if (!_selected)                                            // view_details.jsxi:560
+				menu.append(new gui.MenuItem({                                     // view_details.jsxi:562
+					label: 'Open in Custom Showroom (Experimental)',               // view_details.jsxi:562
+					click: (function (){                                           // view_details.jsxi:562
+						if (!_selected)                                            // view_details.jsxi:563
 							return;
 						
 						try {
 							AcTools.Utils.Kn5RenderWrapper.StartDarkRoomPreview(_selected.path, id);
-						} catch (err){                                             // view_details.jsxi:563
+						} catch (err){                                             // view_details.jsxi:566
 							ErrorHandler.handled('Cannot start Custom Showroom.', err);
 							return;
 						} 
@@ -8492,367 +8500,367 @@ var ViewDetails = (function (){                                                 
 				
 				var driveMenu = new gui.MenuItem({ label: 'Drive', submenu: new gui.Menu() });
 				
-				menu.append(driveMenu);                                            // view_details.jsxi:570
-				driveMenu = driveMenu.submenu;                                     // view_details.jsxi:571
-				driveMenu.append(new gui.MenuItem({                                // view_details.jsxi:573
-					label: 'Practice',                                             // view_details.jsxi:573
-					click: (function (){                                           // view_details.jsxi:573
-						AcPractice.start(_selected, id, 'Practice');               // view_details.jsxi:574
+				menu.append(driveMenu);                                            // view_details.jsxi:573
+				driveMenu = driveMenu.submenu;                                     // view_details.jsxi:574
+				driveMenu.append(new gui.MenuItem({                                // view_details.jsxi:576
+					label: 'Practice',                                             // view_details.jsxi:576
+					click: (function (){                                           // view_details.jsxi:576
+						AcPractice.start(_selected, id, 'Practice');               // view_details.jsxi:577
 					})
 				}));
-				driveMenu.append(new gui.MenuItem({                                // view_details.jsxi:577
-					label: 'Hotlap',                                               // view_details.jsxi:577
-					click: (function (){                                           // view_details.jsxi:577
-						AcPractice.start(_selected, id, 'Hotlap');                 // view_details.jsxi:578
+				driveMenu.append(new gui.MenuItem({                                // view_details.jsxi:580
+					label: 'Hotlap',                                               // view_details.jsxi:580
+					click: (function (){                                           // view_details.jsxi:580
+						AcPractice.start(_selected, id, 'Hotlap');                 // view_details.jsxi:581
 					})
 				}));
-				driveMenu.append(new gui.MenuItem({                                // view_details.jsxi:581
-					label: 'Drift',                                                // view_details.jsxi:581
-					click: (function (){                                           // view_details.jsxi:581
-						AcPractice.start(_selected, id, 'Drift');                  // view_details.jsxi:582
+				driveMenu.append(new gui.MenuItem({                                // view_details.jsxi:584
+					label: 'Drift',                                                // view_details.jsxi:584
+					click: (function (){                                           // view_details.jsxi:584
+						AcPractice.start(_selected, id, 'Drift');                  // view_details.jsxi:585
 					})
 				}));
-				menu.append(new gui.MenuItem({                                     // view_details.jsxi:585
-					label: 'Folder',                                               // view_details.jsxi:585
-					click: (function (){                                           // view_details.jsxi:585
-						if (!_selected)                                            // view_details.jsxi:586
+				menu.append(new gui.MenuItem({                                     // view_details.jsxi:588
+					label: 'Folder',                                               // view_details.jsxi:588
+					click: (function (){                                           // view_details.jsxi:588
+						if (!_selected)                                            // view_details.jsxi:589
 							return;
 						
-						Shell.openItem(_selected.getSkin(id).path);                // view_details.jsxi:587
+						Shell.openItem(_selected.getSkin(id).path);                // view_details.jsxi:590
 					})
 				}));
-				menu.append(new gui.MenuItem({ type: 'separator' }));              // view_details.jsxi:590
+				menu.append(new gui.MenuItem({ type: 'separator' }));              // view_details.jsxi:593
 				
 				var autoUpdateLivery = new gui.MenuItem({ label: 'Update Livery', submenu: new gui.Menu() });
 				
-				menu.append(autoUpdateLivery);                                     // view_details.jsxi:593
-				autoUpdateLivery = autoUpdateLivery.submenu;                       // view_details.jsxi:594
-				autoUpdateLivery.append(new gui.MenuItem({                         // view_details.jsxi:596
-					label: 'From Preview',                                         // view_details.jsxi:596
-					click: (function (){                                           // view_details.jsxi:596
-						if (!_selected)                                            // view_details.jsxi:597
+				menu.append(autoUpdateLivery);                                     // view_details.jsxi:596
+				autoUpdateLivery = autoUpdateLivery.submenu;                       // view_details.jsxi:597
+				autoUpdateLivery.append(new gui.MenuItem({                         // view_details.jsxi:599
+					label: 'From Preview',                                         // view_details.jsxi:599
+					click: (function (){                                           // view_details.jsxi:599
+						if (!_selected)                                            // view_details.jsxi:600
 							return;
 						
 						var skin = _selected.getSkin(id);
 						
 						try {
 							AcTools.Utils.ImageUtils.GenerateLivery(skin.preview, skin.livery);
-							_selected.loadSkins();                                 // view_details.jsxi:601
-						} catch (err){                                             // view_details.jsxi:602
-							ErrorHandler.handled('Cannot update livery.', err);    // view_details.jsxi:603
+							_selected.loadSkins();                                 // view_details.jsxi:604
+						} catch (err){                                             // view_details.jsxi:605
+							ErrorHandler.handled('Cannot update livery.', err);    // view_details.jsxi:606
 							return;
 						} 
 					})
 				}));
-				autoUpdateLivery.append(new gui.MenuItem({                         // view_details.jsxi:608
-					label: 'With Custom Showroom',                                 // view_details.jsxi:608
-					click: (function (){                                           // view_details.jsxi:608
-						if (!_selected)                                            // view_details.jsxi:609
+				autoUpdateLivery.append(new gui.MenuItem({                         // view_details.jsxi:611
+					label: 'With Custom Showroom',                                 // view_details.jsxi:611
+					click: (function (){                                           // view_details.jsxi:611
+						if (!_selected)                                            // view_details.jsxi:612
 							return;
 						
 						var skin = _selected.getSkin(id);
 						
 						try {
 							AcTools.Utils.Kn5RenderWrapper.GenerateLivery(_selected.path, skin.id, skin.livery);
-							_selected.loadSkins();                                 // view_details.jsxi:613
-						} catch (err){                                             // view_details.jsxi:614
-							ErrorHandler.handled('Cannot update livery.', err);    // view_details.jsxi:615
+							_selected.loadSkins();                                 // view_details.jsxi:616
+						} catch (err){                                             // view_details.jsxi:617
+							ErrorHandler.handled('Cannot update livery.', err);    // view_details.jsxi:618
 							return;
 						} 
 					})
 				}));
-				menu.append(new gui.MenuItem({                                     // view_details.jsxi:620
-					label: 'Delete skin',                                          // view_details.jsxi:620
-					click: (function (){                                           // view_details.jsxi:620
-						if (!_selected)                                            // view_details.jsxi:621
+				menu.append(new gui.MenuItem({                                     // view_details.jsxi:623
+					label: 'Delete skin',                                          // view_details.jsxi:623
+					click: (function (){                                           // view_details.jsxi:623
+						if (!_selected)                                            // view_details.jsxi:624
 							return;
 						
 						var skin = _selected.getSkin(id);
 						
-						new Dialog('Delete ' + skin.displayName,                   // view_details.jsxi:624
+						new Dialog('Delete ' + skin.displayName,                   // view_details.jsxi:627
 							'Folder will be removed to the Recycle Bin. Are you sure?', 
-							function (arg){                                        // view_details.jsxi:624
-								if (!skin)                                         // view_details.jsxi:625
+							function (arg){                                        // view_details.jsxi:627
+								if (!skin)                                         // view_details.jsxi:628
 									return;
 								
-								AcTools.Utils.FileUtils.Recycle(skin.path);        // view_details.jsxi:626
-								_selected.loadSkins();                             // view_details.jsxi:627
+								AcTools.Utils.FileUtils.Recycle(skin.path);        // view_details.jsxi:629
+								_selected.loadSkins();                             // view_details.jsxi:630
 							});
 					})
 				}));
-				menu.popup(e.clientX, e.clientY);                                  // view_details.jsxi:634
+				menu.popup(e.clientX, e.clientY);                                  // view_details.jsxi:637
 				return false;
 			});
-		$('#selected-car-skins').on('click',                                       // view_details.jsxi:639
-			function (e){                                                          // view_details.jsxi:640
-				if (!_selected)                                                    // view_details.jsxi:641
+		$('#selected-car-skins').on('click',                                       // view_details.jsxi:642
+			function (e){                                                          // view_details.jsxi:643
+				if (!_selected)                                                    // view_details.jsxi:644
 					return;
 				
 				var id = e.target.getAttribute('data-id');
 				
-				if (!id)                                                           // view_details.jsxi:644
+				if (!id)                                                           // view_details.jsxi:647
 					return;
 				
-				_selected.selectSkin(id);                                          // view_details.jsxi:646
+				_selected.selectSkin(id);                                          // view_details.jsxi:649
 			});
-		$('#selected-car-error').click(function (e){                               // view_details.jsxi:650
-			if (!_selected)                                                        // view_details.jsxi:651
+		$('#selected-car-error').click(function (e){                               // view_details.jsxi:653
+			if (!_selected)                                                        // view_details.jsxi:654
 				return;
 			
 			var id = e.target.getAttribute('data-error-id');
 			
-			if (id){                                                               // view_details.jsxi:653
-				RestorationWizard.fix(_selected, id);                              // view_details.jsxi:654
+			if (id){                                                               // view_details.jsxi:656
+				RestorationWizard.fix(_selected, id);                              // view_details.jsxi:657
 			}
 		});
-		$(window).on('keydown',                                                    // view_details.jsxi:659
-			function (e){                                                          // view_details.jsxi:660
-				if (!_selected)                                                    // view_details.jsxi:661
+		$(window).on('keydown',                                                    // view_details.jsxi:662
+			function (e){                                                          // view_details.jsxi:663
+				if (!_selected)                                                    // view_details.jsxi:664
 					return;
 				
-				if (e.keyCode === 'S'.charCodeAt(0) && e.ctrlKey && e.altKey){     // view_details.jsxi:663
+				if (e.keyCode === 'S'.charCodeAt(0) && e.ctrlKey && e.altKey){     // view_details.jsxi:666
 					try {
 						AcTools.Utils.Kn5RenderWrapper.UpdateAmbientShadows(_selected.path);
-					} catch (err){                                                 // view_details.jsxi:666
-						ErrorHandler.handled('Cannot update shadows.', err);       // view_details.jsxi:667
+					} catch (err){                                                 // view_details.jsxi:669
+						ErrorHandler.handled('Cannot update shadows.', err);       // view_details.jsxi:670
 						return;
 					} 
 					
-					AcShowroom.shot(_selected);                                    // view_details.jsxi:670
+					AcShowroom.shot(_selected);                                    // view_details.jsxi:673
 					return false;
 				}
 				
-				if (e.keyCode === 'S'.charCodeAt(0) && e.ctrlKey){                 // view_details.jsxi:674
-					$(':focus').each(function (arg){                               // view_details.jsxi:675
-						return this.blur();                                        // view_details.jsxi:675
+				if (e.keyCode === 'S'.charCodeAt(0) && e.ctrlKey){                 // view_details.jsxi:677
+					$(':focus').each(function (arg){                               // view_details.jsxi:678
+						return this.blur();                                        // view_details.jsxi:678
 					});
-					_selected.save();                                              // view_details.jsxi:676
+					_selected.save();                                              // view_details.jsxi:679
 					return false;
 				}
 				
-				if (e.keyCode === 'F'.charCodeAt(0) && e.ctrlKey){                 // view_details.jsxi:680
-					UpdateDescription.update(_selected);                           // view_details.jsxi:681
+				if (e.keyCode === 'F'.charCodeAt(0) && e.ctrlKey){                 // view_details.jsxi:683
+					UpdateDescription.update(_selected);                           // view_details.jsxi:684
 					return false;
 				}
 				
-				if (e.keyCode === 'T'.charCodeAt(0) && e.ctrlKey){                 // view_details.jsxi:685
-					_selected.toggle();                                            // view_details.jsxi:686
+				if (e.keyCode === 'T'.charCodeAt(0) && e.ctrlKey){                 // view_details.jsxi:688
+					_selected.toggle();                                            // view_details.jsxi:689
 					return false;
 				}
 				
-				if (e.keyCode === 'B'.charCodeAt(0) && e.ctrlKey && e.shiftKey){   // view_details.jsxi:690
-					$('#selected-car-logo')[0].click();                            // view_details.jsxi:691
+				if (e.keyCode === 'B'.charCodeAt(0) && e.ctrlKey && e.shiftKey){   // view_details.jsxi:693
+					$('#selected-car-logo')[0].click();                            // view_details.jsxi:694
 					return false;
 				}
 				
-				if (e.keyCode === 'U'.charCodeAt(0) && e.ctrlKey && e.shiftKey){   // view_details.jsxi:695
-					if (_selected.parent)                                          // view_details.jsxi:696
-						$('#selected-car-upgrade')[0].click();                     // view_details.jsxi:696
+				if (e.keyCode === 'U'.charCodeAt(0) && e.ctrlKey && e.shiftKey){   // view_details.jsxi:698
+					if (_selected.parent)                                          // view_details.jsxi:699
+						$('#selected-car-upgrade')[0].click();                     // view_details.jsxi:699
 					return false;
 				}
 				
 				if (localStorage.developerMode && e.keyCode === 'E'.charCodeAt(0) && e.ctrlKey && e.shiftKey){
-					_selected.exportDatabase();                                    // view_details.jsxi:701
+					_selected.exportDatabase();                                    // view_details.jsxi:704
 					return false;
 				}
 			});
 		
 		var cmIgnore = false;
 		
-		$('main').on('contextmenu',                                                // view_details.jsxi:708
-			function (){                                                           // view_details.jsxi:709
-				this.querySelector('footer').classList.toggle('active');           // view_details.jsxi:710
-				cmIgnore = true;                                                   // view_details.jsxi:711
+		$('main').on('contextmenu',                                                // view_details.jsxi:711
+			function (){                                                           // view_details.jsxi:712
+				this.querySelector('footer').classList.toggle('active');           // view_details.jsxi:713
+				cmIgnore = true;                                                   // view_details.jsxi:714
 			});
-		$(window).on('click contextmenu',                                          // view_details.jsxi:714
-			(function (e){                                                         // view_details.jsxi:715
-				if (cmIgnore){                                                     // view_details.jsxi:716
-					cmIgnore = false;                                              // view_details.jsxi:717
-				} else if (e.target !== this){                                     // view_details.jsxi:718
-					this.classList.remove('active');                               // view_details.jsxi:719
+		$(window).on('click contextmenu',                                          // view_details.jsxi:717
+			(function (e){                                                         // view_details.jsxi:718
+				if (cmIgnore){                                                     // view_details.jsxi:719
+					cmIgnore = false;                                              // view_details.jsxi:720
+				} else if (e.target !== this){                                     // view_details.jsxi:721
+					this.classList.remove('active');                               // view_details.jsxi:722
 				}
-			}).bind($('main footer')[0]));                                         // view_details.jsxi:721
-		$('#selected-car-open-directory').click(function (){                       // view_details.jsxi:724
-			if (!_selected)                                                        // view_details.jsxi:725
+			}).bind($('main footer')[0]));                                         // view_details.jsxi:724
+		$('#selected-car-open-directory').click(function (){                       // view_details.jsxi:727
+			if (!_selected)                                                        // view_details.jsxi:728
 				return;
 			
-			Shell.openItem(_selected.path);                                        // view_details.jsxi:726
+			Shell.openItem(_selected.path);                                        // view_details.jsxi:729
 		});
-		$('#selected-car-showroom').click(function (){                             // view_details.jsxi:729
-			if (!_selected)                                                        // view_details.jsxi:730
+		$('#selected-car-showroom').click(function (){                             // view_details.jsxi:732
+			if (!_selected)                                                        // view_details.jsxi:733
 				return;
 			
-			AcShowroom.start(_selected);                                           // view_details.jsxi:731
+			AcShowroom.start(_selected);                                           // view_details.jsxi:734
 		});
-		$('#selected-car-showroom-select').click(function (){                      // view_details.jsxi:734
-			if (!_selected)                                                        // view_details.jsxi:735
+		$('#selected-car-showroom-select').click(function (){                      // view_details.jsxi:737
+			if (!_selected)                                                        // view_details.jsxi:738
 				return;
 			
-			AcShowroom.select(_selected);                                          // view_details.jsxi:736
+			AcShowroom.select(_selected);                                          // view_details.jsxi:739
 		});
-		$('#selected-car-practice').click(function (){                             // view_details.jsxi:739
-			if (!_selected)                                                        // view_details.jsxi:740
+		$('#selected-car-practice').click(function (){                             // view_details.jsxi:742
+			if (!_selected)                                                        // view_details.jsxi:743
 				return;
 			
-			AcPractice.start(_selected);                                           // view_details.jsxi:741
+			AcPractice.start(_selected);                                           // view_details.jsxi:744
 		});
-		$('#selected-car-practice-select').click(function (){                      // view_details.jsxi:744
-			if (!_selected)                                                        // view_details.jsxi:745
+		$('#selected-car-practice-select').click(function (){                      // view_details.jsxi:747
+			if (!_selected)                                                        // view_details.jsxi:748
 				return;
 			
-			AcPractice.select(_selected);                                          // view_details.jsxi:746
+			AcPractice.select(_selected);                                          // view_details.jsxi:749
 		});
-		$('#selected-car-reload').click(function (){                               // view_details.jsxi:749
-			if (!_selected)                                                        // view_details.jsxi:750
+		$('#selected-car-reload').click(function (){                               // view_details.jsxi:752
+			if (!_selected)                                                        // view_details.jsxi:753
 				return;
 			
-			if (_selected.changed){                                                // view_details.jsxi:752
-				new Dialog('Reload',                                               // view_details.jsxi:753
+			if (_selected.changed){                                                // view_details.jsxi:755
+				new Dialog('Reload',                                               // view_details.jsxi:756
 					[ 'Your changes will be lost. Are you sure?' ], 
-					reload);                                                       // view_details.jsxi:755
+					reload);                                                       // view_details.jsxi:758
 			} else {
-				reload();                                                          // view_details.jsxi:757
+				reload();                                                          // view_details.jsxi:760
 			}
 			
-			function reload(){                                                     // view_details.jsxi:760
-				if (!_selected)                                                    // view_details.jsxi:761
+			function reload(){                                                     // view_details.jsxi:763
+				if (!_selected)                                                    // view_details.jsxi:764
 					return;
 				
-				_selected.reload();                                                // view_details.jsxi:762
+				_selected.reload();                                                // view_details.jsxi:765
 			}
 		});
-		$('#selected-car-test').click(function (){                                 // view_details.jsxi:766
-			if (!_selected)                                                        // view_details.jsxi:767
+		$('#selected-car-test').click(function (){                                 // view_details.jsxi:769
+			if (!_selected)                                                        // view_details.jsxi:770
 				return;
 			
-			_selected.testAcd();                                                   // view_details.jsxi:768
+			_selected.testAcd();                                                   // view_details.jsxi:771
 		});
-		$('#selected-car-save').click(function (){                                 // view_details.jsxi:772
-			if (!_selected)                                                        // view_details.jsxi:773
+		$('#selected-car-save').click(function (){                                 // view_details.jsxi:775
+			if (!_selected)                                                        // view_details.jsxi:776
 				return;
 			
-			_selected.save();                                                      // view_details.jsxi:774
+			_selected.save();                                                      // view_details.jsxi:777
 		});
-		$('#selected-car-update-data').click(function (){                          // view_details.jsxi:777
-			if (!_selected)                                                        // view_details.jsxi:778
+		$('#selected-car-update-data').click(function (){                          // view_details.jsxi:780
+			if (!_selected)                                                        // view_details.jsxi:781
 				return;
 			
 			var updated = Cars.fromDatabase(_selected.id);
 			
-			if (!updated){                                                         // view_details.jsxi:781
-				return Notification.warn('Error', 'Data is missing.');             // view_details.jsxi:782
+			if (!updated){                                                         // view_details.jsxi:784
+				return Notification.warn('Error', 'Data is missing.');             // view_details.jsxi:785
 			}
 			
 			var fields = [];
 			
-			for (var k in updated)                                                 // view_details.jsxi:786
-				if (updated.hasOwnProperty(k)){                                    // view_details.jsxi:786
+			for (var k in updated)                                                 // view_details.jsxi:789
+				if (updated.hasOwnProperty(k)){                                    // view_details.jsxi:789
 					var v = updated[k];
 					
 					if (JSON.stringify(v) === JSON.stringify(_selected.data[k])){
 						continue;
 					}
 					
-					fields.push({ key: k, value: v });                             // view_details.jsxi:791
+					fields.push({ key: k, value: v });                             // view_details.jsxi:794
 				}
 			
-			if (fields.length === 0){                                              // view_details.jsxi:794
-				return Notification.warn('Error', 'Nothing to update.');           // view_details.jsxi:795
+			if (fields.length === 0){                                              // view_details.jsxi:797
+				return Notification.warn('Error', 'Nothing to update.');           // view_details.jsxi:798
 			}
 			
-			var d = new Dialog('Update Data',                                      // view_details.jsxi:798
+			var d = new Dialog('Update Data',                                      // view_details.jsxi:801
 				[
-					'<h6>Select fields to update</h6>',                            // view_details.jsxi:799
-					fields.map(function (arg){                                     // view_details.jsxi:800
+					'<h6>Select fields to update</h6>',                            // view_details.jsxi:802
+					fields.map(function (arg){                                     // view_details.jsxi:803
 						return '<label><input data-key="' + arg.key + '" type="checkbox" checked>' + (arg.key === 'url' ? 'URL' : arg.key[0].toUpperCase() + arg.key.slice(1).replace(/(?=[A-Z])/g, ' ')) + '</label>';
 					}).join('')
 				], 
-				function (){                                                       // view_details.jsxi:803
-					if (!_selected)                                                // view_details.jsxi:804
+				function (){                                                       // view_details.jsxi:806
+					if (!_selected)                                                // view_details.jsxi:807
 						return;
 					
-					this.content.find(':checked').each(function (arg){             // view_details.jsxi:806
+					this.content.find(':checked').each(function (arg){             // view_details.jsxi:809
 						var k = this.getAttribute('data-key');
 						
-						_selected.changeData(k, updated[k], true);                 // view_details.jsxi:808
+						_selected.changeData(k, updated[k], true);                 // view_details.jsxi:811
 					});
 				});
 		});
-		$('#selected-car-update-description').click(function (){                   // view_details.jsxi:813
-			if (!_selected)                                                        // view_details.jsxi:814
+		$('#selected-car-update-description').click(function (){                   // view_details.jsxi:816
+			if (!_selected)                                                        // view_details.jsxi:817
 				return;
 			
-			UpdateDescription.update(_selected);                                   // view_details.jsxi:815
+			UpdateDescription.update(_selected);                                   // view_details.jsxi:818
 		});
-		$('#selected-car-update-previews').click(function (){                      // view_details.jsxi:818
-			if (!_selected)                                                        // view_details.jsxi:819
+		$('#selected-car-update-previews').click(function (){                      // view_details.jsxi:821
+			if (!_selected)                                                        // view_details.jsxi:822
 				return;
 			
-			AcShowroom.shot(_selected);                                            // view_details.jsxi:820
+			AcShowroom.shot(_selected);                                            // view_details.jsxi:823
 		});
-		$('#selected-car-update-previews-manual').click(function (){               // view_details.jsxi:823
-			if (!_selected)                                                        // view_details.jsxi:824
+		$('#selected-car-update-previews-manual').click(function (){               // view_details.jsxi:826
+			if (!_selected)                                                        // view_details.jsxi:827
 				return;
 			
-			AcShowroom.shot(_selected, true);                                      // view_details.jsxi:825
+			AcShowroom.shot(_selected, true);                                      // view_details.jsxi:828
 		});
-		$('#selected-car-disable').click(function (){                              // view_details.jsxi:828
-			if (!_selected)                                                        // view_details.jsxi:829
+		$('#selected-car-disable').click(function (){                              // view_details.jsxi:831
+			if (!_selected)                                                        // view_details.jsxi:832
 				return;
 			
-			_selected.toggle();                                                    // view_details.jsxi:830
+			_selected.toggle();                                                    // view_details.jsxi:833
 		});
-		$('#selected-car-additional').on('click contextmenu',                      // view_details.jsxi:833
-			function (e){                                                          // view_details.jsxi:833
-				if (!_selected)                                                    // view_details.jsxi:834
+		$('#selected-car-additional').on('click contextmenu',                      // view_details.jsxi:836
+			function (e){                                                          // view_details.jsxi:836
+				if (!_selected)                                                    // view_details.jsxi:837
 					return;
 				
 				var menu = new gui.Menu();
 				
-				function add(label, fn, to){                                       // view_details.jsxi:838
-					if (to === undefined)                                          // view_details.jsxi:838
-						to = menu;                                                 // view_details.jsxi:838
+				function add(label, fn, to){                                       // view_details.jsxi:841
+					if (to === undefined)                                          // view_details.jsxi:841
+						to = menu;                                                 // view_details.jsxi:841
 				
-					to.append(new gui.MenuItem({                                   // view_details.jsxi:839
-						label: label,                                              // view_details.jsxi:839
-						click: (function (){                                       // view_details.jsxi:839
-							$('main footer').removeClass('active');                // view_details.jsxi:840
+					to.append(new gui.MenuItem({                                   // view_details.jsxi:842
+						label: label,                                              // view_details.jsxi:842
+						click: (function (){                                       // view_details.jsxi:842
+							$('main footer').removeClass('active');                // view_details.jsxi:843
 							
-							if (_selected)                                         // view_details.jsxi:841
-								fn();                                              // view_details.jsxi:841
+							if (_selected)                                         // view_details.jsxi:844
+								fn();                                              // view_details.jsxi:844
 						})
 					}));
 				}
 				
-				add('Update Ambient Shadows',                                      // view_details.jsxi:845
-					function (){                                                   // view_details.jsxi:845
+				add('Update Ambient Shadows',                                      // view_details.jsxi:848
+					function (){                                                   // view_details.jsxi:848
 						try {
 							AcTools.Utils.Kn5RenderWrapper.UpdateAmbientShadows(_selected.path);
-						} catch (err){                                             // view_details.jsxi:848
-							ErrorHandler.handled('Cannot update shadows.', err);   // view_details.jsxi:849
+						} catch (err){                                             // view_details.jsxi:851
+							ErrorHandler.handled('Cannot update shadows.', err);   // view_details.jsxi:852
 							return;
 						} 
 					});
-				add('Change Body Ambient Shadow Size',                             // view_details.jsxi:854
-					function (){                                                   // view_details.jsxi:854
+				add('Change Body Ambient Shadow Size',                             // view_details.jsxi:857
+					function (){                                                   // view_details.jsxi:857
 						var currentSize = AcTools.Utils.Kn5RenderWrapper.GetBodyAmbientShadowSize(_selected.path).split(',');
 						
-						var d = new Dialog('Body Ambient Shadow',                  // view_details.jsxi:856
+						var d = new Dialog('Body Ambient Shadow',                  // view_details.jsxi:859
 							[
-								'<h6>Size (in meters)</h6>',                       // view_details.jsxi:857
+								'<h6>Size (in meters)</h6>',                       // view_details.jsxi:860
 								'<label style="display:inline-block;width:160px;line-height:24px">Width: <input id="body-ambient-shadow-width" type="number" step="0.1" min="0.8" max="6.0" style="width: 80px;float: right;margin-right: 20px;"></label>', 
 								'<label style="display:inline-block;width:160px;line-height:24px">Length: <input id="body-ambient-shadow-height" type="number" step="0.1" min="0.8" max="6.0" style="width: 80px;float: right;margin-right: 20px;"></label>'
 							], 
-							function (){                                           // view_details.jsxi:860
+							function (){                                           // view_details.jsxi:863
 								var w = + d.content.find('#body-ambient-shadow-width').val();
 								
-								if (Number.isNaN(w))                               // view_details.jsxi:862
-									w = currentSize[0];                            // view_details.jsxi:862
+								if (Number.isNaN(w))                               // view_details.jsxi:865
+									w = currentSize[0];                            // view_details.jsxi:865
 								
 								var h = + d.content.find('#body-ambient-shadow-height').val();
 								
-								if (Number.isNaN(h))                               // view_details.jsxi:865
-									h = currentSize[1];                            // view_details.jsxi:865
+								if (Number.isNaN(h))                               // view_details.jsxi:868
+									h = currentSize[1];                            // view_details.jsxi:868
 								
 								AcTools.Utils.Kn5RenderWrapper.SetBodyAmbientShadowSize(_selected.path, w, h);
 							});
@@ -8861,70 +8869,70 @@ var ViewDetails = (function (){                                                 
 						d.content.find('#body-ambient-shadow-height').val(currentSize[1]);
 					});
 				
-				if (localStorage.developerMode){                                   // view_details.jsxi:874
+				if (localStorage.developerMode){                                   // view_details.jsxi:877
 					var devMenu = new gui.MenuItem({ label: 'Developer Tools', submenu: new gui.Menu() });
 					
-					menu.append(devMenu);                                          // view_details.jsxi:876
-					devMenu = devMenu.submenu;                                     // view_details.jsxi:877
-					add('Export to database',                                      // view_details.jsxi:879
-						function (){                                               // view_details.jsxi:879
-							_selected.exportDatabase();                            // view_details.jsxi:880
+					menu.append(devMenu);                                          // view_details.jsxi:879
+					devMenu = devMenu.submenu;                                     // view_details.jsxi:880
+					add('Export to database',                                      // view_details.jsxi:882
+						function (){                                               // view_details.jsxi:882
+							_selected.exportDatabase();                            // view_details.jsxi:883
 						}, 
-						devMenu);                                                  // view_details.jsxi:881
-					add('Fix SUSP_XX error',                                       // view_details.jsxi:883
-						function (){                                               // view_details.jsxi:883
+						devMenu);                                                  // view_details.jsxi:884
+					add('Fix SUSP_XX error',                                       // view_details.jsxi:886
+						function (){                                               // view_details.jsxi:886
 							try {
 								AcTools.Utils.Kn5Fixer.FixSuspensionWrapper(AcDir.root, _selected.id);
-							} catch (err){                                         // view_details.jsxi:886
-								ErrorHandler.handled('Cannot fix car.', err);      // view_details.jsxi:887
+							} catch (err){                                         // view_details.jsxi:889
+								ErrorHandler.handled('Cannot fix car.', err);      // view_details.jsxi:890
 								return;
 							} 
 						}, 
-						devMenu);                                                  // view_details.jsxi:890
-					add('Unpack KN5',                                              // view_details.jsxi:892
-						function (){                                               // view_details.jsxi:892
+						devMenu);                                                  // view_details.jsxi:893
+					add('Unpack KN5',                                              // view_details.jsxi:895
+						function (){                                               // view_details.jsxi:895
 							try {
 								var kn5 = AcTools.Kn5File.Kn5.FromFile(AcTools.Utils.FileUtils.GetMainCarFile(AcDir.root, _selected.id));
 								
 								var dest = _selected.path + '/unpacked';
 								
-								if (fs.existsSync(dest))                           // view_details.jsxi:896
-									AcTools.Utils.FileUtils.Recycle(dest);         // view_details.jsxi:896
+								if (fs.existsSync(dest))                           // view_details.jsxi:899
+									AcTools.Utils.FileUtils.Recycle(dest);         // view_details.jsxi:899
 								
-								kn5.ExportDirectory(dest, false);                  // view_details.jsxi:897
+								kn5.ExportDirectory(dest, false);                  // view_details.jsxi:900
 								
-								if (kn5.RootNode != null){                         // view_details.jsxi:898
+								if (kn5.RootNode != null){                         // view_details.jsxi:901
 									kn5.Export(AcTools.Kn5File.Kn5.ExportType.Collada, dest + '/model.dae');
 								}
 								
-								Shell.openItem(dest);                              // view_details.jsxi:901
-							} catch (err){                                         // view_details.jsxi:902
-								ErrorHandler.handled('Failed.', err);              // view_details.jsxi:903
+								Shell.openItem(dest);                              // view_details.jsxi:904
+							} catch (err){                                         // view_details.jsxi:905
+								ErrorHandler.handled('Failed.', err);              // view_details.jsxi:906
 							} 
 						}, 
-						devMenu);                                                  // view_details.jsxi:905
+						devMenu);                                                  // view_details.jsxi:908
 					
-					if (fs.existsSync(_selected.path + '/unpacked'))               // view_details.jsxi:907
-						add('Repack KN5',                                          // view_details.jsxi:907
-							function (){                                           // view_details.jsxi:907
+					if (fs.existsSync(_selected.path + '/unpacked'))               // view_details.jsxi:910
+						add('Repack KN5',                                          // view_details.jsxi:910
+							function (){                                           // view_details.jsxi:910
 								try {
 									var kn5 = AcTools.Kn5File.Kn5.FromDirectory(_selected.path + '/unpacked', false);
 									
 									var dest = AcTools.Utils.FileUtils.GetMainCarFile(AcDir.root, _selected.id);
 									
-									if (fs.existsSync(dest))                       // view_details.jsxi:911
-										AcTools.Utils.FileUtils.Recycle(dest);     // view_details.jsxi:911
+									if (fs.existsSync(dest))                       // view_details.jsxi:914
+										AcTools.Utils.FileUtils.Recycle(dest);     // view_details.jsxi:914
 									
-									kn5.Save(dest, false);                         // view_details.jsxi:912
-								} catch (err){                                     // view_details.jsxi:913
-									ErrorHandler.handled('Failed.', err);          // view_details.jsxi:914
+									kn5.Save(dest, false);                         // view_details.jsxi:915
+								} catch (err){                                     // view_details.jsxi:916
+									ErrorHandler.handled('Failed.', err);          // view_details.jsxi:917
 								} 
 							}, 
-							devMenu);                                              // view_details.jsxi:916
+							devMenu);                                              // view_details.jsxi:919
 					
-					if (fs.existsSync(_selected.path + '/data.acd'))               // view_details.jsxi:918
-						add('Unpack data',                                         // view_details.jsxi:918
-							function (){                                           // view_details.jsxi:918
+					if (fs.existsSync(_selected.path + '/data.acd'))               // view_details.jsxi:921
+						add('Unpack data',                                         // view_details.jsxi:921
+							function (){                                           // view_details.jsxi:921
 								try {
 									var source = _selected.path + '/data.acd';
 									
@@ -8932,21 +8940,21 @@ var ViewDetails = (function (){                                                 
 									
 									var dest = _selected.path + '/data';
 									
-									if (fs.existsSync(dest))                       // view_details.jsxi:923
-										AcTools.Utils.FileUtils.Recycle(dest);     // view_details.jsxi:923
+									if (fs.existsSync(dest))                       // view_details.jsxi:926
+										AcTools.Utils.FileUtils.Recycle(dest);     // view_details.jsxi:926
 									
-									acd.ExportDirectory(dest);                     // view_details.jsxi:924
-									Shell.openItem(dest);                          // view_details.jsxi:925
-									AcTools.Utils.FileUtils.Recycle(source);       // view_details.jsxi:926
-								} catch (err){                                     // view_details.jsxi:927
-									ErrorHandler.handled('Failed.', err);          // view_details.jsxi:928
+									acd.ExportDirectory(dest);                     // view_details.jsxi:927
+									Shell.openItem(dest);                          // view_details.jsxi:928
+									AcTools.Utils.FileUtils.Recycle(source);       // view_details.jsxi:929
+								} catch (err){                                     // view_details.jsxi:930
+									ErrorHandler.handled('Failed.', err);          // view_details.jsxi:931
 								} 
 							}, 
-							devMenu);                                              // view_details.jsxi:930
+							devMenu);                                              // view_details.jsxi:933
 					
-					if (fs.existsSync(_selected.path + '/data'))                   // view_details.jsxi:932
-						add('Pack data',                                           // view_details.jsxi:932
-							function (){                                           // view_details.jsxi:932
+					if (fs.existsSync(_selected.path + '/data'))                   // view_details.jsxi:935
+						add('Pack data',                                           // view_details.jsxi:935
+							function (){                                           // view_details.jsxi:935
 								try {
 									var source = _selected.path + '/data';
 									
@@ -8954,36 +8962,36 @@ var ViewDetails = (function (){                                                 
 									
 									var dest = _selected.path + '/data.acd';
 									
-									if (fs.existsSync(dest))                       // view_details.jsxi:937
-										AcTools.Utils.FileUtils.Recycle(dest);     // view_details.jsxi:937
+									if (fs.existsSync(dest))                       // view_details.jsxi:940
+										AcTools.Utils.FileUtils.Recycle(dest);     // view_details.jsxi:940
 									
-									acd.Save(dest);                                // view_details.jsxi:938
-									AcTools.Utils.FileUtils.Recycle(source);       // view_details.jsxi:939
-								} catch (err){                                     // view_details.jsxi:940
-									ErrorHandler.handled('Failed.', err);          // view_details.jsxi:941
+									acd.Save(dest);                                // view_details.jsxi:941
+									AcTools.Utils.FileUtils.Recycle(source);       // view_details.jsxi:942
+								} catch (err){                                     // view_details.jsxi:943
+									ErrorHandler.handled('Failed.', err);          // view_details.jsxi:944
 								} 
 							}, 
-							devMenu);                                              // view_details.jsxi:943
+							devMenu);                                              // view_details.jsxi:946
 				}
 				
-				add('Delete car',                                                  // view_details.jsxi:946
-					function (){                                                   // view_details.jsxi:946
-						new Dialog('Delete ' + _selected.displayName,              // view_details.jsxi:947
+				add('Delete car',                                                  // view_details.jsxi:949
+					function (){                                                   // view_details.jsxi:949
+						new Dialog('Delete ' + _selected.displayName,              // view_details.jsxi:950
 							'Folder will be removed to the Recycle Bin. Are you sure?', 
-							function (arg){                                        // view_details.jsxi:947
-								if (!_selected)                                    // view_details.jsxi:948
+							function (arg){                                        // view_details.jsxi:950
+								if (!_selected)                                    // view_details.jsxi:951
 									return;
 								
-								Cars.remove(_selected);                            // view_details.jsxi:949
+								Cars.remove(_selected);                            // view_details.jsxi:952
 							});
 					});
-				menu.popup(e.clientX, e.clientY);                                  // view_details.jsxi:953
+				menu.popup(e.clientX, e.clientY);                                  // view_details.jsxi:956
 				return false;
 			});
 	}
 	
-	(function (){                                                                  // view_details.jsxi:958
-		$(init);                                                                   // view_details.jsxi:959
+	(function (){                                                                  // view_details.jsxi:961
+		$(init);                                                                   // view_details.jsxi:962
 	})();
 	return ViewDetails;
 })();

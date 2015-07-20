@@ -108,7 +108,13 @@ partial static class DragMainHandler {
             fs.mkdirSync(tmpDir);
 
             var files = fromArchive_collectSub(node);
-            exec('native\\7z', [ 'x', '-sccUTF-8', '-o' + tmpDir, file ].concat(files));
+            try {
+                exec('native\\7z', [ 'x', '-sccUTF-8', '-o' + tmpDir, file ].concat(files));
+            } catch (err){
+                console.debug(tmpDir, file, files);
+                ErrorHandler.handled('Cannot unpack archive.', err);
+                return;
+            }
 
             for (var f in-array files){
                 var dest = target + '/' + f.slice(node.path.length + 1);

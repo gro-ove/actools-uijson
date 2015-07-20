@@ -15,6 +15,7 @@ Small utility for easy editing *ui_car.json* files. Written using [NW.js](http:/
 * Delete cars to Recycle Bin
 
 #### TODO
+* Auto-detect FWD/RWD/4WD and fix tags
 * Check for updates in …\Documents\Assetto Corsa\cfg\cars\*\view.ini
 * Fix memory consumption, make app more async
 * Check for new car versions by URL
@@ -173,7 +174,7 @@ Small utility for easy editing *ui_car.json* files. Written using [NW.js](http:/
 
 #### Download
 * [Last (0.3.44)](https://yadi.sk/d/8scdCAG-hrHhC)
-* [Stable (0.3.41)](http://www.racedepartment.com/downloads/actools-cars-manager.6518/)
+* [Stable (0.3.44)](http://www.racedepartment.com/downloads/actools-cars-manager.6518/)
 * [Previous](http://www.racedepartment.com/downloads/actools-cars-manager.6518/history) [builds](https://yadi.sk/d/eHr0NCP4hSAfq)
 
 #### Tips
