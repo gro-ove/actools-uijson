@@ -1,5 +1,5 @@
 partial static class DragMainHandler {
-    var _ddId, _holders = [];
+    var _ddId, _holders = [], _idToReload = [];
 
     function handle(file){
         if (fs.statSync(file).isDirectory()){
@@ -69,6 +69,10 @@ partial static class DragMainHandler {
         }
     }
 
+    function reloadAfter(){
+
+    }
+
     function freeHolders(){
         for (var holder in-array _holders){
             holder.stream.end();
@@ -86,6 +90,7 @@ partial static class DragMainHandler {
             step = lambda {
                 if (i >= actions.length){
                     d.close();
+                    reloadAfter();
                     freeHolders();
                 } else {
                     actions[p.value = i++](lambda {

@@ -149,6 +149,8 @@ partial static class DragMainHandler {
             ViewList.select(entry.id);
             if (callback) callback();
         });
+
+        _idToReload.push(entry.id);
     }
 
     function fromArchive_updateCarFull(file, entry, callback){

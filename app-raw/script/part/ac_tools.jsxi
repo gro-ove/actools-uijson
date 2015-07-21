@@ -1,10 +1,26 @@
-__defineGetter__('AcTools', function (){
-    try {
-        return AcTools = require('clr').init({
-            assemblies: [ 'native/AcTools.dll', 'native/AcToolsKn5Render.dll'  ],
-            global: false
-        }).AcTools;
-    } catch (err){
-        throw new Error('Cannot load native module. Make sure you have .NET Framework 4.5 and Visual C++ Redistributable 2013 (x86) installed.');
+(function (){
+    var _a;
+
+    function init(){
+        var c;
+        try {
+            c = require('clr');
+        } catch (err){
+            throw new Error('Cannot load native module. Make sure you have Visual C++ Redistributable 2013 (x86) installed.');
+        }
+
+        try {
+            _a = c.init({
+                assemblies: [ 'native/AcTools.dll', 'native/AcToolsKn5Render.dll'  ],
+                global: false
+            }).AcTools;
+        } catch (err){
+            throw new Error('Cannot load native module. Make sure you have .NET Framework 4.5 installed.');
+        }
     }
-});
+
+    __defineGetter__('AcTools', function (){
+        if (!_a) init();
+        return _a;
+    });
+})();

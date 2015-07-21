@@ -128,7 +128,6 @@ static partial class Cars {
                 } else if (i >= a.length){
                     mediator.dispatch('scan:ready', a);
                     lasyAsyncLoad();
-                    //lasyAsyncErrorTest();
                 } else {
                     mediator.dispatch('scan:progress', i, a.length);
                     a[i++].loadData(step);
@@ -146,6 +145,7 @@ static partial class Cars {
                     mediator.dispatch('lazyscan:interrupt', b);
                 } else if (i >= b.length){
                     mediator.dispatch('lazyscan:ready', b);
+                    // acdTest();
                 } else {
                     mediator.dispatch('lazyscan:progress', i, b.length);
                     b[i++].loadEnsure(step);

@@ -1594,9 +1594,6 @@ var AcPractice = (function (){                                                  
 	}
 	
 	AcPractice.start = function (c, s, m){                                         // ac_practice.jsxi:67
-		if (m === undefined)                                                       // ac_practice.jsxi:67
-			m = _storage.get('mode');                                              // ac_practice.jsxi:67
-	
 		if (c.disabled){                                                           // ac_practice.jsxi:68
 			Notification.warn('No Way', 'Enable car first.');                      // ac_practice.jsxi:69
 			return;
@@ -1610,54 +1607,58 @@ var AcPractice = (function (){                                                  
 			return;
 		}
 		
-		if (s == null){                                                            // ac_practice.jsxi:80
-			s = c.selectedSkin ? c.selectedSkin.id : c.skins[0].id;                // ac_practice.jsxi:81
+		if (m == null){                                                            // ac_practice.jsxi:80
+			m = _storage.get('mode');                                              // ac_practice.jsxi:81
+		}
+		
+		if (s == null){                                                            // ac_practice.jsxi:84
+			s = c.selectedSkin ? c.selectedSkin.id : c.skins[0].id;                // ac_practice.jsxi:85
 		}
 		
 		var r = _storage.get('track')[m];
 		
-		AcTools;                                                                   // ac_practice.jsxi:86
+		AcTools;                                                                   // ac_practice.jsxi:90
 		
 		try {
 			AcTools.Processes.Game[m === 'Practice' ? 'StartPractice' : m === 'Hotlap' ? 'StartHotlap' : 'StartDrift'](AcDir.root, c.id, s, r.split('/')[0], r.split('/')[1] || '');
-		} catch (e){                                                               // ac_practice.jsxi:91
+		} catch (e){                                                               // ac_practice.jsxi:95
 			ErrorHandler.handled('Cannot start the game. Maybe there is not enough rights.');
 		} 
 	};
-	AcPractice.select = function (c, s){                                           // ac_practice.jsxi:96
-		if (!_tracks)                                                              // ac_practice.jsxi:97
-			init();                                                                // ac_practice.jsxi:97
+	AcPractice.select = function (c, s){                                           // ac_practice.jsxi:100
+		if (!_tracks)                                                              // ac_practice.jsxi:101
+			init();                                                                // ac_practice.jsxi:101
 		
-		var d = new Dialog('Drive!',                                               // ac_practice.jsxi:99
+		var d = new Dialog('Drive!',                                               // ac_practice.jsxi:103
 			[
-				'<h6>Mode</h6>',                                                   // ac_practice.jsxi:100
-				'<select id="practice-mode">' + _modes.map(function (arg){         // ac_practice.jsxi:101
-					return '<option value="' + arg + '">' + arg + '</option>';     // ac_practice.jsxi:101
-				}).join('') + '</select>',                                         // ac_practice.jsxi:101
-				'<h6>Track</h6>',                                                  // ac_practice.jsxi:102
-				'<select id="practice-track">' + _tracks.map(function (arg){       // ac_practice.jsxi:103
+				'<h6>Mode</h6>',                                                   // ac_practice.jsxi:104
+				'<select id="practice-mode">' + _modes.map(function (arg){         // ac_practice.jsxi:105
+					return '<option value="' + arg + '">' + arg + '</option>';     // ac_practice.jsxi:105
+				}).join('') + '</select>',                                         // ac_practice.jsxi:105
+				'<h6>Track</h6>',                                                  // ac_practice.jsxi:106
+				'<select id="practice-track">' + _tracks.map(function (arg){       // ac_practice.jsxi:107
 					return '<option value="' + arg.id + '">' + arg.displayNameWithDescription + '</option>';
 				}).join('') + '</select>'
 			], 
-			function (){                                                           // ac_practice.jsxi:104
+			function (){                                                           // ac_practice.jsxi:108
 				AcPractice.start(c, s);
-			}).addButton('Reload List',                                            // ac_practice.jsxi:106
-			function (){                                                           // ac_practice.jsxi:106
-				setTimeout(function (){                                            // ac_practice.jsxi:107
-					initTracks();                                                  // ac_practice.jsxi:108
+			}).addButton('Reload List',                                            // ac_practice.jsxi:110
+			function (){                                                           // ac_practice.jsxi:110
+				setTimeout(function (){                                            // ac_practice.jsxi:111
+					initTracks();                                                  // ac_practice.jsxi:112
 					AcPractice.select(c, s);
 				});
 			});
 		
-		d.find('#practice-mode').val(_storage.get('mode')).change(function (){     // ac_practice.jsxi:113
-			_storage.set('mode', this.value);                                      // ac_practice.jsxi:114
+		d.find('#practice-mode').val(_storage.get('mode')).change(function (){     // ac_practice.jsxi:117
+			_storage.set('mode', this.value);                                      // ac_practice.jsxi:118
 			d.find('#practice-track').val(_storage.get('track')[_storage.get('mode')]);
 		});
 		d.find('#practice-track').val(_storage.get('track')[_storage.get('mode')]).change(function (){
 			var val = this.value;
 			
-			_storage.update(function (arg){                                        // ac_practice.jsxi:120
-				return arg.track[_storage.get('mode')] = val;                      // ac_practice.jsxi:120
+			_storage.update(function (arg){                                        // ac_practice.jsxi:124
+				return arg.track[_storage.get('mode')] = val;                      // ac_practice.jsxi:124
 			});
 		});
 	};
@@ -2017,17 +2018,35 @@ var AcShowroom = (function (){                                                  
 	return AcShowroom;
 })();
 
-__defineGetter__('AcTools',                                                        // ac_tools.jsxi:1
-	function (){                                                                   // ac_tools.jsxi:1
+(function (){                                                                      // ac_tools.jsxi:1
+	var _a;
+	
+	function init(){                                                               // ac_tools.jsxi:4
+		var c;
+		
 		try {
-			return AcTools = require('clr').init({                                 // ac_tools.jsxi:3
+			c = require('clr');                                                    // ac_tools.jsxi:7
+		} catch (err){                                                             // ac_tools.jsxi:8
+			throw new Error('Cannot load native module. Make sure you have Visual C++ Redistributable 2013 (x86) installed.');
+		} 
+		
+		try {
+			_a = c.init({                                                          // ac_tools.jsxi:13
 				assemblies: [ 'native/AcTools.dll', 'native/AcToolsKn5Render.dll' ], 
 				global: false
-			}).AcTools;                                                            // ac_tools.jsxi:6
-		} catch (err){                                                             // ac_tools.jsxi:7
-			throw new Error('Cannot load native module. Make sure you have .NET Framework 4.5 and Visual C++ Redistributable 2013 (x86) installed.');
+			}).AcTools;                                                            // ac_tools.jsxi:16
+		} catch (err){                                                             // ac_tools.jsxi:17
+			throw new Error('Cannot load native module. Make sure you have .NET Framework 4.5 installed.');
 		} 
-	});
+	}
+	
+	__defineGetter__('AcTools',                                                    // ac_tools.jsxi:22
+		function (){                                                               // ac_tools.jsxi:22
+			if (!_a)                                                               // ac_tools.jsxi:23
+				init();                                                            // ac_tools.jsxi:23
+			return _a;                                                             // ac_tools.jsxi:24
+		});
+})();
 
 /* Class "CheckUpdate" declaration */
 var CheckUpdate = (function (){                                                    // app_check_update.jsxi:1
@@ -2459,25 +2478,25 @@ var Cars = (function (){                                                        
 					mediator.dispatch('scan:ready', a);                            // cars.jsxi:129
 					lasyAsyncLoad();                                               // cars.jsxi:130
 				} else {
-					mediator.dispatch('scan:progress', i, a.length);               // cars.jsxi:133
-					a[i ++].loadData(step);                                        // cars.jsxi:134
+					mediator.dispatch('scan:progress', i, a.length);               // cars.jsxi:132
+					a[i ++].loadData(step);                                        // cars.jsxi:133
 				}
 			};
 		
-		mediator.dispatch('scan:list', a);                                         // cars.jsxi:138
-		step();                                                                    // cars.jsxi:139
+		mediator.dispatch('scan:list', a);                                         // cars.jsxi:137
+		step();                                                                    // cars.jsxi:138
 	}
 	
-	function lasyAsyncLoad(){                                                      // cars.jsxi:142
-		var a = _list,                                                             // cars.jsxi:143
-			b = a.slice(),                                                         // cars.jsxi:143
-			i = 0,                                                                 // cars.jsxi:143
-			step = setTimeout.bind(window,                                         // cars.jsxi:144
-				function (arg){                                                    // cars.jsxi:144
-					if (a != _list){                                               // cars.jsxi:145
-						mediator.dispatch('lazyscan:interrupt', b);                // cars.jsxi:146
-					} else if (i >= b.length){                                     // cars.jsxi:147
-						mediator.dispatch('lazyscan:ready', b);                    // cars.jsxi:148
+	function lasyAsyncLoad(){                                                      // cars.jsxi:141
+		var a = _list,                                                             // cars.jsxi:142
+			b = a.slice(),                                                         // cars.jsxi:142
+			i = 0,                                                                 // cars.jsxi:142
+			step = setTimeout.bind(window,                                         // cars.jsxi:143
+				function (arg){                                                    // cars.jsxi:143
+					if (a != _list){                                               // cars.jsxi:144
+						mediator.dispatch('lazyscan:interrupt', b);                // cars.jsxi:145
+					} else if (i >= b.length){                                     // cars.jsxi:146
+						mediator.dispatch('lazyscan:ready', b);                    // cars.jsxi:147
 					} else {
 						mediator.dispatch('lazyscan:progress', i, b.length);       // cars.jsxi:150
 						b[i ++].loadEnsure(step);                                  // cars.jsxi:151
@@ -4866,6 +4885,7 @@ var DragMainHandler = (function (){                                             
 	var DragMainHandler = function (){}, 
 		_ddId,                                                                     // drag_main_handler.jsxi:2
 		_holders = [],                                                             // drag_main_handler.jsxi:2
+		_idToReload = [],                                                          // drag_main_handler.jsxi:2
 		_exec_inner;                                                               // drag_main_handler_archive.jsxi:2
 	
 	function handle(file){                                                         // drag_main_handler.jsxi:4
@@ -4963,39 +4983,42 @@ var DragMainHandler = (function (){                                             
 		}
 	}
 	
-	function freeHolders(){                                                        // drag_main_handler.jsxi:72
-		for (var __t = 0; __t < _holders.length; __t ++){                          // drag_main_handler.jsxi:73
+	function reloadAfter(){}
+	
+	function freeHolders(){                                                        // drag_main_handler.jsxi:76
+		for (var __t = 0; __t < _holders.length; __t ++){                          // drag_main_handler.jsxi:77
 			var holder = _holders[__t];
 			
-			holder.stream.end();                                                   // drag_main_handler.jsxi:74
+			holder.stream.end();                                                   // drag_main_handler.jsxi:78
 			
-			if (fs.existsSync(holder.filename))                                    // drag_main_handler.jsxi:75
+			if (fs.existsSync(holder.filename))                                    // drag_main_handler.jsxi:79
 				try {
-					fs.unlinkSync(holder.filename);                                // drag_main_handler.jsxi:76
+					fs.unlinkSync(holder.filename);                                // drag_main_handler.jsxi:80
 				} catch (e){} 
 		}
 	}
 	
-	function applyActions(actions){                                                // drag_main_handler.jsxi:80
-		var d = new Dialog('Installation',                                         // drag_main_handler.jsxi:81
+	function applyActions(actions){                                                // drag_main_handler.jsxi:84
+		var d = new Dialog('Installation',                                         // drag_main_handler.jsxi:85
 				[ '<progress max="' + actions.length + '"></progress>' ], 
 				false, 
 				false), 
-			p = d.find('progress')[0];                                             // drag_main_handler.jsxi:83
+			p = d.find('progress')[0];                                             // drag_main_handler.jsxi:87
 		
-		var i = 0,                                                                 // drag_main_handler.jsxi:85
-			step = function (arg){                                                 // drag_main_handler.jsxi:86
-				if (i >= actions.length){                                          // drag_main_handler.jsxi:87
-					d.close();                                                     // drag_main_handler.jsxi:88
-					freeHolders();                                                 // drag_main_handler.jsxi:89
+		var i = 0,                                                                 // drag_main_handler.jsxi:89
+			step = function (arg){                                                 // drag_main_handler.jsxi:90
+				if (i >= actions.length){                                          // drag_main_handler.jsxi:91
+					d.close();                                                     // drag_main_handler.jsxi:92
+					reloadAfter();                                                 // drag_main_handler.jsxi:93
+					freeHolders();                                                 // drag_main_handler.jsxi:94
 				} else {
-					actions[p.value = i ++](function (arg){                        // drag_main_handler.jsxi:91
-						setTimeout(step, 100);                                     // drag_main_handler.jsxi:92
+					actions[p.value = i ++](function (arg){                        // drag_main_handler.jsxi:96
+						setTimeout(step, 100);                                     // drag_main_handler.jsxi:97
 					});
 				}
 			};
 		
-		setTimeout(step, 100);                                                     // drag_main_handler.jsxi:97
+		setTimeout(step, 100);                                                     // drag_main_handler.jsxi:102
 	}
 	
 	function exec(){                                                               // drag_main_handler_archive.jsxi:5
@@ -5232,185 +5255,186 @@ var DragMainHandler = (function (){                                             
 				if (callback)                                                      // drag_main_handler_archive.jsxi:150
 					callback();                                                    // drag_main_handler_archive.jsxi:150
 			});
+		_idToReload.push(entry.id);                                                // drag_main_handler_archive.jsxi:153
 	}
 	
-	function fromArchive_updateCarFull(file, entry, callback){                     // drag_main_handler_archive.jsxi:154
+	function fromArchive_updateCarFull(file, entry, callback){                     // drag_main_handler_archive.jsxi:156
 		var destination = Cars.byId(entry.id).path;
 		
-		if (!fs.existsSync(destination)){                                          // drag_main_handler_archive.jsxi:156
+		if (!fs.existsSync(destination)){                                          // drag_main_handler_archive.jsxi:158
 			return ErrorHandler.handled('Folder “' + destination + '” doesn\'t exist.');
 		}
 		
-		AcTools.Utils.FileUtils.Recycle(destination);                              // drag_main_handler_archive.jsxi:160
-		fromArchive_unpack(file, entry.root, destination);                         // drag_main_handler_archive.jsxi:161
-		Cars.loadById(entry.id,                                                    // drag_main_handler_archive.jsxi:162
-			function (arg){                                                        // drag_main_handler_archive.jsxi:162
-				ViewList.select(entry.id);                                         // drag_main_handler_archive.jsxi:163
+		AcTools.Utils.FileUtils.Recycle(destination);                              // drag_main_handler_archive.jsxi:162
+		fromArchive_unpack(file, entry.root, destination);                         // drag_main_handler_archive.jsxi:163
+		Cars.loadById(entry.id,                                                    // drag_main_handler_archive.jsxi:164
+			function (arg){                                                        // drag_main_handler_archive.jsxi:164
+				ViewList.select(entry.id);                                         // drag_main_handler_archive.jsxi:165
 				
-				if (callback)                                                      // drag_main_handler_archive.jsxi:164
-					callback();                                                    // drag_main_handler_archive.jsxi:164
+				if (callback)                                                      // drag_main_handler_archive.jsxi:166
+					callback();                                                    // drag_main_handler_archive.jsxi:166
 			});
 	}
 	
-	function fromArchive_updateCarKeepSkinsUi(file, entry, callback){              // drag_main_handler_archive.jsxi:168
-		var destination = Cars.byId(entry.id).path,                                // drag_main_handler_archive.jsxi:169
-			skins = destination + '/skins',                                        // drag_main_handler_archive.jsxi:170
-			ui = destination + '/ui';                                              // drag_main_handler_archive.jsxi:171
+	function fromArchive_updateCarKeepSkinsUi(file, entry, callback){              // drag_main_handler_archive.jsxi:170
+		var destination = Cars.byId(entry.id).path,                                // drag_main_handler_archive.jsxi:171
+			skins = destination + '/skins',                                        // drag_main_handler_archive.jsxi:172
+			ui = destination + '/ui';                                              // drag_main_handler_archive.jsxi:173
 		
-		if (!fs.existsSync(destination)){                                          // drag_main_handler_archive.jsxi:172
+		if (!fs.existsSync(destination)){                                          // drag_main_handler_archive.jsxi:174
 			return ErrorHandler.handled('Folder “' + destination + '” doesn\'t exist.');
 		}
 		
 		var tmpDir = AcDir.temp;
 		
-		fs.mkdirSync(tmpDir);                                                      // drag_main_handler_archive.jsxi:177
+		fs.mkdirSync(tmpDir);                                                      // drag_main_handler_archive.jsxi:179
 		
-		if (fs.existsSync(skins))                                                  // drag_main_handler_archive.jsxi:179
-			fs.renameSync(skins, tmpDir + '/skins');                               // drag_main_handler_archive.jsxi:179
+		if (fs.existsSync(skins))                                                  // drag_main_handler_archive.jsxi:181
+			fs.renameSync(skins, tmpDir + '/skins');                               // drag_main_handler_archive.jsxi:181
 		
-		if (fs.existsSync(ui))                                                     // drag_main_handler_archive.jsxi:180
-			fs.renameSync(ui, tmpDir + '/ui');                                     // drag_main_handler_archive.jsxi:180
+		if (fs.existsSync(ui))                                                     // drag_main_handler_archive.jsxi:182
+			fs.renameSync(ui, tmpDir + '/ui');                                     // drag_main_handler_archive.jsxi:182
 		
-		AcTools.Utils.FileUtils.Recycle(destination);                              // drag_main_handler_archive.jsxi:182
-		fromArchive_unpack(file, entry.root, destination);                         // drag_main_handler_archive.jsxi:183
+		AcTools.Utils.FileUtils.Recycle(destination);                              // drag_main_handler_archive.jsxi:184
+		fromArchive_unpack(file, entry.root, destination);                         // drag_main_handler_archive.jsxi:185
 		
-		if (fs.existsSync(skins))                                                  // drag_main_handler_archive.jsxi:185
-			fs.removeDirSync(skins);                                               // drag_main_handler_archive.jsxi:185
+		if (fs.existsSync(skins))                                                  // drag_main_handler_archive.jsxi:187
+			fs.removeDirSync(skins);                                               // drag_main_handler_archive.jsxi:187
 		
-		if (fs.existsSync(ui))                                                     // drag_main_handler_archive.jsxi:186
-			fs.removeDirSync(ui);                                                  // drag_main_handler_archive.jsxi:186
+		if (fs.existsSync(ui))                                                     // drag_main_handler_archive.jsxi:188
+			fs.removeDirSync(ui);                                                  // drag_main_handler_archive.jsxi:188
 		
-		if (fs.existsSync(tmpDir + '/skins'))                                      // drag_main_handler_archive.jsxi:188
-			fs.renameSync(tmpDir + '/skins', skins);                               // drag_main_handler_archive.jsxi:188
+		if (fs.existsSync(tmpDir + '/skins'))                                      // drag_main_handler_archive.jsxi:190
+			fs.renameSync(tmpDir + '/skins', skins);                               // drag_main_handler_archive.jsxi:190
 		
-		if (fs.existsSync(tmpDir + '/ui'))                                         // drag_main_handler_archive.jsxi:189
-			fs.renameSync(tmpDir + '/ui', ui);                                     // drag_main_handler_archive.jsxi:189
+		if (fs.existsSync(tmpDir + '/ui'))                                         // drag_main_handler_archive.jsxi:191
+			fs.renameSync(tmpDir + '/ui', ui);                                     // drag_main_handler_archive.jsxi:191
 		
-		fs.removeDirSync(tmpDir);                                                  // drag_main_handler_archive.jsxi:190
-		Cars.loadById(entry.id,                                                    // drag_main_handler_archive.jsxi:192
-			function (arg){                                                        // drag_main_handler_archive.jsxi:192
-				ViewList.select(entry.id);                                         // drag_main_handler_archive.jsxi:193
+		fs.removeDirSync(tmpDir);                                                  // drag_main_handler_archive.jsxi:192
+		Cars.loadById(entry.id,                                                    // drag_main_handler_archive.jsxi:194
+			function (arg){                                                        // drag_main_handler_archive.jsxi:194
+				ViewList.select(entry.id);                                         // drag_main_handler_archive.jsxi:195
 				
-				if (callback)                                                      // drag_main_handler_archive.jsxi:194
-					callback();                                                    // drag_main_handler_archive.jsxi:194
+				if (callback)                                                      // drag_main_handler_archive.jsxi:196
+					callback();                                                    // drag_main_handler_archive.jsxi:196
 			});
 	}
 	
-	function fromArchive_updateCarOnlyDataSfx(file, entry, callback){              // drag_main_handler_archive.jsxi:198
+	function fromArchive_updateCarOnlyDataSfx(file, entry, callback){              // drag_main_handler_archive.jsxi:200
 		var destination = Cars.byId(entry.id).path;
 		
-		if (!fs.existsSync(destination)){                                          // drag_main_handler_archive.jsxi:200
+		if (!fs.existsSync(destination)){                                          // drag_main_handler_archive.jsxi:202
 			return ErrorHandler.handled('Folder “' + destination + '” doesn\'t exist.');
 		}
 		
-		if (fs.existsSync(destination + '/sfx'))                                   // drag_main_handler_archive.jsxi:204
-			AcTools.Utils.FileUtils.Recycle(destination + '/sfx');                 // drag_main_handler_archive.jsxi:204
+		if (fs.existsSync(destination + '/sfx'))                                   // drag_main_handler_archive.jsxi:206
+			AcTools.Utils.FileUtils.Recycle(destination + '/sfx');                 // drag_main_handler_archive.jsxi:206
 		
-		if (fs.existsSync(destination + '/data'))                                  // drag_main_handler_archive.jsxi:205
-			AcTools.Utils.FileUtils.Recycle(destination + '/data');                // drag_main_handler_archive.jsxi:205
+		if (fs.existsSync(destination + '/data'))                                  // drag_main_handler_archive.jsxi:207
+			AcTools.Utils.FileUtils.Recycle(destination + '/data');                // drag_main_handler_archive.jsxi:207
 		
-		if (fs.existsSync(destination + '/data.acd'))                              // drag_main_handler_archive.jsxi:206
-			AcTools.Utils.FileUtils.Recycle(destination + '/data.acd');            // drag_main_handler_archive.jsxi:206
+		if (fs.existsSync(destination + '/data.acd'))                              // drag_main_handler_archive.jsxi:208
+			AcTools.Utils.FileUtils.Recycle(destination + '/data.acd');            // drag_main_handler_archive.jsxi:208
 		
-		fromArchive_unpack(file, entry.root.sub['sfx'], destination + '/sfx');     // drag_main_handler_archive.jsxi:208
+		fromArchive_unpack(file, entry.root.sub['sfx'], destination + '/sfx');     // drag_main_handler_archive.jsxi:210
 		
-		if (entry.root.sub['data'])                                                // drag_main_handler_archive.jsxi:209
+		if (entry.root.sub['data'])                                                // drag_main_handler_archive.jsxi:211
 			fromArchive_unpack(file, entry.root.sub['data'], destination + '/data');
 		
-		if (entry.root.sub['data.acd'])                                            // drag_main_handler_archive.jsxi:210
+		if (entry.root.sub['data.acd'])                                            // drag_main_handler_archive.jsxi:212
 			fromArchive_unpack(file, entry.root.sub['data.acd'], destination + '/data.acd');
 		
-		Cars.loadById(entry.id,                                                    // drag_main_handler_archive.jsxi:212
-			function (arg){                                                        // drag_main_handler_archive.jsxi:212
-				ViewList.select(entry.id);                                         // drag_main_handler_archive.jsxi:213
+		Cars.loadById(entry.id,                                                    // drag_main_handler_archive.jsxi:214
+			function (arg){                                                        // drag_main_handler_archive.jsxi:214
+				ViewList.select(entry.id);                                         // drag_main_handler_archive.jsxi:215
 				
-				if (callback)                                                      // drag_main_handler_archive.jsxi:214
-					callback();                                                    // drag_main_handler_archive.jsxi:214
+				if (callback)                                                      // drag_main_handler_archive.jsxi:216
+					callback();                                                    // drag_main_handler_archive.jsxi:216
 			});
 	}
 	
-	function fromArchive_installSkin(car, file, entry, callback){                  // drag_main_handler_archive.jsxi:218
+	function fromArchive_installSkin(car, file, entry, callback){                  // drag_main_handler_archive.jsxi:220
 		var destination = path.join(car.path, 'skins', entry.id);
 		
-		if (fs.existsSync(destination)){                                           // drag_main_handler_archive.jsxi:220
+		if (fs.existsSync(destination)){                                           // drag_main_handler_archive.jsxi:222
 			return ErrorHandler.handled('Folder “' + destination + '” already exists.');
 		}
 		
-		fromArchive_unpack(file, entry.root, destination);                         // drag_main_handler_archive.jsxi:224
-		car.loadSkins(callback);                                                   // drag_main_handler_archive.jsxi:225
+		fromArchive_unpack(file, entry.root, destination);                         // drag_main_handler_archive.jsxi:226
+		car.loadSkins(callback);                                                   // drag_main_handler_archive.jsxi:227
 	}
 	
-	function fromArchive_installSkinAs(car, id, file, entry, callback){            // drag_main_handler_archive.jsxi:228
+	function fromArchive_installSkinAs(car, id, file, entry, callback){            // drag_main_handler_archive.jsxi:230
 		var destination = path.join(car.path, 'skins', id);
 		
-		if (fs.existsSync(destination)){                                           // drag_main_handler_archive.jsxi:230
+		if (fs.existsSync(destination)){                                           // drag_main_handler_archive.jsxi:232
 			return ErrorHandler.handled('Folder “' + destination + '” already exists.');
 		}
 		
-		fromArchive_unpack(file, entry.root, destination);                         // drag_main_handler_archive.jsxi:234
-		car.loadSkins(callback);                                                   // drag_main_handler_archive.jsxi:235
+		fromArchive_unpack(file, entry.root, destination);                         // drag_main_handler_archive.jsxi:236
+		car.loadSkins(callback);                                                   // drag_main_handler_archive.jsxi:237
 	}
 	
-	function fromArchive_updateSkinFull(car, file, entry, callback){               // drag_main_handler_archive.jsxi:238
+	function fromArchive_updateSkinFull(car, file, entry, callback){               // drag_main_handler_archive.jsxi:240
 		var destination = path.join(car.path, 'skins', entry.id);
 		
-		if (!fs.existsSync(destination)){                                          // drag_main_handler_archive.jsxi:240
-			callback();                                                            // drag_main_handler_archive.jsxi:241
+		if (!fs.existsSync(destination)){                                          // drag_main_handler_archive.jsxi:242
+			callback();                                                            // drag_main_handler_archive.jsxi:243
 			return ErrorHandler.handled('Folder “' + destination + '” doesn\'t exist.');
 		}
 		
-		AcTools.Utils.FileUtils.Recycle(destination);                              // drag_main_handler_archive.jsxi:245
-		fromArchive_unpack(file, entry.root, destination);                         // drag_main_handler_archive.jsxi:246
-		car.loadSkins(callback);                                                   // drag_main_handler_archive.jsxi:247
+		AcTools.Utils.FileUtils.Recycle(destination);                              // drag_main_handler_archive.jsxi:247
+		fromArchive_unpack(file, entry.root, destination);                         // drag_main_handler_archive.jsxi:248
+		car.loadSkins(callback);                                                   // drag_main_handler_archive.jsxi:249
 	}
 	
-	function fromArchive_updateSkinKeepUi(car, file, entry, callback){             // drag_main_handler_archive.jsxi:250
-		var destination = path.join(car.path, 'skins', entry.id),                  // drag_main_handler_archive.jsxi:251
-			preview = destination + '/preview.jpg',                                // drag_main_handler_archive.jsxi:252
-			ui = destination + '/ui_skin.json';                                    // drag_main_handler_archive.jsxi:253
+	function fromArchive_updateSkinKeepUi(car, file, entry, callback){             // drag_main_handler_archive.jsxi:252
+		var destination = path.join(car.path, 'skins', entry.id),                  // drag_main_handler_archive.jsxi:253
+			preview = destination + '/preview.jpg',                                // drag_main_handler_archive.jsxi:254
+			ui = destination + '/ui_skin.json';                                    // drag_main_handler_archive.jsxi:255
 		
-		if (!fs.existsSync(destination)){                                          // drag_main_handler_archive.jsxi:254
-			callback();                                                            // drag_main_handler_archive.jsxi:255
+		if (!fs.existsSync(destination)){                                          // drag_main_handler_archive.jsxi:256
+			callback();                                                            // drag_main_handler_archive.jsxi:257
 			return ErrorHandler.handled('Folder “' + destination + '” doesn\'t exist.');
 		}
 		
 		var tmpDir = AcDir.temp;
 		
-		fs.mkdirSync(tmpDir);                                                      // drag_main_handler_archive.jsxi:260
+		fs.mkdirSync(tmpDir);                                                      // drag_main_handler_archive.jsxi:262
 		
-		if (fs.existsSync(preview))                                                // drag_main_handler_archive.jsxi:262
-			fs.renameSync(preview, tmpDir + '/p');                                 // drag_main_handler_archive.jsxi:262
+		if (fs.existsSync(preview))                                                // drag_main_handler_archive.jsxi:264
+			fs.renameSync(preview, tmpDir + '/p');                                 // drag_main_handler_archive.jsxi:264
 		
-		if (fs.existsSync(ui))                                                     // drag_main_handler_archive.jsxi:263
-			fs.renameSync(ui, tmpDir + '/u');                                      // drag_main_handler_archive.jsxi:263
+		if (fs.existsSync(ui))                                                     // drag_main_handler_archive.jsxi:265
+			fs.renameSync(ui, tmpDir + '/u');                                      // drag_main_handler_archive.jsxi:265
 		
-		AcTools.Utils.FileUtils.Recycle(destination);                              // drag_main_handler_archive.jsxi:265
-		fromArchive_unpack(file, entry.root, destination);                         // drag_main_handler_archive.jsxi:266
+		AcTools.Utils.FileUtils.Recycle(destination);                              // drag_main_handler_archive.jsxi:267
+		fromArchive_unpack(file, entry.root, destination);                         // drag_main_handler_archive.jsxi:268
 		
-		if (fs.existsSync(preview))                                                // drag_main_handler_archive.jsxi:268
-			fs.removeDirSync(preview);                                             // drag_main_handler_archive.jsxi:268
+		if (fs.existsSync(preview))                                                // drag_main_handler_archive.jsxi:270
+			fs.removeDirSync(preview);                                             // drag_main_handler_archive.jsxi:270
 		
-		if (fs.existsSync(ui))                                                     // drag_main_handler_archive.jsxi:269
-			fs.removeDirSync(ui);                                                  // drag_main_handler_archive.jsxi:269
+		if (fs.existsSync(ui))                                                     // drag_main_handler_archive.jsxi:271
+			fs.removeDirSync(ui);                                                  // drag_main_handler_archive.jsxi:271
 		
-		if (fs.existsSync(tmpDir + '/p'))                                          // drag_main_handler_archive.jsxi:271
-			fs.renameSync(tmpDir + '/p', preview);                                 // drag_main_handler_archive.jsxi:271
+		if (fs.existsSync(tmpDir + '/p'))                                          // drag_main_handler_archive.jsxi:273
+			fs.renameSync(tmpDir + '/p', preview);                                 // drag_main_handler_archive.jsxi:273
 		
-		if (fs.existsSync(tmpDir + '/u'))                                          // drag_main_handler_archive.jsxi:272
-			fs.renameSync(tmpDir + '/u', ui);                                      // drag_main_handler_archive.jsxi:272
+		if (fs.existsSync(tmpDir + '/u'))                                          // drag_main_handler_archive.jsxi:274
+			fs.renameSync(tmpDir + '/u', ui);                                      // drag_main_handler_archive.jsxi:274
 		
-		fs.removeDirSync(tmpDir);                                                  // drag_main_handler_archive.jsxi:273
-		car.loadSkins(callback);                                                   // drag_main_handler_archive.jsxi:275
+		fs.removeDirSync(tmpDir);                                                  // drag_main_handler_archive.jsxi:275
+		car.loadSkins(callback);                                                   // drag_main_handler_archive.jsxi:277
 	}
 	
-	function fromArchive(file){                                                    // drag_main_handler_archive.jsxi:278
+	function fromArchive(file){                                                    // drag_main_handler_archive.jsxi:280
 		var tree = fromArchive_getFiles(file);
 		
 		var content = detectContent(file, tree);
 		
-		fromArchive_extractData(file, content);                                    // drag_main_handler_archive.jsxi:281
-		return content.map(function (arg){                                         // drag_main_handler_archive.jsxi:282
-			return fromArchive_prepareFound(file, arg);                            // drag_main_handler_archive.jsxi:282
+		fromArchive_extractData(file, content);                                    // drag_main_handler_archive.jsxi:283
+		return content.map(function (arg){                                         // drag_main_handler_archive.jsxi:284
+			return fromArchive_prepareFound(file, arg);                            // drag_main_handler_archive.jsxi:284
 		});
 	}
 	
@@ -5807,21 +5831,21 @@ var DragMainHandler = (function (){                                             
 				return _exec_inner || (_exec_inner = require('child_process').execFileSync);
 			})
 		});
-	(function (){                                                                  // drag_main_handler.jsxi:100
-		_ddId = DragDestination.register('New Car Or Skin',                        // drag_main_handler.jsxi:101
-			function (files){                                                      // drag_main_handler.jsxi:101
-				var d = new Dialog('Searching',                                    // drag_main_handler.jsxi:102
+	(function (){                                                                  // drag_main_handler.jsxi:105
+		_ddId = DragDestination.register('New Car Or Skin',                        // drag_main_handler.jsxi:106
+			function (files){                                                      // drag_main_handler.jsxi:106
+				var d = new Dialog('Searching',                                    // drag_main_handler.jsxi:107
 					[ '<progress indeterminate></progress>' ], 
 					false, 
 					false);
 				
-				setTimeout(function (arg){                                         // drag_main_handler.jsxi:106
-					d.close();                                                     // drag_main_handler.jsxi:107
+				setTimeout(function (arg){                                         // drag_main_handler.jsxi:111
+					d.close();                                                     // drag_main_handler.jsxi:112
 					
 					try {
 						var found = [];
 						
-						for (var __10 = 0; __10 < files.length; __10 ++){          // drag_main_handler.jsxi:111
+						for (var __10 = 0; __10 < files.length; __10 ++){          // drag_main_handler.jsxi:116
 							var file = files[__10];
 							
 							{
@@ -5830,16 +5854,16 @@ var DragMainHandler = (function (){                                             
 								for (var __u = 0; __u < __v.length; __u ++){
 									var entry = __v[__u];
 									
-									if (entry)                                     // drag_main_handler.jsxi:113
-										found.push(entry);                         // drag_main_handler.jsxi:113
+									if (entry)                                     // drag_main_handler.jsxi:118
+										found.push(entry);                         // drag_main_handler.jsxi:118
 								}
 								
 								__v = undefined;
 							}
 						}
 						
-						showDialog(found);                                         // drag_main_handler.jsxi:117
-					} catch (err){                                                 // drag_main_handler.jsxi:118
+						showDialog(found);                                         // drag_main_handler.jsxi:122
+					} catch (err){                                                 // drag_main_handler.jsxi:123
 						ErrorHandler.handled('Cannot process dragged files.', err);
 					} 
 				}, 
@@ -6995,13 +7019,14 @@ __prototypeExtend(AcdAeroDataSectionFixer,
 	AbstractFixer);
 AcdAeroDataSectionFixer.prototype.__AcdAeroDataSectionFixer_removeSection = function (c){
 	AcTools.Utils.DataFixer.RemoveAeroDataSection(this.__car.path);                // error_acd_file.jsxi:3
-	c();                                                                           // error_acd_file.jsxi:4
+	Notification.info('Done', 'Obsolete section “DATA” in aero.ini removed.');     // error_acd_file.jsxi:4
+	c();                                                                           // error_acd_file.jsxi:5
 };
 Object.defineProperty(AcdAeroDataSectionFixer.prototype, 
 	'title', 
 	{
 		get: (function (){
-			return 'Obsolete section “DATA” in aero.ini';                          // error_acd_file.jsxi:7
+			return 'Obsolete section “DATA” in aero.ini';                          // error_acd_file.jsxi:8
 		})
 	});
 Object.defineProperty(AcdAeroDataSectionFixer.prototype, 
@@ -7010,32 +7035,33 @@ Object.defineProperty(AcdAeroDataSectionFixer.prototype,
 		get: (function (){
 			return [
 				{
-					name: 'Remove section',                                        // error_acd_file.jsxi:9
+					name: 'Remove section',                                        // error_acd_file.jsxi:10
 					fn: __bindOnce(this, '__AcdAeroDataSectionFixer_removeSection')
 				}
 			];
 		})
 	});
 
-RestorationWizard.register('acd-obsolete-aero-data', AcdAeroDataSectionFixer);     // error_acd_file.jsxi:13
+RestorationWizard.register('acd-obsolete-aero-data', AcdAeroDataSectionFixer);     // error_acd_file.jsxi:14
 
 /* Class "AcdInvalidWeightFixer" declaration */
-function AcdInvalidWeightFixer(){                                                  // error_acd_file.jsxi:15
+function AcdInvalidWeightFixer(){                                                  // error_acd_file.jsxi:16
 	AbstractFixer.apply(this, 
 		arguments);
 }
 __prototypeExtend(AcdInvalidWeightFixer, 
 	AbstractFixer);
 AcdInvalidWeightFixer.prototype.__AcdInvalidWeightFixer_changeWeight = function (c){
-	this.__car.changeDataSpecs('weight',                                           // error_acd_file.jsxi:17
-		AcTools.Utils.DataFixer.GetWeight(this.__car.path) + 'kg');                // error_acd_file.jsxi:17
-	c();                                                                           // error_acd_file.jsxi:18
+	this.__car.changeDataSpecs('weight',                                           // error_acd_file.jsxi:18
+		AcTools.Utils.DataFixer.GetWeight(this.__car.path) + 'kg');                // error_acd_file.jsxi:18
+	Notification.info('Done', 'Weight changed, don\'t forget to save.');           // error_acd_file.jsxi:19
+	c();                                                                           // error_acd_file.jsxi:20
 };
 Object.defineProperty(AcdInvalidWeightFixer.prototype, 
 	'title', 
 	{
 		get: (function (){
-			return 'Obsolete section “DATA” in aero.ini';                          // error_acd_file.jsxi:21
+			return 'Obsolete section “DATA” in aero.ini';                          // error_acd_file.jsxi:23
 		})
 	});
 Object.defineProperty(AcdInvalidWeightFixer.prototype, 
@@ -7046,16 +7072,12 @@ Object.defineProperty(AcdInvalidWeightFixer.prototype,
 				{
 					name: 'Change weight in UI to ' + AcTools.Utils.DataFixer.GetWeight(this.__car.path) + 'kg', 
 					fn: __bindOnce(this, '__AcdInvalidWeightFixer_changeWeight')
-				}, 
-				localStorage.developerMode && {                                    // error_acd_file.jsxi:24
-					name: 'Change weight in data to ' + this.__car.getSpec('weight') + 'kg (use only if UI weight is correct!)', 
-					fn: __bindOnce(this, '__AcdInvalidWeightFixer_changeWeight')
 				}
 			];
 		})
 	});
 
-RestorationWizard.register('acd-invalid-weight', AcdInvalidWeightFixer);           // error_acd_file.jsxi:28
+RestorationWizard.register('acd-invalid-weight', AcdInvalidWeightFixer);           // error_acd_file.jsxi:30
 
 /* Class "MissingBadgeIconFixer" declaration */
 function MissingBadgeIconFixer(){                                                  // error_badge_missing.jsxi:1

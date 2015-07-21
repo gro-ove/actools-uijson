@@ -10,6 +10,8 @@ perl -0pe "s{Last \(\K\d\.\d+\.\d+(?=\))}{%VERSION%}" < README.md > README.md~
 del README.md
 ren README.md~ README.md
 
+copy app\main.js build\main-%VERSION%.js
+
 cd %~dp0
 
 mkdir tmp

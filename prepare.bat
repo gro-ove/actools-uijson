@@ -11,6 +11,8 @@ rem del app\native\AcTools.dll
 rem mklink /h app\native\AcTools.dll "D:\Applications\AcTools\AcTools.dll" >nul
 rem mklink /h app\native\AcToolsKn5Render.dll "D:\Applications\AcTools\AcToolsKn5Render.dll" >nul 
 
+rem /C/Windows/Microsoft.NET/Framework/v4.0.30319/csc /t:library /out:app\native\Wrapper.dll app-raw\data\wrapper.cs /r:app\native\AcTools.dll /r:app\native\AcToolsKn5Render.dll
+
 copy "D:\Applications\AcTools\AcTools.dll" app\native\AcTools.dll >nul 
 copy "D:\Development\GitHub\actools\AcToolsKn5Render\bin\Release\AcToolsKn5Render.dll" app\native\AcToolsKn5Render.dll >nul 
 

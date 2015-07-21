@@ -17,7 +17,6 @@ Small utility for easy editing *ui_car.json* files. Written using [NW.js](http:/
 #### TODO
 * Auto-detect FWD/RWD/4WD and fix tags
 * Check for updates in …\Documents\Assetto Corsa\cfg\cars\*\view.ini
-* Fix memory consumption, make app more async
 * Check for new car versions by URL
 * Optional sorting, sorting by brand/id/…
 * Skins Editor
@@ -32,6 +31,10 @@ Small utility for easy editing *ui_car.json* files. Written using [NW.js](http:/
 * Custom Launcher (with GT-like career mode?)
 
 #### Changelog
+* 0.3.45
+    * Fixed memory leaking, improved perfomance
+    * Fixed INI parsing (seriously, these files are such a mess)
+    * Bugfixes
 * 0.3.44
     * Bugfixes
 * 0.3.42
@@ -173,7 +176,7 @@ Small utility for easy editing *ui_car.json* files. Written using [NW.js](http:/
 * DirectX 11 for custom showroom
 
 #### Download
-* [Last (0.3.44)](https://yadi.sk/d/8scdCAG-hrHhC)
+* [Last (0.3.45)](https://yadi.sk/d/8scdCAG-hrHhC)
 * [Stable (0.3.44)](http://www.racedepartment.com/downloads/actools-cars-manager.6518/)
 * [Previous](http://www.racedepartment.com/downloads/actools-cars-manager.6518/history) [builds](https://yadi.sk/d/eHr0NCP4hSAfq)
 
