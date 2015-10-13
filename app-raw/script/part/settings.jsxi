@@ -64,4 +64,5 @@ var Settings = new ObjLocalStorage('settings', {
     aptCameraY:         36
     aptCameraDistance:  5.5
     aptIncreaseDelays:  false
+    aptPngMode:         false
 });

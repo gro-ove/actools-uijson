@@ -562,7 +562,7 @@ static class ViewDetails {
                 menu.append(new gui.MenuItem({ label: 'Open in Custom Showroom (Experimental)', click: function (){
                     if (!_selected) return;
                     try {
-                        AcTools.Utils.Kn5RenderWrapper.StartDarkRoomPreview(_selected.path, id);
+                        AcTools.Kn5Render.Utils.Kn5RenderWrapper.StartDarkRoomPreview(_selected.path, id);
                     } catch (err){
                         ErrorHandler.handled('Cannot start Custom Showroom.', err);
                         return;
@@ -579,6 +579,10 @@ static class ViewDetails {
 
                 driveMenu.append(new gui.MenuItem({ label: 'Hotlap', click: function (){
                     AcPractice.start(_selected, id, 'Hotlap');
+                } }));
+
+                driveMenu.append(new gui.MenuItem({ label: 'Race', click: function (){
+                    AcPractice.start(_selected, id, 'Race');
                 } }));
 
                 driveMenu.append(new gui.MenuItem({ label: 'Drift', click: function (){
@@ -612,7 +616,7 @@ static class ViewDetails {
                     if (!_selected) return;
                     var skin = _selected.getSkin(id);
                     try {
-                        AcTools.Utils.Kn5RenderWrapper.GenerateLivery(_selected.path, skin.id, skin.livery);
+                        AcTools.Kn5Render.Utils.Kn5RenderWrapper.GenerateLivery(_selected.path, skin.id, skin.livery);
                         _selected.loadSkins();
                     } catch (err){
                         ErrorHandler.handled('Cannot update livery.', err);
@@ -664,13 +668,28 @@ static class ViewDetails {
                 if (!_selected) return;
 
                 if (e.keyCode === 'S'.charCodeAt(0) && e.ctrlKey && e.altKey){
+                    AcShowroom.shot(_selected, true);
+                    return false;
+                }
+
+                if (e.keyCode === 'D'.charCodeAt(0) && e.ctrlKey && e.altKey){
                     try {
-                        AcTools.Utils.Kn5RenderWrapper.UpdateAmbientShadows(_selected.path);
+                        AcTools.Kn5Render.Utils.Kn5RenderWrapper.UpdateAmbientShadows(_selected.path);
                     } catch (err){
                         ErrorHandler.handled('Cannot update shadows.', err);
                         return;
                     }
-                    AcShowroom.shot(_selected);
+                    return false;
+                }
+
+                if (e.keyCode === 'A'.charCodeAt(0) && e.ctrlKey && e.altKey){
+                    try {
+                        AcTools.Kn5Render.Utils.Kn5RenderWrapper.UpdateAmbientShadows(_selected.path);
+                    } catch (err){
+                        ErrorHandler.handled('Cannot update shadows.', err);
+                        return;
+                    }
+                    AcShowroom.shot(_selected, true);
                     return false;
                 }
 
@@ -847,7 +866,7 @@ static class ViewDetails {
 
             add('Update Ambient Shadows', function (){
                 try {
-                    AcTools.Utils.Kn5RenderWrapper.UpdateAmbientShadows(_selected.path);
+                    AcTools.Kn5Render.Utils.Kn5RenderWrapper.UpdateAmbientShadows(_selected.path);
                 } catch (err){
                     ErrorHandler.handled('Cannot update shadows.', err);
                     return;
@@ -855,7 +874,7 @@ static class ViewDetails {
             });
 
             add('Change Body Ambient Shadow Size', function (){
-                var currentSize = AcTools.Utils.Kn5RenderWrapper.GetBodyAmbientShadowSize(_selected.path).split(',');
+                var currentSize = AcTools.Kn5Render.Utils.Kn5RenderWrapper.GetBodyAmbientShadowSize(_selected.path).split(',');
                 var d = new Dialog('Body Ambient Shadow', [
                     '<h6>Size (in meters)</h6>',
                     '<label style="display:inline-block;width:160px;line-height:24px">Width: <input id="body-ambient-shadow-width" type="number" step="0.1" min="0.8" max="6.0" style="width: 80px;float: right;margin-right: 20px;"></label>',
@@ -867,11 +886,29 @@ static class ViewDetails {
                     var h = +d.content.find('#body-ambient-shadow-height').val();
                     if (Number.isNaN(h)) h = currentSize[1];
 
-                    AcTools.Utils.Kn5RenderWrapper.SetBodyAmbientShadowSize(_selected.path, w, h);
+                    AcTools.Kn5Render.Utils.Kn5RenderWrapper.SetBodyAmbientShadowSize(_selected.path, w, h);
                 });
 
                 d.content.find('#body-ambient-shadow-width').val(currentSize[0]);
                 d.content.find('#body-ambient-shadow-height').val(currentSize[1]);
+            });
+
+            add('Fix LR/HR nodes', function (){
+                try {
+                    AcTools.Utils.Kn5Fixer.FixLrHrNodes(AcDir.root, _selected.id);
+                } catch (err){
+                    ErrorHandler.handled('Cannot fix car.', err);
+                    return;
+                }
+            });
+
+            add('Fix blurred wheels', function (){
+                try {
+                    AcTools.Utils.Kn5Fixer.FixBlurredWheels(AcDir.root, _selected.id);
+                } catch (err){
+                    ErrorHandler.handled('Cannot fix car.', err);
+                    return;
+                }
             });
 
             if (localStorage.developerMode){
@@ -885,7 +922,7 @@ static class ViewDetails {
 
                 add('Fix SUSP_XX error', function (){
                     try {
-                        AcTools.Utils.Kn5Fixer.FixSuspensionWrapper(AcDir.root, _selected.id);
+                        AcTools.Utils.Kn5Fixer.FixSuspension(AcDir.root, _selected.id);
                     } catch (err){
                         ErrorHandler.handled('Cannot fix car.', err);
                         return;

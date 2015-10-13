@@ -1526,7 +1526,7 @@ var AcFilters = (function (){                                                   
 /* Class "AcPractice" declaration */
 var AcPractice = (function (){                                                     // ac_practice.jsxi:1
 	var AcPractice = function (){}, 
-		_modes = [ 'Practice', 'Hotlap', 'Drift' ],                                // ac_practice.jsxi:17
+		_modes = [ 'Practice', 'Hotlap', 'Race', 'Drift' ],                        // ac_practice.jsxi:17
 		_storage,                                                                  // ac_practice.jsxi:21
 		_tracks;                                                                   // ac_practice.jsxi:22
 	
@@ -1580,85 +1580,86 @@ var AcPractice = (function (){                                                  
 				track: {                                                           // ac_practice.jsxi:57
 					'Practice': 'spa',                                             // ac_practice.jsxi:57
 					'Hotlap': 'silverstone-national',                              // ac_practice.jsxi:57
+					'Race': 'valencia',                                            // ac_practice.jsxi:57
 					'Drift': 'drift'
 				}, 
 				mode: _modes[0]
 			});
 		
-		if (localStorage.lastTrack){                                               // ac_practice.jsxi:61
-			_storage.update(function (arg){                                        // ac_practice.jsxi:62
-				return arg.track['Practice'] = localStorage.lastTrack;             // ac_practice.jsxi:62
+		if (localStorage.lastTrack){                                               // ac_practice.jsxi:62
+			_storage.update(function (arg){                                        // ac_practice.jsxi:63
+				return arg.track['Practice'] = localStorage.lastTrack;             // ac_practice.jsxi:63
 			});
-			delete localStorage.lastTrack;                                         // ac_practice.jsxi:63
+			delete localStorage.lastTrack;                                         // ac_practice.jsxi:64
 		}
 	}
 	
-	AcPractice.start = function (c, s, m){                                         // ac_practice.jsxi:67
-		if (c.disabled){                                                           // ac_practice.jsxi:68
-			Notification.warn('No Way', 'Enable car first.');                      // ac_practice.jsxi:69
+	AcPractice.start = function (c, s, m){                                         // ac_practice.jsxi:68
+		if (c.disabled){                                                           // ac_practice.jsxi:69
+			Notification.warn('No Way', 'Enable car first.');                      // ac_practice.jsxi:70
 			return;
 		}
 		
-		if (!_tracks)                                                              // ac_practice.jsxi:73
-			init();                                                                // ac_practice.jsxi:73
+		if (!_tracks)                                                              // ac_practice.jsxi:74
+			init();                                                                // ac_practice.jsxi:74
 		
-		if (c.skins.length === 0){                                                 // ac_practice.jsxi:75
-			Notification.warn('No Way', 'At least one skin required.');            // ac_practice.jsxi:76
+		if (c.skins.length === 0){                                                 // ac_practice.jsxi:76
+			Notification.warn('No Way', 'At least one skin required.');            // ac_practice.jsxi:77
 			return;
 		}
 		
-		if (m == null){                                                            // ac_practice.jsxi:80
-			m = _storage.get('mode');                                              // ac_practice.jsxi:81
+		if (m == null){                                                            // ac_practice.jsxi:81
+			m = _storage.get('mode');                                              // ac_practice.jsxi:82
 		}
 		
-		if (s == null){                                                            // ac_practice.jsxi:84
-			s = c.selectedSkin ? c.selectedSkin.id : c.skins[0].id;                // ac_practice.jsxi:85
+		if (s == null){                                                            // ac_practice.jsxi:85
+			s = c.selectedSkin ? c.selectedSkin.id : c.skins[0].id;                // ac_practice.jsxi:86
 		}
 		
 		var r = _storage.get('track')[m];
 		
-		AcTools;                                                                   // ac_practice.jsxi:90
+		AcTools;                                                                   // ac_practice.jsxi:91
 		
 		try {
-			AcTools.Processes.Game[m === 'Practice' ? 'StartPractice' : m === 'Hotlap' ? 'StartHotlap' : 'StartDrift'](AcDir.root, c.id, s, r.split('/')[0], r.split('/')[1] || '');
-		} catch (e){                                                               // ac_practice.jsxi:95
+			AcTools.Processes.Game[m === 'Practice' ? 'StartPractice' : m === 'Hotlap' ? 'StartHotlap' : m === 'Race' ? 'StartSimpleRace' : 'StartDrift'](AcDir.root, c.id, s, r.split('/')[0], r.split('/')[1] || '');
+		} catch (e){                                                               // ac_practice.jsxi:96
 			ErrorHandler.handled('Cannot start the game. Maybe there is not enough rights.');
 		} 
 	};
-	AcPractice.select = function (c, s){                                           // ac_practice.jsxi:100
-		if (!_tracks)                                                              // ac_practice.jsxi:101
-			init();                                                                // ac_practice.jsxi:101
+	AcPractice.select = function (c, s){                                           // ac_practice.jsxi:101
+		if (!_tracks)                                                              // ac_practice.jsxi:102
+			init();                                                                // ac_practice.jsxi:102
 		
-		var d = new Dialog('Drive!',                                               // ac_practice.jsxi:103
+		var d = new Dialog('Drive!',                                               // ac_practice.jsxi:104
 			[
-				'<h6>Mode</h6>',                                                   // ac_practice.jsxi:104
-				'<select id="practice-mode">' + _modes.map(function (arg){         // ac_practice.jsxi:105
-					return '<option value="' + arg + '">' + arg + '</option>';     // ac_practice.jsxi:105
-				}).join('') + '</select>',                                         // ac_practice.jsxi:105
-				'<h6>Track</h6>',                                                  // ac_practice.jsxi:106
-				'<select id="practice-track">' + _tracks.map(function (arg){       // ac_practice.jsxi:107
+				'<h6>Mode</h6>',                                                   // ac_practice.jsxi:105
+				'<select id="practice-mode">' + _modes.map(function (arg){         // ac_practice.jsxi:106
+					return '<option value="' + arg + '">' + arg + '</option>';     // ac_practice.jsxi:106
+				}).join('') + '</select>',                                         // ac_practice.jsxi:106
+				'<h6>Track</h6>',                                                  // ac_practice.jsxi:107
+				'<select id="practice-track">' + _tracks.map(function (arg){       // ac_practice.jsxi:108
 					return '<option value="' + arg.id + '">' + arg.displayNameWithDescription + '</option>';
 				}).join('') + '</select>'
 			], 
-			function (){                                                           // ac_practice.jsxi:108
+			function (){                                                           // ac_practice.jsxi:109
 				AcPractice.start(c, s);
-			}).addButton('Reload List',                                            // ac_practice.jsxi:110
-			function (){                                                           // ac_practice.jsxi:110
-				setTimeout(function (){                                            // ac_practice.jsxi:111
-					initTracks();                                                  // ac_practice.jsxi:112
+			}).addButton('Reload List',                                            // ac_practice.jsxi:111
+			function (){                                                           // ac_practice.jsxi:111
+				setTimeout(function (){                                            // ac_practice.jsxi:112
+					initTracks();                                                  // ac_practice.jsxi:113
 					AcPractice.select(c, s);
 				});
 			});
 		
-		d.find('#practice-mode').val(_storage.get('mode')).change(function (){     // ac_practice.jsxi:117
-			_storage.set('mode', this.value);                                      // ac_practice.jsxi:118
+		d.find('#practice-mode').val(_storage.get('mode')).change(function (){     // ac_practice.jsxi:118
+			_storage.set('mode', this.value);                                      // ac_practice.jsxi:119
 			d.find('#practice-track').val(_storage.get('track')[_storage.get('mode')]);
 		});
 		d.find('#practice-track').val(_storage.get('track')[_storage.get('mode')]).change(function (){
 			var val = this.value;
 			
-			_storage.update(function (arg){                                        // ac_practice.jsxi:124
-				return arg.track[_storage.get('mode')] = val;                      // ac_practice.jsxi:124
+			_storage.update(function (arg){                                        // ac_practice.jsxi:125
+				return arg.track[_storage.get('mode')] = val;                      // ac_practice.jsxi:125
 			});
 		});
 	};
@@ -1868,7 +1869,7 @@ var AcShowroom = (function (){                                                  
 			t.find('#button-prev').attr('disabled', pos > 0 ? null : true);        // ac_showroom.jsxi:181
 			t.find('#button-next').attr('disabled', pos < car.skins.length - 1 ? null : true);
 			d.content.find('#current-preview').prop('src', car.skins[pos].preview.cssUrl());
-			d.content.find('#new-preview').prop('src', (output + '/' + car.skins[pos].id + '.jpg').cssUrl());
+			d.content.find('#new-preview').prop('src', (output + '/' + car.skins[pos].id + '.bmp').cssUrl());
 		}
 		
 		out();                                                                     // ac_showroom.jsxi:187
@@ -1973,7 +1974,7 @@ var AcShowroom = (function (){                                                  
 						disableSweetFx,                                            // ac_showroom.jsxi:262
 						delays);                                                   // ac_showroom.jsxi:262
 				} else {
-					output = AcTools.Utils.Kn5RenderWrapper.Shot(c.path, mode);    // ac_showroom.jsxi:264
+					output = AcTools.Kn5Render.Utils.Kn5RenderWrapper.Shot(c.path, mode);
 				}
 			} catch (err){                                                         // ac_showroom.jsxi:266
 				if (!handleError(err, c)){                                         // ac_showroom.jsxi:267
@@ -1985,7 +1986,11 @@ var AcShowroom = (function (){                                                  
 			shotOutputPreview(c,                                                   // ac_showroom.jsxi:274
 				output,                                                            // ac_showroom.jsxi:274
 				function (){                                                       // ac_showroom.jsxi:274
-					AcTools.Utils.ImageUtils.ApplyPreviews(AcDir.root, c.id, output, Settings.get('aptResize'));
+					AcTools.Utils.ImageUtils.ApplyPreviews(AcDir.root,             // ac_showroom.jsxi:275
+						c.id,                                                      // ac_showroom.jsxi:275
+						output,                                                    // ac_showroom.jsxi:275
+						Settings.get('aptResize'),                                 // ac_showroom.jsxi:275
+						Settings.get('aptPngMode'));                               // ac_showroom.jsxi:275
 					c.loadSkins();                                                 // ac_showroom.jsxi:276
 					fs.rmdirSync(output);                                          // ac_showroom.jsxi:277
 				});
@@ -2705,7 +2710,7 @@ var Cars = (function (){                                                        
 			}
 			return false;
 		};
-		Car.prototype.toggle = function (state){                                   // cars_car.jsxi:87
+		Car.prototype.toggle = function (state, skipParent){                       // cars_car.jsxi:87
 			var __that = this, 
 				d = state == null ? !this.disabled : !state;                       // cars_car.jsxi:88
 			
@@ -2737,13 +2742,13 @@ var Cars = (function (){                                                        
 			if (this.skins)
 				mediator.dispatch('update.car.skins', this);                       // cars_car.jsxi:111
 			
-			if (this.parent && !this.disabled && this.parent.disabled){            // cars_car.jsxi:113
+			if (!skipParent && this.parent && !this.disabled && this.parent.disabled){
 				this.toggle(this.parent, 
 					true);
 			}
 			
 			this.children.forEach(function (e){                                    // cars_car.jsxi:117
-				__that.toggle(e, !__that.disabled);
+				e.toggle(!__that.disabled, true);                                  // cars_car.jsxi:118
 			});
 		};
 		Car.prototype.changeData = function (key, value, inner){                   // cars_car.jsxi:127
@@ -3215,10 +3220,10 @@ var Cars = (function (){                                                        
 							
 							if (__that.data.year == null && Years.nameContains(__that.data.name)){
 								__that.data.year = Years.fromName(__that.data.name);
-								
-								if (__that.data.year == null){                     // cars_car_load.jsxi:179
-									__that.data.year = Years.fromDatabase(__that.id);
-								}
+							}
+							
+							if (__that.data.year == null){                         // cars_car_load.jsxi:180
+								__that.data.year = Years.fromDatabase(__that.id);
 							}
 							
 							if (__that.data.year != null && Settings.get('yearAutoupdate') && !Years.nameContains(__that.data.name)){
@@ -3722,7 +3727,7 @@ var DataStorage = (function (){                                                 
 var Data = (function (){                                                           // data.jsxi:87
 	var Data = function (){}, 
 		mediator = new Mediator(),                                                 // data.jsxi:88
-		_builtInVersion = 29,                                                      // data.jsxi:90
+		_builtInVersion = 34,                                                      // data.jsxi:90
 		_scheduled;                                                                // data.jsxi:179
 	
 	function installBuiltIn(){                                                     // data.jsxi:95
@@ -5041,185 +5046,188 @@ var DragMainHandler = (function (){                                             
 			
 			var loc = root;
 			
-			for (var __11 = 0; __11 < path.length; __11 ++){                       // drag_main_handler_archive.jsxi:17
+			var currentPath = '';
+			
+			for (var __11 = 0; __11 < path.length; __11 ++){                       // drag_main_handler_archive.jsxi:19
 				var part = path[__11];
 				
-				if (!loc.sub)                                                      // drag_main_handler_archive.jsxi:18
-					loc.sub = {};                                                  // drag_main_handler_archive.jsxi:18
+				if (!loc.sub)                                                      // drag_main_handler_archive.jsxi:20
+					loc.sub = {};                                                  // drag_main_handler_archive.jsxi:20
 				
-				loc = loc.sub[part] || (loc.sub[part] = { id: part });             // drag_main_handler_archive.jsxi:19
+				currentPath = currentPath ? currentPath + '\\' + part : part;      // drag_main_handler_archive.jsxi:21
+				loc = loc.sub[part] || (loc.sub[part] = { id: part, path: currentPath });
 			}
 			
-			loc.path = entry.path;                                                 // drag_main_handler_archive.jsxi:22
-			loc.size = entry.size;                                                 // drag_main_handler_archive.jsxi:23
+			loc.path = entry.path;                                                 // drag_main_handler_archive.jsxi:25
+			loc.size = entry.size;                                                 // drag_main_handler_archive.jsxi:26
 		}
-		return root;                                                               // drag_main_handler_archive.jsxi:26
+		return root;                                                               // drag_main_handler_archive.jsxi:29
 	}
 	
-	function fromArchive_extractData(file, content){                               // drag_main_handler_archive.jsxi:29
-		var files = content.map(function (arg){                                    // drag_main_handler_archive.jsxi:30
-			return arg.data;                                                       // drag_main_handler_archive.jsxi:30
-		}).filter(function (arg){                                                  // drag_main_handler_archive.jsxi:30
-			return arg;                                                            // drag_main_handler_archive.jsxi:30
+	function fromArchive_extractData(file, content){                               // drag_main_handler_archive.jsxi:32
+		var files = content.map(function (arg){                                    // drag_main_handler_archive.jsxi:33
+			return arg.data;                                                       // drag_main_handler_archive.jsxi:33
+		}).filter(function (arg){                                                  // drag_main_handler_archive.jsxi:33
+			return arg;                                                            // drag_main_handler_archive.jsxi:33
 		});
 		
-		var output = exec('native\\7z',                                            // drag_main_handler_archive.jsxi:31
-			[ 'e', '-sccUTF-8', file, '-so' ].concat(files.map(function (arg){     // drag_main_handler_archive.jsxi:31
-				return arg.path;                                                   // drag_main_handler_archive.jsxi:31
+		var output = exec('native\\7z',                                            // drag_main_handler_archive.jsxi:34
+			[ 'e', '-sccUTF-8', file, '-so' ].concat(files.map(function (arg){     // drag_main_handler_archive.jsxi:34
+				return arg.path;                                                   // drag_main_handler_archive.jsxi:34
 			})));
 		
-		for (var __13 = 0; __13 < files.length; __13 ++){                          // drag_main_handler_archive.jsxi:33
+		for (var __13 = 0; __13 < files.length; __13 ++){                          // drag_main_handler_archive.jsxi:36
 			var file = files[__13];
 			
 			try {
-				file.content = JSON.flexibleParse(output.substr(0, file.size));    // drag_main_handler_archive.jsxi:34
+				file.content = JSON.flexibleParse(output.substr(0, file.size));    // drag_main_handler_archive.jsxi:37
 			} catch (e){} 
 			
-			output = output.slice(file.size);                                      // drag_main_handler_archive.jsxi:35
+			output = output.slice(file.size);                                      // drag_main_handler_archive.jsxi:38
 		}
 	}
 	
-	function fromArchive_prepareFound(file, entry){                                // drag_main_handler_archive.jsxi:39
-		var path = '/' + entry.root.path.replace(/\\/g, '/'),                      // drag_main_handler_archive.jsxi:40
+	function fromArchive_prepareFound(file, entry){                                // drag_main_handler_archive.jsxi:42
+		var path = '/' + entry.root.path.replace(/\\/g, '/'),                      // drag_main_handler_archive.jsxi:43
 			name = entry.data && entry.data.content && (entry.data.content.name || entry.data.content.skinname);
 		
-		name = name ? name + ' (' + path + ')' : path;                             // drag_main_handler_archive.jsxi:43
+		name = name ? name + ' (' + path + ')' : path;                             // drag_main_handler_archive.jsxi:46
 		
-		switch (entry.type){                                                       // drag_main_handler_archive.jsxi:45
-			case 'car':                                                            // drag_main_handler_archive.jsxi:46
-				return Cars.byId(entry.id) == null ? {                             // drag_main_handler_archive.jsxi:47
-					id: entry.id,                                                  // drag_main_handler_archive.jsxi:47
-					type: 'New Car',                                               // drag_main_handler_archive.jsxi:49
-					name: name,                                                    // drag_main_handler_archive.jsxi:50
-					actions: [                                                     // drag_main_handler_archive.jsxi:51
-						{                                                          // drag_main_handler_archive.jsxi:51
-							name: 'Install',                                       // drag_main_handler_archive.jsxi:51
-							action: (function (arg){                               // drag_main_handler_archive.jsxi:52
-								return fromArchive_installCar(file, entry, arg);   // drag_main_handler_archive.jsxi:52
+		switch (entry.type){                                                       // drag_main_handler_archive.jsxi:48
+			case 'car':                                                            // drag_main_handler_archive.jsxi:49
+				return Cars.byId(entry.id) == null ? {                             // drag_main_handler_archive.jsxi:50
+					id: entry.id,                                                  // drag_main_handler_archive.jsxi:50
+					type: 'New Car',                                               // drag_main_handler_archive.jsxi:52
+					name: name,                                                    // drag_main_handler_archive.jsxi:53
+					actions: [                                                     // drag_main_handler_archive.jsxi:54
+						{                                                          // drag_main_handler_archive.jsxi:54
+							name: 'Install',                                       // drag_main_handler_archive.jsxi:54
+							action: (function (arg){                               // drag_main_handler_archive.jsxi:55
+								return fromArchive_installCar(file, entry, arg);   // drag_main_handler_archive.jsxi:55
 							})
 						}
 					]
 				} : {
-					id: entry.id,                                                  // drag_main_handler_archive.jsxi:55
-					type: 'Update Existing Car',                                   // drag_main_handler_archive.jsxi:56
-					name: name,                                                    // drag_main_handler_archive.jsxi:57
-					actions: [                                                     // drag_main_handler_archive.jsxi:58
-						{                                                          // drag_main_handler_archive.jsxi:58
-							name: 'Keep current skins & information',              // drag_main_handler_archive.jsxi:58
-							action: (function (arg){                               // drag_main_handler_archive.jsxi:59
+					id: entry.id,                                                  // drag_main_handler_archive.jsxi:58
+					type: 'Update Existing Car',                                   // drag_main_handler_archive.jsxi:59
+					name: name,                                                    // drag_main_handler_archive.jsxi:60
+					actions: [                                                     // drag_main_handler_archive.jsxi:61
+						{                                                          // drag_main_handler_archive.jsxi:61
+							name: 'Keep current skins & information',              // drag_main_handler_archive.jsxi:61
+							action: (function (arg){                               // drag_main_handler_archive.jsxi:62
 								return fromArchive_updateCarKeepSkinsUi(file, entry, arg);
 							})
 						}, 
 						{
-							name: 'Update only data & sfx',                        // drag_main_handler_archive.jsxi:60
-							action: (function (arg){                               // drag_main_handler_archive.jsxi:60
+							name: 'Update only data & sfx',                        // drag_main_handler_archive.jsxi:63
+							action: (function (arg){                               // drag_main_handler_archive.jsxi:63
 								return fromArchive_updateCarOnlyDataSfx(file, entry, arg);
 							})
 						}, 
 						{
-							name: 'Full update',                                   // drag_main_handler_archive.jsxi:61
-							action: (function (arg){                               // drag_main_handler_archive.jsxi:61
+							name: 'Full update',                                   // drag_main_handler_archive.jsxi:64
+							action: (function (arg){                               // drag_main_handler_archive.jsxi:64
 								return fromArchive_updateCarFull(file, entry, arg);
 							})
 						}
 					]
 				};
-			case 'skin':                                                           // drag_main_handler_archive.jsxi:65
+			case 'skin':                                                           // drag_main_handler_archive.jsxi:68
 				var selected = ViewList.selected;
 				
-				if (!selected)                                                     // drag_main_handler_archive.jsxi:67
+				if (!selected)                                                     // drag_main_handler_archive.jsxi:70
 					return;
 				
 				var _unique;
 				
-				function unique(){                                                 // drag_main_handler_archive.jsxi:70
+				function unique(){                                                 // drag_main_handler_archive.jsxi:73
 					for (var i = 1; selected.getSkin(_unique = entry.id + '-' + i) != null; i ++);
-					return _unique;                                                // drag_main_handler_archive.jsxi:72
+					return _unique;                                                // drag_main_handler_archive.jsxi:75
 				}
-				return selected.getSkin(entry.id) == null ? {                      // drag_main_handler_archive.jsxi:75
-					id: entry.id,                                                  // drag_main_handler_archive.jsxi:75
-					type: 'New Skin For ' + selected.displayName,                  // drag_main_handler_archive.jsxi:77
-					name: name,                                                    // drag_main_handler_archive.jsxi:78
-					actions: [                                                     // drag_main_handler_archive.jsxi:79
-						{                                                          // drag_main_handler_archive.jsxi:79
-							name: 'Install',                                       // drag_main_handler_archive.jsxi:79
-							action: (function (arg){                               // drag_main_handler_archive.jsxi:80
+				return selected.getSkin(entry.id) == null ? {                      // drag_main_handler_archive.jsxi:78
+					id: entry.id,                                                  // drag_main_handler_archive.jsxi:78
+					type: 'New Skin For ' + selected.displayName,                  // drag_main_handler_archive.jsxi:80
+					name: name,                                                    // drag_main_handler_archive.jsxi:81
+					actions: [                                                     // drag_main_handler_archive.jsxi:82
+						{                                                          // drag_main_handler_archive.jsxi:82
+							name: 'Install',                                       // drag_main_handler_archive.jsxi:82
+							action: (function (arg){                               // drag_main_handler_archive.jsxi:83
 								return fromArchive_installSkin(selected, file, entry, arg);
 							})
 						}
 					]
 				} : {
-					id: entry.id,                                                  // drag_main_handler_archive.jsxi:83
-					type: 'Update Existing Skin Of ' + selected.displayName,       // drag_main_handler_archive.jsxi:84
-					name: name,                                                    // drag_main_handler_archive.jsxi:85
-					actions: [                                                     // drag_main_handler_archive.jsxi:86
-						{                                                          // drag_main_handler_archive.jsxi:86
-							name: 'Full update',                                   // drag_main_handler_archive.jsxi:86
-							action: (function (arg){                               // drag_main_handler_archive.jsxi:87
+					id: entry.id,                                                  // drag_main_handler_archive.jsxi:86
+					type: 'Update Existing Skin Of ' + selected.displayName,       // drag_main_handler_archive.jsxi:87
+					name: name,                                                    // drag_main_handler_archive.jsxi:88
+					actions: [                                                     // drag_main_handler_archive.jsxi:89
+						{                                                          // drag_main_handler_archive.jsxi:89
+							name: 'Full update',                                   // drag_main_handler_archive.jsxi:89
+							action: (function (arg){                               // drag_main_handler_archive.jsxi:90
 								return fromArchive_updateSkinFull(selected, file, entry, arg);
 							})
 						}, 
 						{
-							name: 'Install as ' + unique(),                        // drag_main_handler_archive.jsxi:88
-							action: (function (arg){                               // drag_main_handler_archive.jsxi:88
+							name: 'Install as ' + unique(),                        // drag_main_handler_archive.jsxi:91
+							action: (function (arg){                               // drag_main_handler_archive.jsxi:91
 								return fromArchive_installSkinAs(selected, _unique, file, entry, arg);
 							})
 						}, 
 						{
-							name: 'Keep current preview & information',            // drag_main_handler_archive.jsxi:89
-							action: (function (arg){                               // drag_main_handler_archive.jsxi:89
+							name: 'Keep current preview & information',            // drag_main_handler_archive.jsxi:92
+							action: (function (arg){                               // drag_main_handler_archive.jsxi:92
 								return fromArchive_updateSkinKeepUi(selected, file, entry, arg);
 							})
 						}
 					]
 				};
 			default:
-				throw new Error('Unsupported type: ' + entry.type);                // drag_main_handler_archive.jsxi:94
+				throw new Error('Unsupported type: ' + entry.type);                // drag_main_handler_archive.jsxi:97
 		}
 	}
 	
-	function fromArchive_unpack(file, node, target){                               // drag_main_handler_archive.jsxi:98
-		if (!fs.existsSync(target)){                                               // drag_main_handler_archive.jsxi:99
-			fs.mkdirSync(target);                                                  // drag_main_handler_archive.jsxi:100
+	function fromArchive_unpack(file, node, target){                               // drag_main_handler_archive.jsxi:101
+		if (!fs.existsSync(target)){                                               // drag_main_handler_archive.jsxi:102
+			fs.mkdirSync(target);                                                  // drag_main_handler_archive.jsxi:103
 		}
 		
-		if (node.path === ''){                                                     // drag_main_handler_archive.jsxi:103
+		if (node.path === ''){                                                     // drag_main_handler_archive.jsxi:106
 			var files = fromArchive_collectSub(node);
 			
-			exec('native\\7z',                                                     // drag_main_handler_archive.jsxi:105
-				[ 'x', '-sccUTF-8', '-o' + target, file ].concat(files));          // drag_main_handler_archive.jsxi:105
+			exec('native\\7z',                                                     // drag_main_handler_archive.jsxi:108
+				[ 'x', '-sccUTF-8', '-o' + target, file ].concat(files));          // drag_main_handler_archive.jsxi:108
 		} else {
 			var tmpDir = target + '/__tmp_' + Date.now();
 			
-			fs.mkdirSync(tmpDir);                                                  // drag_main_handler_archive.jsxi:108
+			fs.mkdirSync(tmpDir);                                                  // drag_main_handler_archive.jsxi:111
 			
 			var files = fromArchive_collectSub(node);
 			
 			try {
-				exec('native\\7z',                                                 // drag_main_handler_archive.jsxi:112
-					[ 'x', '-sccUTF-8', '-o' + tmpDir, file ].concat(files));      // drag_main_handler_archive.jsxi:112
-			} catch (err){                                                         // drag_main_handler_archive.jsxi:113
-				console.debug(tmpDir, file, files);                                // drag_main_handler_archive.jsxi:114
-				ErrorHandler.handled('Cannot unpack archive.', err);               // drag_main_handler_archive.jsxi:115
+				exec('native\\7z',                                                 // drag_main_handler_archive.jsxi:115
+					[ 'x', '-sccUTF-8', '-o' + tmpDir, file ].concat(files));      // drag_main_handler_archive.jsxi:115
+			} catch (err){                                                         // drag_main_handler_archive.jsxi:116
+				console.debug(tmpDir, file, files);                                // drag_main_handler_archive.jsxi:117
+				ErrorHandler.handled('Cannot unpack archive.', err);               // drag_main_handler_archive.jsxi:118
 				return;
 			} 
 			
-			for (var __14 = 0; __14 < files.length; __14 ++){                      // drag_main_handler_archive.jsxi:119
+			for (var __14 = 0; __14 < files.length; __14 ++){                      // drag_main_handler_archive.jsxi:122
 				var f = files[__14];
 				
 				var dest = target + '/' + f.slice(node.path.length + 1);
 				
-				fs.mkdirpSync(path.dirname(dest));                                 // drag_main_handler_archive.jsxi:121
-				fs.renameSync(tmpDir + '/' + f, dest);                             // drag_main_handler_archive.jsxi:122
+				fs.mkdirpSync(path.dirname(dest));                                 // drag_main_handler_archive.jsxi:124
+				fs.renameSync(tmpDir + '/' + f, dest);                             // drag_main_handler_archive.jsxi:125
 			}
 			
-			fs.removeDirSync(tmpDir);                                              // drag_main_handler_archive.jsxi:125
+			fs.removeDirSync(tmpDir);                                              // drag_main_handler_archive.jsxi:128
 		}
 	}
 	
-	function fromArchive_collectSub(node, result){                                 // drag_main_handler_archive.jsxi:129
-		if (result === undefined)                                                  // drag_main_handler_archive.jsxi:129
-			result = [];                                                           // drag_main_handler_archive.jsxi:129
+	function fromArchive_collectSub(node, result){                                 // drag_main_handler_archive.jsxi:132
+		if (result === undefined)                                                  // drag_main_handler_archive.jsxi:132
+			result = [];                                                           // drag_main_handler_archive.jsxi:132
 	
 		{
 			var __15 = node.sub;
@@ -5228,213 +5236,213 @@ var DragMainHandler = (function (){                                             
 				if (__15.hasOwnProperty(id)){
 					var child = __15[id];
 					
-					if (child.sub){                                                // drag_main_handler_archive.jsxi:131
-						fromArchive_collectSub(child, result);                     // drag_main_handler_archive.jsxi:132
+					if (child.sub){                                                // drag_main_handler_archive.jsxi:134
+						fromArchive_collectSub(child, result);                     // drag_main_handler_archive.jsxi:135
 					} else {
-						result.push(child.path);                                   // drag_main_handler_archive.jsxi:134
+						result.push(child.path);                                   // drag_main_handler_archive.jsxi:137
 					}
 				}
 			
 			__15 = undefined;
 		}
-		return result;                                                             // drag_main_handler_archive.jsxi:138
+		return result;                                                             // drag_main_handler_archive.jsxi:141
 	}
 	
-	function fromArchive_installCar(file, entry, callback){                        // drag_main_handler_archive.jsxi:141
+	function fromArchive_installCar(file, entry, callback){                        // drag_main_handler_archive.jsxi:144
 		var destination = path.join(AcDir.cars, entry.id);
 		
-		if (fs.existsSync(destination)){                                           // drag_main_handler_archive.jsxi:143
+		if (fs.existsSync(destination)){                                           // drag_main_handler_archive.jsxi:146
 			return ErrorHandler.handled('Folder “' + destination + '” already exists.');
 		}
 		
-		fromArchive_unpack(file, entry.root, destination);                         // drag_main_handler_archive.jsxi:147
-		Cars.loadById(entry.id,                                                    // drag_main_handler_archive.jsxi:148
-			function (arg){                                                        // drag_main_handler_archive.jsxi:148
-				ViewList.select(entry.id);                                         // drag_main_handler_archive.jsxi:149
+		fromArchive_unpack(file, entry.root, destination);                         // drag_main_handler_archive.jsxi:150
+		Cars.loadById(entry.id,                                                    // drag_main_handler_archive.jsxi:151
+			function (arg){                                                        // drag_main_handler_archive.jsxi:151
+				ViewList.select(entry.id);                                         // drag_main_handler_archive.jsxi:152
 				
-				if (callback)                                                      // drag_main_handler_archive.jsxi:150
-					callback();                                                    // drag_main_handler_archive.jsxi:150
+				if (callback)                                                      // drag_main_handler_archive.jsxi:153
+					callback();                                                    // drag_main_handler_archive.jsxi:153
 			});
-		_idToReload.push(entry.id);                                                // drag_main_handler_archive.jsxi:153
+		_idToReload.push(entry.id);                                                // drag_main_handler_archive.jsxi:156
 	}
 	
-	function fromArchive_updateCarFull(file, entry, callback){                     // drag_main_handler_archive.jsxi:156
+	function fromArchive_updateCarFull(file, entry, callback){                     // drag_main_handler_archive.jsxi:159
 		var destination = Cars.byId(entry.id).path;
 		
-		if (!fs.existsSync(destination)){                                          // drag_main_handler_archive.jsxi:158
+		if (!fs.existsSync(destination)){                                          // drag_main_handler_archive.jsxi:161
 			return ErrorHandler.handled('Folder “' + destination + '” doesn\'t exist.');
 		}
 		
-		AcTools.Utils.FileUtils.Recycle(destination);                              // drag_main_handler_archive.jsxi:162
-		fromArchive_unpack(file, entry.root, destination);                         // drag_main_handler_archive.jsxi:163
-		Cars.loadById(entry.id,                                                    // drag_main_handler_archive.jsxi:164
-			function (arg){                                                        // drag_main_handler_archive.jsxi:164
-				ViewList.select(entry.id);                                         // drag_main_handler_archive.jsxi:165
+		AcTools.Utils.FileUtils.Recycle(destination);                              // drag_main_handler_archive.jsxi:165
+		fromArchive_unpack(file, entry.root, destination);                         // drag_main_handler_archive.jsxi:166
+		Cars.loadById(entry.id,                                                    // drag_main_handler_archive.jsxi:167
+			function (arg){                                                        // drag_main_handler_archive.jsxi:167
+				ViewList.select(entry.id);                                         // drag_main_handler_archive.jsxi:168
 				
-				if (callback)                                                      // drag_main_handler_archive.jsxi:166
-					callback();                                                    // drag_main_handler_archive.jsxi:166
+				if (callback)                                                      // drag_main_handler_archive.jsxi:169
+					callback();                                                    // drag_main_handler_archive.jsxi:169
 			});
 	}
 	
-	function fromArchive_updateCarKeepSkinsUi(file, entry, callback){              // drag_main_handler_archive.jsxi:170
-		var destination = Cars.byId(entry.id).path,                                // drag_main_handler_archive.jsxi:171
-			skins = destination + '/skins',                                        // drag_main_handler_archive.jsxi:172
-			ui = destination + '/ui';                                              // drag_main_handler_archive.jsxi:173
+	function fromArchive_updateCarKeepSkinsUi(file, entry, callback){              // drag_main_handler_archive.jsxi:173
+		var destination = Cars.byId(entry.id).path,                                // drag_main_handler_archive.jsxi:174
+			skins = destination + '/skins',                                        // drag_main_handler_archive.jsxi:175
+			ui = destination + '/ui';                                              // drag_main_handler_archive.jsxi:176
 		
-		if (!fs.existsSync(destination)){                                          // drag_main_handler_archive.jsxi:174
+		if (!fs.existsSync(destination)){                                          // drag_main_handler_archive.jsxi:177
 			return ErrorHandler.handled('Folder “' + destination + '” doesn\'t exist.');
 		}
 		
 		var tmpDir = AcDir.temp;
 		
-		fs.mkdirSync(tmpDir);                                                      // drag_main_handler_archive.jsxi:179
+		fs.mkdirSync(tmpDir);                                                      // drag_main_handler_archive.jsxi:182
 		
-		if (fs.existsSync(skins))                                                  // drag_main_handler_archive.jsxi:181
-			fs.renameSync(skins, tmpDir + '/skins');                               // drag_main_handler_archive.jsxi:181
+		if (fs.existsSync(skins))                                                  // drag_main_handler_archive.jsxi:184
+			fs.renameSync(skins, tmpDir + '/skins');                               // drag_main_handler_archive.jsxi:184
 		
-		if (fs.existsSync(ui))                                                     // drag_main_handler_archive.jsxi:182
-			fs.renameSync(ui, tmpDir + '/ui');                                     // drag_main_handler_archive.jsxi:182
+		if (fs.existsSync(ui))                                                     // drag_main_handler_archive.jsxi:185
+			fs.renameSync(ui, tmpDir + '/ui');                                     // drag_main_handler_archive.jsxi:185
 		
-		AcTools.Utils.FileUtils.Recycle(destination);                              // drag_main_handler_archive.jsxi:184
-		fromArchive_unpack(file, entry.root, destination);                         // drag_main_handler_archive.jsxi:185
+		AcTools.Utils.FileUtils.Recycle(destination);                              // drag_main_handler_archive.jsxi:187
+		fromArchive_unpack(file, entry.root, destination);                         // drag_main_handler_archive.jsxi:188
 		
-		if (fs.existsSync(skins))                                                  // drag_main_handler_archive.jsxi:187
-			fs.removeDirSync(skins);                                               // drag_main_handler_archive.jsxi:187
+		if (fs.existsSync(skins))                                                  // drag_main_handler_archive.jsxi:190
+			fs.removeDirSync(skins);                                               // drag_main_handler_archive.jsxi:190
 		
-		if (fs.existsSync(ui))                                                     // drag_main_handler_archive.jsxi:188
-			fs.removeDirSync(ui);                                                  // drag_main_handler_archive.jsxi:188
+		if (fs.existsSync(ui))                                                     // drag_main_handler_archive.jsxi:191
+			fs.removeDirSync(ui);                                                  // drag_main_handler_archive.jsxi:191
 		
-		if (fs.existsSync(tmpDir + '/skins'))                                      // drag_main_handler_archive.jsxi:190
-			fs.renameSync(tmpDir + '/skins', skins);                               // drag_main_handler_archive.jsxi:190
+		if (fs.existsSync(tmpDir + '/skins'))                                      // drag_main_handler_archive.jsxi:193
+			fs.renameSync(tmpDir + '/skins', skins);                               // drag_main_handler_archive.jsxi:193
 		
-		if (fs.existsSync(tmpDir + '/ui'))                                         // drag_main_handler_archive.jsxi:191
-			fs.renameSync(tmpDir + '/ui', ui);                                     // drag_main_handler_archive.jsxi:191
+		if (fs.existsSync(tmpDir + '/ui'))                                         // drag_main_handler_archive.jsxi:194
+			fs.renameSync(tmpDir + '/ui', ui);                                     // drag_main_handler_archive.jsxi:194
 		
-		fs.removeDirSync(tmpDir);                                                  // drag_main_handler_archive.jsxi:192
-		Cars.loadById(entry.id,                                                    // drag_main_handler_archive.jsxi:194
-			function (arg){                                                        // drag_main_handler_archive.jsxi:194
-				ViewList.select(entry.id);                                         // drag_main_handler_archive.jsxi:195
+		fs.removeDirSync(tmpDir);                                                  // drag_main_handler_archive.jsxi:195
+		Cars.loadById(entry.id,                                                    // drag_main_handler_archive.jsxi:197
+			function (arg){                                                        // drag_main_handler_archive.jsxi:197
+				ViewList.select(entry.id);                                         // drag_main_handler_archive.jsxi:198
 				
-				if (callback)                                                      // drag_main_handler_archive.jsxi:196
-					callback();                                                    // drag_main_handler_archive.jsxi:196
+				if (callback)                                                      // drag_main_handler_archive.jsxi:199
+					callback();                                                    // drag_main_handler_archive.jsxi:199
 			});
 	}
 	
-	function fromArchive_updateCarOnlyDataSfx(file, entry, callback){              // drag_main_handler_archive.jsxi:200
+	function fromArchive_updateCarOnlyDataSfx(file, entry, callback){              // drag_main_handler_archive.jsxi:203
 		var destination = Cars.byId(entry.id).path;
 		
-		if (!fs.existsSync(destination)){                                          // drag_main_handler_archive.jsxi:202
+		if (!fs.existsSync(destination)){                                          // drag_main_handler_archive.jsxi:205
 			return ErrorHandler.handled('Folder “' + destination + '” doesn\'t exist.');
 		}
 		
-		if (fs.existsSync(destination + '/sfx'))                                   // drag_main_handler_archive.jsxi:206
-			AcTools.Utils.FileUtils.Recycle(destination + '/sfx');                 // drag_main_handler_archive.jsxi:206
+		if (fs.existsSync(destination + '/sfx'))                                   // drag_main_handler_archive.jsxi:209
+			AcTools.Utils.FileUtils.Recycle(destination + '/sfx');                 // drag_main_handler_archive.jsxi:209
 		
-		if (fs.existsSync(destination + '/data'))                                  // drag_main_handler_archive.jsxi:207
-			AcTools.Utils.FileUtils.Recycle(destination + '/data');                // drag_main_handler_archive.jsxi:207
+		if (fs.existsSync(destination + '/data'))                                  // drag_main_handler_archive.jsxi:210
+			AcTools.Utils.FileUtils.Recycle(destination + '/data');                // drag_main_handler_archive.jsxi:210
 		
-		if (fs.existsSync(destination + '/data.acd'))                              // drag_main_handler_archive.jsxi:208
-			AcTools.Utils.FileUtils.Recycle(destination + '/data.acd');            // drag_main_handler_archive.jsxi:208
+		if (fs.existsSync(destination + '/data.acd'))                              // drag_main_handler_archive.jsxi:211
+			AcTools.Utils.FileUtils.Recycle(destination + '/data.acd');            // drag_main_handler_archive.jsxi:211
 		
-		fromArchive_unpack(file, entry.root.sub['sfx'], destination + '/sfx');     // drag_main_handler_archive.jsxi:210
+		fromArchive_unpack(file, entry.root.sub['sfx'], destination + '/sfx');     // drag_main_handler_archive.jsxi:213
 		
-		if (entry.root.sub['data'])                                                // drag_main_handler_archive.jsxi:211
+		if (entry.root.sub['data'])                                                // drag_main_handler_archive.jsxi:214
 			fromArchive_unpack(file, entry.root.sub['data'], destination + '/data');
 		
-		if (entry.root.sub['data.acd'])                                            // drag_main_handler_archive.jsxi:212
+		if (entry.root.sub['data.acd'])                                            // drag_main_handler_archive.jsxi:215
 			fromArchive_unpack(file, entry.root.sub['data.acd'], destination + '/data.acd');
 		
-		Cars.loadById(entry.id,                                                    // drag_main_handler_archive.jsxi:214
-			function (arg){                                                        // drag_main_handler_archive.jsxi:214
-				ViewList.select(entry.id);                                         // drag_main_handler_archive.jsxi:215
+		Cars.loadById(entry.id,                                                    // drag_main_handler_archive.jsxi:217
+			function (arg){                                                        // drag_main_handler_archive.jsxi:217
+				ViewList.select(entry.id);                                         // drag_main_handler_archive.jsxi:218
 				
-				if (callback)                                                      // drag_main_handler_archive.jsxi:216
-					callback();                                                    // drag_main_handler_archive.jsxi:216
+				if (callback)                                                      // drag_main_handler_archive.jsxi:219
+					callback();                                                    // drag_main_handler_archive.jsxi:219
 			});
 	}
 	
-	function fromArchive_installSkin(car, file, entry, callback){                  // drag_main_handler_archive.jsxi:220
+	function fromArchive_installSkin(car, file, entry, callback){                  // drag_main_handler_archive.jsxi:223
 		var destination = path.join(car.path, 'skins', entry.id);
 		
-		if (fs.existsSync(destination)){                                           // drag_main_handler_archive.jsxi:222
+		if (fs.existsSync(destination)){                                           // drag_main_handler_archive.jsxi:225
 			return ErrorHandler.handled('Folder “' + destination + '” already exists.');
 		}
 		
-		fromArchive_unpack(file, entry.root, destination);                         // drag_main_handler_archive.jsxi:226
-		car.loadSkins(callback);                                                   // drag_main_handler_archive.jsxi:227
+		fromArchive_unpack(file, entry.root, destination);                         // drag_main_handler_archive.jsxi:229
+		car.loadSkins(callback);                                                   // drag_main_handler_archive.jsxi:230
 	}
 	
-	function fromArchive_installSkinAs(car, id, file, entry, callback){            // drag_main_handler_archive.jsxi:230
+	function fromArchive_installSkinAs(car, id, file, entry, callback){            // drag_main_handler_archive.jsxi:233
 		var destination = path.join(car.path, 'skins', id);
 		
-		if (fs.existsSync(destination)){                                           // drag_main_handler_archive.jsxi:232
+		if (fs.existsSync(destination)){                                           // drag_main_handler_archive.jsxi:235
 			return ErrorHandler.handled('Folder “' + destination + '” already exists.');
 		}
 		
-		fromArchive_unpack(file, entry.root, destination);                         // drag_main_handler_archive.jsxi:236
-		car.loadSkins(callback);                                                   // drag_main_handler_archive.jsxi:237
+		fromArchive_unpack(file, entry.root, destination);                         // drag_main_handler_archive.jsxi:239
+		car.loadSkins(callback);                                                   // drag_main_handler_archive.jsxi:240
 	}
 	
-	function fromArchive_updateSkinFull(car, file, entry, callback){               // drag_main_handler_archive.jsxi:240
+	function fromArchive_updateSkinFull(car, file, entry, callback){               // drag_main_handler_archive.jsxi:243
 		var destination = path.join(car.path, 'skins', entry.id);
 		
-		if (!fs.existsSync(destination)){                                          // drag_main_handler_archive.jsxi:242
-			callback();                                                            // drag_main_handler_archive.jsxi:243
+		if (!fs.existsSync(destination)){                                          // drag_main_handler_archive.jsxi:245
+			callback();                                                            // drag_main_handler_archive.jsxi:246
 			return ErrorHandler.handled('Folder “' + destination + '” doesn\'t exist.');
 		}
 		
-		AcTools.Utils.FileUtils.Recycle(destination);                              // drag_main_handler_archive.jsxi:247
-		fromArchive_unpack(file, entry.root, destination);                         // drag_main_handler_archive.jsxi:248
-		car.loadSkins(callback);                                                   // drag_main_handler_archive.jsxi:249
+		AcTools.Utils.FileUtils.Recycle(destination);                              // drag_main_handler_archive.jsxi:250
+		fromArchive_unpack(file, entry.root, destination);                         // drag_main_handler_archive.jsxi:251
+		car.loadSkins(callback);                                                   // drag_main_handler_archive.jsxi:252
 	}
 	
-	function fromArchive_updateSkinKeepUi(car, file, entry, callback){             // drag_main_handler_archive.jsxi:252
-		var destination = path.join(car.path, 'skins', entry.id),                  // drag_main_handler_archive.jsxi:253
-			preview = destination + '/preview.jpg',                                // drag_main_handler_archive.jsxi:254
-			ui = destination + '/ui_skin.json';                                    // drag_main_handler_archive.jsxi:255
+	function fromArchive_updateSkinKeepUi(car, file, entry, callback){             // drag_main_handler_archive.jsxi:255
+		var destination = path.join(car.path, 'skins', entry.id),                  // drag_main_handler_archive.jsxi:256
+			preview = destination + '/preview.jpg',                                // drag_main_handler_archive.jsxi:257
+			ui = destination + '/ui_skin.json';                                    // drag_main_handler_archive.jsxi:258
 		
-		if (!fs.existsSync(destination)){                                          // drag_main_handler_archive.jsxi:256
-			callback();                                                            // drag_main_handler_archive.jsxi:257
+		if (!fs.existsSync(destination)){                                          // drag_main_handler_archive.jsxi:259
+			callback();                                                            // drag_main_handler_archive.jsxi:260
 			return ErrorHandler.handled('Folder “' + destination + '” doesn\'t exist.');
 		}
 		
 		var tmpDir = AcDir.temp;
 		
-		fs.mkdirSync(tmpDir);                                                      // drag_main_handler_archive.jsxi:262
+		fs.mkdirSync(tmpDir);                                                      // drag_main_handler_archive.jsxi:265
 		
-		if (fs.existsSync(preview))                                                // drag_main_handler_archive.jsxi:264
-			fs.renameSync(preview, tmpDir + '/p');                                 // drag_main_handler_archive.jsxi:264
+		if (fs.existsSync(preview))                                                // drag_main_handler_archive.jsxi:267
+			fs.renameSync(preview, tmpDir + '/p');                                 // drag_main_handler_archive.jsxi:267
 		
-		if (fs.existsSync(ui))                                                     // drag_main_handler_archive.jsxi:265
-			fs.renameSync(ui, tmpDir + '/u');                                      // drag_main_handler_archive.jsxi:265
+		if (fs.existsSync(ui))                                                     // drag_main_handler_archive.jsxi:268
+			fs.renameSync(ui, tmpDir + '/u');                                      // drag_main_handler_archive.jsxi:268
 		
-		AcTools.Utils.FileUtils.Recycle(destination);                              // drag_main_handler_archive.jsxi:267
-		fromArchive_unpack(file, entry.root, destination);                         // drag_main_handler_archive.jsxi:268
+		AcTools.Utils.FileUtils.Recycle(destination);                              // drag_main_handler_archive.jsxi:270
+		fromArchive_unpack(file, entry.root, destination);                         // drag_main_handler_archive.jsxi:271
 		
-		if (fs.existsSync(preview))                                                // drag_main_handler_archive.jsxi:270
-			fs.removeDirSync(preview);                                             // drag_main_handler_archive.jsxi:270
+		if (fs.existsSync(preview))                                                // drag_main_handler_archive.jsxi:273
+			fs.removeDirSync(preview);                                             // drag_main_handler_archive.jsxi:273
 		
-		if (fs.existsSync(ui))                                                     // drag_main_handler_archive.jsxi:271
-			fs.removeDirSync(ui);                                                  // drag_main_handler_archive.jsxi:271
+		if (fs.existsSync(ui))                                                     // drag_main_handler_archive.jsxi:274
+			fs.removeDirSync(ui);                                                  // drag_main_handler_archive.jsxi:274
 		
-		if (fs.existsSync(tmpDir + '/p'))                                          // drag_main_handler_archive.jsxi:273
-			fs.renameSync(tmpDir + '/p', preview);                                 // drag_main_handler_archive.jsxi:273
+		if (fs.existsSync(tmpDir + '/p'))                                          // drag_main_handler_archive.jsxi:276
+			fs.renameSync(tmpDir + '/p', preview);                                 // drag_main_handler_archive.jsxi:276
 		
-		if (fs.existsSync(tmpDir + '/u'))                                          // drag_main_handler_archive.jsxi:274
-			fs.renameSync(tmpDir + '/u', ui);                                      // drag_main_handler_archive.jsxi:274
+		if (fs.existsSync(tmpDir + '/u'))                                          // drag_main_handler_archive.jsxi:277
+			fs.renameSync(tmpDir + '/u', ui);                                      // drag_main_handler_archive.jsxi:277
 		
-		fs.removeDirSync(tmpDir);                                                  // drag_main_handler_archive.jsxi:275
-		car.loadSkins(callback);                                                   // drag_main_handler_archive.jsxi:277
+		fs.removeDirSync(tmpDir);                                                  // drag_main_handler_archive.jsxi:278
+		car.loadSkins(callback);                                                   // drag_main_handler_archive.jsxi:280
 	}
 	
-	function fromArchive(file){                                                    // drag_main_handler_archive.jsxi:280
+	function fromArchive(file){                                                    // drag_main_handler_archive.jsxi:283
 		var tree = fromArchive_getFiles(file);
 		
 		var content = detectContent(file, tree);
 		
-		fromArchive_extractData(file, content);                                    // drag_main_handler_archive.jsxi:283
-		return content.map(function (arg){                                         // drag_main_handler_archive.jsxi:284
-			return fromArchive_prepareFound(file, arg);                            // drag_main_handler_archive.jsxi:284
+		fromArchive_extractData(file, content);                                    // drag_main_handler_archive.jsxi:286
+		return content.map(function (arg){                                         // drag_main_handler_archive.jsxi:287
+			return fromArchive_prepareFound(file, arg);                            // drag_main_handler_archive.jsxi:287
 		});
 	}
 	
@@ -5452,30 +5460,33 @@ var DragMainHandler = (function (){                                             
 			
 			var loc = root;
 			
-			for (var __16 = 0; __16 < path.length; __16 ++){                       // drag_main_handler_directory.jsxi:11
+			var currentPath = '';
+			
+			for (var __16 = 0; __16 < path.length; __16 ++){                       // drag_main_handler_directory.jsxi:13
 				var part = path[__16];
 				
-				if (!loc.sub)                                                      // drag_main_handler_directory.jsxi:12
-					loc.sub = {};                                                  // drag_main_handler_directory.jsxi:12
+				if (!loc.sub)                                                      // drag_main_handler_directory.jsxi:14
+					loc.sub = {};                                                  // drag_main_handler_directory.jsxi:14
 				
-				loc = loc.sub[part] || (loc.sub[part] = { id: part });             // drag_main_handler_directory.jsxi:13
+				currentPath = currentPath ? currentPath + '\\' + part : part;      // drag_main_handler_directory.jsxi:15
+				loc = loc.sub[part] || (loc.sub[part] = { id: part, path: currentPath });
 			}
 			
-			loc.path = entry;                                                      // drag_main_handler_directory.jsxi:16
+			loc.path = entry;                                                      // drag_main_handler_directory.jsxi:19
 		}
 		
-		console.log(root);                                                         // drag_main_handler_directory.jsxi:19
-		return root;                                                               // drag_main_handler_directory.jsxi:21
+		console.log(root);                                                         // drag_main_handler_directory.jsxi:22
+		return root;                                                               // drag_main_handler_directory.jsxi:24
 	}
 	
-	function fromDirectory_extractData(dir, content){                              // drag_main_handler_directory.jsxi:24
-		var files = content.map(function (arg){                                    // drag_main_handler_directory.jsxi:25
-			return arg.data;                                                       // drag_main_handler_directory.jsxi:25
-		}).filter(function (arg){                                                  // drag_main_handler_directory.jsxi:25
-			return arg;                                                            // drag_main_handler_directory.jsxi:25
+	function fromDirectory_extractData(dir, content){                              // drag_main_handler_directory.jsxi:27
+		var files = content.map(function (arg){                                    // drag_main_handler_directory.jsxi:28
+			return arg.data;                                                       // drag_main_handler_directory.jsxi:28
+		}).filter(function (arg){                                                  // drag_main_handler_directory.jsxi:28
+			return arg;                                                            // drag_main_handler_directory.jsxi:28
 		});
 		
-		for (var __18 = 0; __18 < files.length; __18 ++){                          // drag_main_handler_directory.jsxi:26
+		for (var __18 = 0; __18 < files.length; __18 ++){                          // drag_main_handler_directory.jsxi:29
 			var file = files[__18];
 			
 			try {
@@ -5484,125 +5495,125 @@ var DragMainHandler = (function (){                                             
 		}
 	}
 	
-	function fromDirectory_prepareFound(file, entry){                              // drag_main_handler_directory.jsxi:31
-		var path = '/' + entry.root.path.replace(/\\/g, '/'),                      // drag_main_handler_directory.jsxi:32
+	function fromDirectory_prepareFound(file, entry){                              // drag_main_handler_directory.jsxi:34
+		var path = '/' + entry.root.path.replace(/\\/g, '/'),                      // drag_main_handler_directory.jsxi:35
 			name = entry.data && entry.data.content && (entry.data.content.name || entry.data.content.skinname);
 		
-		name = name ? name + ' (' + path + ')' : path;                             // drag_main_handler_directory.jsxi:35
+		name = name ? name + ' (' + path + ')' : path;                             // drag_main_handler_directory.jsxi:38
 		
-		switch (entry.type){                                                       // drag_main_handler_directory.jsxi:37
-			case 'car':                                                            // drag_main_handler_directory.jsxi:38
-				return Cars.byId(entry.id) == null ? {                             // drag_main_handler_directory.jsxi:39
-					id: entry.id,                                                  // drag_main_handler_directory.jsxi:39
-					type: 'New Car',                                               // drag_main_handler_directory.jsxi:41
-					name: name,                                                    // drag_main_handler_directory.jsxi:42
-					actions: [                                                     // drag_main_handler_directory.jsxi:43
-						{                                                          // drag_main_handler_directory.jsxi:43
-							name: 'Install',                                       // drag_main_handler_directory.jsxi:43
-							action: (function (arg){                               // drag_main_handler_directory.jsxi:44
+		switch (entry.type){                                                       // drag_main_handler_directory.jsxi:40
+			case 'car':                                                            // drag_main_handler_directory.jsxi:41
+				return Cars.byId(entry.id) == null ? {                             // drag_main_handler_directory.jsxi:42
+					id: entry.id,                                                  // drag_main_handler_directory.jsxi:42
+					type: 'New Car',                                               // drag_main_handler_directory.jsxi:44
+					name: name,                                                    // drag_main_handler_directory.jsxi:45
+					actions: [                                                     // drag_main_handler_directory.jsxi:46
+						{                                                          // drag_main_handler_directory.jsxi:46
+							name: 'Install',                                       // drag_main_handler_directory.jsxi:46
+							action: (function (arg){                               // drag_main_handler_directory.jsxi:47
 								return fromDirectory_installCar(file, entry, arg);
 							})
 						}
 					]
 				} : {
-					id: entry.id,                                                  // drag_main_handler_directory.jsxi:47
-					type: 'Update Existing Car',                                   // drag_main_handler_directory.jsxi:48
-					name: name,                                                    // drag_main_handler_directory.jsxi:49
-					actions: [                                                     // drag_main_handler_directory.jsxi:50
-						{                                                          // drag_main_handler_directory.jsxi:50
-							name: 'Keep current skins & information',              // drag_main_handler_directory.jsxi:50
-							action: (function (arg){                               // drag_main_handler_directory.jsxi:51
+					id: entry.id,                                                  // drag_main_handler_directory.jsxi:50
+					type: 'Update Existing Car',                                   // drag_main_handler_directory.jsxi:51
+					name: name,                                                    // drag_main_handler_directory.jsxi:52
+					actions: [                                                     // drag_main_handler_directory.jsxi:53
+						{                                                          // drag_main_handler_directory.jsxi:53
+							name: 'Keep current skins & information',              // drag_main_handler_directory.jsxi:53
+							action: (function (arg){                               // drag_main_handler_directory.jsxi:54
 								return fromDirectory_updateCarKeepSkinsUi(file, entry, arg);
 							})
 						}, 
 						{
-							name: 'Update only data & sfx',                        // drag_main_handler_directory.jsxi:52
-							action: (function (arg){                               // drag_main_handler_directory.jsxi:52
+							name: 'Update only data & sfx',                        // drag_main_handler_directory.jsxi:55
+							action: (function (arg){                               // drag_main_handler_directory.jsxi:55
 								return fromDirectory_updateCarOnlyDataSfx(file, entry, arg);
 							})
 						}, 
 						{
-							name: 'Full update',                                   // drag_main_handler_directory.jsxi:53
-							action: (function (arg){                               // drag_main_handler_directory.jsxi:53
+							name: 'Full update',                                   // drag_main_handler_directory.jsxi:56
+							action: (function (arg){                               // drag_main_handler_directory.jsxi:56
 								return fromDirectory_updateCarFull(file, entry, arg);
 							})
 						}
 					]
 				};
-			case 'skin':                                                           // drag_main_handler_directory.jsxi:57
+			case 'skin':                                                           // drag_main_handler_directory.jsxi:60
 				var selected = ViewList.selected;
 				
-				if (!selected)                                                     // drag_main_handler_directory.jsxi:59
+				if (!selected)                                                     // drag_main_handler_directory.jsxi:62
 					return;
 				
 				var _unique;
 				
-				function unique(){                                                 // drag_main_handler_directory.jsxi:62
+				function unique(){                                                 // drag_main_handler_directory.jsxi:65
 					for (var i = 1; selected.getSkin(_unique = entry.id + '-' + i) != null; i ++);
-					return _unique;                                                // drag_main_handler_directory.jsxi:64
+					return _unique;                                                // drag_main_handler_directory.jsxi:67
 				}
-				return selected.getSkin(entry.id) == null ? {                      // drag_main_handler_directory.jsxi:67
-					id: entry.id,                                                  // drag_main_handler_directory.jsxi:67
-					type: 'New Skin For ' + selected.displayName,                  // drag_main_handler_directory.jsxi:69
-					name: name,                                                    // drag_main_handler_directory.jsxi:70
-					actions: [                                                     // drag_main_handler_directory.jsxi:71
-						{                                                          // drag_main_handler_directory.jsxi:71
-							name: 'Install',                                       // drag_main_handler_directory.jsxi:71
-							action: (function (arg){                               // drag_main_handler_directory.jsxi:72
+				return selected.getSkin(entry.id) == null ? {                      // drag_main_handler_directory.jsxi:70
+					id: entry.id,                                                  // drag_main_handler_directory.jsxi:70
+					type: 'New Skin For ' + selected.displayName,                  // drag_main_handler_directory.jsxi:72
+					name: name,                                                    // drag_main_handler_directory.jsxi:73
+					actions: [                                                     // drag_main_handler_directory.jsxi:74
+						{                                                          // drag_main_handler_directory.jsxi:74
+							name: 'Install',                                       // drag_main_handler_directory.jsxi:74
+							action: (function (arg){                               // drag_main_handler_directory.jsxi:75
 								return fromDirectory_installSkin(selected, file, entry, arg);
 							})
 						}
 					]
 				} : {
-					id: entry.id,                                                  // drag_main_handler_directory.jsxi:75
-					type: 'Update Existing Skin Of ' + selected.displayName,       // drag_main_handler_directory.jsxi:76
-					name: name,                                                    // drag_main_handler_directory.jsxi:77
-					actions: [                                                     // drag_main_handler_directory.jsxi:78
-						{                                                          // drag_main_handler_directory.jsxi:78
-							name: 'Full update',                                   // drag_main_handler_directory.jsxi:78
-							action: (function (arg){                               // drag_main_handler_directory.jsxi:79
+					id: entry.id,                                                  // drag_main_handler_directory.jsxi:78
+					type: 'Update Existing Skin Of ' + selected.displayName,       // drag_main_handler_directory.jsxi:79
+					name: name,                                                    // drag_main_handler_directory.jsxi:80
+					actions: [                                                     // drag_main_handler_directory.jsxi:81
+						{                                                          // drag_main_handler_directory.jsxi:81
+							name: 'Full update',                                   // drag_main_handler_directory.jsxi:81
+							action: (function (arg){                               // drag_main_handler_directory.jsxi:82
 								return fromDirectory_updateSkinFull(selected, file, entry, arg);
 							})
 						}, 
 						{
-							name: 'Install as ' + unique(),                        // drag_main_handler_directory.jsxi:80
-							action: (function (arg){                               // drag_main_handler_directory.jsxi:80
+							name: 'Install as ' + unique(),                        // drag_main_handler_directory.jsxi:83
+							action: (function (arg){                               // drag_main_handler_directory.jsxi:83
 								return fromDirectory_installSkinAs(selected, _unique, file, entry, arg);
 							})
 						}, 
 						{
-							name: 'Keep current preview & information',            // drag_main_handler_directory.jsxi:81
-							action: (function (arg){                               // drag_main_handler_directory.jsxi:81
+							name: 'Keep current preview & information',            // drag_main_handler_directory.jsxi:84
+							action: (function (arg){                               // drag_main_handler_directory.jsxi:84
 								return fromDirectory_updateSkinKeepUi(selected, file, entry, arg);
 							})
 						}
 					]
 				};
 			default:
-				throw new Error('Unsupported type: ' + entry.type);                // drag_main_handler_directory.jsxi:86
+				throw new Error('Unsupported type: ' + entry.type);                // drag_main_handler_directory.jsxi:89
 		}
 	}
 	
-	function fromDirectory_unpack(dir, node, target){                              // drag_main_handler_directory.jsxi:90
-		if (!fs.existsSync(target)){                                               // drag_main_handler_directory.jsxi:91
-			fs.mkdirSync(target);                                                  // drag_main_handler_directory.jsxi:92
+	function fromDirectory_unpack(dir, node, target){                              // drag_main_handler_directory.jsxi:93
+		if (!fs.existsSync(target)){                                               // drag_main_handler_directory.jsxi:94
+			fs.mkdirSync(target);                                                  // drag_main_handler_directory.jsxi:95
 		}
 		
 		var files = fromDirectory_collectSub(node);
 		
-		for (var __19 = 0; __19 < files.length; __19 ++){                          // drag_main_handler_directory.jsxi:96
+		for (var __19 = 0; __19 < files.length; __19 ++){                          // drag_main_handler_directory.jsxi:99
 			var file = files[__19];
 			
 			var dest = target + '/' + file.slice(node.path.length + 1);
 			
-			fs.mkdirpSync(path.dirname(dest));                                     // drag_main_handler_directory.jsxi:98
-			fs.copyFileSync(dir + '/' + file, dest);                               // drag_main_handler_directory.jsxi:99
+			fs.mkdirpSync(path.dirname(dest));                                     // drag_main_handler_directory.jsxi:101
+			fs.copyFileSync(dir + '/' + file, dest);                               // drag_main_handler_directory.jsxi:102
 		}
 	}
 	
-	function fromDirectory_collectSub(node, result){                               // drag_main_handler_directory.jsxi:103
-		if (result === undefined)                                                  // drag_main_handler_directory.jsxi:103
-			result = [];                                                           // drag_main_handler_directory.jsxi:103
+	function fromDirectory_collectSub(node, result){                               // drag_main_handler_directory.jsxi:106
+		if (result === undefined)                                                  // drag_main_handler_directory.jsxi:106
+			result = [];                                                           // drag_main_handler_directory.jsxi:106
 	
 		{
 			var __1a = node.sub;
@@ -5611,205 +5622,205 @@ var DragMainHandler = (function (){                                             
 				if (__1a.hasOwnProperty(id)){
 					var child = __1a[id];
 					
-					if (child.sub){                                                // drag_main_handler_directory.jsxi:105
-						fromDirectory_collectSub(child, result);                   // drag_main_handler_directory.jsxi:106
+					if (child.sub){                                                // drag_main_handler_directory.jsxi:108
+						fromDirectory_collectSub(child, result);                   // drag_main_handler_directory.jsxi:109
 					} else {
-						result.push(child.path);                                   // drag_main_handler_directory.jsxi:108
+						result.push(child.path);                                   // drag_main_handler_directory.jsxi:111
 					}
 				}
 			
 			__1a = undefined;
 		}
-		return result;                                                             // drag_main_handler_directory.jsxi:112
+		return result;                                                             // drag_main_handler_directory.jsxi:115
 	}
 	
-	function fromDirectory_installCar(file, entry, callback){                      // drag_main_handler_directory.jsxi:115
+	function fromDirectory_installCar(file, entry, callback){                      // drag_main_handler_directory.jsxi:118
 		var destination = path.join(AcDir.cars, entry.id);
 		
-		if (fs.existsSync(destination)){                                           // drag_main_handler_directory.jsxi:117
+		if (fs.existsSync(destination)){                                           // drag_main_handler_directory.jsxi:120
 			return ErrorHandler.handled('Folder “' + destination + '” already exists.');
 		}
 		
-		fromDirectory_unpack(file, entry.root, destination);                       // drag_main_handler_directory.jsxi:121
-		Cars.loadById(entry.id,                                                    // drag_main_handler_directory.jsxi:122
-			function (arg){                                                        // drag_main_handler_directory.jsxi:122
-				ViewList.select(entry.id);                                         // drag_main_handler_directory.jsxi:123
+		fromDirectory_unpack(file, entry.root, destination);                       // drag_main_handler_directory.jsxi:124
+		Cars.loadById(entry.id,                                                    // drag_main_handler_directory.jsxi:125
+			function (arg){                                                        // drag_main_handler_directory.jsxi:125
+				ViewList.select(entry.id);                                         // drag_main_handler_directory.jsxi:126
 				
-				if (callback)                                                      // drag_main_handler_directory.jsxi:124
-					callback();                                                    // drag_main_handler_directory.jsxi:124
+				if (callback)                                                      // drag_main_handler_directory.jsxi:127
+					callback();                                                    // drag_main_handler_directory.jsxi:127
 			});
 	}
 	
-	function fromDirectory_updateCarFull(file, entry, callback){                   // drag_main_handler_directory.jsxi:128
+	function fromDirectory_updateCarFull(file, entry, callback){                   // drag_main_handler_directory.jsxi:131
 		var destination = Cars.byId(entry.id).path;
 		
-		if (!fs.existsSync(destination)){                                          // drag_main_handler_directory.jsxi:130
+		if (!fs.existsSync(destination)){                                          // drag_main_handler_directory.jsxi:133
 			return ErrorHandler.handled('Folder “' + destination + '” doesn\'t exist.');
 		}
 		
-		AcTools.Utils.FileUtils.Recycle(destination);                              // drag_main_handler_directory.jsxi:134
-		fromDirectory_unpack(file, entry.root, destination);                       // drag_main_handler_directory.jsxi:135
-		Cars.loadById(entry.id,                                                    // drag_main_handler_directory.jsxi:136
-			function (arg){                                                        // drag_main_handler_directory.jsxi:136
-				ViewList.select(entry.id);                                         // drag_main_handler_directory.jsxi:137
+		AcTools.Utils.FileUtils.Recycle(destination);                              // drag_main_handler_directory.jsxi:137
+		fromDirectory_unpack(file, entry.root, destination);                       // drag_main_handler_directory.jsxi:138
+		Cars.loadById(entry.id,                                                    // drag_main_handler_directory.jsxi:139
+			function (arg){                                                        // drag_main_handler_directory.jsxi:139
+				ViewList.select(entry.id);                                         // drag_main_handler_directory.jsxi:140
 				
-				if (callback)                                                      // drag_main_handler_directory.jsxi:138
-					callback();                                                    // drag_main_handler_directory.jsxi:138
+				if (callback)                                                      // drag_main_handler_directory.jsxi:141
+					callback();                                                    // drag_main_handler_directory.jsxi:141
 			});
 	}
 	
-	function fromDirectory_updateCarKeepSkinsUi(file, entry, callback){            // drag_main_handler_directory.jsxi:142
-		var destination = Cars.byId(entry.id).path,                                // drag_main_handler_directory.jsxi:143
-			skins = destination + '/skins',                                        // drag_main_handler_directory.jsxi:144
-			ui = destination + '/ui';                                              // drag_main_handler_directory.jsxi:145
+	function fromDirectory_updateCarKeepSkinsUi(file, entry, callback){            // drag_main_handler_directory.jsxi:145
+		var destination = Cars.byId(entry.id).path,                                // drag_main_handler_directory.jsxi:146
+			skins = destination + '/skins',                                        // drag_main_handler_directory.jsxi:147
+			ui = destination + '/ui';                                              // drag_main_handler_directory.jsxi:148
 		
-		if (!fs.existsSync(destination)){                                          // drag_main_handler_directory.jsxi:146
+		if (!fs.existsSync(destination)){                                          // drag_main_handler_directory.jsxi:149
 			return ErrorHandler.handled('Folder “' + destination + '” doesn\'t exist.');
 		}
 		
 		var tmpDir = AcDir.temp;
 		
-		fs.mkdirSync(tmpDir);                                                      // drag_main_handler_directory.jsxi:151
+		fs.mkdirSync(tmpDir);                                                      // drag_main_handler_directory.jsxi:154
 		
-		if (fs.existsSync(skins))                                                  // drag_main_handler_directory.jsxi:153
-			fs.renameSync(skins, tmpDir + '/skins');                               // drag_main_handler_directory.jsxi:153
+		if (fs.existsSync(skins))                                                  // drag_main_handler_directory.jsxi:156
+			fs.renameSync(skins, tmpDir + '/skins');                               // drag_main_handler_directory.jsxi:156
 		
-		if (fs.existsSync(ui))                                                     // drag_main_handler_directory.jsxi:154
-			fs.renameSync(ui, tmpDir + '/ui');                                     // drag_main_handler_directory.jsxi:154
+		if (fs.existsSync(ui))                                                     // drag_main_handler_directory.jsxi:157
+			fs.renameSync(ui, tmpDir + '/ui');                                     // drag_main_handler_directory.jsxi:157
 		
-		AcTools.Utils.FileUtils.Recycle(destination);                              // drag_main_handler_directory.jsxi:156
-		fromDirectory_unpack(file, entry.root, destination);                       // drag_main_handler_directory.jsxi:157
+		AcTools.Utils.FileUtils.Recycle(destination);                              // drag_main_handler_directory.jsxi:159
+		fromDirectory_unpack(file, entry.root, destination);                       // drag_main_handler_directory.jsxi:160
 		
-		if (fs.existsSync(skins))                                                  // drag_main_handler_directory.jsxi:159
-			fs.removeDirSync(skins);                                               // drag_main_handler_directory.jsxi:159
+		if (fs.existsSync(skins))                                                  // drag_main_handler_directory.jsxi:162
+			fs.removeDirSync(skins);                                               // drag_main_handler_directory.jsxi:162
 		
-		if (fs.existsSync(ui))                                                     // drag_main_handler_directory.jsxi:160
-			fs.removeDirSync(ui);                                                  // drag_main_handler_directory.jsxi:160
+		if (fs.existsSync(ui))                                                     // drag_main_handler_directory.jsxi:163
+			fs.removeDirSync(ui);                                                  // drag_main_handler_directory.jsxi:163
 		
-		if (fs.existsSync(tmpDir + '/skins'))                                      // drag_main_handler_directory.jsxi:162
-			fs.renameSync(tmpDir + '/skins', skins);                               // drag_main_handler_directory.jsxi:162
+		if (fs.existsSync(tmpDir + '/skins'))                                      // drag_main_handler_directory.jsxi:165
+			fs.renameSync(tmpDir + '/skins', skins);                               // drag_main_handler_directory.jsxi:165
 		
-		if (fs.existsSync(tmpDir + '/ui'))                                         // drag_main_handler_directory.jsxi:163
-			fs.renameSync(tmpDir + '/ui', ui);                                     // drag_main_handler_directory.jsxi:163
+		if (fs.existsSync(tmpDir + '/ui'))                                         // drag_main_handler_directory.jsxi:166
+			fs.renameSync(tmpDir + '/ui', ui);                                     // drag_main_handler_directory.jsxi:166
 		
-		fs.removeDirSync(tmpDir);                                                  // drag_main_handler_directory.jsxi:164
-		Cars.loadById(entry.id,                                                    // drag_main_handler_directory.jsxi:166
-			function (arg){                                                        // drag_main_handler_directory.jsxi:166
-				ViewList.select(entry.id);                                         // drag_main_handler_directory.jsxi:167
+		fs.removeDirSync(tmpDir);                                                  // drag_main_handler_directory.jsxi:167
+		Cars.loadById(entry.id,                                                    // drag_main_handler_directory.jsxi:169
+			function (arg){                                                        // drag_main_handler_directory.jsxi:169
+				ViewList.select(entry.id);                                         // drag_main_handler_directory.jsxi:170
 				
-				if (callback)                                                      // drag_main_handler_directory.jsxi:168
-					callback();                                                    // drag_main_handler_directory.jsxi:168
+				if (callback)                                                      // drag_main_handler_directory.jsxi:171
+					callback();                                                    // drag_main_handler_directory.jsxi:171
 			});
 	}
 	
-	function fromDirectory_updateCarOnlyDataSfx(file, entry, callback){            // drag_main_handler_directory.jsxi:172
+	function fromDirectory_updateCarOnlyDataSfx(file, entry, callback){            // drag_main_handler_directory.jsxi:175
 		var destination = Cars.byId(entry.id).path;
 		
-		if (!fs.existsSync(destination)){                                          // drag_main_handler_directory.jsxi:174
+		if (!fs.existsSync(destination)){                                          // drag_main_handler_directory.jsxi:177
 			return ErrorHandler.handled('Folder “' + destination + '” doesn\'t exist.');
 		}
 		
-		if (fs.existsSync(destination + '/sfx'))                                   // drag_main_handler_directory.jsxi:178
-			AcTools.Utils.FileUtils.Recycle(destination + '/sfx');                 // drag_main_handler_directory.jsxi:178
+		if (fs.existsSync(destination + '/sfx'))                                   // drag_main_handler_directory.jsxi:181
+			AcTools.Utils.FileUtils.Recycle(destination + '/sfx');                 // drag_main_handler_directory.jsxi:181
 		
-		if (fs.existsSync(destination + '/data'))                                  // drag_main_handler_directory.jsxi:179
-			AcTools.Utils.FileUtils.Recycle(destination + '/data');                // drag_main_handler_directory.jsxi:179
+		if (fs.existsSync(destination + '/data'))                                  // drag_main_handler_directory.jsxi:182
+			AcTools.Utils.FileUtils.Recycle(destination + '/data');                // drag_main_handler_directory.jsxi:182
 		
-		if (fs.existsSync(destination + '/data.acd'))                              // drag_main_handler_directory.jsxi:180
-			AcTools.Utils.FileUtils.Recycle(destination + '/data.acd');            // drag_main_handler_directory.jsxi:180
+		if (fs.existsSync(destination + '/data.acd'))                              // drag_main_handler_directory.jsxi:183
+			AcTools.Utils.FileUtils.Recycle(destination + '/data.acd');            // drag_main_handler_directory.jsxi:183
 		
-		fromDirectory_unpack(file, entry.root.sub['sfx'], destination + '/sfx');   // drag_main_handler_directory.jsxi:182
+		fromDirectory_unpack(file, entry.root.sub['sfx'], destination + '/sfx');   // drag_main_handler_directory.jsxi:185
 		
-		if (entry.root.sub['data'])                                                // drag_main_handler_directory.jsxi:183
+		if (entry.root.sub['data'])                                                // drag_main_handler_directory.jsxi:186
 			fromDirectory_unpack(file, entry.root.sub['data'], destination + '/data');
 		
-		if (entry.root.sub['data.acd'])                                            // drag_main_handler_directory.jsxi:184
+		if (entry.root.sub['data.acd'])                                            // drag_main_handler_directory.jsxi:187
 			fromDirectory_unpack(file, entry.root.sub['data.acd'], destination + '/data.acd');
 		
-		Cars.loadById(entry.id,                                                    // drag_main_handler_directory.jsxi:186
-			function (arg){                                                        // drag_main_handler_directory.jsxi:186
-				ViewList.select(entry.id);                                         // drag_main_handler_directory.jsxi:187
+		Cars.loadById(entry.id,                                                    // drag_main_handler_directory.jsxi:189
+			function (arg){                                                        // drag_main_handler_directory.jsxi:189
+				ViewList.select(entry.id);                                         // drag_main_handler_directory.jsxi:190
 				
-				if (callback)                                                      // drag_main_handler_directory.jsxi:188
-					callback();                                                    // drag_main_handler_directory.jsxi:188
+				if (callback)                                                      // drag_main_handler_directory.jsxi:191
+					callback();                                                    // drag_main_handler_directory.jsxi:191
 			});
 	}
 	
-	function fromDirectory_installSkin(car, file, entry, callback){                // drag_main_handler_directory.jsxi:192
+	function fromDirectory_installSkin(car, file, entry, callback){                // drag_main_handler_directory.jsxi:195
 		var destination = path.join(car.path, 'skins', entry.id);
 		
-		if (fs.existsSync(destination)){                                           // drag_main_handler_directory.jsxi:194
+		if (fs.existsSync(destination)){                                           // drag_main_handler_directory.jsxi:197
 			return ErrorHandler.handled('Folder “' + destination + '” already exists.');
 		}
 		
-		fromDirectory_unpack(file, entry.root, destination);                       // drag_main_handler_directory.jsxi:198
-		car.loadSkins(callback);                                                   // drag_main_handler_directory.jsxi:199
+		fromDirectory_unpack(file, entry.root, destination);                       // drag_main_handler_directory.jsxi:201
+		car.loadSkins(callback);                                                   // drag_main_handler_directory.jsxi:202
 	}
 	
-	function fromDirectory_installSkinAs(car, id, file, entry, callback){          // drag_main_handler_directory.jsxi:202
+	function fromDirectory_installSkinAs(car, id, file, entry, callback){          // drag_main_handler_directory.jsxi:205
 		var destination = path.join(car.path, 'skins', id);
 		
-		if (fs.existsSync(destination)){                                           // drag_main_handler_directory.jsxi:204
+		if (fs.existsSync(destination)){                                           // drag_main_handler_directory.jsxi:207
 			return ErrorHandler.handled('Folder “' + destination + '” already exists.');
 		}
 		
-		fromDirectory_unpack(file, entry.root, destination);                       // drag_main_handler_directory.jsxi:208
-		car.loadSkins(callback);                                                   // drag_main_handler_directory.jsxi:209
+		fromDirectory_unpack(file, entry.root, destination);                       // drag_main_handler_directory.jsxi:211
+		car.loadSkins(callback);                                                   // drag_main_handler_directory.jsxi:212
 	}
 	
-	function fromDirectory_updateSkinFull(car, file, entry, callback){             // drag_main_handler_directory.jsxi:212
+	function fromDirectory_updateSkinFull(car, file, entry, callback){             // drag_main_handler_directory.jsxi:215
 		var destination = path.join(car.path, 'skins', entry.id);
 		
-		if (!fs.existsSync(destination)){                                          // drag_main_handler_directory.jsxi:214
-			callback();                                                            // drag_main_handler_directory.jsxi:215
+		if (!fs.existsSync(destination)){                                          // drag_main_handler_directory.jsxi:217
+			callback();                                                            // drag_main_handler_directory.jsxi:218
 			return ErrorHandler.handled('Folder “' + destination + '” doesn\'t exist.');
 		}
 		
-		AcTools.Utils.FileUtils.Recycle(destination);                              // drag_main_handler_directory.jsxi:219
-		fromDirectory_unpack(file, entry.root, destination);                       // drag_main_handler_directory.jsxi:220
-		car.loadSkins(callback);                                                   // drag_main_handler_directory.jsxi:221
+		AcTools.Utils.FileUtils.Recycle(destination);                              // drag_main_handler_directory.jsxi:222
+		fromDirectory_unpack(file, entry.root, destination);                       // drag_main_handler_directory.jsxi:223
+		car.loadSkins(callback);                                                   // drag_main_handler_directory.jsxi:224
 	}
 	
-	function fromDirectory_updateSkinKeepUi(car, file, entry, callback){           // drag_main_handler_directory.jsxi:224
-		var destination = path.join(car.path, 'skins', entry.id),                  // drag_main_handler_directory.jsxi:225
-			preview = destination + '/preview.jpg',                                // drag_main_handler_directory.jsxi:226
-			ui = destination + '/ui_skin.json';                                    // drag_main_handler_directory.jsxi:227
+	function fromDirectory_updateSkinKeepUi(car, file, entry, callback){           // drag_main_handler_directory.jsxi:227
+		var destination = path.join(car.path, 'skins', entry.id),                  // drag_main_handler_directory.jsxi:228
+			preview = destination + '/preview.jpg',                                // drag_main_handler_directory.jsxi:229
+			ui = destination + '/ui_skin.json';                                    // drag_main_handler_directory.jsxi:230
 		
-		if (!fs.existsSync(destination)){                                          // drag_main_handler_directory.jsxi:228
-			callback();                                                            // drag_main_handler_directory.jsxi:229
+		if (!fs.existsSync(destination)){                                          // drag_main_handler_directory.jsxi:231
+			callback();                                                            // drag_main_handler_directory.jsxi:232
 			return ErrorHandler.handled('Folder “' + destination + '” doesn\'t exist.');
 		}
 		
 		var tmpDir = AcDir.temp;
 		
-		fs.mkdirSync(tmpDir);                                                      // drag_main_handler_directory.jsxi:234
+		fs.mkdirSync(tmpDir);                                                      // drag_main_handler_directory.jsxi:237
 		
-		if (fs.existsSync(preview))                                                // drag_main_handler_directory.jsxi:236
-			fs.renameSync(preview, tmpDir + '/p');                                 // drag_main_handler_directory.jsxi:236
+		if (fs.existsSync(preview))                                                // drag_main_handler_directory.jsxi:239
+			fs.renameSync(preview, tmpDir + '/p');                                 // drag_main_handler_directory.jsxi:239
 		
-		if (fs.existsSync(ui))                                                     // drag_main_handler_directory.jsxi:237
-			fs.renameSync(ui, tmpDir + '/u');                                      // drag_main_handler_directory.jsxi:237
+		if (fs.existsSync(ui))                                                     // drag_main_handler_directory.jsxi:240
+			fs.renameSync(ui, tmpDir + '/u');                                      // drag_main_handler_directory.jsxi:240
 		
-		AcTools.Utils.FileUtils.Recycle(destination);                              // drag_main_handler_directory.jsxi:239
-		fromDirectory_unpack(file, entry.root, destination);                       // drag_main_handler_directory.jsxi:240
+		AcTools.Utils.FileUtils.Recycle(destination);                              // drag_main_handler_directory.jsxi:242
+		fromDirectory_unpack(file, entry.root, destination);                       // drag_main_handler_directory.jsxi:243
 		
-		if (fs.existsSync(preview))                                                // drag_main_handler_directory.jsxi:242
-			fs.removeDirSync(preview);                                             // drag_main_handler_directory.jsxi:242
+		if (fs.existsSync(preview))                                                // drag_main_handler_directory.jsxi:245
+			fs.removeDirSync(preview);                                             // drag_main_handler_directory.jsxi:245
 		
-		if (fs.existsSync(ui))                                                     // drag_main_handler_directory.jsxi:243
-			fs.removeDirSync(ui);                                                  // drag_main_handler_directory.jsxi:243
+		if (fs.existsSync(ui))                                                     // drag_main_handler_directory.jsxi:246
+			fs.removeDirSync(ui);                                                  // drag_main_handler_directory.jsxi:246
 		
-		if (fs.existsSync(tmpDir + '/p'))                                          // drag_main_handler_directory.jsxi:245
-			fs.renameSync(tmpDir + '/p', preview);                                 // drag_main_handler_directory.jsxi:245
+		if (fs.existsSync(tmpDir + '/p'))                                          // drag_main_handler_directory.jsxi:248
+			fs.renameSync(tmpDir + '/p', preview);                                 // drag_main_handler_directory.jsxi:248
 		
-		if (fs.existsSync(tmpDir + '/u'))                                          // drag_main_handler_directory.jsxi:246
-			fs.renameSync(tmpDir + '/u', ui);                                      // drag_main_handler_directory.jsxi:246
+		if (fs.existsSync(tmpDir + '/u'))                                          // drag_main_handler_directory.jsxi:249
+			fs.renameSync(tmpDir + '/u', ui);                                      // drag_main_handler_directory.jsxi:249
 		
-		fs.removeDirSync(tmpDir);                                                  // drag_main_handler_directory.jsxi:247
-		car.loadSkins(callback);                                                   // drag_main_handler_directory.jsxi:249
+		fs.removeDirSync(tmpDir);                                                  // drag_main_handler_directory.jsxi:250
+		car.loadSkins(callback);                                                   // drag_main_handler_directory.jsxi:252
 	}
 	
-	function fromDirectory(dir){                                                   // drag_main_handler_directory.jsxi:252
+	function fromDirectory(dir){                                                   // drag_main_handler_directory.jsxi:255
 		var holder = dir + '/__tmp_' + Date.now();
 		
 		_holders.push({ stream: fs.createWriteStream(holder), filename: holder });
@@ -5818,9 +5829,9 @@ var DragMainHandler = (function (){                                             
 		
 		var content = detectContent(dir, tree);
 		
-		fromDirectory_extractData(dir, content);                                   // drag_main_handler_directory.jsxi:258
-		return content.map(function (arg){                                         // drag_main_handler_directory.jsxi:259
-			return fromDirectory_prepareFound(dir, arg);                           // drag_main_handler_directory.jsxi:259
+		fromDirectory_extractData(dir, content);                                   // drag_main_handler_directory.jsxi:261
+		return content.map(function (arg){                                         // drag_main_handler_directory.jsxi:262
+			return fromDirectory_prepareFound(dir, arg);                           // drag_main_handler_directory.jsxi:262
 		});
 	}
 	
@@ -5939,7 +5950,8 @@ var Settings = new ObjLocalStorage('settings',                                  
 		aptCameraX: - 145,                                                         // settings.jsxi:63
 		aptCameraY: 36,                                                            // settings.jsxi:64
 		aptCameraDistance: 5.5,                                                    // settings.jsxi:65
-		aptIncreaseDelays: false
+		aptIncreaseDelays: false,                                                  // settings.jsxi:66
+		aptPngMode: false
 	});
 
 /* Class "BadgeEditor" declaration */
@@ -7391,7 +7403,7 @@ function Kn5SuspXxErrorFixer(){                                                 
 __prototypeExtend(Kn5SuspXxErrorFixer, 
 	AbstractFixer);
 Kn5SuspXxErrorFixer.prototype.__Kn5SuspXxErrorFixer_emptyPlaceholders = function (c){
-	AcTools.Utils.Kn5Fixer.FixSuspensionWrapper(AcDir.root, this.__car.id);        // error_kn5_file.jsxi:3
+	AcTools.Utils.Kn5Fixer.FixSuspension(AcDir.root, this.__car.id);               // error_kn5_file.jsxi:3
 	Notification.info('Done',                                                      // error_kn5_file.jsxi:4
 		'Suspension fixed, empty placeholders have been added.');                  // error_kn5_file.jsxi:4
 	c();                                                                           // error_kn5_file.jsxi:5
@@ -7737,7 +7749,7 @@ MissingLiveryFixer.prototype.__MissingLiveryFixer_autogenFromPreview = function 
 	c();                                                                           // error_skin_images.jsxi:26
 };
 MissingLiveryFixer.prototype.__MissingLiveryFixer_autogenFromCustomShowroom = function (c){
-	AcTools.Utils.Kn5RenderWrapper.GenerateLivery(this.__car.path, this.__object.id, this.__object.livery);
+	AcTools.Kn5Render.Utils.Kn5RenderWrapper.GenerateLivery(this.__car.path, this.__object.id, this.__object.livery);
 	c();                                                                           // error_skin_images.jsxi:31
 };
 Object.defineProperty(MissingLiveryFixer.prototype, 
@@ -8512,7 +8524,7 @@ var ViewDetails = (function (){                                                 
 							return;
 						
 						try {
-							AcTools.Utils.Kn5RenderWrapper.StartDarkRoomPreview(_selected.path, id);
+							AcTools.Kn5Render.Utils.Kn5RenderWrapper.StartDarkRoomPreview(_selected.path, id);
 						} catch (err){                                             // view_details.jsxi:566
 							ErrorHandler.handled('Cannot start Custom Showroom.', err);
 							return;
@@ -8537,424 +8549,463 @@ var ViewDetails = (function (){                                                 
 					})
 				}));
 				driveMenu.append(new gui.MenuItem({                                // view_details.jsxi:584
-					label: 'Drift',                                                // view_details.jsxi:584
+					label: 'Race',                                                 // view_details.jsxi:584
 					click: (function (){                                           // view_details.jsxi:584
-						AcPractice.start(_selected, id, 'Drift');                  // view_details.jsxi:585
+						AcPractice.start(_selected, id, 'Race');                   // view_details.jsxi:585
 					})
 				}));
-				menu.append(new gui.MenuItem({                                     // view_details.jsxi:588
-					label: 'Folder',                                               // view_details.jsxi:588
+				driveMenu.append(new gui.MenuItem({                                // view_details.jsxi:588
+					label: 'Drift',                                                // view_details.jsxi:588
 					click: (function (){                                           // view_details.jsxi:588
-						if (!_selected)                                            // view_details.jsxi:589
+						AcPractice.start(_selected, id, 'Drift');                  // view_details.jsxi:589
+					})
+				}));
+				menu.append(new gui.MenuItem({                                     // view_details.jsxi:592
+					label: 'Folder',                                               // view_details.jsxi:592
+					click: (function (){                                           // view_details.jsxi:592
+						if (!_selected)                                            // view_details.jsxi:593
 							return;
 						
-						Shell.openItem(_selected.getSkin(id).path);                // view_details.jsxi:590
+						Shell.openItem(_selected.getSkin(id).path);                // view_details.jsxi:594
 					})
 				}));
-				menu.append(new gui.MenuItem({ type: 'separator' }));              // view_details.jsxi:593
+				menu.append(new gui.MenuItem({ type: 'separator' }));              // view_details.jsxi:597
 				
 				var autoUpdateLivery = new gui.MenuItem({ label: 'Update Livery', submenu: new gui.Menu() });
 				
-				menu.append(autoUpdateLivery);                                     // view_details.jsxi:596
-				autoUpdateLivery = autoUpdateLivery.submenu;                       // view_details.jsxi:597
-				autoUpdateLivery.append(new gui.MenuItem({                         // view_details.jsxi:599
-					label: 'From Preview',                                         // view_details.jsxi:599
-					click: (function (){                                           // view_details.jsxi:599
-						if (!_selected)                                            // view_details.jsxi:600
+				menu.append(autoUpdateLivery);                                     // view_details.jsxi:600
+				autoUpdateLivery = autoUpdateLivery.submenu;                       // view_details.jsxi:601
+				autoUpdateLivery.append(new gui.MenuItem({                         // view_details.jsxi:603
+					label: 'From Preview',                                         // view_details.jsxi:603
+					click: (function (){                                           // view_details.jsxi:603
+						if (!_selected)                                            // view_details.jsxi:604
 							return;
 						
 						var skin = _selected.getSkin(id);
 						
 						try {
 							AcTools.Utils.ImageUtils.GenerateLivery(skin.preview, skin.livery);
-							_selected.loadSkins();                                 // view_details.jsxi:604
-						} catch (err){                                             // view_details.jsxi:605
-							ErrorHandler.handled('Cannot update livery.', err);    // view_details.jsxi:606
+							_selected.loadSkins();                                 // view_details.jsxi:608
+						} catch (err){                                             // view_details.jsxi:609
+							ErrorHandler.handled('Cannot update livery.', err);    // view_details.jsxi:610
 							return;
 						} 
 					})
 				}));
-				autoUpdateLivery.append(new gui.MenuItem({                         // view_details.jsxi:611
-					label: 'With Custom Showroom',                                 // view_details.jsxi:611
-					click: (function (){                                           // view_details.jsxi:611
-						if (!_selected)                                            // view_details.jsxi:612
+				autoUpdateLivery.append(new gui.MenuItem({                         // view_details.jsxi:615
+					label: 'With Custom Showroom',                                 // view_details.jsxi:615
+					click: (function (){                                           // view_details.jsxi:615
+						if (!_selected)                                            // view_details.jsxi:616
 							return;
 						
 						var skin = _selected.getSkin(id);
 						
 						try {
-							AcTools.Utils.Kn5RenderWrapper.GenerateLivery(_selected.path, skin.id, skin.livery);
-							_selected.loadSkins();                                 // view_details.jsxi:616
-						} catch (err){                                             // view_details.jsxi:617
-							ErrorHandler.handled('Cannot update livery.', err);    // view_details.jsxi:618
+							AcTools.Kn5Render.Utils.Kn5RenderWrapper.GenerateLivery(_selected.path, skin.id, skin.livery);
+							_selected.loadSkins();                                 // view_details.jsxi:620
+						} catch (err){                                             // view_details.jsxi:621
+							ErrorHandler.handled('Cannot update livery.', err);    // view_details.jsxi:622
 							return;
 						} 
 					})
 				}));
-				menu.append(new gui.MenuItem({                                     // view_details.jsxi:623
-					label: 'Delete skin',                                          // view_details.jsxi:623
-					click: (function (){                                           // view_details.jsxi:623
-						if (!_selected)                                            // view_details.jsxi:624
+				menu.append(new gui.MenuItem({                                     // view_details.jsxi:627
+					label: 'Delete skin',                                          // view_details.jsxi:627
+					click: (function (){                                           // view_details.jsxi:627
+						if (!_selected)                                            // view_details.jsxi:628
 							return;
 						
 						var skin = _selected.getSkin(id);
 						
-						new Dialog('Delete ' + skin.displayName,                   // view_details.jsxi:627
+						new Dialog('Delete ' + skin.displayName,                   // view_details.jsxi:631
 							'Folder will be removed to the Recycle Bin. Are you sure?', 
-							function (arg){                                        // view_details.jsxi:627
-								if (!skin)                                         // view_details.jsxi:628
+							function (arg){                                        // view_details.jsxi:631
+								if (!skin)                                         // view_details.jsxi:632
 									return;
 								
-								AcTools.Utils.FileUtils.Recycle(skin.path);        // view_details.jsxi:629
-								_selected.loadSkins();                             // view_details.jsxi:630
+								AcTools.Utils.FileUtils.Recycle(skin.path);        // view_details.jsxi:633
+								_selected.loadSkins();                             // view_details.jsxi:634
 							});
 					})
 				}));
-				menu.popup(e.clientX, e.clientY);                                  // view_details.jsxi:637
+				menu.popup(e.clientX, e.clientY);                                  // view_details.jsxi:641
 				return false;
 			});
-		$('#selected-car-skins').on('click',                                       // view_details.jsxi:642
-			function (e){                                                          // view_details.jsxi:643
-				if (!_selected)                                                    // view_details.jsxi:644
+		$('#selected-car-skins').on('click',                                       // view_details.jsxi:646
+			function (e){                                                          // view_details.jsxi:647
+				if (!_selected)                                                    // view_details.jsxi:648
 					return;
 				
 				var id = e.target.getAttribute('data-id');
 				
-				if (!id)                                                           // view_details.jsxi:647
+				if (!id)                                                           // view_details.jsxi:651
 					return;
 				
-				_selected.selectSkin(id);                                          // view_details.jsxi:649
+				_selected.selectSkin(id);                                          // view_details.jsxi:653
 			});
-		$('#selected-car-error').click(function (e){                               // view_details.jsxi:653
-			if (!_selected)                                                        // view_details.jsxi:654
+		$('#selected-car-error').click(function (e){                               // view_details.jsxi:657
+			if (!_selected)                                                        // view_details.jsxi:658
 				return;
 			
 			var id = e.target.getAttribute('data-error-id');
 			
-			if (id){                                                               // view_details.jsxi:656
-				RestorationWizard.fix(_selected, id);                              // view_details.jsxi:657
+			if (id){                                                               // view_details.jsxi:660
+				RestorationWizard.fix(_selected, id);                              // view_details.jsxi:661
 			}
 		});
-		$(window).on('keydown',                                                    // view_details.jsxi:662
-			function (e){                                                          // view_details.jsxi:663
-				if (!_selected)                                                    // view_details.jsxi:664
+		$(window).on('keydown',                                                    // view_details.jsxi:666
+			function (e){                                                          // view_details.jsxi:667
+				if (!_selected)                                                    // view_details.jsxi:668
 					return;
 				
-				if (e.keyCode === 'S'.charCodeAt(0) && e.ctrlKey && e.altKey){     // view_details.jsxi:666
+				if (e.keyCode === 'S'.charCodeAt(0) && e.ctrlKey && e.altKey){     // view_details.jsxi:670
+					AcShowroom.shot(_selected, true);                              // view_details.jsxi:671
+					return false;
+				}
+				
+				if (e.keyCode === 'D'.charCodeAt(0) && e.ctrlKey && e.altKey){     // view_details.jsxi:675
 					try {
-						AcTools.Utils.Kn5RenderWrapper.UpdateAmbientShadows(_selected.path);
-					} catch (err){                                                 // view_details.jsxi:669
-						ErrorHandler.handled('Cannot update shadows.', err);       // view_details.jsxi:670
+						AcTools.Kn5Render.Utils.Kn5RenderWrapper.UpdateAmbientShadows(_selected.path);
+					} catch (err){                                                 // view_details.jsxi:678
+						ErrorHandler.handled('Cannot update shadows.', err);       // view_details.jsxi:679
+						return;
+					} 
+					return false;
+				}
+				
+				if (e.keyCode === 'A'.charCodeAt(0) && e.ctrlKey && e.altKey){     // view_details.jsxi:685
+					try {
+						AcTools.Kn5Render.Utils.Kn5RenderWrapper.UpdateAmbientShadows(_selected.path);
+					} catch (err){                                                 // view_details.jsxi:688
+						ErrorHandler.handled('Cannot update shadows.', err);       // view_details.jsxi:689
 						return;
 					} 
 					
-					AcShowroom.shot(_selected);                                    // view_details.jsxi:673
+					AcShowroom.shot(_selected, true);                              // view_details.jsxi:692
 					return false;
 				}
 				
-				if (e.keyCode === 'S'.charCodeAt(0) && e.ctrlKey){                 // view_details.jsxi:677
-					$(':focus').each(function (arg){                               // view_details.jsxi:678
-						return this.blur();                                        // view_details.jsxi:678
+				if (e.keyCode === 'S'.charCodeAt(0) && e.ctrlKey){                 // view_details.jsxi:696
+					$(':focus').each(function (arg){                               // view_details.jsxi:697
+						return this.blur();                                        // view_details.jsxi:697
 					});
-					_selected.save();                                              // view_details.jsxi:679
+					_selected.save();                                              // view_details.jsxi:698
 					return false;
 				}
 				
-				if (e.keyCode === 'F'.charCodeAt(0) && e.ctrlKey){                 // view_details.jsxi:683
-					UpdateDescription.update(_selected);                           // view_details.jsxi:684
+				if (e.keyCode === 'F'.charCodeAt(0) && e.ctrlKey){                 // view_details.jsxi:702
+					UpdateDescription.update(_selected);                           // view_details.jsxi:703
 					return false;
 				}
 				
-				if (e.keyCode === 'T'.charCodeAt(0) && e.ctrlKey){                 // view_details.jsxi:688
-					_selected.toggle();                                            // view_details.jsxi:689
+				if (e.keyCode === 'T'.charCodeAt(0) && e.ctrlKey){                 // view_details.jsxi:707
+					_selected.toggle();                                            // view_details.jsxi:708
 					return false;
 				}
 				
-				if (e.keyCode === 'B'.charCodeAt(0) && e.ctrlKey && e.shiftKey){   // view_details.jsxi:693
-					$('#selected-car-logo')[0].click();                            // view_details.jsxi:694
+				if (e.keyCode === 'B'.charCodeAt(0) && e.ctrlKey && e.shiftKey){   // view_details.jsxi:712
+					$('#selected-car-logo')[0].click();                            // view_details.jsxi:713
 					return false;
 				}
 				
-				if (e.keyCode === 'U'.charCodeAt(0) && e.ctrlKey && e.shiftKey){   // view_details.jsxi:698
-					if (_selected.parent)                                          // view_details.jsxi:699
-						$('#selected-car-upgrade')[0].click();                     // view_details.jsxi:699
+				if (e.keyCode === 'U'.charCodeAt(0) && e.ctrlKey && e.shiftKey){   // view_details.jsxi:717
+					if (_selected.parent)                                          // view_details.jsxi:718
+						$('#selected-car-upgrade')[0].click();                     // view_details.jsxi:718
 					return false;
 				}
 				
 				if (localStorage.developerMode && e.keyCode === 'E'.charCodeAt(0) && e.ctrlKey && e.shiftKey){
-					_selected.exportDatabase();                                    // view_details.jsxi:704
+					_selected.exportDatabase();                                    // view_details.jsxi:723
 					return false;
 				}
 			});
 		
 		var cmIgnore = false;
 		
-		$('main').on('contextmenu',                                                // view_details.jsxi:711
-			function (){                                                           // view_details.jsxi:712
-				this.querySelector('footer').classList.toggle('active');           // view_details.jsxi:713
-				cmIgnore = true;                                                   // view_details.jsxi:714
+		$('main').on('contextmenu',                                                // view_details.jsxi:730
+			function (){                                                           // view_details.jsxi:731
+				this.querySelector('footer').classList.toggle('active');           // view_details.jsxi:732
+				cmIgnore = true;                                                   // view_details.jsxi:733
 			});
-		$(window).on('click contextmenu',                                          // view_details.jsxi:717
-			(function (e){                                                         // view_details.jsxi:718
-				if (cmIgnore){                                                     // view_details.jsxi:719
-					cmIgnore = false;                                              // view_details.jsxi:720
-				} else if (e.target !== this){                                     // view_details.jsxi:721
-					this.classList.remove('active');                               // view_details.jsxi:722
+		$(window).on('click contextmenu',                                          // view_details.jsxi:736
+			(function (e){                                                         // view_details.jsxi:737
+				if (cmIgnore){                                                     // view_details.jsxi:738
+					cmIgnore = false;                                              // view_details.jsxi:739
+				} else if (e.target !== this){                                     // view_details.jsxi:740
+					this.classList.remove('active');                               // view_details.jsxi:741
 				}
-			}).bind($('main footer')[0]));                                         // view_details.jsxi:724
-		$('#selected-car-open-directory').click(function (){                       // view_details.jsxi:727
-			if (!_selected)                                                        // view_details.jsxi:728
+			}).bind($('main footer')[0]));                                         // view_details.jsxi:743
+		$('#selected-car-open-directory').click(function (){                       // view_details.jsxi:746
+			if (!_selected)                                                        // view_details.jsxi:747
 				return;
 			
-			Shell.openItem(_selected.path);                                        // view_details.jsxi:729
+			Shell.openItem(_selected.path);                                        // view_details.jsxi:748
 		});
-		$('#selected-car-showroom').click(function (){                             // view_details.jsxi:732
-			if (!_selected)                                                        // view_details.jsxi:733
+		$('#selected-car-showroom').click(function (){                             // view_details.jsxi:751
+			if (!_selected)                                                        // view_details.jsxi:752
 				return;
 			
-			AcShowroom.start(_selected);                                           // view_details.jsxi:734
+			AcShowroom.start(_selected);                                           // view_details.jsxi:753
 		});
-		$('#selected-car-showroom-select').click(function (){                      // view_details.jsxi:737
-			if (!_selected)                                                        // view_details.jsxi:738
+		$('#selected-car-showroom-select').click(function (){                      // view_details.jsxi:756
+			if (!_selected)                                                        // view_details.jsxi:757
 				return;
 			
-			AcShowroom.select(_selected);                                          // view_details.jsxi:739
+			AcShowroom.select(_selected);                                          // view_details.jsxi:758
 		});
-		$('#selected-car-practice').click(function (){                             // view_details.jsxi:742
-			if (!_selected)                                                        // view_details.jsxi:743
+		$('#selected-car-practice').click(function (){                             // view_details.jsxi:761
+			if (!_selected)                                                        // view_details.jsxi:762
 				return;
 			
-			AcPractice.start(_selected);                                           // view_details.jsxi:744
+			AcPractice.start(_selected);                                           // view_details.jsxi:763
 		});
-		$('#selected-car-practice-select').click(function (){                      // view_details.jsxi:747
-			if (!_selected)                                                        // view_details.jsxi:748
+		$('#selected-car-practice-select').click(function (){                      // view_details.jsxi:766
+			if (!_selected)                                                        // view_details.jsxi:767
 				return;
 			
-			AcPractice.select(_selected);                                          // view_details.jsxi:749
+			AcPractice.select(_selected);                                          // view_details.jsxi:768
 		});
-		$('#selected-car-reload').click(function (){                               // view_details.jsxi:752
-			if (!_selected)                                                        // view_details.jsxi:753
+		$('#selected-car-reload').click(function (){                               // view_details.jsxi:771
+			if (!_selected)                                                        // view_details.jsxi:772
 				return;
 			
-			if (_selected.changed){                                                // view_details.jsxi:755
-				new Dialog('Reload',                                               // view_details.jsxi:756
+			if (_selected.changed){                                                // view_details.jsxi:774
+				new Dialog('Reload',                                               // view_details.jsxi:775
 					[ 'Your changes will be lost. Are you sure?' ], 
-					reload);                                                       // view_details.jsxi:758
+					reload);                                                       // view_details.jsxi:777
 			} else {
-				reload();                                                          // view_details.jsxi:760
+				reload();                                                          // view_details.jsxi:779
 			}
 			
-			function reload(){                                                     // view_details.jsxi:763
-				if (!_selected)                                                    // view_details.jsxi:764
+			function reload(){                                                     // view_details.jsxi:782
+				if (!_selected)                                                    // view_details.jsxi:783
 					return;
 				
-				_selected.reload();                                                // view_details.jsxi:765
+				_selected.reload();                                                // view_details.jsxi:784
 			}
 		});
-		$('#selected-car-test').click(function (){                                 // view_details.jsxi:769
-			if (!_selected)                                                        // view_details.jsxi:770
+		$('#selected-car-test').click(function (){                                 // view_details.jsxi:788
+			if (!_selected)                                                        // view_details.jsxi:789
 				return;
 			
-			_selected.testAcd();                                                   // view_details.jsxi:771
+			_selected.testAcd();                                                   // view_details.jsxi:790
 		});
-		$('#selected-car-save').click(function (){                                 // view_details.jsxi:775
-			if (!_selected)                                                        // view_details.jsxi:776
+		$('#selected-car-save').click(function (){                                 // view_details.jsxi:794
+			if (!_selected)                                                        // view_details.jsxi:795
 				return;
 			
-			_selected.save();                                                      // view_details.jsxi:777
+			_selected.save();                                                      // view_details.jsxi:796
 		});
-		$('#selected-car-update-data').click(function (){                          // view_details.jsxi:780
-			if (!_selected)                                                        // view_details.jsxi:781
+		$('#selected-car-update-data').click(function (){                          // view_details.jsxi:799
+			if (!_selected)                                                        // view_details.jsxi:800
 				return;
 			
 			var updated = Cars.fromDatabase(_selected.id);
 			
-			if (!updated){                                                         // view_details.jsxi:784
-				return Notification.warn('Error', 'Data is missing.');             // view_details.jsxi:785
+			if (!updated){                                                         // view_details.jsxi:803
+				return Notification.warn('Error', 'Data is missing.');             // view_details.jsxi:804
 			}
 			
 			var fields = [];
 			
-			for (var k in updated)                                                 // view_details.jsxi:789
-				if (updated.hasOwnProperty(k)){                                    // view_details.jsxi:789
+			for (var k in updated)                                                 // view_details.jsxi:808
+				if (updated.hasOwnProperty(k)){                                    // view_details.jsxi:808
 					var v = updated[k];
 					
 					if (JSON.stringify(v) === JSON.stringify(_selected.data[k])){
 						continue;
 					}
 					
-					fields.push({ key: k, value: v });                             // view_details.jsxi:794
+					fields.push({ key: k, value: v });                             // view_details.jsxi:813
 				}
 			
-			if (fields.length === 0){                                              // view_details.jsxi:797
-				return Notification.warn('Error', 'Nothing to update.');           // view_details.jsxi:798
+			if (fields.length === 0){                                              // view_details.jsxi:816
+				return Notification.warn('Error', 'Nothing to update.');           // view_details.jsxi:817
 			}
 			
-			var d = new Dialog('Update Data',                                      // view_details.jsxi:801
+			var d = new Dialog('Update Data',                                      // view_details.jsxi:820
 				[
-					'<h6>Select fields to update</h6>',                            // view_details.jsxi:802
-					fields.map(function (arg){                                     // view_details.jsxi:803
+					'<h6>Select fields to update</h6>',                            // view_details.jsxi:821
+					fields.map(function (arg){                                     // view_details.jsxi:822
 						return '<label><input data-key="' + arg.key + '" type="checkbox" checked>' + (arg.key === 'url' ? 'URL' : arg.key[0].toUpperCase() + arg.key.slice(1).replace(/(?=[A-Z])/g, ' ')) + '</label>';
 					}).join('')
 				], 
-				function (){                                                       // view_details.jsxi:806
-					if (!_selected)                                                // view_details.jsxi:807
+				function (){                                                       // view_details.jsxi:825
+					if (!_selected)                                                // view_details.jsxi:826
 						return;
 					
-					this.content.find(':checked').each(function (arg){             // view_details.jsxi:809
+					this.content.find(':checked').each(function (arg){             // view_details.jsxi:828
 						var k = this.getAttribute('data-key');
 						
-						_selected.changeData(k, updated[k], true);                 // view_details.jsxi:811
+						_selected.changeData(k, updated[k], true);                 // view_details.jsxi:830
 					});
 				});
 		});
-		$('#selected-car-update-description').click(function (){                   // view_details.jsxi:816
-			if (!_selected)                                                        // view_details.jsxi:817
+		$('#selected-car-update-description').click(function (){                   // view_details.jsxi:835
+			if (!_selected)                                                        // view_details.jsxi:836
 				return;
 			
-			UpdateDescription.update(_selected);                                   // view_details.jsxi:818
+			UpdateDescription.update(_selected);                                   // view_details.jsxi:837
 		});
-		$('#selected-car-update-previews').click(function (){                      // view_details.jsxi:821
-			if (!_selected)                                                        // view_details.jsxi:822
+		$('#selected-car-update-previews').click(function (){                      // view_details.jsxi:840
+			if (!_selected)                                                        // view_details.jsxi:841
 				return;
 			
-			AcShowroom.shot(_selected);                                            // view_details.jsxi:823
+			AcShowroom.shot(_selected);                                            // view_details.jsxi:842
 		});
-		$('#selected-car-update-previews-manual').click(function (){               // view_details.jsxi:826
-			if (!_selected)                                                        // view_details.jsxi:827
+		$('#selected-car-update-previews-manual').click(function (){               // view_details.jsxi:845
+			if (!_selected)                                                        // view_details.jsxi:846
 				return;
 			
-			AcShowroom.shot(_selected, true);                                      // view_details.jsxi:828
+			AcShowroom.shot(_selected, true);                                      // view_details.jsxi:847
 		});
-		$('#selected-car-disable').click(function (){                              // view_details.jsxi:831
-			if (!_selected)                                                        // view_details.jsxi:832
+		$('#selected-car-disable').click(function (){                              // view_details.jsxi:850
+			if (!_selected)                                                        // view_details.jsxi:851
 				return;
 			
-			_selected.toggle();                                                    // view_details.jsxi:833
+			_selected.toggle();                                                    // view_details.jsxi:852
 		});
-		$('#selected-car-additional').on('click contextmenu',                      // view_details.jsxi:836
-			function (e){                                                          // view_details.jsxi:836
-				if (!_selected)                                                    // view_details.jsxi:837
+		$('#selected-car-additional').on('click contextmenu',                      // view_details.jsxi:855
+			function (e){                                                          // view_details.jsxi:855
+				if (!_selected)                                                    // view_details.jsxi:856
 					return;
 				
 				var menu = new gui.Menu();
 				
-				function add(label, fn, to){                                       // view_details.jsxi:841
-					if (to === undefined)                                          // view_details.jsxi:841
-						to = menu;                                                 // view_details.jsxi:841
+				function add(label, fn, to){                                       // view_details.jsxi:860
+					if (to === undefined)                                          // view_details.jsxi:860
+						to = menu;                                                 // view_details.jsxi:860
 				
-					to.append(new gui.MenuItem({                                   // view_details.jsxi:842
-						label: label,                                              // view_details.jsxi:842
-						click: (function (){                                       // view_details.jsxi:842
-							$('main footer').removeClass('active');                // view_details.jsxi:843
+					to.append(new gui.MenuItem({                                   // view_details.jsxi:861
+						label: label,                                              // view_details.jsxi:861
+						click: (function (){                                       // view_details.jsxi:861
+							$('main footer').removeClass('active');                // view_details.jsxi:862
 							
-							if (_selected)                                         // view_details.jsxi:844
-								fn();                                              // view_details.jsxi:844
+							if (_selected)                                         // view_details.jsxi:863
+								fn();                                              // view_details.jsxi:863
 						})
 					}));
 				}
 				
-				add('Update Ambient Shadows',                                      // view_details.jsxi:848
-					function (){                                                   // view_details.jsxi:848
+				add('Update Ambient Shadows',                                      // view_details.jsxi:867
+					function (){                                                   // view_details.jsxi:867
 						try {
-							AcTools.Utils.Kn5RenderWrapper.UpdateAmbientShadows(_selected.path);
-						} catch (err){                                             // view_details.jsxi:851
-							ErrorHandler.handled('Cannot update shadows.', err);   // view_details.jsxi:852
+							AcTools.Kn5Render.Utils.Kn5RenderWrapper.UpdateAmbientShadows(_selected.path);
+						} catch (err){                                             // view_details.jsxi:870
+							ErrorHandler.handled('Cannot update shadows.', err);   // view_details.jsxi:871
 							return;
 						} 
 					});
-				add('Change Body Ambient Shadow Size',                             // view_details.jsxi:857
-					function (){                                                   // view_details.jsxi:857
-						var currentSize = AcTools.Utils.Kn5RenderWrapper.GetBodyAmbientShadowSize(_selected.path).split(',');
+				add('Change Body Ambient Shadow Size',                             // view_details.jsxi:876
+					function (){                                                   // view_details.jsxi:876
+						var currentSize = AcTools.Kn5Render.Utils.Kn5RenderWrapper.GetBodyAmbientShadowSize(_selected.path).split(',');
 						
-						var d = new Dialog('Body Ambient Shadow',                  // view_details.jsxi:859
+						var d = new Dialog('Body Ambient Shadow',                  // view_details.jsxi:878
 							[
-								'<h6>Size (in meters)</h6>',                       // view_details.jsxi:860
+								'<h6>Size (in meters)</h6>',                       // view_details.jsxi:879
 								'<label style="display:inline-block;width:160px;line-height:24px">Width: <input id="body-ambient-shadow-width" type="number" step="0.1" min="0.8" max="6.0" style="width: 80px;float: right;margin-right: 20px;"></label>', 
 								'<label style="display:inline-block;width:160px;line-height:24px">Length: <input id="body-ambient-shadow-height" type="number" step="0.1" min="0.8" max="6.0" style="width: 80px;float: right;margin-right: 20px;"></label>'
 							], 
-							function (){                                           // view_details.jsxi:863
+							function (){                                           // view_details.jsxi:882
 								var w = + d.content.find('#body-ambient-shadow-width').val();
 								
-								if (Number.isNaN(w))                               // view_details.jsxi:865
-									w = currentSize[0];                            // view_details.jsxi:865
+								if (Number.isNaN(w))                               // view_details.jsxi:884
+									w = currentSize[0];                            // view_details.jsxi:884
 								
 								var h = + d.content.find('#body-ambient-shadow-height').val();
 								
-								if (Number.isNaN(h))                               // view_details.jsxi:868
-									h = currentSize[1];                            // view_details.jsxi:868
+								if (Number.isNaN(h))                               // view_details.jsxi:887
+									h = currentSize[1];                            // view_details.jsxi:887
 								
-								AcTools.Utils.Kn5RenderWrapper.SetBodyAmbientShadowSize(_selected.path, w, h);
+								AcTools.Kn5Render.Utils.Kn5RenderWrapper.SetBodyAmbientShadowSize(_selected.path, w, h);
 							});
 						
 						d.content.find('#body-ambient-shadow-width').val(currentSize[0]);
 						d.content.find('#body-ambient-shadow-height').val(currentSize[1]);
 					});
+				add('Fix LR/HR nodes',                                             // view_details.jsxi:896
+					function (){                                                   // view_details.jsxi:896
+						try {
+							AcTools.Utils.Kn5Fixer.FixLrHrNodes(AcDir.root, _selected.id);
+						} catch (err){                                             // view_details.jsxi:899
+							ErrorHandler.handled('Cannot fix car.', err);          // view_details.jsxi:900
+							return;
+						} 
+					});
+				add('Fix blurred wheels',                                          // view_details.jsxi:905
+					function (){                                                   // view_details.jsxi:905
+						try {
+							AcTools.Utils.Kn5Fixer.FixBlurredWheels(AcDir.root, _selected.id);
+						} catch (err){                                             // view_details.jsxi:908
+							ErrorHandler.handled('Cannot fix car.', err);          // view_details.jsxi:909
+							return;
+						} 
+					});
 				
-				if (localStorage.developerMode){                                   // view_details.jsxi:877
+				if (localStorage.developerMode){                                   // view_details.jsxi:914
 					var devMenu = new gui.MenuItem({ label: 'Developer Tools', submenu: new gui.Menu() });
 					
-					menu.append(devMenu);                                          // view_details.jsxi:879
-					devMenu = devMenu.submenu;                                     // view_details.jsxi:880
-					add('Export to database',                                      // view_details.jsxi:882
-						function (){                                               // view_details.jsxi:882
-							_selected.exportDatabase();                            // view_details.jsxi:883
+					menu.append(devMenu);                                          // view_details.jsxi:916
+					devMenu = devMenu.submenu;                                     // view_details.jsxi:917
+					add('Export to database',                                      // view_details.jsxi:919
+						function (){                                               // view_details.jsxi:919
+							_selected.exportDatabase();                            // view_details.jsxi:920
 						}, 
-						devMenu);                                                  // view_details.jsxi:884
-					add('Fix SUSP_XX error',                                       // view_details.jsxi:886
-						function (){                                               // view_details.jsxi:886
+						devMenu);                                                  // view_details.jsxi:921
+					add('Fix SUSP_XX error',                                       // view_details.jsxi:923
+						function (){                                               // view_details.jsxi:923
 							try {
-								AcTools.Utils.Kn5Fixer.FixSuspensionWrapper(AcDir.root, _selected.id);
-							} catch (err){                                         // view_details.jsxi:889
-								ErrorHandler.handled('Cannot fix car.', err);      // view_details.jsxi:890
+								AcTools.Utils.Kn5Fixer.FixSuspension(AcDir.root, _selected.id);
+							} catch (err){                                         // view_details.jsxi:926
+								ErrorHandler.handled('Cannot fix car.', err);      // view_details.jsxi:927
 								return;
 							} 
 						}, 
-						devMenu);                                                  // view_details.jsxi:893
-					add('Unpack KN5',                                              // view_details.jsxi:895
-						function (){                                               // view_details.jsxi:895
+						devMenu);                                                  // view_details.jsxi:930
+					add('Unpack KN5',                                              // view_details.jsxi:932
+						function (){                                               // view_details.jsxi:932
 							try {
 								var kn5 = AcTools.Kn5File.Kn5.FromFile(AcTools.Utils.FileUtils.GetMainCarFile(AcDir.root, _selected.id));
 								
 								var dest = _selected.path + '/unpacked';
 								
-								if (fs.existsSync(dest))                           // view_details.jsxi:899
-									AcTools.Utils.FileUtils.Recycle(dest);         // view_details.jsxi:899
+								if (fs.existsSync(dest))                           // view_details.jsxi:936
+									AcTools.Utils.FileUtils.Recycle(dest);         // view_details.jsxi:936
 								
-								kn5.ExportDirectory(dest, false);                  // view_details.jsxi:900
+								kn5.ExportDirectory(dest, false);                  // view_details.jsxi:937
 								
-								if (kn5.RootNode != null){                         // view_details.jsxi:901
+								if (kn5.RootNode != null){                         // view_details.jsxi:938
 									kn5.Export(AcTools.Kn5File.Kn5.ExportType.Collada, dest + '/model.dae');
 								}
 								
-								Shell.openItem(dest);                              // view_details.jsxi:904
-							} catch (err){                                         // view_details.jsxi:905
-								ErrorHandler.handled('Failed.', err);              // view_details.jsxi:906
+								Shell.openItem(dest);                              // view_details.jsxi:941
+							} catch (err){                                         // view_details.jsxi:942
+								ErrorHandler.handled('Failed.', err);              // view_details.jsxi:943
 							} 
 						}, 
-						devMenu);                                                  // view_details.jsxi:908
+						devMenu);                                                  // view_details.jsxi:945
 					
-					if (fs.existsSync(_selected.path + '/unpacked'))               // view_details.jsxi:910
-						add('Repack KN5',                                          // view_details.jsxi:910
-							function (){                                           // view_details.jsxi:910
+					if (fs.existsSync(_selected.path + '/unpacked'))               // view_details.jsxi:947
+						add('Repack KN5',                                          // view_details.jsxi:947
+							function (){                                           // view_details.jsxi:947
 								try {
 									var kn5 = AcTools.Kn5File.Kn5.FromDirectory(_selected.path + '/unpacked', false);
 									
 									var dest = AcTools.Utils.FileUtils.GetMainCarFile(AcDir.root, _selected.id);
 									
-									if (fs.existsSync(dest))                       // view_details.jsxi:914
-										AcTools.Utils.FileUtils.Recycle(dest);     // view_details.jsxi:914
+									if (fs.existsSync(dest))                       // view_details.jsxi:951
+										AcTools.Utils.FileUtils.Recycle(dest);     // view_details.jsxi:951
 									
-									kn5.Save(dest, false);                         // view_details.jsxi:915
-								} catch (err){                                     // view_details.jsxi:916
-									ErrorHandler.handled('Failed.', err);          // view_details.jsxi:917
+									kn5.Save(dest, false);                         // view_details.jsxi:952
+								} catch (err){                                     // view_details.jsxi:953
+									ErrorHandler.handled('Failed.', err);          // view_details.jsxi:954
 								} 
 							}, 
-							devMenu);                                              // view_details.jsxi:919
+							devMenu);                                              // view_details.jsxi:956
 					
-					if (fs.existsSync(_selected.path + '/data.acd'))               // view_details.jsxi:921
-						add('Unpack data',                                         // view_details.jsxi:921
-							function (){                                           // view_details.jsxi:921
+					if (fs.existsSync(_selected.path + '/data.acd'))               // view_details.jsxi:958
+						add('Unpack data',                                         // view_details.jsxi:958
+							function (){                                           // view_details.jsxi:958
 								try {
 									var source = _selected.path + '/data.acd';
 									
@@ -8962,21 +9013,21 @@ var ViewDetails = (function (){                                                 
 									
 									var dest = _selected.path + '/data';
 									
-									if (fs.existsSync(dest))                       // view_details.jsxi:926
-										AcTools.Utils.FileUtils.Recycle(dest);     // view_details.jsxi:926
+									if (fs.existsSync(dest))                       // view_details.jsxi:963
+										AcTools.Utils.FileUtils.Recycle(dest);     // view_details.jsxi:963
 									
-									acd.ExportDirectory(dest);                     // view_details.jsxi:927
-									Shell.openItem(dest);                          // view_details.jsxi:928
-									AcTools.Utils.FileUtils.Recycle(source);       // view_details.jsxi:929
-								} catch (err){                                     // view_details.jsxi:930
-									ErrorHandler.handled('Failed.', err);          // view_details.jsxi:931
+									acd.ExportDirectory(dest);                     // view_details.jsxi:964
+									Shell.openItem(dest);                          // view_details.jsxi:965
+									AcTools.Utils.FileUtils.Recycle(source);       // view_details.jsxi:966
+								} catch (err){                                     // view_details.jsxi:967
+									ErrorHandler.handled('Failed.', err);          // view_details.jsxi:968
 								} 
 							}, 
-							devMenu);                                              // view_details.jsxi:933
+							devMenu);                                              // view_details.jsxi:970
 					
-					if (fs.existsSync(_selected.path + '/data'))                   // view_details.jsxi:935
-						add('Pack data',                                           // view_details.jsxi:935
-							function (){                                           // view_details.jsxi:935
+					if (fs.existsSync(_selected.path + '/data'))                   // view_details.jsxi:972
+						add('Pack data',                                           // view_details.jsxi:972
+							function (){                                           // view_details.jsxi:972
 								try {
 									var source = _selected.path + '/data';
 									
@@ -8984,36 +9035,36 @@ var ViewDetails = (function (){                                                 
 									
 									var dest = _selected.path + '/data.acd';
 									
-									if (fs.existsSync(dest))                       // view_details.jsxi:940
-										AcTools.Utils.FileUtils.Recycle(dest);     // view_details.jsxi:940
+									if (fs.existsSync(dest))                       // view_details.jsxi:977
+										AcTools.Utils.FileUtils.Recycle(dest);     // view_details.jsxi:977
 									
-									acd.Save(dest);                                // view_details.jsxi:941
-									AcTools.Utils.FileUtils.Recycle(source);       // view_details.jsxi:942
-								} catch (err){                                     // view_details.jsxi:943
-									ErrorHandler.handled('Failed.', err);          // view_details.jsxi:944
+									acd.Save(dest);                                // view_details.jsxi:978
+									AcTools.Utils.FileUtils.Recycle(source);       // view_details.jsxi:979
+								} catch (err){                                     // view_details.jsxi:980
+									ErrorHandler.handled('Failed.', err);          // view_details.jsxi:981
 								} 
 							}, 
-							devMenu);                                              // view_details.jsxi:946
+							devMenu);                                              // view_details.jsxi:983
 				}
 				
-				add('Delete car',                                                  // view_details.jsxi:949
-					function (){                                                   // view_details.jsxi:949
-						new Dialog('Delete ' + _selected.displayName,              // view_details.jsxi:950
+				add('Delete car',                                                  // view_details.jsxi:986
+					function (){                                                   // view_details.jsxi:986
+						new Dialog('Delete ' + _selected.displayName,              // view_details.jsxi:987
 							'Folder will be removed to the Recycle Bin. Are you sure?', 
-							function (arg){                                        // view_details.jsxi:950
-								if (!_selected)                                    // view_details.jsxi:951
+							function (arg){                                        // view_details.jsxi:987
+								if (!_selected)                                    // view_details.jsxi:988
 									return;
 								
-								Cars.remove(_selected);                            // view_details.jsxi:952
+								Cars.remove(_selected);                            // view_details.jsxi:989
 							});
 					});
-				menu.popup(e.clientX, e.clientY);                                  // view_details.jsxi:956
+				menu.popup(e.clientX, e.clientY);                                  // view_details.jsxi:993
 				return false;
 			});
 	}
 	
-	(function (){                                                                  // view_details.jsxi:961
-		$(init);                                                                   // view_details.jsxi:962
+	(function (){                                                                  // view_details.jsxi:998
+		$(init);                                                                   // view_details.jsxi:999
 	})();
 	return ViewDetails;
 })();
@@ -9857,15 +9908,17 @@ var ViewSettings = (function (){                                                
 				'<label style="display:inline-block;width:160px;line-height:24px" title="Actually, just simulate mouse move">Rotate Y: <input id="apt-camera-y" type="number" step="1" style="width: 80px;float: right;margin-right: 20px;"></label>', 
 				'<label style="display:inline-block;width:160px;line-height:24px">Distance: <input id="apt-camera-distance" type="number" step="0.1" style="width: 80px;float: right;margin-right: 20px;"></label>', 
 				'<h6>Delays</h6>',                                                 // view_settings.jsxi:139
-				'<label><input id="apt-increase-delays" type="checkbox">Increased delays</label>'
+				'<label><input id="apt-increase-delays" type="checkbox">Increased delays</label>', 
+				'<h6>PNG Mode</h6>',                                               // view_settings.jsxi:142
+				'<label><input id="apt-png-mode" type="checkbox">Make previews in PNG format (but still save as preview.jpg)</label>'
 			], 
-			save).setButton('Save').addButton('Defaults',                          // view_settings.jsxi:141
-			function (){                                                           // view_settings.jsxi:141
+			save).setButton('Save').addButton('Defaults',                          // view_settings.jsxi:144
+			function (){                                                           // view_settings.jsxi:144
 				apt.content.find('#apt-mode')[0].value = (aptMode = Settings.defaults.aptMode);
 				apt.content.toggleClass('apt-nondefmode', aptMode !== 'default');
 				apt.content.find('#apt-showroom')[0].value = (aptShowroom = Settings.defaults.aptShowroom);
 				
-				if (AcFilters.list.length)                                         // view_settings.jsxi:146
+				if (AcFilters.list.length)                                         // view_settings.jsxi:149
 					apt.content.find('#apt-filter')[0].value = (aptFilter = Settings.defaults.aptFilter);
 				
 				apt.content.find('#apt-disable-sweetfx')[0].checked = (aptDisableSweetFx = Settings.defaults.aptDisableSweetFx);
@@ -9874,150 +9927,157 @@ var ViewSettings = (function (){                                                
 				apt.content.find('#apt-camera-y')[0].value = (aptCameraY = Settings.defaults.aptCameraY);
 				apt.content.find('#apt-camera-distance')[0].value = (aptCameraDistance = Settings.defaults.aptCameraDistance);
 				apt.content.find('#apt-increase-delays')[0].checked = (aptIncreaseDelays = Settings.defaults.aptIncreaseDelays);
+				apt.content.find('#apt-png-mode')[0].checked = (aptPngMode = Settings.defaults.aptPngMode);
 				return false;
-			}).addButton('Cancel');                                                // view_settings.jsxi:154
+			}).addButton('Cancel');                                                // view_settings.jsxi:158
 		
 		var aptMode = Settings.get('aptMode');
 		
-		apt.content.find('#apt-mode').change(function (arg){                       // view_settings.jsxi:157
-			aptMode = this.value;                                                  // view_settings.jsxi:158
-			apt.content.toggleClass('apt-nondefmode', aptMode !== 'default');      // view_settings.jsxi:159
-		})[0].value = aptMode;                                                     // view_settings.jsxi:160
-		apt.content.toggleClass('apt-nondefmode', aptMode !== 'default');          // view_settings.jsxi:161
+		apt.content.find('#apt-mode').change(function (arg){                       // view_settings.jsxi:161
+			aptMode = this.value;                                                  // view_settings.jsxi:162
+			apt.content.toggleClass('apt-nondefmode', aptMode !== 'default');      // view_settings.jsxi:163
+		})[0].value = aptMode;                                                     // view_settings.jsxi:164
+		apt.content.toggleClass('apt-nondefmode', aptMode !== 'default');          // view_settings.jsxi:165
 		
 		var aptShowroom = Settings.get('aptShowroom');
 		
-		apt.content.find('#apt-showroom').change(function (arg){                   // view_settings.jsxi:164
-			aptShowroom = this.value;                                              // view_settings.jsxi:164
-		})[0].value = aptShowroom;                                                 // view_settings.jsxi:164
+		apt.content.find('#apt-showroom').change(function (arg){                   // view_settings.jsxi:168
+			aptShowroom = this.value;                                              // view_settings.jsxi:168
+		})[0].value = aptShowroom;                                                 // view_settings.jsxi:168
 		
 		var aptFilter = Settings.get('aptFilter');
 		
-		if (AcFilters.list.length){                                                // view_settings.jsxi:167
+		if (AcFilters.list.length){                                                // view_settings.jsxi:171
 			var recFilter = apt.content.find('#apt-filter [value="' + Settings.defaults.aptFilter + '"]')[0];
 			
-			if (recFilter){                                                        // view_settings.jsxi:169
-				recFilter.textContent += ' (Recommended)';                         // view_settings.jsxi:170
+			if (recFilter){                                                        // view_settings.jsxi:173
+				recFilter.textContent += ' (Recommended)';                         // view_settings.jsxi:174
 			} else {
 				$('<option value="' + Settings.defaults.aptFilter + '">' + Settings.defaults.aptFilter + ' (Recommended)</option>').insertAfter(apt.content.find('#apt-filter option:first-child'));
 			}
 			
-			apt.content.find('#apt-filter').change(function (arg){                 // view_settings.jsxi:175
-				aptFilter = this.value;                                            // view_settings.jsxi:175
-			})[0].value = aptFilter;                                               // view_settings.jsxi:175
+			apt.content.find('#apt-filter').change(function (arg){                 // view_settings.jsxi:179
+				aptFilter = this.value;                                            // view_settings.jsxi:179
+			})[0].value = aptFilter;                                               // view_settings.jsxi:179
 		} else {
 			apt.content.find('#apt-filter').attr({ disabled: true, title: 'Filters not found' });
 		}
 		
 		var aptDisableSweetFx = Settings.get('aptDisableSweetFx');
 		
-		apt.content.find('#apt-disable-sweetfx').change(function (arg){            // view_settings.jsxi:184
-			aptDisableSweetFx = this.checked;                                      // view_settings.jsxi:184
-		})[0].checked = aptDisableSweetFx;                                         // view_settings.jsxi:184
+		apt.content.find('#apt-disable-sweetfx').change(function (arg){            // view_settings.jsxi:188
+			aptDisableSweetFx = this.checked;                                      // view_settings.jsxi:188
+		})[0].checked = aptDisableSweetFx;                                         // view_settings.jsxi:188
 		
 		var aptResize = Settings.get('aptResize');
 		
-		apt.content.find('#apt-resize').change(function (arg){                     // view_settings.jsxi:187
-			aptResize = this.checked;                                              // view_settings.jsxi:187
-		})[0].checked = aptResize;                                                 // view_settings.jsxi:187
+		apt.content.find('#apt-resize').change(function (arg){                     // view_settings.jsxi:191
+			aptResize = this.checked;                                              // view_settings.jsxi:191
+		})[0].checked = aptResize;                                                 // view_settings.jsxi:191
 		
 		var aptCameraX = Settings.get('aptCameraX');
 		
-		apt.content.find('#apt-camera-x').change(function (arg){                   // view_settings.jsxi:190
-			aptCameraX = this.value;                                               // view_settings.jsxi:190
-		})[0].value = aptCameraX;                                                  // view_settings.jsxi:190
+		apt.content.find('#apt-camera-x').change(function (arg){                   // view_settings.jsxi:194
+			aptCameraX = this.value;                                               // view_settings.jsxi:194
+		})[0].value = aptCameraX;                                                  // view_settings.jsxi:194
 		
 		var aptCameraY = Settings.get('aptCameraY');
 		
-		apt.content.find('#apt-camera-y').change(function (arg){                   // view_settings.jsxi:193
-			aptCameraY = this.value;                                               // view_settings.jsxi:193
-		})[0].value = aptCameraY;                                                  // view_settings.jsxi:193
+		apt.content.find('#apt-camera-y').change(function (arg){                   // view_settings.jsxi:197
+			aptCameraY = this.value;                                               // view_settings.jsxi:197
+		})[0].value = aptCameraY;                                                  // view_settings.jsxi:197
 		
 		var aptCameraDistance = Settings.get('aptCameraDistance');
 		
-		apt.content.find('#apt-camera-distance').change(function (arg){            // view_settings.jsxi:196
-			aptCameraDistance = this.value;                                        // view_settings.jsxi:196
-		})[0].value = aptCameraDistance;                                           // view_settings.jsxi:196
+		apt.content.find('#apt-camera-distance').change(function (arg){            // view_settings.jsxi:200
+			aptCameraDistance = this.value;                                        // view_settings.jsxi:200
+		})[0].value = aptCameraDistance;                                           // view_settings.jsxi:200
 		
 		var aptIncreaseDelays = Settings.get('aptIncreaseDelays');
 		
-		apt.content.find('#apt-increase-delays').change(function (arg){            // view_settings.jsxi:199
-			aptIncreaseDelays = this.checked;                                      // view_settings.jsxi:199
-		})[0].checked = aptIncreaseDelays;                                         // view_settings.jsxi:199
-		d.addTab('About',                                                          // view_settings.jsxi:202
+		apt.content.find('#apt-increase-delays').change(function (arg){            // view_settings.jsxi:203
+			aptIncreaseDelays = this.checked;                                      // view_settings.jsxi:203
+		})[0].checked = aptIncreaseDelays;                                         // view_settings.jsxi:203
+		
+		var aptPngMode = Settings.get('aptPngMode');
+		
+		apt.content.find('#apt-png-mode').change(function (arg){                   // view_settings.jsxi:206
+			aptPngMode = this.checked;                                             // view_settings.jsxi:206
+		})[0].checked = aptPngMode;                                                // view_settings.jsxi:206
+		d.addTab('About',                                                          // view_settings.jsxi:209
 			[
-				'<h6>Version</h6>',                                                // view_settings.jsxi:203
-				'<p id="version">' + gui.App.manifest.version + '</p>',            // view_settings.jsxi:204
-				'<h6>Details</h6>',                                                // view_settings.jsxi:205
+				'<h6>Version</h6>',                                                // view_settings.jsxi:210
+				'<p id="version">' + gui.App.manifest.version + '</p>',            // view_settings.jsxi:211
+				'<h6>Details</h6>',                                                // view_settings.jsxi:212
 				"<p><a href=\"#\" onclick=\"Shell.openItem('https://ascobash.wordpress.com/2015/06/14/actools-uijson/')\">https://ascobash.wordpress.com/…/actools-uijson/</a></p>", 
-				'<h6>Author</h6>',                                                 // view_settings.jsxi:207
+				'<h6>Author</h6>',                                                 // view_settings.jsxi:214
 				'x4fab'
-			]).addButton('Feedback',                                               // view_settings.jsxi:209
-			function (){                                                           // view_settings.jsxi:209
-				feedbackForm();                                                    // view_settings.jsxi:210
+			]).addButton('Feedback',                                               // view_settings.jsxi:216
+			function (){                                                           // view_settings.jsxi:216
+				feedbackForm();                                                    // view_settings.jsxi:217
 				return false;
-			}).addButton('Check for update',                                       // view_settings.jsxi:212
-			function (){                                                           // view_settings.jsxi:212
+			}).addButton('Check for update',                                       // view_settings.jsxi:219
+			function (){                                                           // view_settings.jsxi:219
 				var b = this.buttons.find('button:last-child').text('Please wait...').attr('disabled', true);
 				
-				CheckUpdate.check();                                               // view_settings.jsxi:214
-				CheckUpdate.one('check',                                           // view_settings.jsxi:215
-					function (arg){                                                // view_settings.jsxi:215
-						b.text('Check again').attr('disabled', null);              // view_settings.jsxi:216
+				CheckUpdate.check();                                               // view_settings.jsxi:221
+				CheckUpdate.one('check',                                           // view_settings.jsxi:222
+					function (arg){                                                // view_settings.jsxi:222
+						b.text('Check again').attr('disabled', null);              // view_settings.jsxi:223
 						
-						if (arg === 'check:failed'){                               // view_settings.jsxi:217
+						if (arg === 'check:failed'){                               // view_settings.jsxi:224
 							new Dialog('Check For Update', 'Cannot check for update.');
-						} else if (arg !== 'check:done:found'){                    // view_settings.jsxi:219
+						} else if (arg !== 'check:done:found'){                    // view_settings.jsxi:226
 							new Dialog('Check For Update', 'New version not found.');
 						}
 					});
 				return false;
-			}).content.find('#version').click(function (){                         // view_settings.jsxi:224
-			if (++ c > 10 && !localStorage.developerMode){                         // view_settings.jsxi:225
-				new Dialog('Developer Mode Enabled',                               // view_settings.jsxi:226
-					'Don\'t spread it around, ok?',                                // view_settings.jsxi:226
+			}).content.find('#version').click(function (){                         // view_settings.jsxi:231
+			if (++ c > 10 && !localStorage.developerMode){                         // view_settings.jsxi:232
+				new Dialog('Developer Mode Enabled',                               // view_settings.jsxi:233
+					'Don\'t spread it around, ok?',                                // view_settings.jsxi:233
 					function (arg){}, 
 					false);
-				localStorage.developerMode = true;                                 // view_settings.jsxi:227
+				localStorage.developerMode = true;                                 // view_settings.jsxi:234
 			}
 		});
 	}
 	
-	function feedbackForm(){                                                       // view_settings.jsxi:232
-		function sendFeedback(v){                                                  // view_settings.jsxi:233
+	function feedbackForm(){                                                       // view_settings.jsxi:239
+		function sendFeedback(v){                                                  // view_settings.jsxi:240
 			d.buttons.find('button:first-child').text('Please wait...').attr('disabled', true);
-			AppServerRequest.sendFeedback(v,                                       // view_settings.jsxi:236
-				function (arg){                                                    // view_settings.jsxi:236
-					d.close();                                                     // view_settings.jsxi:237
+			AppServerRequest.sendFeedback(v,                                       // view_settings.jsxi:243
+				function (arg){                                                    // view_settings.jsxi:243
+					d.close();                                                     // view_settings.jsxi:244
 					
-					if (arg){                                                      // view_settings.jsxi:238
-						new Dialog('Cannot Send Feedback', 'Sorry about that.');   // view_settings.jsxi:239
+					if (arg){                                                      // view_settings.jsxi:245
+						new Dialog('Cannot Send Feedback', 'Sorry about that.');   // view_settings.jsxi:246
 					} else {
-						_prevFeedback = null;                                      // view_settings.jsxi:241
-						new Dialog('Feedback Sent', 'Thank you.');                 // view_settings.jsxi:242
+						_prevFeedback = null;                                      // view_settings.jsxi:248
+						new Dialog('Feedback Sent', 'Thank you.');                 // view_settings.jsxi:249
 					}
 				});
 		}
 		
-		var d = new Dialog('Feedback',                                             // view_settings.jsxi:247
+		var d = new Dialog('Feedback',                                             // view_settings.jsxi:254
 			'<textarea style="width:350px;height:200px;resize:none" maxlength="5000"\
                 placeholder="If you have any ideas or suggestions please let me know"></textarea>', 
-			function (){                                                           // view_settings.jsxi:248
+			function (){                                                           // view_settings.jsxi:255
 				var v = this.content.find('textarea').val().trim();
 				
-				if (v)                                                             // view_settings.jsxi:250
-					sendFeedback(v);                                               // view_settings.jsxi:250
+				if (v)                                                             // view_settings.jsxi:257
+					sendFeedback(v);                                               // view_settings.jsxi:257
 				return false;
 			}, 
-			false).setButton('Send').addButton('Cancel').closeOnEnter(false);      // view_settings.jsxi:252
+			false).setButton('Send').addButton('Cancel').closeOnEnter(false);      // view_settings.jsxi:259
 		
 		d.content.find('textarea').val(_prevFeedback || '').change(function (arg){
-			return _prevFeedback = this.value;                                     // view_settings.jsxi:253
+			return _prevFeedback = this.value;                                     // view_settings.jsxi:260
 		});
 	}
 	
-	(function (){                                                                  // view_settings.jsxi:256
-		$('#settings-open').click(openDialog);                                     // view_settings.jsxi:257
+	(function (){                                                                  // view_settings.jsxi:263
+		$('#settings-open').click(openDialog);                                     // view_settings.jsxi:264
 	})();
 	return ViewSettings;
 })();
@@ -10106,31 +10166,38 @@ Cars.on('update.car.data',                                                      
 
 var first = true;
 
-AcDir.on('change',                                                                 // app.jsxi:76
-	function (){                                                                   // app.jsxi:77
-		Cars.scan();                                                               // app.jsxi:78
+var checkAndFixDefaultLauncherTimeout = null;
+
+AcDir.on('change',                                                                 // app.jsxi:77
+	function (){                                                                   // app.jsxi:78
+		Cars.scan();                                                               // app.jsxi:79
+		clearTimeout(checkAndFixDefaultLauncherTimeout);                           // app.jsxi:81
+		checkAndFixDefaultLauncherTimeout = setTimeout(function (arg){             // app.jsxi:82
+			AcTools.Utils.AcFixer.CheckAndFixDefaultLauncher(AcDir.root);          // app.jsxi:83
+		}, 
+		15e3);
 		
-		if (first && !Settings.get('disableTips')){                                // app.jsxi:80
-			new Dialog('Tip',                                                      // app.jsxi:81
-				Tips.next,                                                         // app.jsxi:81
-				function (){                                                       // app.jsxi:81
-					this.find('p').html(Tips.next);                                // app.jsxi:82
-					this.find('h4').text('Another Tip');                           // app.jsxi:83
+		if (first && !Settings.get('disableTips')){                                // app.jsxi:86
+			new Dialog('Tip',                                                      // app.jsxi:87
+				Tips.next,                                                         // app.jsxi:87
+				function (){                                                       // app.jsxi:87
+					this.find('p').html(Tips.next);                                // app.jsxi:88
+					this.find('h4').text('Another Tip');                           // app.jsxi:89
 					return false;
-				}).setButton('Next').addButton('Disable Tips',                     // app.jsxi:85
-				function (){                                                       // app.jsxi:85
-					Settings.set('disableTips', true);                             // app.jsxi:86
-				}).find('p').css('maxWidth', 400);                                 // app.jsxi:87
-			first = false;                                                         // app.jsxi:89
+				}).setButton('Next').addButton('Disable Tips',                     // app.jsxi:91
+				function (){                                                       // app.jsxi:91
+					Settings.set('disableTips', true);                             // app.jsxi:92
+				}).find('p').css('maxWidth', 400);                                 // app.jsxi:93
+			first = false;                                                         // app.jsxi:95
 		}
 	});
-Data.one('update',                                                                 // app.jsxi:93
-	function (){                                                                   // app.jsxi:94
-		AcDir.init();                                                              // app.jsxi:95
+Data.one('update',                                                                 // app.jsxi:99
+	function (){                                                                   // app.jsxi:100
+		AcDir.init();                                                              // app.jsxi:101
 	});
-CheckUpdate.on('check:failed',                                                     // app.jsxi:98
-	function (){                                                                   // app.jsxi:99
-		Notification.warn('Update Checking Failed',                                // app.jsxi:100
-			'Probably server is unavailable or something.');                       // app.jsxi:100
+CheckUpdate.on('check:failed',                                                     // app.jsxi:104
+	function (){                                                                   // app.jsxi:105
+		Notification.warn('Update Checking Failed',                                // app.jsxi:106
+			'Probably server is unavailable or something.');                       // app.jsxi:106
 	});
 

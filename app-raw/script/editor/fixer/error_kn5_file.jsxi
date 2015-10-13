@@ -1,6 +1,6 @@
 class Kn5SuspXxErrorFixer extends AbstractFixer {
     emptyPlaceholders (c){
-        AcTools.Utils.Kn5Fixer.FixSuspensionWrapper(AcDir.root, car.id);
+        AcTools.Utils.Kn5Fixer.FixSuspension(AcDir.root, car.id);
         Notification.info('Done', 'Suspension fixed, empty placeholders have been added.');
         c();
     }

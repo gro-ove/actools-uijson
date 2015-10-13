@@ -15,7 +15,7 @@ static class AcPractice {
     }
 
     private _modes = [
-        'Practice', 'Hotlap', 'Drift'
+        'Practice', 'Hotlap', 'Race', 'Drift'
     ];
 
     private _storage,
@@ -54,10 +54,11 @@ static class AcPractice {
     private init(){
         initTracks();
         _storage = new ObjLocalStorage('practice', {
-            track: { 'Practice': 'spa', 'Hotlap': 'silverstone-national', 'Drift': 'drift' },
+            track: { 'Practice': 'spa', 'Hotlap': 'silverstone-national', 'Race': 'valencia', 'Drift': 'drift' },
             mode: _modes[0]
         });
 
+        /* compatibility with some old version */
         if (localStorage.lastTrack){
             _storage.update(lambda arg.track['Practice'] = localStorage.lastTrack);
             delete localStorage.lastTrack;
@@ -90,7 +91,7 @@ static class AcPractice {
         AcTools;
         try {
             AcTools.Processes.Game[
-                m === 'Practice' ? 'StartPractice' : m === 'Hotlap' ? 'StartHotlap' : 'StartDrift'
+                m === 'Practice' ? 'StartPractice' : m === 'Hotlap' ? 'StartHotlap' : m === 'Race' ? 'StartSimpleRace' : 'StartDrift'
             ](AcDir.root, c.id, s, r.split('/')[0], r.split('/')[1] || '');
         } catch (e){
             ErrorHandler.handled('Cannot start the game. Maybe there is not enough rights.');

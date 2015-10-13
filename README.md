@@ -31,6 +31,23 @@ Small utility for easy editing *ui_car.json* files. Written using [NW.js](http:/
 * Custom Launcher (with GT-like career mode?)
 
 #### Changelog
+* 0.3.49
+    * Preview generator quality has been reduced back (there is the new option to use PNG, but be careful!)
+    * Support for 1.3.1
+    * Simple race mode (more settings will be in next WPF-version)
+* 0.3.48
+    * LR/HR nodes fixer (enables COCKPIT_HR, disables COCKPIT_LR and etc)
+    * Blurred rims fixer (use it when car in showroom has blurred rims)
+    * Preview generator quality has been improved 
+        * *Warning!* There is a bug in Windows GDI+, which messes up JPEGs even when quality is 100%. So for now app saves preview.jpg as PNG-image. Everything should work fine anyway, but it's still kinda bad. I'll try to find better solution.
+    * Shortcuts updated:
+        * Ctrl+Alt+A: Update shadows + Update previews in manual mode
+        * Ctrl+Alt+S: Update previews in manual mode
+        * Ctrl+Alt+D: Update shadows
+* 0.3.47
+    * Fixed year autoinsert
+    * Fixed cars toggle
+    * Custom Showroom: fixed, improved, optimized
 * 0.3.45
     * Fixed memory leaking, improved perfomance
     * Fixed INI parsing (seriously, these files are such a mess)
@@ -176,8 +193,8 @@ Small utility for easy editing *ui_car.json* files. Written using [NW.js](http:/
 * DirectX 11 for custom showroom
 
 #### Download
-* [Last (0.3.45)](https://yadi.sk/d/8scdCAG-hrHhC)
-* [Stable (0.3.44)](http://www.racedepartment.com/downloads/actools-cars-manager.6518/)
+* [Last (0.3.49)](https://yadi.sk/d/aHa03mejjekCr)
+* [Stable (0.3.49)](http://www.racedepartment.com/downloads/actools-cars-manager.6518/)
 * [Previous](http://www.racedepartment.com/downloads/actools-cars-manager.6518/history) [builds](https://yadi.sk/d/eHr0NCP4hSAfq)
 
 #### Tips

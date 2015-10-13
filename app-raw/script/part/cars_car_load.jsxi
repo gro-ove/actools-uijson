@@ -175,10 +175,10 @@ static partial class Cars {
 
                         if (data.year == null && Years.nameContains(data.name)){
                             data.year = Years.fromName(data.name);
+                        }
 
-                            if (data.year == null){
-                                data.year = Years.fromDatabase(id);
-                            }
+                        if (data.year == null){
+                            data.year = Years.fromDatabase(id);
                         }
 
                         if (data.year != null && Settings.get('yearAutoupdate') && !Years.nameContains(data.name)){

@@ -27,7 +27,7 @@ class MissingLiveryFixer extends AbstractFixer {
     }
 
     autogenFromCustomShowroom(c){
-        AcTools.Utils.Kn5RenderWrapper.GenerateLivery(car.path, object.id, object.livery);
+        AcTools.Kn5Render.Utils.Kn5RenderWrapper.GenerateLivery(car.path, object.id, object.livery);
         c();
     }
 

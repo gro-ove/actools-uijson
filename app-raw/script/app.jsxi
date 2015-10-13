@@ -73,9 +73,15 @@ Cars
     });
 
 var first = true;
+var checkAndFixDefaultLauncherTimeout = null;
 AcDir
     .on('change', function (){
         Cars.scan();
+
+        clearTimeout(checkAndFixDefaultLauncherTimeout);
+        checkAndFixDefaultLauncherTimeout = setTimeout(lambda {
+            AcTools.Utils.AcFixer.CheckAndFixDefaultLauncher(AcDir.root);
+        }, 15e3);
 
         if (first && !Settings.get('disableTips')){
             new Dialog('Tip', Tips.next, function (){

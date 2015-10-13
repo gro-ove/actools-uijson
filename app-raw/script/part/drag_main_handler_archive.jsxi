@@ -14,9 +14,12 @@ partial static class DragMainHandler {
         for (var entry in-array list){
             var path = entry.path.split('\\');
             var loc = root;
+            var currentPath = '';
+
             for (var part in-array path){
                 if (!loc.sub) loc.sub = {};
-                loc = loc.sub[part] || (loc.sub[part] = { id: part });
+                currentPath = currentPath ? currentPath + '\\' + part : part;
+                loc = loc.sub[part] || (loc.sub[part] = { id: part, path: currentPath });
             }
 
             loc.path = entry.path;

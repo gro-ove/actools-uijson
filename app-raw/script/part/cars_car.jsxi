@@ -84,7 +84,7 @@ static partial class Cars {
             return false;
         }
 
-        public toggle(state){
+        public toggle(state, skipParent){
             var d = state == null ? !disabled : !state;
             if (disabled == d) return;
 
@@ -110,12 +110,12 @@ static partial class Cars {
             mediator.dispatch('update.car.path', this);
             if (skins) mediator.dispatch('update.car.skins', this);
 
-            if (parent && !disabled && parent.disabled){
+            if (!skipParent && parent && !disabled && parent.disabled){
                 toggle(parent, true);
             }
 
             children.forEach(function (e){
-                toggle(e, !disabled);
+                e.toggle(!disabled, true);
             });
         }
 

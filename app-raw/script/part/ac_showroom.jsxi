@@ -181,7 +181,7 @@ static class AcShowroom {
             t.find('#button-prev').attr('disabled', pos > 0 ? null : true);
             t.find('#button-next').attr('disabled', pos < car.skins.length - 1 ? null : true);
             d.content.find('#current-preview').prop('src', car.skins[pos].preview.cssUrl());
-            d.content.find('#new-preview').prop('src', '%0/%1.jpg'(output, car.skins[pos].id).cssUrl());
+            d.content.find('#new-preview').prop('src', '%0/%1.bmp'(output, car.skins[pos].id).cssUrl());
         }
 
         out();
@@ -261,7 +261,7 @@ static class AcShowroom {
                 if (mode === 'default'){
                     output = AcTools.Processes.Showroom.Shot(AcDir.root, c.id, showroom, !!m, x, y, distance, filter, disableSweetFx, delays);
                 } else {
-                    output = AcTools.Utils.Kn5RenderWrapper.Shot(c.path, mode);
+                    output = AcTools.Kn5Render.Utils.Kn5RenderWrapper.Shot(c.path, mode);
                 }
             } catch (err){
                 if (!handleError(err, c)){
@@ -272,7 +272,7 @@ static class AcShowroom {
             }
 
             shotOutputPreview(c, output, function (){
-                AcTools.Utils.ImageUtils.ApplyPreviews(AcDir.root, c.id, output, Settings.get('aptResize'));
+                AcTools.Utils.ImageUtils.ApplyPreviews(AcDir.root, c.id, output, Settings.get('aptResize'), Settings.get('aptPngMode'));
                 c.loadSkins();
                 fs.rmdirSync(output);
             });

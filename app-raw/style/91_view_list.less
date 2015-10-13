@@ -88,7 +88,7 @@
 
     #cars-list div div {
         overflow: hidden;
-        height: 0;
+        //height: 0;
     }
 
     #cars-list span.expand ~ div {
@@ -104,8 +104,12 @@
         background: #59f;
     }
 
-    #cars-list span.changed:after {
-        content: "*";
+    #cars-list span.changed {
+        font-style: italic;
+
+        &:after {
+            content: "*";
+        }
     }
 
     #cars-list-filter-focus {

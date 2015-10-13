@@ -138,6 +138,9 @@ static class ViewSettings {
 
             '<h6>Delays</h6>'
             '<label><input id="apt-increase-delays" type="checkbox">Increased delays</label>'
+
+            '<h6>PNG Mode</h6>'
+            '<label><input id="apt-png-mode" type="checkbox">Make previews in PNG format (but still save as preview.jpg)</label>'
         ], save).setButton('Save').addButton('Defaults', function (){
             apt.content.find('#apt-mode')[0].value = aptMode = Settings.defaults.aptMode;
             apt.content.toggleClass('apt-nondefmode', aptMode !== 'default');
@@ -150,6 +153,7 @@ static class ViewSettings {
             apt.content.find('#apt-camera-y')[0].value = aptCameraY = Settings.defaults.aptCameraY;
             apt.content.find('#apt-camera-distance')[0].value = aptCameraDistance = Settings.defaults.aptCameraDistance;
             apt.content.find('#apt-increase-delays')[0].checked = aptIncreaseDelays = Settings.defaults.aptIncreaseDelays;
+            apt.content.find('#apt-png-mode')[0].checked = aptPngMode = Settings.defaults.aptPngMode;
             return false;
         }).addButton('Cancel');
 
@@ -197,6 +201,9 @@ static class ViewSettings {
 
         var aptIncreaseDelays = Settings.get('aptIncreaseDelays');
         apt.content.find('#apt-increase-delays').change(lambda { aptIncreaseDelays = this.checked })[0].checked = aptIncreaseDelays;
+
+        var aptPngMode = Settings.get('aptPngMode');
+        apt.content.find('#apt-png-mode').change(lambda { aptPngMode = this.checked })[0].checked = aptPngMode;
 
         /* about tab */
         d.addTab('About', [
