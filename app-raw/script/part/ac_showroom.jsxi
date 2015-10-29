@@ -274,7 +274,7 @@ static class AcShowroom {
             shotOutputPreview(c, output, function (){
                 AcTools.Utils.ImageUtils.ApplyPreviews(AcDir.root, c.id, output, Settings.get('aptResize'), Settings.get('aptPngMode'));
                 c.loadSkins();
-                fs.rmdirSync(output);
+                try fs.rmdirSync(output);
             });
         }
     }

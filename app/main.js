@@ -1992,7 +1992,10 @@ var AcShowroom = (function (){                                                  
 						Settings.get('aptResize'),                                 // ac_showroom.jsxi:275
 						Settings.get('aptPngMode'));                               // ac_showroom.jsxi:275
 					c.loadSkins();                                                 // ac_showroom.jsxi:276
-					fs.rmdirSync(output);                                          // ac_showroom.jsxi:277
+					
+					try {
+						fs.rmdirSync(output);                                      // ac_showroom.jsxi:277
+					} catch (e){} 
 				});
 		}
 	};

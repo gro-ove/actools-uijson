@@ -31,6 +31,8 @@ Small utility for easy editing *ui_car.json* files. Written using [NW.js](http:/
 * Custom Launcher (with GT-like career mode?)
 
 #### Changelog
+* 0.3.51
+    * Bugfixes
 * 0.3.49
     * Preview generator quality has been reduced back (there is the new option to use PNG, but be careful!)
     * Support for 1.3.1
@@ -193,7 +195,7 @@ Small utility for easy editing *ui_car.json* files. Written using [NW.js](http:/
 * DirectX 11 for custom showroom
 
 #### Download
-* [Last (0.3.49)](https://yadi.sk/d/aHa03mejjekCr)
+* [Last (0.3.51)](https://yadi.sk/d/LwzWmtR9jszT4)
 * [Stable (0.3.49)](http://www.racedepartment.com/downloads/actools-cars-manager.6518/)
 * [Previous](http://www.racedepartment.com/downloads/actools-cars-manager.6518/history) [builds](https://yadi.sk/d/eHr0NCP4hSAfq)
 
