@@ -25,8 +25,13 @@ Event.isSomeInput = function (e){
     return false;
 };
 
-RegExp.fromQuery = function (q, w){
+/*RegExp.fromQuery = function (q, w){
     var r = q.replace(/(?=[\$^.+(){}[\]])/g, '\\').replace(/\?|(\*)/g, '.$1');
+    return new RegExp(w ? '^(?:' + r + ')$' : r, 'i');
+};*/
+
+RegExp.fromQuery = function (q, w){
+    var r = q.replace(/\\/g, '\\\\').replace(/(?=[\$^.+(){}[\]])/g, '\\').replace(/\?|(\*)/g, '.$1');
     return new RegExp(w ? '^(?:' + r + ')$' : r, 'i');
 };
 

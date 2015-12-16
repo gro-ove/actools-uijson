@@ -11,7 +11,7 @@
 
         try {
             _a = c.init({
-                assemblies: [ 'native/AcTools.dll', 'native/AcToolsKn5Render.dll'  ],
+                assemblies: [ 'native/AcTools.dll', 'native/AcTools.Kn5Render.dll'  ],
                 global: false
             }).AcTools;
         } catch (err){

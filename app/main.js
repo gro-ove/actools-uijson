@@ -877,254 +877,254 @@ Event.isSomeInput = function (e){                                               
 	}
 	return false;
 };
-RegExp.fromQuery = function (q, w){                                                // helpers.jsxi:28
-	var r = q.replace(/(?=[\$^.+(){}[\]])/g, '\\').replace(/\?|(\*)/g, '.$1');     // helpers.jsxi:29
-	return new RegExp(w ? '^(?:' + r + ')$' : r, 'i');                             // helpers.jsxi:30
+RegExp.fromQuery = function (q, w){                                                // helpers.jsxi:33
+	var r = q.replace(/\\/g, '\\\\').replace(/(?=[\$^.+(){}[\]])/g, '\\').replace(/\?|(\*)/g, '.$1');
+	return new RegExp(w ? '^(?:' + r + ')$' : r, 'i');                             // helpers.jsxi:35
 };
-String.prototype.cssUrl = function (){                                             // helpers.jsxi:33
-	return (this[1] === ':' ? 'file://' : '') + this.replace(/\\/g, '/');          // helpers.jsxi:34
+String.prototype.cssUrl = function (){                                             // helpers.jsxi:38
+	return (this[1] === ':' ? 'file://' : '') + this.replace(/\\/g, '/');          // helpers.jsxi:39
 };
-String.prototype.decodeHtmlEntities = function (){                                 // helpers.jsxi:37
-	return this.replace(/&(?:#(\d+)|(\w{2,7}));/g,                                 // helpers.jsxi:38
-		function (_, n, v){                                                        // helpers.jsxi:38
-			if (n)                                                                 // helpers.jsxi:39
-				return String.fromCharCode(+ n);                                   // helpers.jsxi:39
+String.prototype.decodeHtmlEntities = function (){                                 // helpers.jsxi:42
+	return this.replace(/&(?:#(\d+)|(\w{2,7}));/g,                                 // helpers.jsxi:43
+		function (_, n, v){                                                        // helpers.jsxi:43
+			if (n)                                                                 // helpers.jsxi:44
+				return String.fromCharCode(+ n);                                   // helpers.jsxi:44
 			
-			switch (v){                                                            // helpers.jsxi:40
-				case 'amp':                                                        // helpers.jsxi:41
-					return '&';                                                    // helpers.jsxi:41
-				case 'nbsp':                                                       // helpers.jsxi:42
-					return ' ';                                                    // helpers.jsxi:42
-				case 'iexcl':                                                      // helpers.jsxi:43
-					return '¡';                                                    // helpers.jsxi:43
-				case 'cent':                                                       // helpers.jsxi:44
-					return '¢';                                                    // helpers.jsxi:44
-				case 'pound':                                                      // helpers.jsxi:45
-					return '£';                                                    // helpers.jsxi:45
-				case 'curren':                                                     // helpers.jsxi:46
-					return '¤';                                                    // helpers.jsxi:46
-				case 'yen':                                                        // helpers.jsxi:47
-					return '¥';                                                    // helpers.jsxi:47
-				case 'brvbar':                                                     // helpers.jsxi:48
-					return '¦';                                                    // helpers.jsxi:48
-				case 'sect':                                                       // helpers.jsxi:49
-					return '§';                                                    // helpers.jsxi:49
-				case 'uml':                                                        // helpers.jsxi:50
-					return '¨';                                                    // helpers.jsxi:50
-				case 'copy':                                                       // helpers.jsxi:51
-					return '©';                                                    // helpers.jsxi:51
-				case 'ordf':                                                       // helpers.jsxi:52
-					return 'ª';                                                    // helpers.jsxi:52
-				case 'laquo':                                                      // helpers.jsxi:53
-					return '«';                                                    // helpers.jsxi:53
-				case 'not':                                                        // helpers.jsxi:54
-					return '¬';                                                    // helpers.jsxi:54
-				case 'shy':                                                        // helpers.jsxi:55
-					return '­';                                                    // helpers.jsxi:55
-				case 'reg':                                                        // helpers.jsxi:56
-					return '®';                                                    // helpers.jsxi:56
-				case 'macr':                                                       // helpers.jsxi:57
-					return '¯';                                                    // helpers.jsxi:57
-				case 'deg':                                                        // helpers.jsxi:58
-					return '°';                                                    // helpers.jsxi:58
-				case 'plusmn':                                                     // helpers.jsxi:59
-					return '±';                                                    // helpers.jsxi:59
-				case 'sup2':                                                       // helpers.jsxi:60
-					return '²';                                                    // helpers.jsxi:60
-				case 'sup3':                                                       // helpers.jsxi:61
-					return '³';                                                    // helpers.jsxi:61
-				case 'acute':                                                      // helpers.jsxi:62
-					return '´';                                                    // helpers.jsxi:62
-				case 'micro':                                                      // helpers.jsxi:63
-					return 'µ';                                                    // helpers.jsxi:63
-				case 'para':                                                       // helpers.jsxi:64
-					return '¶';                                                    // helpers.jsxi:64
-				case 'middot':                                                     // helpers.jsxi:65
-					return '·';                                                    // helpers.jsxi:65
-				case 'cedil':                                                      // helpers.jsxi:66
-					return '¸';                                                    // helpers.jsxi:66
-				case 'sup1':                                                       // helpers.jsxi:67
-					return '¹';                                                    // helpers.jsxi:67
-				case 'ordm':                                                       // helpers.jsxi:68
-					return 'º';                                                    // helpers.jsxi:68
-				case 'raquo':                                                      // helpers.jsxi:69
-					return '»';                                                    // helpers.jsxi:69
-				case 'frac14':                                                     // helpers.jsxi:70
-					return '¼';                                                    // helpers.jsxi:70
-				case 'frac12':                                                     // helpers.jsxi:71
-					return '½';                                                    // helpers.jsxi:71
-				case 'frac34':                                                     // helpers.jsxi:72
-					return '¾';                                                    // helpers.jsxi:72
-				case 'iquest':                                                     // helpers.jsxi:73
-					return '¿';                                                    // helpers.jsxi:73
-				case 'Agrave':                                                     // helpers.jsxi:74
-					return 'À';                                                    // helpers.jsxi:74
-				case 'Aacute':                                                     // helpers.jsxi:75
-					return 'Á';                                                    // helpers.jsxi:75
-				case 'Acirc':                                                      // helpers.jsxi:76
-					return 'Â';                                                    // helpers.jsxi:76
-				case 'Atilde':                                                     // helpers.jsxi:77
-					return 'Ã';                                                    // helpers.jsxi:77
-				case 'Auml':                                                       // helpers.jsxi:78
-					return 'Ä';                                                    // helpers.jsxi:78
-				case 'Aring':                                                      // helpers.jsxi:79
-					return 'Å';                                                    // helpers.jsxi:79
-				case 'AElig':                                                      // helpers.jsxi:80
-					return 'Æ';                                                    // helpers.jsxi:80
-				case 'Ccedil':                                                     // helpers.jsxi:81
-					return 'Ç';                                                    // helpers.jsxi:81
-				case 'Egrave':                                                     // helpers.jsxi:82
-					return 'È';                                                    // helpers.jsxi:82
-				case 'Eacute':                                                     // helpers.jsxi:83
-					return 'É';                                                    // helpers.jsxi:83
-				case 'Ecirc':                                                      // helpers.jsxi:84
-					return 'Ê';                                                    // helpers.jsxi:84
-				case 'Euml':                                                       // helpers.jsxi:85
-					return 'Ë';                                                    // helpers.jsxi:85
-				case 'Igrave':                                                     // helpers.jsxi:86
-					return 'Ì';                                                    // helpers.jsxi:86
-				case 'Iacute':                                                     // helpers.jsxi:87
-					return 'Í';                                                    // helpers.jsxi:87
-				case 'Icirc':                                                      // helpers.jsxi:88
-					return 'Î';                                                    // helpers.jsxi:88
-				case 'Iuml':                                                       // helpers.jsxi:89
-					return 'Ï';                                                    // helpers.jsxi:89
-				case 'ETH':                                                        // helpers.jsxi:90
-					return 'Ð';                                                    // helpers.jsxi:90
-				case 'Ntilde':                                                     // helpers.jsxi:91
-					return 'Ñ';                                                    // helpers.jsxi:91
-				case 'Ograve':                                                     // helpers.jsxi:92
-					return 'Ò';                                                    // helpers.jsxi:92
-				case 'Oacute':                                                     // helpers.jsxi:93
-					return 'Ó';                                                    // helpers.jsxi:93
-				case 'Ocirc':                                                      // helpers.jsxi:94
-					return 'Ô';                                                    // helpers.jsxi:94
-				case 'Otilde':                                                     // helpers.jsxi:95
-					return 'Õ';                                                    // helpers.jsxi:95
-				case 'Ouml':                                                       // helpers.jsxi:96
-					return 'Ö';                                                    // helpers.jsxi:96
-				case 'times':                                                      // helpers.jsxi:97
-					return '×';                                                    // helpers.jsxi:97
-				case 'Oslash':                                                     // helpers.jsxi:98
-					return 'Ø';                                                    // helpers.jsxi:98
-				case 'Ugrave':                                                     // helpers.jsxi:99
-					return 'Ù';                                                    // helpers.jsxi:99
-				case 'Uacute':                                                     // helpers.jsxi:100
-					return 'Ú';                                                    // helpers.jsxi:100
-				case 'Ucirc':                                                      // helpers.jsxi:101
-					return 'Û';                                                    // helpers.jsxi:101
-				case 'Uuml':                                                       // helpers.jsxi:102
-					return 'Ü';                                                    // helpers.jsxi:102
-				case 'Yacute':                                                     // helpers.jsxi:103
-					return 'Ý';                                                    // helpers.jsxi:103
-				case 'THORN':                                                      // helpers.jsxi:104
-					return 'Þ';                                                    // helpers.jsxi:104
-				case 'szlig':                                                      // helpers.jsxi:105
-					return 'ß';                                                    // helpers.jsxi:105
-				case 'agrave':                                                     // helpers.jsxi:106
-					return 'à';                                                    // helpers.jsxi:106
-				case 'aacute':                                                     // helpers.jsxi:107
-					return 'á';                                                    // helpers.jsxi:107
-				case 'acirc':                                                      // helpers.jsxi:108
-					return 'â';                                                    // helpers.jsxi:108
-				case 'atilde':                                                     // helpers.jsxi:109
-					return 'ã';                                                    // helpers.jsxi:109
-				case 'auml':                                                       // helpers.jsxi:110
-					return 'ä';                                                    // helpers.jsxi:110
-				case 'aring':                                                      // helpers.jsxi:111
-					return 'å';                                                    // helpers.jsxi:111
-				case 'aelig':                                                      // helpers.jsxi:112
-					return 'æ';                                                    // helpers.jsxi:112
-				case 'ccedil':                                                     // helpers.jsxi:113
-					return 'ç';                                                    // helpers.jsxi:113
-				case 'egrave':                                                     // helpers.jsxi:114
-					return 'è';                                                    // helpers.jsxi:114
-				case 'eacute':                                                     // helpers.jsxi:115
-					return 'é';                                                    // helpers.jsxi:115
-				case 'ecirc':                                                      // helpers.jsxi:116
-					return 'ê';                                                    // helpers.jsxi:116
-				case 'euml':                                                       // helpers.jsxi:117
-					return 'ë';                                                    // helpers.jsxi:117
-				case 'igrave':                                                     // helpers.jsxi:118
-					return 'ì';                                                    // helpers.jsxi:118
-				case 'iacute':                                                     // helpers.jsxi:119
-					return 'í';                                                    // helpers.jsxi:119
-				case 'icirc':                                                      // helpers.jsxi:120
-					return 'î';                                                    // helpers.jsxi:120
-				case 'iuml':                                                       // helpers.jsxi:121
-					return 'ï';                                                    // helpers.jsxi:121
-				case 'eth':                                                        // helpers.jsxi:122
-					return 'ð';                                                    // helpers.jsxi:122
-				case 'ntilde':                                                     // helpers.jsxi:123
-					return 'ñ';                                                    // helpers.jsxi:123
-				case 'ograve':                                                     // helpers.jsxi:124
-					return 'ò';                                                    // helpers.jsxi:124
-				case 'oacute':                                                     // helpers.jsxi:125
-					return 'ó';                                                    // helpers.jsxi:125
-				case 'ocirc':                                                      // helpers.jsxi:126
-					return 'ô';                                                    // helpers.jsxi:126
-				case 'otilde':                                                     // helpers.jsxi:127
-					return 'õ';                                                    // helpers.jsxi:127
-				case 'ouml':                                                       // helpers.jsxi:128
-					return 'ö';                                                    // helpers.jsxi:128
-				case 'divide':                                                     // helpers.jsxi:129
-					return '÷';                                                    // helpers.jsxi:129
-				case 'oslash':                                                     // helpers.jsxi:130
-					return 'ø';                                                    // helpers.jsxi:130
-				case 'ugrave':                                                     // helpers.jsxi:131
-					return 'ù';                                                    // helpers.jsxi:131
-				case 'uacute':                                                     // helpers.jsxi:132
-					return 'ú';                                                    // helpers.jsxi:132
-				case 'ucirc':                                                      // helpers.jsxi:133
-					return 'û';                                                    // helpers.jsxi:133
-				case 'uuml':                                                       // helpers.jsxi:134
-					return 'ü';                                                    // helpers.jsxi:134
-				case 'yacute':                                                     // helpers.jsxi:135
-					return 'ý';                                                    // helpers.jsxi:135
-				case 'thorn':                                                      // helpers.jsxi:136
-					return 'þ';                                                    // helpers.jsxi:136
-				case 'yuml':                                                       // helpers.jsxi:137
-					return 'ÿ';                                                    // helpers.jsxi:137
-				case 'quot':                                                       // helpers.jsxi:138
-					return '"';                                                    // helpers.jsxi:138
-				case 'lt':                                                         // helpers.jsxi:139
-					return '<';                                                    // helpers.jsxi:139
-				case 'gt':                                                         // helpers.jsxi:140
-					return '>';                                                    // helpers.jsxi:140
+			switch (v){                                                            // helpers.jsxi:45
+				case 'amp':                                                        // helpers.jsxi:46
+					return '&';                                                    // helpers.jsxi:46
+				case 'nbsp':                                                       // helpers.jsxi:47
+					return ' ';                                                    // helpers.jsxi:47
+				case 'iexcl':                                                      // helpers.jsxi:48
+					return '¡';                                                    // helpers.jsxi:48
+				case 'cent':                                                       // helpers.jsxi:49
+					return '¢';                                                    // helpers.jsxi:49
+				case 'pound':                                                      // helpers.jsxi:50
+					return '£';                                                    // helpers.jsxi:50
+				case 'curren':                                                     // helpers.jsxi:51
+					return '¤';                                                    // helpers.jsxi:51
+				case 'yen':                                                        // helpers.jsxi:52
+					return '¥';                                                    // helpers.jsxi:52
+				case 'brvbar':                                                     // helpers.jsxi:53
+					return '¦';                                                    // helpers.jsxi:53
+				case 'sect':                                                       // helpers.jsxi:54
+					return '§';                                                    // helpers.jsxi:54
+				case 'uml':                                                        // helpers.jsxi:55
+					return '¨';                                                    // helpers.jsxi:55
+				case 'copy':                                                       // helpers.jsxi:56
+					return '©';                                                    // helpers.jsxi:56
+				case 'ordf':                                                       // helpers.jsxi:57
+					return 'ª';                                                    // helpers.jsxi:57
+				case 'laquo':                                                      // helpers.jsxi:58
+					return '«';                                                    // helpers.jsxi:58
+				case 'not':                                                        // helpers.jsxi:59
+					return '¬';                                                    // helpers.jsxi:59
+				case 'shy':                                                        // helpers.jsxi:60
+					return '­';                                                    // helpers.jsxi:60
+				case 'reg':                                                        // helpers.jsxi:61
+					return '®';                                                    // helpers.jsxi:61
+				case 'macr':                                                       // helpers.jsxi:62
+					return '¯';                                                    // helpers.jsxi:62
+				case 'deg':                                                        // helpers.jsxi:63
+					return '°';                                                    // helpers.jsxi:63
+				case 'plusmn':                                                     // helpers.jsxi:64
+					return '±';                                                    // helpers.jsxi:64
+				case 'sup2':                                                       // helpers.jsxi:65
+					return '²';                                                    // helpers.jsxi:65
+				case 'sup3':                                                       // helpers.jsxi:66
+					return '³';                                                    // helpers.jsxi:66
+				case 'acute':                                                      // helpers.jsxi:67
+					return '´';                                                    // helpers.jsxi:67
+				case 'micro':                                                      // helpers.jsxi:68
+					return 'µ';                                                    // helpers.jsxi:68
+				case 'para':                                                       // helpers.jsxi:69
+					return '¶';                                                    // helpers.jsxi:69
+				case 'middot':                                                     // helpers.jsxi:70
+					return '·';                                                    // helpers.jsxi:70
+				case 'cedil':                                                      // helpers.jsxi:71
+					return '¸';                                                    // helpers.jsxi:71
+				case 'sup1':                                                       // helpers.jsxi:72
+					return '¹';                                                    // helpers.jsxi:72
+				case 'ordm':                                                       // helpers.jsxi:73
+					return 'º';                                                    // helpers.jsxi:73
+				case 'raquo':                                                      // helpers.jsxi:74
+					return '»';                                                    // helpers.jsxi:74
+				case 'frac14':                                                     // helpers.jsxi:75
+					return '¼';                                                    // helpers.jsxi:75
+				case 'frac12':                                                     // helpers.jsxi:76
+					return '½';                                                    // helpers.jsxi:76
+				case 'frac34':                                                     // helpers.jsxi:77
+					return '¾';                                                    // helpers.jsxi:77
+				case 'iquest':                                                     // helpers.jsxi:78
+					return '¿';                                                    // helpers.jsxi:78
+				case 'Agrave':                                                     // helpers.jsxi:79
+					return 'À';                                                    // helpers.jsxi:79
+				case 'Aacute':                                                     // helpers.jsxi:80
+					return 'Á';                                                    // helpers.jsxi:80
+				case 'Acirc':                                                      // helpers.jsxi:81
+					return 'Â';                                                    // helpers.jsxi:81
+				case 'Atilde':                                                     // helpers.jsxi:82
+					return 'Ã';                                                    // helpers.jsxi:82
+				case 'Auml':                                                       // helpers.jsxi:83
+					return 'Ä';                                                    // helpers.jsxi:83
+				case 'Aring':                                                      // helpers.jsxi:84
+					return 'Å';                                                    // helpers.jsxi:84
+				case 'AElig':                                                      // helpers.jsxi:85
+					return 'Æ';                                                    // helpers.jsxi:85
+				case 'Ccedil':                                                     // helpers.jsxi:86
+					return 'Ç';                                                    // helpers.jsxi:86
+				case 'Egrave':                                                     // helpers.jsxi:87
+					return 'È';                                                    // helpers.jsxi:87
+				case 'Eacute':                                                     // helpers.jsxi:88
+					return 'É';                                                    // helpers.jsxi:88
+				case 'Ecirc':                                                      // helpers.jsxi:89
+					return 'Ê';                                                    // helpers.jsxi:89
+				case 'Euml':                                                       // helpers.jsxi:90
+					return 'Ë';                                                    // helpers.jsxi:90
+				case 'Igrave':                                                     // helpers.jsxi:91
+					return 'Ì';                                                    // helpers.jsxi:91
+				case 'Iacute':                                                     // helpers.jsxi:92
+					return 'Í';                                                    // helpers.jsxi:92
+				case 'Icirc':                                                      // helpers.jsxi:93
+					return 'Î';                                                    // helpers.jsxi:93
+				case 'Iuml':                                                       // helpers.jsxi:94
+					return 'Ï';                                                    // helpers.jsxi:94
+				case 'ETH':                                                        // helpers.jsxi:95
+					return 'Ð';                                                    // helpers.jsxi:95
+				case 'Ntilde':                                                     // helpers.jsxi:96
+					return 'Ñ';                                                    // helpers.jsxi:96
+				case 'Ograve':                                                     // helpers.jsxi:97
+					return 'Ò';                                                    // helpers.jsxi:97
+				case 'Oacute':                                                     // helpers.jsxi:98
+					return 'Ó';                                                    // helpers.jsxi:98
+				case 'Ocirc':                                                      // helpers.jsxi:99
+					return 'Ô';                                                    // helpers.jsxi:99
+				case 'Otilde':                                                     // helpers.jsxi:100
+					return 'Õ';                                                    // helpers.jsxi:100
+				case 'Ouml':                                                       // helpers.jsxi:101
+					return 'Ö';                                                    // helpers.jsxi:101
+				case 'times':                                                      // helpers.jsxi:102
+					return '×';                                                    // helpers.jsxi:102
+				case 'Oslash':                                                     // helpers.jsxi:103
+					return 'Ø';                                                    // helpers.jsxi:103
+				case 'Ugrave':                                                     // helpers.jsxi:104
+					return 'Ù';                                                    // helpers.jsxi:104
+				case 'Uacute':                                                     // helpers.jsxi:105
+					return 'Ú';                                                    // helpers.jsxi:105
+				case 'Ucirc':                                                      // helpers.jsxi:106
+					return 'Û';                                                    // helpers.jsxi:106
+				case 'Uuml':                                                       // helpers.jsxi:107
+					return 'Ü';                                                    // helpers.jsxi:107
+				case 'Yacute':                                                     // helpers.jsxi:108
+					return 'Ý';                                                    // helpers.jsxi:108
+				case 'THORN':                                                      // helpers.jsxi:109
+					return 'Þ';                                                    // helpers.jsxi:109
+				case 'szlig':                                                      // helpers.jsxi:110
+					return 'ß';                                                    // helpers.jsxi:110
+				case 'agrave':                                                     // helpers.jsxi:111
+					return 'à';                                                    // helpers.jsxi:111
+				case 'aacute':                                                     // helpers.jsxi:112
+					return 'á';                                                    // helpers.jsxi:112
+				case 'acirc':                                                      // helpers.jsxi:113
+					return 'â';                                                    // helpers.jsxi:113
+				case 'atilde':                                                     // helpers.jsxi:114
+					return 'ã';                                                    // helpers.jsxi:114
+				case 'auml':                                                       // helpers.jsxi:115
+					return 'ä';                                                    // helpers.jsxi:115
+				case 'aring':                                                      // helpers.jsxi:116
+					return 'å';                                                    // helpers.jsxi:116
+				case 'aelig':                                                      // helpers.jsxi:117
+					return 'æ';                                                    // helpers.jsxi:117
+				case 'ccedil':                                                     // helpers.jsxi:118
+					return 'ç';                                                    // helpers.jsxi:118
+				case 'egrave':                                                     // helpers.jsxi:119
+					return 'è';                                                    // helpers.jsxi:119
+				case 'eacute':                                                     // helpers.jsxi:120
+					return 'é';                                                    // helpers.jsxi:120
+				case 'ecirc':                                                      // helpers.jsxi:121
+					return 'ê';                                                    // helpers.jsxi:121
+				case 'euml':                                                       // helpers.jsxi:122
+					return 'ë';                                                    // helpers.jsxi:122
+				case 'igrave':                                                     // helpers.jsxi:123
+					return 'ì';                                                    // helpers.jsxi:123
+				case 'iacute':                                                     // helpers.jsxi:124
+					return 'í';                                                    // helpers.jsxi:124
+				case 'icirc':                                                      // helpers.jsxi:125
+					return 'î';                                                    // helpers.jsxi:125
+				case 'iuml':                                                       // helpers.jsxi:126
+					return 'ï';                                                    // helpers.jsxi:126
+				case 'eth':                                                        // helpers.jsxi:127
+					return 'ð';                                                    // helpers.jsxi:127
+				case 'ntilde':                                                     // helpers.jsxi:128
+					return 'ñ';                                                    // helpers.jsxi:128
+				case 'ograve':                                                     // helpers.jsxi:129
+					return 'ò';                                                    // helpers.jsxi:129
+				case 'oacute':                                                     // helpers.jsxi:130
+					return 'ó';                                                    // helpers.jsxi:130
+				case 'ocirc':                                                      // helpers.jsxi:131
+					return 'ô';                                                    // helpers.jsxi:131
+				case 'otilde':                                                     // helpers.jsxi:132
+					return 'õ';                                                    // helpers.jsxi:132
+				case 'ouml':                                                       // helpers.jsxi:133
+					return 'ö';                                                    // helpers.jsxi:133
+				case 'divide':                                                     // helpers.jsxi:134
+					return '÷';                                                    // helpers.jsxi:134
+				case 'oslash':                                                     // helpers.jsxi:135
+					return 'ø';                                                    // helpers.jsxi:135
+				case 'ugrave':                                                     // helpers.jsxi:136
+					return 'ù';                                                    // helpers.jsxi:136
+				case 'uacute':                                                     // helpers.jsxi:137
+					return 'ú';                                                    // helpers.jsxi:137
+				case 'ucirc':                                                      // helpers.jsxi:138
+					return 'û';                                                    // helpers.jsxi:138
+				case 'uuml':                                                       // helpers.jsxi:139
+					return 'ü';                                                    // helpers.jsxi:139
+				case 'yacute':                                                     // helpers.jsxi:140
+					return 'ý';                                                    // helpers.jsxi:140
+				case 'thorn':                                                      // helpers.jsxi:141
+					return 'þ';                                                    // helpers.jsxi:141
+				case 'yuml':                                                       // helpers.jsxi:142
+					return 'ÿ';                                                    // helpers.jsxi:142
+				case 'quot':                                                       // helpers.jsxi:143
+					return '"';                                                    // helpers.jsxi:143
+				case 'lt':                                                         // helpers.jsxi:144
+					return '<';                                                    // helpers.jsxi:144
+				case 'gt':                                                         // helpers.jsxi:145
+					return '>';                                                    // helpers.jsxi:145
 				default:
-					return _;                                                      // helpers.jsxi:141
+					return _;                                                      // helpers.jsxi:146
 			}
 		});
 };
-JSON.flexibleParse = function (d){                                                 // helpers.jsxi:146
-	d = d.toString();                                                              // helpers.jsxi:147
+JSON.flexibleParse = function (d){                                                 // helpers.jsxi:151
+	d = d.toString();                                                              // helpers.jsxi:152
 	
 	try {
-		return JSON.parse(d);                                                      // helpers.jsxi:150
+		return JSON.parse(d);                                                      // helpers.jsxi:155
 	} catch (e){
 		var r;
 		
-		eval('r=' + d.toString().replace(/"(?:[^"\\]*(?:\\.)?)+"/g,                // helpers.jsxi:153
-			function (_){                                                          // helpers.jsxi:153
-				return _.replace(/\r?\n/g, '\\n');                                 // helpers.jsxi:154
+		eval('r=' + d.toString().replace(/"(?:[^"\\]*(?:\\.)?)+"/g,                // helpers.jsxi:158
+			function (_){                                                          // helpers.jsxi:158
+				return _.replace(/\r?\n/g, '\\n');                                 // helpers.jsxi:159
 			}));
-		return r;                                                                  // helpers.jsxi:156
+		return r;                                                                  // helpers.jsxi:161
 	} 
 };
-JSON.restoreDamaged = function (data, fields){                                     // helpers.jsxi:160
-	data = data.toString().replace(/\r?\n|\r/g, '\n').trim();                      // helpers.jsxi:161
+JSON.restoreDamaged = function (data, fields){                                     // helpers.jsxi:165
+	data = data.toString().replace(/\r?\n|\r/g, '\n').trim();                      // helpers.jsxi:166
 	
 	var result = {};
 	
-	for (var key in fields)                                                        // helpers.jsxi:164
-		if (fields.hasOwnProperty(key)){                                           // helpers.jsxi:164
+	for (var key in fields)                                                        // helpers.jsxi:169
+		if (fields.hasOwnProperty(key)){                                           // helpers.jsxi:169
 			var type = fields[key];
 			
 			var re = new RegExp('(?:\"\\s*' + key + '\\s*\"|\'\\s*' + key + '\\s*\'|' + key + ')\\s*:\\s*([\\s\\S]+)');
 			
 			var m = data.match(re);
 			
-			if (re.test(data)){                                                    // helpers.jsxi:167
+			if (re.test(data)){                                                    // helpers.jsxi:172
 				var d = RegExp.$1.trim();
 				
 				if (type !== 'multiline' && type !== 'array' && type !== 'pairsArray'){
@@ -1132,70 +1132,70 @@ JSON.restoreDamaged = function (data, fields){                                  
 				}
 				
 				d = d.replace(/(?:\n?\s*,?\s*("\s*\w+\s*"|'\s*\w+\s*'|\w+)\s*:|\s*})[\s\S]*$/, 
-					'');                                                           // helpers.jsxi:174
-				result[key] = d.trim().replace(/,$/, '');                          // helpers.jsxi:175
+					'');                                                           // helpers.jsxi:179
+				result[key] = d.trim().replace(/,$/, '');                          // helpers.jsxi:180
 			}
 		}
 	
-	for (var key in result)                                                        // helpers.jsxi:179
-		if (result.hasOwnProperty(key)){                                           // helpers.jsxi:179
+	for (var key in result)                                                        // helpers.jsxi:184
+		if (result.hasOwnProperty(key)){                                           // helpers.jsxi:184
 			var value = result[key];
 			
-			if (fields[key] === 'string' || fields[key] === 'multiline'){          // helpers.jsxi:180
+			if (fields[key] === 'string' || fields[key] === 'multiline'){          // helpers.jsxi:185
 				result[key] = value === 'null' ? null : value.replace(/^['"]/, '').replace(/['"]$/, '').replace(/\\(?=")/g, '');
 			}
 			
-			if (fields[key] === 'array' || fields[key] === 'pairsArray'){          // helpers.jsxi:184
-				value = value.split(/\n|,/).map(function (arg){                    // helpers.jsxi:185
-					return arg.trim().replace(/^['"]/, '').replace(/['"]$/, '');   // helpers.jsxi:186
-				}).filter(function (a, i){                                         // helpers.jsxi:187
-					return a && (i > 0 || a != '[');                               // helpers.jsxi:187
+			if (fields[key] === 'array' || fields[key] === 'pairsArray'){          // helpers.jsxi:189
+				value = value.split(/\n|,/).map(function (arg){                    // helpers.jsxi:190
+					return arg.trim().replace(/^['"]/, '').replace(/['"]$/, '');   // helpers.jsxi:191
+				}).filter(function (a, i){                                         // helpers.jsxi:192
+					return a && (i > 0 || a != '[');                               // helpers.jsxi:192
 				});
 				
-				if (value[value.length - 1] === ']'){                              // helpers.jsxi:188
-					value.length --;                                               // helpers.jsxi:189
+				if (value[value.length - 1] === ']'){                              // helpers.jsxi:193
+					value.length --;                                               // helpers.jsxi:194
 				}
 				
-				result[key] = value;                                               // helpers.jsxi:192
+				result[key] = value;                                               // helpers.jsxi:197
 			}
 			
-			if (fields[key] === 'pairsArray'){                                     // helpers.jsxi:195
-				result[key] = [];                                                  // helpers.jsxi:196
+			if (fields[key] === 'pairsArray'){                                     // helpers.jsxi:200
+				result[key] = [];                                                  // helpers.jsxi:201
 				
 				var last;
 				
-				value.forEach(function (arg){                                      // helpers.jsxi:198
-					if (arg === '[' || arg === ']')                                // helpers.jsxi:199
+				value.forEach(function (arg){                                      // helpers.jsxi:203
+					if (arg === '[' || arg === ']')                                // helpers.jsxi:204
 						return;
 					
-					if (last){                                                     // helpers.jsxi:200
-						last.push(arg);                                            // helpers.jsxi:201
-						last = null;                                               // helpers.jsxi:202
+					if (last){                                                     // helpers.jsxi:205
+						last.push(arg);                                            // helpers.jsxi:206
+						last = null;                                               // helpers.jsxi:207
 					} else {
-						result[key].push(last = [ arg ]);                          // helpers.jsxi:204
+						result[key].push(last = [ arg ]);                          // helpers.jsxi:209
 					}
 				});
 			}
 			
-			if (fields[key] === 'number'){                                         // helpers.jsxi:209
-				if (value === 'null'){                                             // helpers.jsxi:210
-					value = null;                                                  // helpers.jsxi:211
+			if (fields[key] === 'number'){                                         // helpers.jsxi:214
+				if (value === 'null'){                                             // helpers.jsxi:215
+					value = null;                                                  // helpers.jsxi:216
 				} else {
-					value = value.replace(/^['"]/, '').replace(/['"]$/, '');       // helpers.jsxi:213
-					value = value.replace(/[liI]/g, '1').replace(/[oO]/g, '0');    // helpers.jsxi:215
-					result[key] = + value;                                         // helpers.jsxi:216
+					value = value.replace(/^['"]/, '').replace(/['"]$/, '');       // helpers.jsxi:218
+					value = value.replace(/[liI]/g, '1').replace(/[oO]/g, '0');    // helpers.jsxi:220
+					result[key] = + value;                                         // helpers.jsxi:221
 					
-					if (Number.isNaN(result[key])){                                // helpers.jsxi:218
-						result[key] = + value.replace(/[^-.\d]+/g, '');            // helpers.jsxi:219
+					if (Number.isNaN(result[key])){                                // helpers.jsxi:223
+						result[key] = + value.replace(/[^-.\d]+/g, '');            // helpers.jsxi:224
 					}
 					
-					if (Number.isNaN(result[key])){                                // helpers.jsxi:222
-						result[key] = + (value.replace(/[^\d]+/g, '') || '0');     // helpers.jsxi:223
+					if (Number.isNaN(result[key])){                                // helpers.jsxi:227
+						result[key] = + (value.replace(/[^\d]+/g, '') || '0');     // helpers.jsxi:228
 					}
 				}
 			}
 		}
-	return result;                                                                 // helpers.jsxi:229
+	return result;                                                                 // helpers.jsxi:234
 };
 
 /* Class "ErrorHandler" declaration */
@@ -2040,7 +2040,7 @@ var AcShowroom = (function (){                                                  
 		
 		try {
 			_a = c.init({                                                          // ac_tools.jsxi:13
-				assemblies: [ 'native/AcTools.dll', 'native/AcToolsKn5Render.dll' ], 
+				assemblies: [ 'native/AcTools.dll', 'native/AcTools.Kn5Render.dll' ], 
 				global: false
 			}).AcTools;                                                            // ac_tools.jsxi:16
 		} catch (err){                                                             // ac_tools.jsxi:17
@@ -9079,15 +9079,15 @@ var ViewList = (function (){                                                    
 		_selected,                                                                 // view_list.jsxi:4
 		_aside = $(document.getElementsByTagName('aside')[0]),                     // view_list.jsxi:5
 		_node = $(document.getElementById('cars-list')),                           // view_list.jsxi:6
-		_sortFn = {                                                                // view_list.jsxi:149
-			id: (function (a, b){                                                  // view_list.jsxi:149
+		_sortFn = {                                                                // view_list.jsxi:138
+			id: (function (a, b){                                                  // view_list.jsxi:138
 				return !a.disabled && b.disabled ? - 1 : a.disabled && !b.disabled ? 1 : a.id.localeCompare(b.id);
 			}), 
-			displayName: (function (a, b){                                         // view_list.jsxi:153
+			displayName: (function (a, b){                                         // view_list.jsxi:142
 				return !a.disabled && b.disabled ? - 1 : a.disabled && !b.disabled ? 1 : a.displayName.localeCompare(b.displayName);
 			})
 		}, 
-		sortingEnabled = true;                                                     // view_list.jsxi:157
+		sortingEnabled = true;                                                     // view_list.jsxi:146
 	
 	function scrollToSelected(){                                                   // view_list.jsxi:10
 		var n = _node[0].querySelector('.selected');
@@ -9166,89 +9166,85 @@ var ViewList = (function (){                                                    
 		if (v){                                                                    // view_list.jsxi:69
 			i.style.display = 'block';                                             // view_list.jsxi:70
 			
-			var s = v.trim().split(/\s+/);
+			var f;
 			
-			var brandFilter = '',                                                  // view_list.jsxi:73
-				classFilter = '',                                                  // view_list.jsxi:74
-				tagFilter = '',                                                    // view_list.jsxi:75
-				countryFilter = '',                                                // view_list.jsxi:76
-				yearFilter = '',                                                   // view_list.jsxi:77
-				authorFilter = '';                                                 // view_list.jsxi:78
-			
-			var vv = s.filter(function (e){                                        // view_list.jsxi:80
-				if (/^brand:(.*)/.test(e)){                                        // view_list.jsxi:81
-					brandFilter = (brandFilter && brandFilter + '|') + RegExp.$1;
-					return false;
-				}
+			try {
+				var fCode = v.replace(/\s+/g, ' ').trim().split(/\s*\|\s*/).join('  ||  ').split(/\s*!\s*/).join('  !  ').split(/\s*&\s*/).join('  &&  ').split(/\s*\(\s*/).join('  (  ').split(/\s*\)\s*/).join('  )  ').replace(/(?:^|  )(?!&&|\|\||[()!])([^ ]+(?:\s[^ ]+)*)/g, 
+					function (_, a){                                               // view_list.jsxi:95
+						if (!a)                                                    // view_list.jsxi:96
+							return 'true';                                         // view_list.jsxi:96
+						
+						if (/^brand:(.*)/.test(a))                                 // view_list.jsxi:98
+							return '(car.data && (' + RegExp.fromQuery(RegExp.$1, true) + ').test(car.data.brand))';
+						
+						if (/^class:(.*)/.test(a))                                 // view_list.jsxi:99
+							return '(car.data && (' + RegExp.fromQuery(RegExp.$1, true) + ').test(car.data.class))';
+						
+						if (/^country:(.*)/.test(a))                               // view_list.jsxi:100
+							return '(car.data && (' + RegExp.fromQuery(RegExp.$1, true) + ').test(car.data.country))';
+						
+						if (/^year:(.*)/.test(a))                                  // view_list.jsxi:101
+							return '(car.data && (' + RegExp.fromQuery(RegExp.$1, true) + ').test(car.data.year))';
+						
+						if (/^year([><=])(.*)/.test(a))                            // view_list.jsxi:102
+							return '(car.data && car.data.year ' + (RegExp.$1 == '=' ? '==' : RegExp.$1) + ' ' + JSON.stringify(RegExp.$2) + ')';
+						
+						if (/^author:(.*)/.test(a))                                // view_list.jsxi:103
+							return '(car.data && (' + RegExp.fromQuery(RegExp.$1, true) + ').test(car.data.author))';
+						
+						if (/^tag:(.*)/.test(a))                                   // view_list.jsxi:104
+							return '(car.data && car.data.tags.some(RegExp.prototype.test.bind(' + RegExp.fromQuery(RegExp.$1, true) + ')))';
+						
+						if (/^(?:bhp|power):(.*)/.test(a))                         // view_list.jsxi:106
+							return '(' + RegExp.fromQuery(RegExp.$1, true) + ').test(car.getSpec(\'bhp\'))';
+						
+						if (/^(?:bhp|power)([><=])(.*)/.test(a))                   // view_list.jsxi:107
+							return '(car.getSpec(\'bhp\') ' + (RegExp.$1 == '=' ? '==' : RegExp.$1) + ' ' + JSON.stringify(RegExp.$2) + ')';
+						
+						if (/^(?:torque):(.*)/.test(a))                            // view_list.jsxi:108
+							return '(' + RegExp.fromQuery(RegExp.$1, true) + ').test(car.getSpec(\'torque\'))';
+						
+						if (/^(?:torque)([><=])(.*)/.test(a))                      // view_list.jsxi:109
+							return '(car.getSpec(\'torque\') ' + (RegExp.$1 == '=' ? '==' : RegExp.$1) + ' ' + JSON.stringify(RegExp.$2) + ')';
+						
+						if (/^(?:weight|mass):(.*)/.test(a))                       // view_list.jsxi:110
+							return '(' + RegExp.fromQuery(RegExp.$1, true) + ').test(car.getSpec(\'weight\'))';
+						
+						if (/^(?:weight|mass)([><=])(.*)/.test(a))                 // view_list.jsxi:111
+							return '(car.getSpec(\'weight\') ' + (RegExp.$1 == '=' ? '==' : RegExp.$1) + ' ' + JSON.stringify(RegExp.$2) + ')';
+						
+						var r = RegExp.fromQuery(a);
+						return '((' + r + ').test(car.id) || car.data && (' + r + ').test(car.data.name))';
+					});
 				
-				if (/^class:(.*)/.test(e)){                                        // view_list.jsxi:86
-					classFilter = (classFilter && classFilter + '|') + RegExp.$1;
+				console.debug(fCode);                                              // view_list.jsxi:117
+				f = eval('(function (car){ return ' + fCode + '; })');             // view_list.jsxi:118
+			} catch (e){                                                           // view_list.jsxi:119
+				f = function (arg){                                                // view_list.jsxi:120
 					return false;
-				}
-				
-				if (/^tag:(.*)/.test(e)){                                          // view_list.jsxi:91
-					tagFilter = (tagFilter && tagFilter + '|') + RegExp.$1;        // view_list.jsxi:92
-					return false;
-				}
-				
-				if (/^country:(.*)/.test(e)){                                      // view_list.jsxi:96
-					countryFilter = (countryFilter && countryFilter + '|') + RegExp.$1;
-					return false;
-				}
-				
-				if (/^author:(.*)/.test(e)){                                       // view_list.jsxi:101
-					authorFilter = (authorFilter && authorFilter + '|') + RegExp.$1;
-					return false;
-				}
-				
-				if (/^year:(.*)/.test(e)){                                         // view_list.jsxi:106
-					yearFilter = (yearFilter && yearFilter + '|') + RegExp.$1;     // view_list.jsxi:107
-					return false;
-				}
-				return true;
-			});
+				};
+				console.warn('broken query: ' + e);                                // view_list.jsxi:121
+			} 
 			
-			var re = RegExp.fromQuery(vv.join(' '));
-			
-			var brandRe = brandFilter && RegExp.fromQuery(brandFilter, true);
-			
-			var classRe = classFilter && RegExp.fromQuery(classFilter, true);
-			
-			var tagRe = tagFilter && RegExp.fromQuery(tagFilter, true);
-			
-			var countryRe = countryFilter && RegExp.fromQuery(countryFilter, true);
-			
-			var authorRe = authorFilter && RegExp.fromQuery(authorFilter, true);   // view_list.jsxi:119
-			
-			var yearRe = yearFilter && RegExp.fromQuery(yearFilter, true);
-			
-			var f = function (car){                                                // view_list.jsxi:122
-				if (brandRe && (!car.data || !brandRe.test(car.data.brand)) || classRe && (!car.data || !classRe.test(car.data.class)) || tagRe && (!car.data || !car.data.tags.some(tagRe.test.bind(tagRe))) || countryRe && (!car.data || !countryRe.test(car.data.country)) || yearRe && (!car.data || !yearRe.test(car.data.year)) || authorRe && (!car.data || !authorRe.test(car.data.author))){
-					return false;
-				} else {
-					return re.test(car.id) || car.data && re.test(car.data.name);
-				}
-			};
-			
-			_aside.find('#cars-list > div > [data-id]').each(function (){          // view_list.jsxi:135
+			_aside.find('#cars-list > div > [data-id]').each(function (){          // view_list.jsxi:124
 				this.parentNode.style.display = f(Cars.byName(this.getAttribute('data-id'))) ? null : 'none';
 			});
 		} else {
-			i.style.display = 'hide';                                              // view_list.jsxi:139
-			_aside.find('#cars-list > div').show();                                // view_list.jsxi:140
+			i.style.display = 'hide';                                              // view_list.jsxi:128
+			_aside.find('#cars-list > div').show();                                // view_list.jsxi:129
 		}
 	};
-	ViewList.addFilter = function (v){                                             // view_list.jsxi:144
+	ViewList.addFilter = function (v){                                             // view_list.jsxi:133
 		var a = _aside.find('#cars-list-filter')[0].value;
 		
 		ViewList.filter((a && a + ' ') + v);
 	};
-	ViewList.sort = function (){                                                   // view_list.jsxi:159
-		if (!sortingEnabled)                                                       // view_list.jsxi:160
+	ViewList.sort = function (){                                                   // view_list.jsxi:148
+		if (!sortingEnabled)                                                       // view_list.jsxi:149
 			return;
 		
-		_aside.find('#total-cars').text(Cars.list.filter(function (e){             // view_list.jsxi:162
-			return e.parent == null;                                               // view_list.jsxi:163
+		_aside.find('#total-cars').text(Cars.list.filter(function (e){             // view_list.jsxi:151
+			return e.parent == null;                                               // view_list.jsxi:152
 		}).length).attr('title', 'Including modded versions: ' + Cars.list.length);
 		
 		var sorted = Cars.list.sort(_sortFn.displayName);
@@ -9257,241 +9253,241 @@ var ViewList = (function (){                                                    
 		
 		var children = Array.prototype.slice.call(listNode.children);
 		
-		for (var __1h = 0; __1h < sorted.length; __1h ++){                         // view_list.jsxi:170
+		for (var __1h = 0; __1h < sorted.length; __1h ++){                         // view_list.jsxi:159
 			var car = sorted[__1h];
 			
-			for (var __1g = 0; __1g < children.length; __1g ++){                   // view_list.jsxi:171
+			for (var __1g = 0; __1g < children.length; __1g ++){                   // view_list.jsxi:160
 				var entry = children[__1g];
 				
-				if (entry.children[0].getAttribute('data-id') === car.id){         // view_list.jsxi:172
-					listNode.appendChild(entry);                                   // view_list.jsxi:173
+				if (entry.children[0].getAttribute('data-id') === car.id){         // view_list.jsxi:161
+					listNode.appendChild(entry);                                   // view_list.jsxi:162
 					
 					break;
 				}
 			}
 		}
 		
-		scrollToSelected();                                                        // view_list.jsxi:179
+		scrollToSelected();                                                        // view_list.jsxi:168
 	};
 	
-	function init(){                                                               // view_list.jsxi:182
-		BatchProcessing.on('start',                                                // view_list.jsxi:183
-			function (arg){                                                        // view_list.jsxi:184
-				return sortingEnabled = false;                                     // view_list.jsxi:184
-			}).on('end',                                                           // view_list.jsxi:185
-			function (arg){                                                        // view_list.jsxi:185
-				sortingEnabled = true;                                             // view_list.jsxi:186
+	function init(){                                                               // view_list.jsxi:171
+		BatchProcessing.on('start',                                                // view_list.jsxi:172
+			function (arg){                                                        // view_list.jsxi:173
+				return sortingEnabled = false;                                     // view_list.jsxi:173
+			}).on('end',                                                           // view_list.jsxi:174
+			function (arg){                                                        // view_list.jsxi:174
+				sortingEnabled = true;                                             // view_list.jsxi:175
 				ViewList.sort();
 			});
-		Cars.on('scan:start',                                                      // view_list.jsxi:190
-			function (){                                                           // view_list.jsxi:191
-				sortingEnabled = false;                                            // view_list.jsxi:192
-				_aside.find('#cars-list').empty();                                 // view_list.jsxi:194
-				document.body.removeChild(_aside[0]);                              // view_list.jsxi:195
-			}).on('scan:ready',                                                    // view_list.jsxi:197
-			function (list){                                                       // view_list.jsxi:197
-				sortingEnabled = true;                                             // view_list.jsxi:198
+		Cars.on('scan:start',                                                      // view_list.jsxi:179
+			function (){                                                           // view_list.jsxi:180
+				sortingEnabled = false;                                            // view_list.jsxi:181
+				_aside.find('#cars-list').empty();                                 // view_list.jsxi:183
+				document.body.removeChild(_aside[0]);                              // view_list.jsxi:184
+			}).on('scan:ready',                                                    // view_list.jsxi:186
+			function (list){                                                       // view_list.jsxi:186
+				sortingEnabled = true;                                             // view_list.jsxi:187
 				ViewList.sort();
-				document.body.appendChild(_aside[0]);                              // view_list.jsxi:201
+				document.body.appendChild(_aside[0]);                              // view_list.jsxi:190
 				
-				if (list.length > 0){                                              // view_list.jsxi:203
+				if (list.length > 0){                                              // view_list.jsxi:192
 					ViewList.select(Cars.byName(localStorage.selectedCar) || list[0]);
 				}
-			}).on('new.car',                                                       // view_list.jsxi:207
-			function (car){                                                        // view_list.jsxi:207
+			}).on('new.car',                                                       // view_list.jsxi:196
+			function (car){                                                        // view_list.jsxi:196
 				var s = document.createElement('span');
 				
-				s.textContent = car.displayName;                                   // view_list.jsxi:209
+				s.textContent = car.displayName;                                   // view_list.jsxi:198
 				
-				if (car.disabled)                                                  // view_list.jsxi:210
-					s.classList.add('disabled');                                   // view_list.jsxi:210
+				if (car.disabled)                                                  // view_list.jsxi:199
+					s.classList.add('disabled');                                   // view_list.jsxi:199
 				
-				s.setAttribute('title', car.path);                                 // view_list.jsxi:212
-				s.setAttribute('data-id', car.id);                                 // view_list.jsxi:213
-				s.setAttribute('data-name', car.id);                               // view_list.jsxi:214
-				s.setAttribute('data-path', car.path);                             // view_list.jsxi:215
+				s.setAttribute('title', car.path);                                 // view_list.jsxi:201
+				s.setAttribute('data-id', car.id);                                 // view_list.jsxi:202
+				s.setAttribute('data-name', car.id);                               // view_list.jsxi:203
+				s.setAttribute('data-path', car.path);                             // view_list.jsxi:204
 				
 				var d = document.createElement('div');
 				
-				d.appendChild(s);                                                  // view_list.jsxi:218
+				d.appendChild(s);                                                  // view_list.jsxi:207
 				
-				if (car.children.length > 0){                                      // view_list.jsxi:220
-					d.setAttribute('data-children', car.children.length + 1);      // view_list.jsxi:221
+				if (car.children.length > 0){                                      // view_list.jsxi:209
+					d.setAttribute('data-children', car.children.length + 1);      // view_list.jsxi:210
 				}
 				
-				_node[0].appendChild(d);                                           // view_list.jsxi:224
+				_node[0].appendChild(d);                                           // view_list.jsxi:213
 				ViewList.sort();
-			}).on('remove.car',                                                    // view_list.jsxi:227
-			function (car){                                                        // view_list.jsxi:227
-				if (car === _selected){                                            // view_list.jsxi:228
+			}).on('remove.car',                                                    // view_list.jsxi:216
+			function (car){                                                        // view_list.jsxi:216
+				if (car === _selected){                                            // view_list.jsxi:217
 					ViewList.selectNear();
 				}
 				
 				var d = _node[0].querySelector('[data-id="' + car.id + '"]').parentNode;
 				
-				d.parentNode.removeChild(d);                                       // view_list.jsxi:233
-			}).on('update.car.data',                                               // view_list.jsxi:235
-			function (car, upd){                                                   // view_list.jsxi:235
+				d.parentNode.removeChild(d);                                       // view_list.jsxi:222
+			}).on('update.car.data',                                               // view_list.jsxi:224
+			function (car, upd){                                                   // view_list.jsxi:224
 				_node.find('[data-id="' + car.id + '"]').text(car.displayName).attr('data-name', car.displayName.toLowerCase());
 				ViewList.filter(_aside.find('#cars-list-filter').val());
 				
-				if (upd === 'update.car.data:name'){                               // view_list.jsxi:240
+				if (upd === 'update.car.data:name'){                               // view_list.jsxi:229
 					ViewList.sort();
 				}
-			}).on('update.car.parent',                                             // view_list.jsxi:244
-			function (car){                                                        // view_list.jsxi:244
+			}).on('update.car.parent',                                             // view_list.jsxi:233
+			function (car){                                                        // view_list.jsxi:233
 				var d = _node[0].querySelector('[data-id="' + car.id + '"]').parentNode;
 				
-				if (car.error.length > 0){                                         // view_list.jsxi:246
+				if (car.error.length > 0){                                         // view_list.jsxi:235
 					var c = d.parentNode;
 					
 					if (c.tagName === 'DIV' && c.querySelectorAll('.error').length == 1){
-						c.classList.remove('error');                               // view_list.jsxi:249
+						c.classList.remove('error');                               // view_list.jsxi:238
 					}
 				}
 				
-				if (car.parent){                                                   // view_list.jsxi:253
+				if (car.parent){                                                   // view_list.jsxi:242
 					var p = _node[0].querySelector('[data-id="' + car.parent.id + '"]').parentNode;
 					
-					p.appendChild(d);                                              // view_list.jsxi:255
+					p.appendChild(d);                                              // view_list.jsxi:244
 					
-					if (d.classList.contains('error')){                            // view_list.jsxi:256
-						d.classList.remove('error');                               // view_list.jsxi:257
-						p.classList.add('error');                                  // view_list.jsxi:258
+					if (d.classList.contains('error')){                            // view_list.jsxi:245
+						d.classList.remove('error');                               // view_list.jsxi:246
+						p.classList.add('error');                                  // view_list.jsxi:247
 					}
 				} else {
-					_node[0].appendChild(d);                                       // view_list.jsxi:261
+					_node[0].appendChild(d);                                       // view_list.jsxi:250
 					ViewList.sort();
 				}
 				
-				scrollToSelected();                                                // view_list.jsxi:265
-			}).on('update.car.children',                                           // view_list.jsxi:267
-			function (car){                                                        // view_list.jsxi:267
+				scrollToSelected();                                                // view_list.jsxi:254
+			}).on('update.car.children',                                           // view_list.jsxi:256
+			function (car){                                                        // view_list.jsxi:256
 				var e = _node[0].querySelector('[data-id="' + car.id + '"]');
 				
-				if (!e)                                                            // view_list.jsxi:269
+				if (!e)                                                            // view_list.jsxi:258
 					return;
 				
-				if (car.children.length){                                          // view_list.jsxi:270
+				if (car.children.length){                                          // view_list.jsxi:259
 					e.parentNode.setAttribute('data-children', car.children.length + 1);
 				} else {
-					e.parentNode.removeAttribute('data-children');                 // view_list.jsxi:273
+					e.parentNode.removeAttribute('data-children');                 // view_list.jsxi:262
 				}
-			}).on('update.car.path',                                               // view_list.jsxi:276
-			function (car){                                                        // view_list.jsxi:276
+			}).on('update.car.path',                                               // view_list.jsxi:265
+			function (car){                                                        // view_list.jsxi:265
 				var e = _node[0].querySelector('[data-id="' + car.id + '"]');
 				
-				if (!e)                                                            // view_list.jsxi:278
+				if (!e)                                                            // view_list.jsxi:267
 					return;
 				
-				e.setAttribute('data-path', car.path);                             // view_list.jsxi:279
-				e.setAttribute('title', car.path);                                 // view_list.jsxi:280
-			}).on('update.car.disabled',                                           // view_list.jsxi:282
+				e.setAttribute('data-path', car.path);                             // view_list.jsxi:268
+				e.setAttribute('title', car.path);                                 // view_list.jsxi:269
+			}).on('update.car.disabled',                                           // view_list.jsxi:271
+			function (car){                                                        // view_list.jsxi:271
+				var e = _node[0].querySelector('[data-id="' + car.id + '"]');
+				
+				if (!e)                                                            // view_list.jsxi:273
+					return;
+				
+				if (car.disabled){                                                 // view_list.jsxi:274
+					e.classList.add('disabled');                                   // view_list.jsxi:275
+				} else {
+					e.classList.remove('disabled');                                // view_list.jsxi:277
+				}
+				
+				ViewList.sort();
+			}).on('update.car.changed',                                            // view_list.jsxi:282
 			function (car){                                                        // view_list.jsxi:282
 				var e = _node[0].querySelector('[data-id="' + car.id + '"]');
 				
 				if (!e)                                                            // view_list.jsxi:284
 					return;
 				
-				if (car.disabled){                                                 // view_list.jsxi:285
-					e.classList.add('disabled');                                   // view_list.jsxi:286
+				if (car.changed){                                                  // view_list.jsxi:285
+					e.classList.add('changed');                                    // view_list.jsxi:286
 				} else {
-					e.classList.remove('disabled');                                // view_list.jsxi:288
+					e.classList.remove('changed');                                 // view_list.jsxi:288
 				}
-				
-				ViewList.sort();
-			}).on('update.car.changed',                                            // view_list.jsxi:293
-			function (car){                                                        // view_list.jsxi:293
+			}).on('error',                                                         // view_list.jsxi:291
+			function (car){                                                        // view_list.jsxi:291
 				var e = _node[0].querySelector('[data-id="' + car.id + '"]');
 				
-				if (!e)                                                            // view_list.jsxi:295
+				if (!e)                                                            // view_list.jsxi:293
 					return;
 				
-				if (car.changed){                                                  // view_list.jsxi:296
-					e.classList.add('changed');                                    // view_list.jsxi:297
+				if (car.error.length > 0){                                         // view_list.jsxi:295
+					e.classList.add('error');                                      // view_list.jsxi:296
 				} else {
-					e.classList.remove('changed');                                 // view_list.jsxi:299
-				}
-			}).on('error',                                                         // view_list.jsxi:302
-			function (car){                                                        // view_list.jsxi:302
-				var e = _node[0].querySelector('[data-id="' + car.id + '"]');
-				
-				if (!e)                                                            // view_list.jsxi:304
-					return;
-				
-				if (car.error.length > 0){                                         // view_list.jsxi:306
-					e.classList.add('error');                                      // view_list.jsxi:307
-				} else {
-					e.classList.remove('error');                                   // view_list.jsxi:309
+					e.classList.remove('error');                                   // view_list.jsxi:298
 				}
 				
-				while (e.parentNode.id !== 'cars-list'){                           // view_list.jsxi:312
-					e = e.parentNode;                                              // view_list.jsxi:313
+				while (e.parentNode.id !== 'cars-list'){                           // view_list.jsxi:301
+					e = e.parentNode;                                              // view_list.jsxi:302
 				}
 				
-				if (car.error.length > 0){                                         // view_list.jsxi:316
-					e.classList.add('error');                                      // view_list.jsxi:317
+				if (car.error.length > 0){                                         // view_list.jsxi:305
+					e.classList.add('error');                                      // view_list.jsxi:306
 				} else {
-					e.classList.remove('error');                                   // view_list.jsxi:319
+					e.classList.remove('error');                                   // view_list.jsxi:308
 				}
 			});
 		_aside.find('#cars-list-filter').on('change paste keyup keypress search', 
-			function (e){                                                          // view_list.jsxi:324
-				if (e.keyCode == 13){                                              // view_list.jsxi:325
-					this.blur();                                                   // view_list.jsxi:326
+			function (e){                                                          // view_list.jsxi:313
+				if (e.keyCode == 13){                                              // view_list.jsxi:314
+					this.blur();                                                   // view_list.jsxi:315
 				}
 				
-				if (e.keyCode == 27){                                              // view_list.jsxi:329
-					this.value = '';                                               // view_list.jsxi:330
-					this.blur();                                                   // view_list.jsxi:331
+				if (e.keyCode == 27){                                              // view_list.jsxi:318
+					this.value = '';                                               // view_list.jsxi:319
+					this.blur();                                                   // view_list.jsxi:320
 				}
 				
 				ViewList.filter(this.value);
-			}).on('keydown',                                                       // view_list.jsxi:336
-			function (e){                                                          // view_list.jsxi:336
-				if (e.keyCode == 8 && !this.value){                                // view_list.jsxi:337
-					this.blur();                                                   // view_list.jsxi:338
+			}).on('keydown',                                                       // view_list.jsxi:325
+			function (e){                                                          // view_list.jsxi:325
+				if (e.keyCode == 8 && !this.value){                                // view_list.jsxi:326
+					this.blur();                                                   // view_list.jsxi:327
 				}
-			}).on('blur',                                                          // view_list.jsxi:341
-			function (){                                                           // view_list.jsxi:341
-				if (!this.value){                                                  // view_list.jsxi:342
-					$(this).hide();                                                // view_list.jsxi:343
+			}).on('blur',                                                          // view_list.jsxi:330
+			function (){                                                           // view_list.jsxi:330
+				if (!this.value){                                                  // view_list.jsxi:331
+					$(this).hide();                                                // view_list.jsxi:332
 				}
 			});
-		$(window).on('keydown',                                                    // view_list.jsxi:348
-			function (e){                                                          // view_list.jsxi:349
-				if (Event.isSomeInput(e))                                          // view_list.jsxi:350
+		$(window).on('keydown',                                                    // view_list.jsxi:337
+			function (e){                                                          // view_list.jsxi:338
+				if (Event.isSomeInput(e))                                          // view_list.jsxi:339
 					return;
 				
-				if (e.ctrlKey || e.altKey || e.shiftKey)                           // view_list.jsxi:351
+				if (e.ctrlKey || e.altKey || e.shiftKey)                           // view_list.jsxi:340
 					return;
 				
-				if ($('#dialog')[0])                                               // view_list.jsxi:352
+				if ($('#dialog')[0])                                               // view_list.jsxi:341
 					return;
 				
 				var f = _aside.find('#cars-list-filter');
 				
 				if (/[a-zA-Z\d]/.test(String.fromCharCode(e.keyCode)) || e.keyCode == 8 && f.val()){
-					f.show()[0].focus();                                           // view_list.jsxi:356
+					f.show()[0].focus();                                           // view_list.jsxi:345
 				}
 				
-				if (e.keyCode === 38){                                             // view_list.jsxi:359
+				if (e.keyCode === 38){                                             // view_list.jsxi:348
 					ViewList.selectNear(- 1);
 					return false;
 				}
 				
-				if (e.keyCode === 40){                                             // view_list.jsxi:364
+				if (e.keyCode === 40){                                             // view_list.jsxi:353
 					ViewList.selectNear(1);
 					return false;
 				}
 			});
-		_aside.find('#cars-list-filter-focus').click(function (){                  // view_list.jsxi:370
-			_aside.find('#cars-list-filter').show()[0].focus();                    // view_list.jsxi:371
+		_aside.find('#cars-list-filter-focus').click(function (){                  // view_list.jsxi:359
+			_aside.find('#cars-list-filter').show()[0].focus();                    // view_list.jsxi:360
 		});
-		_aside.find('#cars-list').click(function (e){                              // view_list.jsxi:375
+		_aside.find('#cars-list').click(function (e){                              // view_list.jsxi:364
 			var car = Cars.byName(e.target.getAttribute('data-id'));
 			
-			if (!car)                                                              // view_list.jsxi:377
+			if (!car)                                                              // view_list.jsxi:366
 				return;
 			
 			ViewList.select(car);
@@ -9499,82 +9495,82 @@ var ViewList = (function (){                                                    
 		
 		var cmIgnore = false;
 		
-		_aside.on('contextmenu',                                                   // view_list.jsxi:383
-			function (){                                                           // view_list.jsxi:384
-				this.querySelector('footer').classList.toggle('active');           // view_list.jsxi:385
-				cmIgnore = true;                                                   // view_list.jsxi:386
+		_aside.on('contextmenu',                                                   // view_list.jsxi:372
+			function (){                                                           // view_list.jsxi:373
+				this.querySelector('footer').classList.toggle('active');           // view_list.jsxi:374
+				cmIgnore = true;                                                   // view_list.jsxi:375
 			});
-		$(window).on('click contextmenu',                                          // view_list.jsxi:389
-			(function (e){                                                         // view_list.jsxi:390
-				if (cmIgnore){                                                     // view_list.jsxi:391
-					cmIgnore = false;                                              // view_list.jsxi:392
-				} else if (e.target !== this){                                     // view_list.jsxi:393
-					this.classList.remove('active');                               // view_list.jsxi:394
+		$(window).on('click contextmenu',                                          // view_list.jsxi:378
+			(function (e){                                                         // view_list.jsxi:379
+				if (cmIgnore){                                                     // view_list.jsxi:380
+					cmIgnore = false;                                              // view_list.jsxi:381
+				} else if (e.target !== this){                                     // view_list.jsxi:382
+					this.classList.remove('active');                               // view_list.jsxi:383
 				}
-			}).bind(_aside.find('footer')[0]));                                    // view_list.jsxi:396
-		_aside.find('#cars-list-open-directory').click(function (){                // view_list.jsxi:399
-			if (!_selected)                                                        // view_list.jsxi:400
+			}).bind(_aside.find('footer')[0]));                                    // view_list.jsxi:385
+		_aside.find('#cars-list-open-directory').click(function (){                // view_list.jsxi:388
+			if (!_selected)                                                        // view_list.jsxi:389
 				return;
 			
-			Shell.openItem(AcDir.cars);                                            // view_list.jsxi:401
+			Shell.openItem(AcDir.cars);                                            // view_list.jsxi:390
 		});
-		_aside.find('#cars-list-reload').click(function (){                        // view_list.jsxi:404
-			if (Cars.list.some(function (e){                                       // view_list.jsxi:405
-				return e.changed;                                                  // view_list.jsxi:406
+		_aside.find('#cars-list-reload').click(function (){                        // view_list.jsxi:393
+			if (Cars.list.some(function (e){                                       // view_list.jsxi:394
+				return e.changed;                                                  // view_list.jsxi:395
 			})){
-				new Dialog('Reload',                                               // view_list.jsxi:408
+				new Dialog('Reload',                                               // view_list.jsxi:397
 					[
 						'<p>{0}</p>'.format('Your changes will be lost. Are you sure?')
 					], 
-					reload);                                                       // view_list.jsxi:410
+					reload);                                                       // view_list.jsxi:399
 			} else {
-				reload();                                                          // view_list.jsxi:412
+				reload();                                                          // view_list.jsxi:401
 			}
 			
-			function reload(){                                                     // view_list.jsxi:415
-				Cars.reloadAll();                                                  // view_list.jsxi:416
+			function reload(){                                                     // view_list.jsxi:404
+				Cars.reloadAll();                                                  // view_list.jsxi:405
 			}
 		});
-		_aside.find('#cars-list-test-acd').click(function (){                      // view_list.jsxi:420
-			Cars.acdTest();                                                        // view_list.jsxi:421
+		_aside.find('#cars-list-test-acd').click(function (){                      // view_list.jsxi:409
+			Cars.acdTest();                                                        // view_list.jsxi:410
 		});
-		_aside.find('#cars-list-batch').click(function (){                         // view_list.jsxi:425
-			if (_aside.find('#cars-list-filter').val()){                           // view_list.jsxi:426
+		_aside.find('#cars-list-batch').click(function (){                         // view_list.jsxi:414
+			if (_aside.find('#cars-list-filter').val()){                           // view_list.jsxi:415
 				var filtered = [];
 				
 				var n = _node[0].querySelectorAll('[data-id]');
 				
-				for (var i = 0; i < n.length; i ++){                               // view_list.jsxi:430
-					filtered.push(Cars.byName(n[i].getAttribute('data-id')));      // view_list.jsxi:431
+				for (var i = 0; i < n.length; i ++){                               // view_list.jsxi:419
+					filtered.push(Cars.byName(n[i].getAttribute('data-id')));      // view_list.jsxi:420
 				}
 				
-				BatchProcessing.select(filtered);                                  // view_list.jsxi:434
+				BatchProcessing.select(filtered);                                  // view_list.jsxi:423
 			} else {
-				BatchProcessing.select(Cars.list.slice());                         // view_list.jsxi:436
+				BatchProcessing.select(Cars.list.slice());                         // view_list.jsxi:425
 			}
 		});
-		_aside.find('#cars-list-save').click(function (){                          // view_list.jsxi:440
-			Cars.saveAll();                                                        // view_list.jsxi:441
+		_aside.find('#cars-list-save').click(function (){                          // view_list.jsxi:429
+			Cars.saveAll();                                                        // view_list.jsxi:430
 		});
 	}
 	
-	function lazyLoadingProgressInit(){                                            // view_list.jsxi:445
+	function lazyLoadingProgressInit(){                                            // view_list.jsxi:434
 		var p;
 		
-		Cars.on('lazyscan:start',                                                  // view_list.jsxi:447
+		Cars.on('lazyscan:start',                                                  // view_list.jsxi:436
+			function (list){                                                       // view_list.jsxi:437
+				p = _aside.find('progress').show()[0];                             // view_list.jsxi:438
+				p.indeterminate = false;                                           // view_list.jsxi:439
+				p.max = list.length;                                               // view_list.jsxi:440
+				p.value = 0;                                                       // view_list.jsxi:441
+				$('#cars-list-test-acd').attr('disabled', true);                   // view_list.jsxi:443
+			}).on('lazyscan:progress',                                             // view_list.jsxi:445
+			function (i, m){                                                       // view_list.jsxi:445
+				p.value = i;                                                       // view_list.jsxi:446
+			}).on('lazyscan:ready',                                                // view_list.jsxi:448
 			function (list){                                                       // view_list.jsxi:448
-				p = _aside.find('progress').show()[0];                             // view_list.jsxi:449
-				p.indeterminate = false;                                           // view_list.jsxi:450
-				p.max = list.length;                                               // view_list.jsxi:451
-				p.value = 0;                                                       // view_list.jsxi:452
-				$('#cars-list-test-acd').attr('disabled', true);                   // view_list.jsxi:454
-			}).on('lazyscan:progress',                                             // view_list.jsxi:456
-			function (i, m){                                                       // view_list.jsxi:456
-				p.value = i;                                                       // view_list.jsxi:457
-			}).on('lazyscan:ready',                                                // view_list.jsxi:459
-			function (list){                                                       // view_list.jsxi:459
-				p.style.display = 'none';                                          // view_list.jsxi:460
-				$('#cars-list-test-acd').attr('disabled', null);                   // view_list.jsxi:462
+				p.style.display = 'none';                                          // view_list.jsxi:449
+				$('#cars-list-test-acd').attr('disabled', null);                   // view_list.jsxi:451
 			});
 	}
 	
@@ -9585,10 +9581,10 @@ var ViewList = (function (){                                                    
 				return _selected;                                                  // view_list.jsxi:8
 			})
 		});
-	(function (){                                                                  // view_list.jsxi:466
-		init();                                                                    // view_list.jsxi:467
-		lazyLoadingProgressInit();                                                 // view_list.jsxi:468
-		mediator.extend(ViewList);                                                 // view_list.jsxi:469
+	(function (){                                                                  // view_list.jsxi:455
+		init();                                                                    // view_list.jsxi:456
+		lazyLoadingProgressInit();                                                 // view_list.jsxi:457
+		mediator.extend(ViewList);                                                 // view_list.jsxi:458
 	})();
 	return ViewList;
 })();

@@ -31,6 +31,13 @@ Small utility for easy editing *ui_car.json* files. Written using [NW.js](http:/
 * Custom Launcher (with GT-like career mode?)
 
 #### Changelog
+* 0.3.53
+    * Ambient shadows update fixed
+* 0.3.52
+    * Custom Showroom Auto-update previews fixed
+    * Custom Showroom improved (now with normal maps)
+    * Ambient shadows update for AMD videocards
+    * A lot of fixes for systems which use “0,1” instead of “0.1”
 * 0.3.51
     * Bugfixes
 * 0.3.49
@@ -195,7 +202,7 @@ Small utility for easy editing *ui_car.json* files. Written using [NW.js](http:/
 * DirectX 11 for custom showroom
 
 #### Download
-* [Last (0.3.51)](https://yadi.sk/d/LwzWmtR9jszT4)
+* [Last (0.3.54)](https://yadi.sk/d/wZ83W2JmkcbAN)
 * [Stable (0.3.49)](http://www.racedepartment.com/downloads/actools-cars-manager.6518/)
 * [Previous](http://www.racedepartment.com/downloads/actools-cars-manager.6518/history) [builds](https://yadi.sk/d/eHr0NCP4hSAfq)
 

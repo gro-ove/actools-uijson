@@ -69,68 +69,49 @@ static class ViewList {
         if (v){
             i.style.display = 'block';
 
-            var s = v.trim().split(/\s+/);
-            var brandFilter = '',
-                classFilter = '',
-                tagFilter = '',
-                countryFilter = '',
-                yearFilter = '',
-                authorFilter = '';
+            var f;
+            try {
+                var fCode = v.replace(/\s+/g, ' ').trim()
+                    .split(/\s*\|\s*/).join('  ||  ')
+                    .split(/\s*!\s*/).join('  !  ')
+                    .split(/\s*&\s*/).join('  &&  ')
+                    .split(/\s*\(\s*/).join('  (  ')
+                    .split(/\s*\)\s*/).join('  )  ')
+                    .replace(/(?:^|  )(?!&&|\|\||[()!])([^ ]+(?:\s[^ ]+)*)/g, function(_, a){ 
+                        if (!a) return 'true';
 
-            var vv = s.filter(function (e){
-                if (/^brand:(.*)/.test(e)){
-                    brandFilter = (brandFilter && brandFilter + '|') + RegExp.$1;
-                    return false;
-                }
+                        if (/^brand:(.*)/.test(a)) return `(car.data && (%0).test(car.data.brand))`(RegExp.fromQuery(RegExp.$1, true));
+                        if (/^class:(.*)/.test(a)) return `(car.data && (%0).test(car.data.class))`(RegExp.fromQuery(RegExp.$1, true));
+                        if (/^country:(.*)/.test(a)) return `(car.data && (%0).test(car.data.country))`(RegExp.fromQuery(RegExp.$1, true));
+                        if (/^year:(.*)/.test(a)) return `(car.data && (%0).test(car.data.year))`(RegExp.fromQuery(RegExp.$1, true));
+                        if (/^year([><=])(.*)/.test(a)) return `(car.data && car.data.year %1 %0)`(JSON.stringify(RegExp.$2), RegExp.$1 == '=' ? '==' : RegExp.$1);
+                        if (/^author:(.*)/.test(a)) return `(car.data && (%0).test(car.data.author))`(RegExp.fromQuery(RegExp.$1, true));
+                        if (/^tag:(.*)/.test(a)) return `(car.data && car.data.tags.some(RegExp.prototype.test.bind(%0)))`(RegExp.fromQuery(RegExp.$1, true));
 
-                if (/^class:(.*)/.test(e)){
-                    classFilter = (classFilter && classFilter + '|') + RegExp.$1;
-                    return false;
-                }
+                        if (/^(?:bhp|power):(.*)/.test(a)) return `(%0).test(car.getSpec('bhp'))`(RegExp.fromQuery(RegExp.$1, true));
+                        if (/^(?:bhp|power)([><=])(.*)/.test(a)) return `(car.getSpec('bhp') %1 %0)`(JSON.stringify(RegExp.$2), RegExp.$1 == '=' ? '==' : RegExp.$1);
+                        if (/^(?:weight|mass):(.*)/.test(a)) return `(%0).test(car.getSpec('weight'))`(RegExp.fromQuery(RegExp.$1, true));
+                        if (/^(?:weight|mass)([><=])(.*)/.test(a)) return `(car.getSpec('weight') %1 %0)`(JSON.stringify(RegExp.$2), RegExp.$1 == '=' ? '==' : RegExp.$1);
 
-                if (/^tag:(.*)/.test(e)){
-                    tagFilter = (tagFilter && tagFilter + '|') + RegExp.$1;
-                    return false;
-                }
+                        if (/^torque:(.*)/.test(a)) return `(%0).test(car.getSpec('torque'))`(RegExp.fromQuery(RegExp.$1, true));
+                        if (/^torque([><=])(.*)/.test(a)) return `(car.getSpec('torque') %1 %0)`(JSON.stringify(RegExp.$2), RegExp.$1 == '=' ? '==' : RegExp.$1);
+                        if (/^topspeed:(.*)/.test(a)) return `(%0).test(car.getSpec('topspeed'))`(RegExp.fromQuery(RegExp.$1, true));
+                        if (/^topspeed([><=])(.*)/.test(a)) return `(car.getSpec('topspeed') %1 %0)`(JSON.stringify(RegExp.$2), RegExp.$1 == '=' ? '==' : RegExp.$1);
+                        if (/^acceleration:(.*)/.test(a)) return `(%0).test(car.getSpec('acceleration'))`(RegExp.fromQuery(RegExp.$1, true));
+                        if (/^acceleration([><=])(.*)/.test(a)) return `(car.getSpec('acceleration') %1 %0)`(JSON.stringify(RegExp.$2), RegExp.$1 == '=' ? '==' : RegExp.$1);
+                        if (/^pwratio:(.*)/.test(a)) return `(%0).test(car.getSpec('pwratio'))`(RegExp.fromQuery(RegExp.$1, true));
+                        if (/^pwratio([><=])(.*)/.test(a)) return `(car.getSpec('pwratio') %1 %0)`(JSON.stringify(RegExp.$2), RegExp.$1 == '=' ? '==' : RegExp.$1);
 
-                if (/^country:(.*)/.test(e)){
-                    countryFilter = (countryFilter && countryFilter + '|') + RegExp.$1;
-                    return false;
-                }
+                        var r = RegExp.fromQuery(a);
+                        return '((%0).test(car.id) || car.data && (%0).test(car.data.name))'(r);
+                    });
 
-                if (/^author:(.*)/.test(e)){
-                    authorFilter = (authorFilter && authorFilter + '|') + RegExp.$1;
-                    return false;
-                }
-
-                if (/^year:(.*)/.test(e)){
-                    yearFilter = (yearFilter && yearFilter + '|') + RegExp.$1;
-                    return false;
-                }
-
-                return true;
-            });
-
-            var re = RegExp.fromQuery(vv.join(' '));
-            var brandRe = brandFilter && RegExp.fromQuery(brandFilter, true); 
-            var classRe = classFilter && RegExp.fromQuery(classFilter, true); 
-            var tagRe = tagFilter && RegExp.fromQuery(tagFilter, true);
-            var countryRe = countryFilter && RegExp.fromQuery(countryFilter, true);
-            var authorRe = authorFilter && RegExp.fromQuery(authorFilter, true);
-            var yearRe = yearFilter && RegExp.fromQuery(yearFilter, true);
-
-            var f = function (car){
-                if (brandRe && (!car.data || !brandRe.test(car.data.brand)) ||
-                    classRe && (!car.data || !classRe.test(car.data.class)) ||
-                    tagRe && (!car.data || !car.data.tags.some(tagRe.test.bind(tagRe))) ||
-                    countryRe && (!car.data || !countryRe.test(car.data.country)) ||
-                    yearRe && (!car.data || !yearRe.test(car.data.year)) ||
-                    authorRe && (!car.data || !authorRe.test(car.data.author))){
-                    return false;
-                } else {
-                    return re.test(car.id) || car.data && re.test(car.data.name);
-                }
-            };
+                console.debug(fCode);
+                f = eval(`(function (car){ return %0; })`(fCode));
+            } catch (e){
+                f = lambda false;
+                console.warn('broken query: ' + e);
+            }
 
             _aside.find('#cars-list > div > [data-id]').each(function (){
                 this.parentNode.style.display = f(Cars.byName(this.getAttribute('data-id'))) ? null : 'none';
