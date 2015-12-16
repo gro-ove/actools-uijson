@@ -9079,15 +9079,15 @@ var ViewList = (function (){                                                    
 		_selected,                                                                 // view_list.jsxi:4
 		_aside = $(document.getElementsByTagName('aside')[0]),                     // view_list.jsxi:5
 		_node = $(document.getElementById('cars-list')),                           // view_list.jsxi:6
-		_sortFn = {                                                                // view_list.jsxi:138
-			id: (function (a, b){                                                  // view_list.jsxi:138
+		_sortFn = {                                                                // view_list.jsxi:133
+			id: (function (a, b){                                                  // view_list.jsxi:133
 				return !a.disabled && b.disabled ? - 1 : a.disabled && !b.disabled ? 1 : a.id.localeCompare(b.id);
 			}), 
-			displayName: (function (a, b){                                         // view_list.jsxi:142
+			displayName: (function (a, b){                                         // view_list.jsxi:137
 				return !a.disabled && b.disabled ? - 1 : a.disabled && !b.disabled ? 1 : a.displayName.localeCompare(b.displayName);
 			})
 		}, 
-		sortingEnabled = true;                                                     // view_list.jsxi:146
+		sortingEnabled = true;                                                     // view_list.jsxi:141
 	
 	function scrollToSelected(){                                                   // view_list.jsxi:10
 		var n = _node[0].querySelector('.selected');
@@ -9170,81 +9170,102 @@ var ViewList = (function (){                                                    
 			
 			try {
 				var fCode = v.replace(/\s+/g, ' ').trim().split(/\s*\|\s*/).join('  ||  ').split(/\s*!\s*/).join('  !  ').split(/\s*&\s*/).join('  &&  ').split(/\s*\(\s*/).join('  (  ').split(/\s*\)\s*/).join('  )  ').replace(/(?:^|  )(?!&&|\|\||[()!])([^ ]+(?:\s[^ ]+)*)/g, 
-					function (_, a){                                               // view_list.jsxi:95
-						if (!a)                                                    // view_list.jsxi:96
-							return 'true';                                         // view_list.jsxi:96
+					function (_, a){                                               // view_list.jsxi:80
+						if (!a)                                                    // view_list.jsxi:81
+							return 'true';                                         // view_list.jsxi:81
 						
-						if (/^brand:(.*)/.test(a))                                 // view_list.jsxi:98
+						if (/^brand:(.*)/.test(a))                                 // view_list.jsxi:83
 							return '(car.data && (' + RegExp.fromQuery(RegExp.$1, true) + ').test(car.data.brand))';
 						
-						if (/^class:(.*)/.test(a))                                 // view_list.jsxi:99
+						if (/^class:(.*)/.test(a))                                 // view_list.jsxi:84
 							return '(car.data && (' + RegExp.fromQuery(RegExp.$1, true) + ').test(car.data.class))';
 						
-						if (/^country:(.*)/.test(a))                               // view_list.jsxi:100
+						if (/^country:(.*)/.test(a))                               // view_list.jsxi:85
 							return '(car.data && (' + RegExp.fromQuery(RegExp.$1, true) + ').test(car.data.country))';
 						
-						if (/^year:(.*)/.test(a))                                  // view_list.jsxi:101
+						if (/^year:(.*)/.test(a))                                  // view_list.jsxi:86
 							return '(car.data && (' + RegExp.fromQuery(RegExp.$1, true) + ').test(car.data.year))';
 						
-						if (/^year([><=])(.*)/.test(a))                            // view_list.jsxi:102
+						if (/^year([><=])(.*)/.test(a))                            // view_list.jsxi:87
 							return '(car.data && car.data.year ' + (RegExp.$1 == '=' ? '==' : RegExp.$1) + ' ' + JSON.stringify(RegExp.$2) + ')';
 						
-						if (/^author:(.*)/.test(a))                                // view_list.jsxi:103
+						if (/^author:(.*)/.test(a))                                // view_list.jsxi:88
 							return '(car.data && (' + RegExp.fromQuery(RegExp.$1, true) + ').test(car.data.author))';
 						
-						if (/^tag:(.*)/.test(a))                                   // view_list.jsxi:104
+						if (/^tag:(.*)/.test(a))                                   // view_list.jsxi:89
 							return '(car.data && car.data.tags.some(RegExp.prototype.test.bind(' + RegExp.fromQuery(RegExp.$1, true) + ')))';
 						
-						if (/^(?:bhp|power):(.*)/.test(a))                         // view_list.jsxi:106
+						if (/^(?:bhp|power):(.*)/.test(a))                         // view_list.jsxi:91
 							return '(' + RegExp.fromQuery(RegExp.$1, true) + ').test(car.getSpec(\'bhp\'))';
 						
-						if (/^(?:bhp|power)([><=])(.*)/.test(a))                   // view_list.jsxi:107
+						if (/^(?:bhp|power)([><=])(.*)/.test(a))                   // view_list.jsxi:92
 							return '(car.getSpec(\'bhp\') ' + (RegExp.$1 == '=' ? '==' : RegExp.$1) + ' ' + JSON.stringify(RegExp.$2) + ')';
 						
-						if (/^(?:torque):(.*)/.test(a))                            // view_list.jsxi:108
-							return '(' + RegExp.fromQuery(RegExp.$1, true) + ').test(car.getSpec(\'torque\'))';
-						
-						if (/^(?:torque)([><=])(.*)/.test(a))                      // view_list.jsxi:109
-							return '(car.getSpec(\'torque\') ' + (RegExp.$1 == '=' ? '==' : RegExp.$1) + ' ' + JSON.stringify(RegExp.$2) + ')';
-						
-						if (/^(?:weight|mass):(.*)/.test(a))                       // view_list.jsxi:110
+						if (/^(?:weight|mass):(.*)/.test(a))                       // view_list.jsxi:93
 							return '(' + RegExp.fromQuery(RegExp.$1, true) + ').test(car.getSpec(\'weight\'))';
 						
-						if (/^(?:weight|mass)([><=])(.*)/.test(a))                 // view_list.jsxi:111
+						if (/^(?:weight|mass)([><=])(.*)/.test(a))                 // view_list.jsxi:94
 							return '(car.getSpec(\'weight\') ' + (RegExp.$1 == '=' ? '==' : RegExp.$1) + ' ' + JSON.stringify(RegExp.$2) + ')';
+						
+						if (/^torque:(.*)/.test(a))                                // view_list.jsxi:96
+							return '(' + RegExp.fromQuery(RegExp.$1, true) + ').test(car.getSpec(\'torque\'))';
+						
+						if (/^torque([><=])(.*)/.test(a))                          // view_list.jsxi:97
+							return '(car.getSpec(\'torque\') ' + (RegExp.$1 == '=' ? '==' : RegExp.$1) + ' ' + JSON.stringify(RegExp.$2) + ')';
+						
+						if (/^topspeed:(.*)/.test(a))                              // view_list.jsxi:98
+							return '(' + RegExp.fromQuery(RegExp.$1, true) + ').test(car.getSpec(\'topspeed\'))';
+						
+						if (/^topspeed([><=])(.*)/.test(a))                        // view_list.jsxi:99
+							return '(car.getSpec(\'topspeed\') ' + (RegExp.$1 == '=' ? '==' : RegExp.$1) + ' ' + JSON.stringify(RegExp.$2) + ')';
+						
+						if (/^acceleration:(.*)/.test(a))                          // view_list.jsxi:100
+							return '(' + RegExp.fromQuery(RegExp.$1, true) + ').test(car.getSpec(\'acceleration\'))';
+						
+						if (/^acceleration([><=])(.*)/.test(a))                    // view_list.jsxi:101
+							return '(car.getSpec(\'acceleration\') ' + (RegExp.$1 == '=' ? '==' : RegExp.$1) + ' ' + JSON.stringify(RegExp.$2) + ')';
+						
+						if (/^pwratio:(.*)/.test(a))                               // view_list.jsxi:102
+							return '(' + RegExp.fromQuery(RegExp.$1, true) + ').test(car.getSpec(\'pwratio\'))';
+						
+						if (/^pwratio([><=])(.*)/.test(a))                         // view_list.jsxi:103
+							return '(car.getSpec(\'pwratio\') ' + (RegExp.$1 == '=' ? '==' : RegExp.$1) + ' ' + JSON.stringify(RegExp.$2) + ')';
 						
 						var r = RegExp.fromQuery(a);
 						return '((' + r + ').test(car.id) || car.data && (' + r + ').test(car.data.name))';
 					});
 				
-				console.debug(fCode);                                              // view_list.jsxi:117
-				f = eval('(function (car){ return ' + fCode + '; })');             // view_list.jsxi:118
-			} catch (e){                                                           // view_list.jsxi:119
-				f = function (arg){                                                // view_list.jsxi:120
+				console.debug(fCode);                                              // view_list.jsxi:109
+				i.style.boxShadow = null;                                          // view_list.jsxi:110
+				f = eval('(function (car){ return ' + fCode + '; })');             // view_list.jsxi:111
+			} catch (e){                                                           // view_list.jsxi:112
+				f = function (arg){                                                // view_list.jsxi:113
 					return false;
 				};
-				console.warn('broken query: ' + e);                                // view_list.jsxi:121
+				i.style.boxShadow = '#f00 0 0 0 2px';                              // view_list.jsxi:114
+				console.warn('broken query: ' + e);                                // view_list.jsxi:115
 			} 
 			
-			_aside.find('#cars-list > div > [data-id]').each(function (){          // view_list.jsxi:124
+			_aside.find('#cars-list > div > [data-id]').each(function (){          // view_list.jsxi:118
 				this.parentNode.style.display = f(Cars.byName(this.getAttribute('data-id'))) ? null : 'none';
 			});
 		} else {
-			i.style.display = 'hide';                                              // view_list.jsxi:128
-			_aside.find('#cars-list > div').show();                                // view_list.jsxi:129
+			i.style.display = 'hide';                                              // view_list.jsxi:122
+			i.style.boxShadow = null;                                              // view_list.jsxi:123
+			_aside.find('#cars-list > div').show();                                // view_list.jsxi:124
 		}
 	};
-	ViewList.addFilter = function (v){                                             // view_list.jsxi:133
+	ViewList.addFilter = function (v){                                             // view_list.jsxi:128
 		var a = _aside.find('#cars-list-filter')[0].value;
 		
 		ViewList.filter((a && a + ' ') + v);
 	};
-	ViewList.sort = function (){                                                   // view_list.jsxi:148
-		if (!sortingEnabled)                                                       // view_list.jsxi:149
+	ViewList.sort = function (){                                                   // view_list.jsxi:143
+		if (!sortingEnabled)                                                       // view_list.jsxi:144
 			return;
 		
-		_aside.find('#total-cars').text(Cars.list.filter(function (e){             // view_list.jsxi:151
-			return e.parent == null;                                               // view_list.jsxi:152
+		_aside.find('#total-cars').text(Cars.list.filter(function (e){             // view_list.jsxi:146
+			return e.parent == null;                                               // view_list.jsxi:147
 		}).length).attr('title', 'Including modded versions: ' + Cars.list.length);
 		
 		var sorted = Cars.list.sort(_sortFn.displayName);
@@ -9253,241 +9274,241 @@ var ViewList = (function (){                                                    
 		
 		var children = Array.prototype.slice.call(listNode.children);
 		
-		for (var __1h = 0; __1h < sorted.length; __1h ++){                         // view_list.jsxi:159
+		for (var __1h = 0; __1h < sorted.length; __1h ++){                         // view_list.jsxi:154
 			var car = sorted[__1h];
 			
-			for (var __1g = 0; __1g < children.length; __1g ++){                   // view_list.jsxi:160
+			for (var __1g = 0; __1g < children.length; __1g ++){                   // view_list.jsxi:155
 				var entry = children[__1g];
 				
-				if (entry.children[0].getAttribute('data-id') === car.id){         // view_list.jsxi:161
-					listNode.appendChild(entry);                                   // view_list.jsxi:162
+				if (entry.children[0].getAttribute('data-id') === car.id){         // view_list.jsxi:156
+					listNode.appendChild(entry);                                   // view_list.jsxi:157
 					
 					break;
 				}
 			}
 		}
 		
-		scrollToSelected();                                                        // view_list.jsxi:168
+		scrollToSelected();                                                        // view_list.jsxi:163
 	};
 	
-	function init(){                                                               // view_list.jsxi:171
-		BatchProcessing.on('start',                                                // view_list.jsxi:172
-			function (arg){                                                        // view_list.jsxi:173
-				return sortingEnabled = false;                                     // view_list.jsxi:173
-			}).on('end',                                                           // view_list.jsxi:174
-			function (arg){                                                        // view_list.jsxi:174
-				sortingEnabled = true;                                             // view_list.jsxi:175
+	function init(){                                                               // view_list.jsxi:166
+		BatchProcessing.on('start',                                                // view_list.jsxi:167
+			function (arg){                                                        // view_list.jsxi:168
+				return sortingEnabled = false;                                     // view_list.jsxi:168
+			}).on('end',                                                           // view_list.jsxi:169
+			function (arg){                                                        // view_list.jsxi:169
+				sortingEnabled = true;                                             // view_list.jsxi:170
 				ViewList.sort();
 			});
-		Cars.on('scan:start',                                                      // view_list.jsxi:179
-			function (){                                                           // view_list.jsxi:180
-				sortingEnabled = false;                                            // view_list.jsxi:181
-				_aside.find('#cars-list').empty();                                 // view_list.jsxi:183
-				document.body.removeChild(_aside[0]);                              // view_list.jsxi:184
-			}).on('scan:ready',                                                    // view_list.jsxi:186
-			function (list){                                                       // view_list.jsxi:186
-				sortingEnabled = true;                                             // view_list.jsxi:187
+		Cars.on('scan:start',                                                      // view_list.jsxi:174
+			function (){                                                           // view_list.jsxi:175
+				sortingEnabled = false;                                            // view_list.jsxi:176
+				_aside.find('#cars-list').empty();                                 // view_list.jsxi:178
+				document.body.removeChild(_aside[0]);                              // view_list.jsxi:179
+			}).on('scan:ready',                                                    // view_list.jsxi:181
+			function (list){                                                       // view_list.jsxi:181
+				sortingEnabled = true;                                             // view_list.jsxi:182
 				ViewList.sort();
-				document.body.appendChild(_aside[0]);                              // view_list.jsxi:190
+				document.body.appendChild(_aside[0]);                              // view_list.jsxi:185
 				
-				if (list.length > 0){                                              // view_list.jsxi:192
+				if (list.length > 0){                                              // view_list.jsxi:187
 					ViewList.select(Cars.byName(localStorage.selectedCar) || list[0]);
 				}
-			}).on('new.car',                                                       // view_list.jsxi:196
-			function (car){                                                        // view_list.jsxi:196
+			}).on('new.car',                                                       // view_list.jsxi:191
+			function (car){                                                        // view_list.jsxi:191
 				var s = document.createElement('span');
 				
-				s.textContent = car.displayName;                                   // view_list.jsxi:198
+				s.textContent = car.displayName;                                   // view_list.jsxi:193
 				
-				if (car.disabled)                                                  // view_list.jsxi:199
-					s.classList.add('disabled');                                   // view_list.jsxi:199
+				if (car.disabled)                                                  // view_list.jsxi:194
+					s.classList.add('disabled');                                   // view_list.jsxi:194
 				
-				s.setAttribute('title', car.path);                                 // view_list.jsxi:201
-				s.setAttribute('data-id', car.id);                                 // view_list.jsxi:202
-				s.setAttribute('data-name', car.id);                               // view_list.jsxi:203
-				s.setAttribute('data-path', car.path);                             // view_list.jsxi:204
+				s.setAttribute('title', car.path);                                 // view_list.jsxi:196
+				s.setAttribute('data-id', car.id);                                 // view_list.jsxi:197
+				s.setAttribute('data-name', car.id);                               // view_list.jsxi:198
+				s.setAttribute('data-path', car.path);                             // view_list.jsxi:199
 				
 				var d = document.createElement('div');
 				
-				d.appendChild(s);                                                  // view_list.jsxi:207
+				d.appendChild(s);                                                  // view_list.jsxi:202
 				
-				if (car.children.length > 0){                                      // view_list.jsxi:209
-					d.setAttribute('data-children', car.children.length + 1);      // view_list.jsxi:210
+				if (car.children.length > 0){                                      // view_list.jsxi:204
+					d.setAttribute('data-children', car.children.length + 1);      // view_list.jsxi:205
 				}
 				
-				_node[0].appendChild(d);                                           // view_list.jsxi:213
+				_node[0].appendChild(d);                                           // view_list.jsxi:208
 				ViewList.sort();
-			}).on('remove.car',                                                    // view_list.jsxi:216
-			function (car){                                                        // view_list.jsxi:216
-				if (car === _selected){                                            // view_list.jsxi:217
+			}).on('remove.car',                                                    // view_list.jsxi:211
+			function (car){                                                        // view_list.jsxi:211
+				if (car === _selected){                                            // view_list.jsxi:212
 					ViewList.selectNear();
 				}
 				
 				var d = _node[0].querySelector('[data-id="' + car.id + '"]').parentNode;
 				
-				d.parentNode.removeChild(d);                                       // view_list.jsxi:222
-			}).on('update.car.data',                                               // view_list.jsxi:224
-			function (car, upd){                                                   // view_list.jsxi:224
+				d.parentNode.removeChild(d);                                       // view_list.jsxi:217
+			}).on('update.car.data',                                               // view_list.jsxi:219
+			function (car, upd){                                                   // view_list.jsxi:219
 				_node.find('[data-id="' + car.id + '"]').text(car.displayName).attr('data-name', car.displayName.toLowerCase());
 				ViewList.filter(_aside.find('#cars-list-filter').val());
 				
-				if (upd === 'update.car.data:name'){                               // view_list.jsxi:229
+				if (upd === 'update.car.data:name'){                               // view_list.jsxi:224
 					ViewList.sort();
 				}
-			}).on('update.car.parent',                                             // view_list.jsxi:233
-			function (car){                                                        // view_list.jsxi:233
+			}).on('update.car.parent',                                             // view_list.jsxi:228
+			function (car){                                                        // view_list.jsxi:228
 				var d = _node[0].querySelector('[data-id="' + car.id + '"]').parentNode;
 				
-				if (car.error.length > 0){                                         // view_list.jsxi:235
+				if (car.error.length > 0){                                         // view_list.jsxi:230
 					var c = d.parentNode;
 					
 					if (c.tagName === 'DIV' && c.querySelectorAll('.error').length == 1){
-						c.classList.remove('error');                               // view_list.jsxi:238
+						c.classList.remove('error');                               // view_list.jsxi:233
 					}
 				}
 				
-				if (car.parent){                                                   // view_list.jsxi:242
+				if (car.parent){                                                   // view_list.jsxi:237
 					var p = _node[0].querySelector('[data-id="' + car.parent.id + '"]').parentNode;
 					
-					p.appendChild(d);                                              // view_list.jsxi:244
+					p.appendChild(d);                                              // view_list.jsxi:239
 					
-					if (d.classList.contains('error')){                            // view_list.jsxi:245
-						d.classList.remove('error');                               // view_list.jsxi:246
-						p.classList.add('error');                                  // view_list.jsxi:247
+					if (d.classList.contains('error')){                            // view_list.jsxi:240
+						d.classList.remove('error');                               // view_list.jsxi:241
+						p.classList.add('error');                                  // view_list.jsxi:242
 					}
 				} else {
-					_node[0].appendChild(d);                                       // view_list.jsxi:250
+					_node[0].appendChild(d);                                       // view_list.jsxi:245
 					ViewList.sort();
 				}
 				
-				scrollToSelected();                                                // view_list.jsxi:254
-			}).on('update.car.children',                                           // view_list.jsxi:256
-			function (car){                                                        // view_list.jsxi:256
+				scrollToSelected();                                                // view_list.jsxi:249
+			}).on('update.car.children',                                           // view_list.jsxi:251
+			function (car){                                                        // view_list.jsxi:251
 				var e = _node[0].querySelector('[data-id="' + car.id + '"]');
 				
-				if (!e)                                                            // view_list.jsxi:258
+				if (!e)                                                            // view_list.jsxi:253
 					return;
 				
-				if (car.children.length){                                          // view_list.jsxi:259
+				if (car.children.length){                                          // view_list.jsxi:254
 					e.parentNode.setAttribute('data-children', car.children.length + 1);
 				} else {
-					e.parentNode.removeAttribute('data-children');                 // view_list.jsxi:262
+					e.parentNode.removeAttribute('data-children');                 // view_list.jsxi:257
 				}
-			}).on('update.car.path',                                               // view_list.jsxi:265
-			function (car){                                                        // view_list.jsxi:265
+			}).on('update.car.path',                                               // view_list.jsxi:260
+			function (car){                                                        // view_list.jsxi:260
 				var e = _node[0].querySelector('[data-id="' + car.id + '"]');
 				
-				if (!e)                                                            // view_list.jsxi:267
+				if (!e)                                                            // view_list.jsxi:262
 					return;
 				
-				e.setAttribute('data-path', car.path);                             // view_list.jsxi:268
-				e.setAttribute('title', car.path);                                 // view_list.jsxi:269
-			}).on('update.car.disabled',                                           // view_list.jsxi:271
-			function (car){                                                        // view_list.jsxi:271
+				e.setAttribute('data-path', car.path);                             // view_list.jsxi:263
+				e.setAttribute('title', car.path);                                 // view_list.jsxi:264
+			}).on('update.car.disabled',                                           // view_list.jsxi:266
+			function (car){                                                        // view_list.jsxi:266
 				var e = _node[0].querySelector('[data-id="' + car.id + '"]');
 				
-				if (!e)                                                            // view_list.jsxi:273
+				if (!e)                                                            // view_list.jsxi:268
 					return;
 				
-				if (car.disabled){                                                 // view_list.jsxi:274
-					e.classList.add('disabled');                                   // view_list.jsxi:275
+				if (car.disabled){                                                 // view_list.jsxi:269
+					e.classList.add('disabled');                                   // view_list.jsxi:270
 				} else {
-					e.classList.remove('disabled');                                // view_list.jsxi:277
+					e.classList.remove('disabled');                                // view_list.jsxi:272
 				}
 				
 				ViewList.sort();
-			}).on('update.car.changed',                                            // view_list.jsxi:282
-			function (car){                                                        // view_list.jsxi:282
+			}).on('update.car.changed',                                            // view_list.jsxi:277
+			function (car){                                                        // view_list.jsxi:277
 				var e = _node[0].querySelector('[data-id="' + car.id + '"]');
 				
-				if (!e)                                                            // view_list.jsxi:284
+				if (!e)                                                            // view_list.jsxi:279
 					return;
 				
-				if (car.changed){                                                  // view_list.jsxi:285
-					e.classList.add('changed');                                    // view_list.jsxi:286
+				if (car.changed){                                                  // view_list.jsxi:280
+					e.classList.add('changed');                                    // view_list.jsxi:281
 				} else {
-					e.classList.remove('changed');                                 // view_list.jsxi:288
+					e.classList.remove('changed');                                 // view_list.jsxi:283
 				}
-			}).on('error',                                                         // view_list.jsxi:291
-			function (car){                                                        // view_list.jsxi:291
+			}).on('error',                                                         // view_list.jsxi:286
+			function (car){                                                        // view_list.jsxi:286
 				var e = _node[0].querySelector('[data-id="' + car.id + '"]');
 				
-				if (!e)                                                            // view_list.jsxi:293
+				if (!e)                                                            // view_list.jsxi:288
 					return;
 				
-				if (car.error.length > 0){                                         // view_list.jsxi:295
-					e.classList.add('error');                                      // view_list.jsxi:296
+				if (car.error.length > 0){                                         // view_list.jsxi:290
+					e.classList.add('error');                                      // view_list.jsxi:291
 				} else {
-					e.classList.remove('error');                                   // view_list.jsxi:298
+					e.classList.remove('error');                                   // view_list.jsxi:293
 				}
 				
-				while (e.parentNode.id !== 'cars-list'){                           // view_list.jsxi:301
-					e = e.parentNode;                                              // view_list.jsxi:302
+				while (e.parentNode.id !== 'cars-list'){                           // view_list.jsxi:296
+					e = e.parentNode;                                              // view_list.jsxi:297
 				}
 				
-				if (car.error.length > 0){                                         // view_list.jsxi:305
-					e.classList.add('error');                                      // view_list.jsxi:306
+				if (car.error.length > 0){                                         // view_list.jsxi:300
+					e.classList.add('error');                                      // view_list.jsxi:301
 				} else {
-					e.classList.remove('error');                                   // view_list.jsxi:308
+					e.classList.remove('error');                                   // view_list.jsxi:303
 				}
 			});
 		_aside.find('#cars-list-filter').on('change paste keyup keypress search', 
-			function (e){                                                          // view_list.jsxi:313
-				if (e.keyCode == 13){                                              // view_list.jsxi:314
+			function (e){                                                          // view_list.jsxi:308
+				if (e.keyCode == 13){                                              // view_list.jsxi:309
+					this.blur();                                                   // view_list.jsxi:310
+				}
+				
+				if (e.keyCode == 27){                                              // view_list.jsxi:313
+					this.value = '';                                               // view_list.jsxi:314
 					this.blur();                                                   // view_list.jsxi:315
 				}
 				
-				if (e.keyCode == 27){                                              // view_list.jsxi:318
-					this.value = '';                                               // view_list.jsxi:319
-					this.blur();                                                   // view_list.jsxi:320
-				}
-				
 				ViewList.filter(this.value);
-			}).on('keydown',                                                       // view_list.jsxi:325
-			function (e){                                                          // view_list.jsxi:325
-				if (e.keyCode == 8 && !this.value){                                // view_list.jsxi:326
-					this.blur();                                                   // view_list.jsxi:327
+			}).on('keydown',                                                       // view_list.jsxi:320
+			function (e){                                                          // view_list.jsxi:320
+				if (e.keyCode == 8 && !this.value){                                // view_list.jsxi:321
+					this.blur();                                                   // view_list.jsxi:322
 				}
-			}).on('blur',                                                          // view_list.jsxi:330
-			function (){                                                           // view_list.jsxi:330
-				if (!this.value){                                                  // view_list.jsxi:331
-					$(this).hide();                                                // view_list.jsxi:332
+			}).on('blur',                                                          // view_list.jsxi:325
+			function (){                                                           // view_list.jsxi:325
+				if (!this.value){                                                  // view_list.jsxi:326
+					$(this).hide();                                                // view_list.jsxi:327
 				}
 			});
-		$(window).on('keydown',                                                    // view_list.jsxi:337
-			function (e){                                                          // view_list.jsxi:338
-				if (Event.isSomeInput(e))                                          // view_list.jsxi:339
+		$(window).on('keydown',                                                    // view_list.jsxi:332
+			function (e){                                                          // view_list.jsxi:333
+				if (Event.isSomeInput(e))                                          // view_list.jsxi:334
 					return;
 				
-				if (e.ctrlKey || e.altKey || e.shiftKey)                           // view_list.jsxi:340
+				if (e.ctrlKey || e.altKey || e.shiftKey)                           // view_list.jsxi:335
 					return;
 				
-				if ($('#dialog')[0])                                               // view_list.jsxi:341
+				if ($('#dialog')[0])                                               // view_list.jsxi:336
 					return;
 				
 				var f = _aside.find('#cars-list-filter');
 				
 				if (/[a-zA-Z\d]/.test(String.fromCharCode(e.keyCode)) || e.keyCode == 8 && f.val()){
-					f.show()[0].focus();                                           // view_list.jsxi:345
+					f.show()[0].focus();                                           // view_list.jsxi:340
 				}
 				
-				if (e.keyCode === 38){                                             // view_list.jsxi:348
+				if (e.keyCode === 38){                                             // view_list.jsxi:343
 					ViewList.selectNear(- 1);
 					return false;
 				}
 				
-				if (e.keyCode === 40){                                             // view_list.jsxi:353
+				if (e.keyCode === 40){                                             // view_list.jsxi:348
 					ViewList.selectNear(1);
 					return false;
 				}
 			});
-		_aside.find('#cars-list-filter-focus').click(function (){                  // view_list.jsxi:359
-			_aside.find('#cars-list-filter').show()[0].focus();                    // view_list.jsxi:360
+		_aside.find('#cars-list-filter-focus').click(function (){                  // view_list.jsxi:354
+			_aside.find('#cars-list-filter').show()[0].focus();                    // view_list.jsxi:355
 		});
-		_aside.find('#cars-list').click(function (e){                              // view_list.jsxi:364
+		_aside.find('#cars-list').click(function (e){                              // view_list.jsxi:359
 			var car = Cars.byName(e.target.getAttribute('data-id'));
 			
-			if (!car)                                                              // view_list.jsxi:366
+			if (!car)                                                              // view_list.jsxi:361
 				return;
 			
 			ViewList.select(car);
@@ -9495,82 +9516,82 @@ var ViewList = (function (){                                                    
 		
 		var cmIgnore = false;
 		
-		_aside.on('contextmenu',                                                   // view_list.jsxi:372
-			function (){                                                           // view_list.jsxi:373
-				this.querySelector('footer').classList.toggle('active');           // view_list.jsxi:374
-				cmIgnore = true;                                                   // view_list.jsxi:375
+		_aside.on('contextmenu',                                                   // view_list.jsxi:367
+			function (){                                                           // view_list.jsxi:368
+				this.querySelector('footer').classList.toggle('active');           // view_list.jsxi:369
+				cmIgnore = true;                                                   // view_list.jsxi:370
 			});
-		$(window).on('click contextmenu',                                          // view_list.jsxi:378
-			(function (e){                                                         // view_list.jsxi:379
-				if (cmIgnore){                                                     // view_list.jsxi:380
-					cmIgnore = false;                                              // view_list.jsxi:381
-				} else if (e.target !== this){                                     // view_list.jsxi:382
-					this.classList.remove('active');                               // view_list.jsxi:383
+		$(window).on('click contextmenu',                                          // view_list.jsxi:373
+			(function (e){                                                         // view_list.jsxi:374
+				if (cmIgnore){                                                     // view_list.jsxi:375
+					cmIgnore = false;                                              // view_list.jsxi:376
+				} else if (e.target !== this){                                     // view_list.jsxi:377
+					this.classList.remove('active');                               // view_list.jsxi:378
 				}
-			}).bind(_aside.find('footer')[0]));                                    // view_list.jsxi:385
-		_aside.find('#cars-list-open-directory').click(function (){                // view_list.jsxi:388
-			if (!_selected)                                                        // view_list.jsxi:389
+			}).bind(_aside.find('footer')[0]));                                    // view_list.jsxi:380
+		_aside.find('#cars-list-open-directory').click(function (){                // view_list.jsxi:383
+			if (!_selected)                                                        // view_list.jsxi:384
 				return;
 			
-			Shell.openItem(AcDir.cars);                                            // view_list.jsxi:390
+			Shell.openItem(AcDir.cars);                                            // view_list.jsxi:385
 		});
-		_aside.find('#cars-list-reload').click(function (){                        // view_list.jsxi:393
-			if (Cars.list.some(function (e){                                       // view_list.jsxi:394
-				return e.changed;                                                  // view_list.jsxi:395
+		_aside.find('#cars-list-reload').click(function (){                        // view_list.jsxi:388
+			if (Cars.list.some(function (e){                                       // view_list.jsxi:389
+				return e.changed;                                                  // view_list.jsxi:390
 			})){
-				new Dialog('Reload',                                               // view_list.jsxi:397
+				new Dialog('Reload',                                               // view_list.jsxi:392
 					[
 						'<p>{0}</p>'.format('Your changes will be lost. Are you sure?')
 					], 
-					reload);                                                       // view_list.jsxi:399
+					reload);                                                       // view_list.jsxi:394
 			} else {
-				reload();                                                          // view_list.jsxi:401
+				reload();                                                          // view_list.jsxi:396
 			}
 			
-			function reload(){                                                     // view_list.jsxi:404
-				Cars.reloadAll();                                                  // view_list.jsxi:405
+			function reload(){                                                     // view_list.jsxi:399
+				Cars.reloadAll();                                                  // view_list.jsxi:400
 			}
 		});
-		_aside.find('#cars-list-test-acd').click(function (){                      // view_list.jsxi:409
-			Cars.acdTest();                                                        // view_list.jsxi:410
+		_aside.find('#cars-list-test-acd').click(function (){                      // view_list.jsxi:404
+			Cars.acdTest();                                                        // view_list.jsxi:405
 		});
-		_aside.find('#cars-list-batch').click(function (){                         // view_list.jsxi:414
-			if (_aside.find('#cars-list-filter').val()){                           // view_list.jsxi:415
+		_aside.find('#cars-list-batch').click(function (){                         // view_list.jsxi:409
+			if (_aside.find('#cars-list-filter').val()){                           // view_list.jsxi:410
 				var filtered = [];
 				
 				var n = _node[0].querySelectorAll('[data-id]');
 				
-				for (var i = 0; i < n.length; i ++){                               // view_list.jsxi:419
-					filtered.push(Cars.byName(n[i].getAttribute('data-id')));      // view_list.jsxi:420
+				for (var i = 0; i < n.length; i ++){                               // view_list.jsxi:414
+					filtered.push(Cars.byName(n[i].getAttribute('data-id')));      // view_list.jsxi:415
 				}
 				
-				BatchProcessing.select(filtered);                                  // view_list.jsxi:423
+				BatchProcessing.select(filtered);                                  // view_list.jsxi:418
 			} else {
-				BatchProcessing.select(Cars.list.slice());                         // view_list.jsxi:425
+				BatchProcessing.select(Cars.list.slice());                         // view_list.jsxi:420
 			}
 		});
-		_aside.find('#cars-list-save').click(function (){                          // view_list.jsxi:429
-			Cars.saveAll();                                                        // view_list.jsxi:430
+		_aside.find('#cars-list-save').click(function (){                          // view_list.jsxi:424
+			Cars.saveAll();                                                        // view_list.jsxi:425
 		});
 	}
 	
-	function lazyLoadingProgressInit(){                                            // view_list.jsxi:434
+	function lazyLoadingProgressInit(){                                            // view_list.jsxi:429
 		var p;
 		
-		Cars.on('lazyscan:start',                                                  // view_list.jsxi:436
-			function (list){                                                       // view_list.jsxi:437
-				p = _aside.find('progress').show()[0];                             // view_list.jsxi:438
-				p.indeterminate = false;                                           // view_list.jsxi:439
-				p.max = list.length;                                               // view_list.jsxi:440
-				p.value = 0;                                                       // view_list.jsxi:441
-				$('#cars-list-test-acd').attr('disabled', true);                   // view_list.jsxi:443
-			}).on('lazyscan:progress',                                             // view_list.jsxi:445
-			function (i, m){                                                       // view_list.jsxi:445
-				p.value = i;                                                       // view_list.jsxi:446
-			}).on('lazyscan:ready',                                                // view_list.jsxi:448
-			function (list){                                                       // view_list.jsxi:448
-				p.style.display = 'none';                                          // view_list.jsxi:449
-				$('#cars-list-test-acd').attr('disabled', null);                   // view_list.jsxi:451
+		Cars.on('lazyscan:start',                                                  // view_list.jsxi:431
+			function (list){                                                       // view_list.jsxi:432
+				p = _aside.find('progress').show()[0];                             // view_list.jsxi:433
+				p.indeterminate = false;                                           // view_list.jsxi:434
+				p.max = list.length;                                               // view_list.jsxi:435
+				p.value = 0;                                                       // view_list.jsxi:436
+				$('#cars-list-test-acd').attr('disabled', true);                   // view_list.jsxi:438
+			}).on('lazyscan:progress',                                             // view_list.jsxi:440
+			function (i, m){                                                       // view_list.jsxi:440
+				p.value = i;                                                       // view_list.jsxi:441
+			}).on('lazyscan:ready',                                                // view_list.jsxi:443
+			function (list){                                                       // view_list.jsxi:443
+				p.style.display = 'none';                                          // view_list.jsxi:444
+				$('#cars-list-test-acd').attr('disabled', null);                   // view_list.jsxi:446
 			});
 	}
 	
@@ -9581,10 +9602,10 @@ var ViewList = (function (){                                                    
 				return _selected;                                                  // view_list.jsxi:8
 			})
 		});
-	(function (){                                                                  // view_list.jsxi:455
-		init();                                                                    // view_list.jsxi:456
-		lazyLoadingProgressInit();                                                 // view_list.jsxi:457
-		mediator.extend(ViewList);                                                 // view_list.jsxi:458
+	(function (){                                                                  // view_list.jsxi:450
+		init();                                                                    // view_list.jsxi:451
+		lazyLoadingProgressInit();                                                 // view_list.jsxi:452
+		mediator.extend(ViewList);                                                 // view_list.jsxi:453
 	})();
 	return ViewList;
 })();

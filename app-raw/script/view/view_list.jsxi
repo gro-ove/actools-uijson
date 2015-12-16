@@ -107,9 +107,11 @@ static class ViewList {
                     });
 
                 console.debug(fCode);
+                i.style.boxShadow = null;
                 f = eval(`(function (car){ return %0; })`(fCode));
             } catch (e){
                 f = lambda false;
+                i.style.boxShadow = '#f00 0 0 0 2px';
                 console.warn('broken query: ' + e);
             }
 
@@ -118,6 +120,7 @@ static class ViewList {
             });
         } else {
             i.style.display = 'hide';
+            i.style.boxShadow = null;
             _aside.find('#cars-list > div').show();
         }
     }
