@@ -1863,138 +1863,172 @@ var AcShowroom = (function (){                                                  
 		});
 		d.content.css({ maxWidth: 'calc(100vw - 100px)', paddingBottom: '10px' }).find('img').css({ width: '100%', verticalAlign: 'top' });
 		
+		var list = fs.readdirSync(output).map(function (arg){                      // ac_showroom.jsxi:179
+			return arg.slice(0, - 4);                                              // ac_showroom.jsxi:179
+		});
+		
 		var pos = 0;
 		
-		function out(){                                                            // ac_showroom.jsxi:180
-			t.find('#button-prev').attr('disabled', pos > 0 ? null : true);        // ac_showroom.jsxi:181
-			t.find('#button-next').attr('disabled', pos < car.skins.length - 1 ? null : true);
-			d.content.find('#current-preview').prop('src', car.skins[pos].preview.cssUrl());
-			d.content.find('#new-preview').prop('src', (output + '/' + car.skins[pos].id + '.bmp').cssUrl());
+		function out(){                                                            // ac_showroom.jsxi:181
+			t.find('#button-prev').attr('disabled', pos > 0 ? null : true);        // ac_showroom.jsxi:182
+			t.find('#button-next').attr('disabled', pos < list.length - 1 ? null : true);
+			d.content.find('#current-preview').prop('src', car.getSkin(list[pos]).preview.cssUrl());
+			d.content.find('#new-preview').prop('src', (output + '/' + list[pos] + '.bmp').cssUrl());
 		}
 		
-		out();                                                                     // ac_showroom.jsxi:187
+		out();                                                                     // ac_showroom.jsxi:188
 	}
 	
-	AcShowroom.shot = function (c, m){                                             // ac_showroom.jsxi:190
-		var mode = Settings.get('aptMode');
+	AcShowroom.shotOne = function (car, skin){                                     // ac_showroom.jsxi:191
+		AcShowroom.shot(car, false, 
+			skin || car.selectedSkin);
+	};
+	AcShowroom.shot = function (c, m, onlyOneSkin){                                // ac_showroom.jsxi:195
+		if (m && onlyOneSkin != null)                                              // ac_showroom.jsxi:196
+			return;
 		
-		if (mode === 'default'){                                                   // ac_showroom.jsxi:193
-			if (c.disabled){                                                       // ac_showroom.jsxi:194
-				Notification.warn('No Way', 'Enable car first.');                  // ac_showroom.jsxi:195
+		var mode = 'default';
+		
+		if (mode === 'default'){                                                   // ac_showroom.jsxi:200
+			if (c.disabled){                                                       // ac_showroom.jsxi:201
+				Notification.warn('No Way', 'Enable car first.');                  // ac_showroom.jsxi:202
 				return;
 			}
 			
 			var showroom = Settings.get('aptShowroom') || _blackShowroom;
 			
-			var x = - Settings.get('aptCameraX');
+			var cameraPosition = Settings.get('aptCameraPosition');
 			
-			var y = - Settings.get('aptCameraY');
+			var cameraLookAt = Settings.get('aptCameraLookAt');
 			
-			var distance = - Settings.get('aptCameraDistance');
+			var cameraFov = Settings.get('aptCameraFov');
 			
 			var filter = Settings.get('aptFilter') || null;
 			
 			var disableSweetFx = !!Settings.get('aptDisableSweetFx');
 			
-			var delays = !!Settings.get('aptIncreaseDelays');
+			if (!/((-?\d(.\d*)?)\s*,\s*){2}(-?\d(.\d*)?)/.test(cameraPosition))    // ac_showroom.jsxi:213
+				cameraPosition = Settings.defaults.aptCameraPosition;              // ac_showroom.jsxi:213
 			
-			if (Number.isNaN(x))                                                   // ac_showroom.jsxi:207
-				x = Settings.defaults.aptCameraX;                                  // ac_showroom.jsxi:207
+			if (!/((-?\d(.\d*)?)\s*,\s*){2}(-?\d(.\d*)?)/.test(cameraLookAt))      // ac_showroom.jsxi:214
+				cameraLookAt = Settings.defaults.aptCameraLookAt;                  // ac_showroom.jsxi:214
 			
-			if (Number.isNaN(y))                                                   // ac_showroom.jsxi:208
-				y = Settings.defaults.aptCameraY;                                  // ac_showroom.jsxi:208
+			if (Number.isNaN(cameraFov))                                           // ac_showroom.jsxi:215
+				cameraFov = Settings.defaults.aptCameraFov;                        // ac_showroom.jsxi:215
 			
-			if (Number.isNaN(distance))                                            // ac_showroom.jsxi:209
-				distance = Settings.defaults.aptCameraY;                           // ac_showroom.jsxi:209
+			showroomTest();                                                        // ac_showroom.jsxi:217
 			
-			showroomTest();                                                        // ac_showroom.jsxi:211
-			
-			function showroomTest(){                                               // ac_showroom.jsxi:212
-				function blackShowroomTest(){                                      // ac_showroom.jsxi:213
+			function showroomTest(){                                               // ac_showroom.jsxi:218
+				function blackShowroomTest(){                                      // ac_showroom.jsxi:219
 					return fs.existsSync(AcTools.Utils.FileUtils.GetShowroomFolder(AcDir.root, showroom));
 				}
 				
-				if (showroom == _blackShowroom && !blackShowroomTest()){           // ac_showroom.jsxi:217
-					new Dialog('One More Thing',                                   // ac_showroom.jsxi:218
+				if (showroom == _blackShowroom && !blackShowroomTest()){           // ac_showroom.jsxi:223
+					new Dialog('One More Thing',                                   // ac_showroom.jsxi:224
 						'Please, install <a href="#" onclick="Shell.openItem(\'' + _blackShowroomUrl + '\')">Black Showroom</a> first.', 
-						function (){                                               // ac_showroom.jsxi:220
-							Shell.openItem(_blackShowroomUrl);                     // ac_showroom.jsxi:221
+						function (){                                               // ac_showroom.jsxi:226
+							Shell.openItem(_blackShowroomUrl);                     // ac_showroom.jsxi:227
 							return false;
-						}).setButton('From Here').addButton('Right Here',          // ac_showroom.jsxi:223
-						function (){                                               // ac_showroom.jsxi:223
+						}).setButton('From Here').addButton('Right Here',          // ac_showroom.jsxi:229
+						function (){                                               // ac_showroom.jsxi:229
 							Shell.openItem(AcTools.Utils.FileUtils.GetShowroomsFolder(AcDir.root));
 							return false;
-						}).addButton('Done',                                       // ac_showroom.jsxi:226
-						function (){                                               // ac_showroom.jsxi:226
-							if (blackShowroomTest()){                              // ac_showroom.jsxi:227
-								setTimeout(proceed);                               // ac_showroom.jsxi:228
+						}).addButton('Done',                                       // ac_showroom.jsxi:232
+						function (){                                               // ac_showroom.jsxi:232
+							if (blackShowroomTest()){                              // ac_showroom.jsxi:233
+								setTimeout(proceed);                               // ac_showroom.jsxi:234
 							} else {
-								new Dialog('Black Showroom Installation',          // ac_showroom.jsxi:230
-									'Showroom is still missing. No way.');         // ac_showroom.jsxi:230
+								new Dialog('Black Showroom Installation',          // ac_showroom.jsxi:236
+									'Showroom is still missing. No way.');         // ac_showroom.jsxi:236
 								this.buttons.find('button:last-child').text('Really Done');
 								return false;
 							}
 						});
 				} else {
-					proceed();                                                     // ac_showroom.jsxi:236
+					proceed();                                                     // ac_showroom.jsxi:242
 				}
 			}
 		} else {
-			proceed();                                                             // ac_showroom.jsxi:240
+			proceed();                                                             // ac_showroom.jsxi:246
 		}
 		
-		function proceed(){                                                        // ac_showroom.jsxi:243
-			if (mode === 'default'){                                               // ac_showroom.jsxi:244
-				if (filter === Settings.defaults.aptFilter){                       // ac_showroom.jsxi:245
+		var upd;
+		
+		function proceed(){                                                        // ac_showroom.jsxi:251
+			upd = new Dialog('Auto-update Previews',                               // ac_showroom.jsxi:252
+				[ '<progress indeterminate></progress>' ], 
+				function (){                                                       // ac_showroom.jsxi:254
+					CheckUpdate.abort();                                           // ac_showroom.jsxi:255
+				}, 
+				false).setButton(false);                                           // ac_showroom.jsxi:256
+			
+			if (mode === 'default'){                                               // ac_showroom.jsxi:258
+				if (filter === Settings.defaults.aptFilter){                       // ac_showroom.jsxi:259
 					AcFilters.installFilter('data/ppfilter.ini', Settings.defaults.aptFilter);
-					setTimeout(proceedShot, 500);                                  // ac_showroom.jsxi:247
+					setTimeout(proceedShot, 500);                                  // ac_showroom.jsxi:261
 					return;
-				} else if (filter && !AcFilters.exists(filter)){                   // ac_showroom.jsxi:249
-					ErrorHandler.handled('Filter “' + filter + '” is missing.');   // ac_showroom.jsxi:250
+				} else if (filter && !AcFilters.exists(filter)){                   // ac_showroom.jsxi:263
+					ErrorHandler.handled('Filter “' + filter + '” is missing.');   // ac_showroom.jsxi:264
+					upd.close();                                                   // ac_showroom.jsxi:265
 					return;
 				}
 			}
 			
-			proceedShot();                                                         // ac_showroom.jsxi:255
+			proceedShot();                                                         // ac_showroom.jsxi:270
 		}
 		
-		function proceedShot(){                                                    // ac_showroom.jsxi:258
+		function proceedShot(){                                                    // ac_showroom.jsxi:273
 			var output;
 			
 			try {
-				if (mode === 'default'){                                           // ac_showroom.jsxi:261
-					output = AcTools.Processes.Showroom.Shot(AcDir.root,           // ac_showroom.jsxi:262
-						c.id,                                                      // ac_showroom.jsxi:262
-						showroom,                                                  // ac_showroom.jsxi:262
-						!!m,                                                       // ac_showroom.jsxi:262
-						x,                                                         // ac_showroom.jsxi:262
-						y,                                                         // ac_showroom.jsxi:262
-						distance,                                                  // ac_showroom.jsxi:262
-						filter,                                                    // ac_showroom.jsxi:262
-						disableSweetFx,                                            // ac_showroom.jsxi:262
-						delays);                                                   // ac_showroom.jsxi:262
+				if (mode === 'default'){                                           // ac_showroom.jsxi:276
+					if (onlyOneSkin != null){                                      // ac_showroom.jsxi:277
+						output = AcTools.Processes.Showroom.ShotOne(AcDir.root,    // ac_showroom.jsxi:278
+							c.id,                                                  // ac_showroom.jsxi:278
+							showroom,                                              // ac_showroom.jsxi:278
+							onlyOneSkin,                                           // ac_showroom.jsxi:278
+							cameraPosition,                                        // ac_showroom.jsxi:278
+							cameraLookAt,                                          // ac_showroom.jsxi:278
+							cameraFov,                                             // ac_showroom.jsxi:278
+							filter,                                                // ac_showroom.jsxi:278
+							disableSweetFx);                                       // ac_showroom.jsxi:278
+					} else {
+						output = AcTools.Processes.Showroom.ShotAll(AcDir.root,    // ac_showroom.jsxi:280
+							c.id,                                                  // ac_showroom.jsxi:280
+							showroom,                                              // ac_showroom.jsxi:280
+							!!m,                                                   // ac_showroom.jsxi:280
+							cameraPosition,                                        // ac_showroom.jsxi:280
+							cameraLookAt,                                          // ac_showroom.jsxi:280
+							cameraFov,                                             // ac_showroom.jsxi:280
+							filter,                                                // ac_showroom.jsxi:280
+							disableSweetFx);                                       // ac_showroom.jsxi:280
+					}
 				} else {
 					output = AcTools.Kn5Render.Utils.Kn5RenderWrapper.Shot(c.path, mode);
 				}
-			} catch (err){                                                         // ac_showroom.jsxi:266
-				if (!handleError(err, c)){                                         // ac_showroom.jsxi:267
+				
+				upd.close();                                                       // ac_showroom.jsxi:285
+			} catch (err){                                                         // ac_showroom.jsxi:286
+				upd.close();                                                       // ac_showroom.jsxi:287
+				
+				if (!handleError(err, c)){                                         // ac_showroom.jsxi:288
 					ErrorHandler.handled('Cannot start showroom. Maybe the car is broken.', err);
 				}
 				return;
 			} 
 			
-			shotOutputPreview(c,                                                   // ac_showroom.jsxi:274
-				output,                                                            // ac_showroom.jsxi:274
-				function (){                                                       // ac_showroom.jsxi:274
-					AcTools.Utils.ImageUtils.ApplyPreviews(AcDir.root,             // ac_showroom.jsxi:275
-						c.id,                                                      // ac_showroom.jsxi:275
-						output,                                                    // ac_showroom.jsxi:275
-						Settings.get('aptResize'),                                 // ac_showroom.jsxi:275
-						Settings.get('aptPngMode'));                               // ac_showroom.jsxi:275
-					c.loadSkins();                                                 // ac_showroom.jsxi:276
+			shotOutputPreview(c,                                                   // ac_showroom.jsxi:295
+				output,                                                            // ac_showroom.jsxi:295
+				function (){                                                       // ac_showroom.jsxi:295
+					AcTools.Utils.ImageUtils.ApplyPreviews(AcDir.root,             // ac_showroom.jsxi:296
+						c.id,                                                      // ac_showroom.jsxi:296
+						output,                                                    // ac_showroom.jsxi:296
+						Settings.get('aptResize'),                                 // ac_showroom.jsxi:296
+						Settings.get('aptPngMode'));                               // ac_showroom.jsxi:296
+					c.loadSkins();                                                 // ac_showroom.jsxi:297
 					
 					try {
-						fs.rmdirSync(output);                                      // ac_showroom.jsxi:277
+						fs.rmdirSync(output);                                      // ac_showroom.jsxi:298
 					} catch (e){} 
 				});
 		}
@@ -5955,7 +5989,7 @@ var Settings = new ObjLocalStorage('settings',                                  
 		aptCameraDistance: 5.5,                                                    // settings.jsxi:65
 		aptIncreaseDelays: false,                                                  // settings.jsxi:66
 		aptPngMode: false,                                                         // settings.jsxi:67
-		aptCameraPosition: '-2.455, 0.835, 5.072',                                 // settings.jsxi:69
+		aptCameraPosition: '-2.459, 0.835, 5.078',                                 // settings.jsxi:69
 		aptCameraLookAt: '0.498, 0.855, 0',                                        // settings.jsxi:70
 		aptCameraFov: 30
 	});
@@ -8576,352 +8610,366 @@ var ViewDetails = (function (){                                                 
 					})
 				}));
 				menu.append(new gui.MenuItem({ type: 'separator' }));              // view_details.jsxi:597
+				menu.append(new gui.MenuItem({                                     // view_details.jsxi:599
+					label: 'Update Preview',                                       // view_details.jsxi:599
+					click: (function (){                                           // view_details.jsxi:599
+						if (!_selected)                                            // view_details.jsxi:600
+							return;
+						
+						AcShowroom.shotOne(_selected, id);                         // view_details.jsxi:601
+					})
+				}));
 				
 				var autoUpdateLivery = new gui.MenuItem({ label: 'Update Livery', submenu: new gui.Menu() });
 				
-				menu.append(autoUpdateLivery);                                     // view_details.jsxi:600
-				autoUpdateLivery = autoUpdateLivery.submenu;                       // view_details.jsxi:601
-				autoUpdateLivery.append(new gui.MenuItem({                         // view_details.jsxi:603
-					label: 'From Preview',                                         // view_details.jsxi:603
-					click: (function (){                                           // view_details.jsxi:603
-						if (!_selected)                                            // view_details.jsxi:604
+				menu.append(autoUpdateLivery);                                     // view_details.jsxi:605
+				autoUpdateLivery = autoUpdateLivery.submenu;                       // view_details.jsxi:606
+				autoUpdateLivery.append(new gui.MenuItem({                         // view_details.jsxi:608
+					label: 'From Preview',                                         // view_details.jsxi:608
+					click: (function (){                                           // view_details.jsxi:608
+						if (!_selected)                                            // view_details.jsxi:609
 							return;
 						
 						var skin = _selected.getSkin(id);
 						
 						try {
 							AcTools.Utils.ImageUtils.GenerateLivery(skin.preview, skin.livery);
-							_selected.loadSkins();                                 // view_details.jsxi:608
-						} catch (err){                                             // view_details.jsxi:609
-							ErrorHandler.handled('Cannot update livery.', err);    // view_details.jsxi:610
+							_selected.loadSkins();                                 // view_details.jsxi:613
+						} catch (err){                                             // view_details.jsxi:614
+							ErrorHandler.handled('Cannot update livery.', err);    // view_details.jsxi:615
 							return;
 						} 
 					})
 				}));
-				autoUpdateLivery.append(new gui.MenuItem({                         // view_details.jsxi:615
-					label: 'With Custom Showroom',                                 // view_details.jsxi:615
-					click: (function (){                                           // view_details.jsxi:615
-						if (!_selected)                                            // view_details.jsxi:616
+				autoUpdateLivery.append(new gui.MenuItem({                         // view_details.jsxi:620
+					label: 'With Custom Showroom',                                 // view_details.jsxi:620
+					click: (function (){                                           // view_details.jsxi:620
+						if (!_selected)                                            // view_details.jsxi:621
 							return;
 						
 						var skin = _selected.getSkin(id);
 						
 						try {
 							AcTools.Kn5Render.Utils.Kn5RenderWrapper.GenerateLivery(_selected.path, skin.id, skin.livery);
-							_selected.loadSkins();                                 // view_details.jsxi:620
-						} catch (err){                                             // view_details.jsxi:621
-							ErrorHandler.handled('Cannot update livery.', err);    // view_details.jsxi:622
+							_selected.loadSkins();                                 // view_details.jsxi:625
+						} catch (err){                                             // view_details.jsxi:626
+							ErrorHandler.handled('Cannot update livery.', err);    // view_details.jsxi:627
 							return;
 						} 
 					})
 				}));
-				menu.append(new gui.MenuItem({                                     // view_details.jsxi:627
-					label: 'Delete skin',                                          // view_details.jsxi:627
-					click: (function (){                                           // view_details.jsxi:627
-						if (!_selected)                                            // view_details.jsxi:628
+				menu.append(new gui.MenuItem({                                     // view_details.jsxi:632
+					label: 'Delete skin',                                          // view_details.jsxi:632
+					click: (function (){                                           // view_details.jsxi:632
+						if (!_selected)                                            // view_details.jsxi:633
 							return;
 						
 						var skin = _selected.getSkin(id);
 						
-						new Dialog('Delete ' + skin.displayName,                   // view_details.jsxi:631
+						new Dialog('Delete ' + skin.displayName,                   // view_details.jsxi:636
 							'Folder will be removed to the Recycle Bin. Are you sure?', 
-							function (arg){                                        // view_details.jsxi:631
-								if (!skin)                                         // view_details.jsxi:632
+							function (arg){                                        // view_details.jsxi:636
+								if (!skin)                                         // view_details.jsxi:637
 									return;
 								
-								AcTools.Utils.FileUtils.Recycle(skin.path);        // view_details.jsxi:633
-								_selected.loadSkins();                             // view_details.jsxi:634
+								AcTools.Utils.FileUtils.Recycle(skin.path);        // view_details.jsxi:638
+								_selected.loadSkins();                             // view_details.jsxi:639
 							});
 					})
 				}));
-				menu.popup(e.clientX, e.clientY);                                  // view_details.jsxi:641
+				menu.popup(e.clientX, e.clientY);                                  // view_details.jsxi:646
 				return false;
 			});
-		$('#selected-car-skins').on('click',                                       // view_details.jsxi:646
-			function (e){                                                          // view_details.jsxi:647
-				if (!_selected)                                                    // view_details.jsxi:648
+		$('#selected-car-skins').on('click',                                       // view_details.jsxi:651
+			function (e){                                                          // view_details.jsxi:652
+				if (!_selected)                                                    // view_details.jsxi:653
 					return;
 				
 				var id = e.target.getAttribute('data-id');
 				
-				if (!id)                                                           // view_details.jsxi:651
+				if (!id)                                                           // view_details.jsxi:656
 					return;
 				
-				_selected.selectSkin(id);                                          // view_details.jsxi:653
+				_selected.selectSkin(id);                                          // view_details.jsxi:658
 			});
-		$('#selected-car-error').click(function (e){                               // view_details.jsxi:657
-			if (!_selected)                                                        // view_details.jsxi:658
+		$('#selected-car-error').click(function (e){                               // view_details.jsxi:662
+			if (!_selected)                                                        // view_details.jsxi:663
 				return;
 			
 			var id = e.target.getAttribute('data-error-id');
 			
-			if (id){                                                               // view_details.jsxi:660
-				RestorationWizard.fix(_selected, id);                              // view_details.jsxi:661
+			if (id){                                                               // view_details.jsxi:665
+				RestorationWizard.fix(_selected, id);                              // view_details.jsxi:666
 			}
 		});
-		$(window).on('keydown',                                                    // view_details.jsxi:666
-			function (e){                                                          // view_details.jsxi:667
-				if (!_selected)                                                    // view_details.jsxi:668
+		$(window).on('keydown',                                                    // view_details.jsxi:671
+			function (e){                                                          // view_details.jsxi:672
+				if (!_selected)                                                    // view_details.jsxi:673
 					return;
 				
-				if (e.keyCode === 'S'.charCodeAt(0) && e.ctrlKey && e.altKey){     // view_details.jsxi:670
-					AcShowroom.shot(_selected, true);                              // view_details.jsxi:671
+				if (e.keyCode === 'S'.charCodeAt(0) && e.ctrlKey && e.altKey){     // view_details.jsxi:675
+					AcShowroom.shot(_selected, false);                             // view_details.jsxi:676
 					return false;
 				}
 				
-				if (e.keyCode === 'D'.charCodeAt(0) && e.ctrlKey && e.altKey){     // view_details.jsxi:675
+				if (e.keyCode === 'D'.charCodeAt(0) && e.ctrlKey && e.altKey){     // view_details.jsxi:680
 					try {
 						AcTools.Kn5Render.Utils.Kn5RenderWrapper.UpdateAmbientShadows(_selected.path);
-					} catch (err){                                                 // view_details.jsxi:678
-						ErrorHandler.handled('Cannot update shadows.', err);       // view_details.jsxi:679
+					} catch (err){                                                 // view_details.jsxi:683
+						ErrorHandler.handled('Cannot update shadows.', err);       // view_details.jsxi:684
 						return;
 					} 
 					return false;
 				}
 				
-				if (e.keyCode === 'A'.charCodeAt(0) && e.ctrlKey && e.altKey){     // view_details.jsxi:685
+				if (e.keyCode === '1'.charCodeAt(0) && e.ctrlKey && e.altKey){     // view_details.jsxi:690
+					AcShowroom.shotOne(_selected, _selected.selectedSkin);         // view_details.jsxi:691
+					return false;
+				}
+				
+				if (e.keyCode === 'A'.charCodeAt(0) && e.ctrlKey && e.altKey){     // view_details.jsxi:695
 					try {
 						AcTools.Kn5Render.Utils.Kn5RenderWrapper.UpdateAmbientShadows(_selected.path);
-					} catch (err){                                                 // view_details.jsxi:688
-						ErrorHandler.handled('Cannot update shadows.', err);       // view_details.jsxi:689
+					} catch (err){                                                 // view_details.jsxi:698
+						ErrorHandler.handled('Cannot update shadows.', err);       // view_details.jsxi:699
 						return;
 					} 
 					
-					AcShowroom.shot(_selected, true);                              // view_details.jsxi:692
+					AcShowroom.shot(_selected, false);                             // view_details.jsxi:702
 					return false;
 				}
 				
-				if (e.keyCode === 'S'.charCodeAt(0) && e.ctrlKey){                 // view_details.jsxi:696
-					$(':focus').each(function (arg){                               // view_details.jsxi:697
-						return this.blur();                                        // view_details.jsxi:697
+				if (e.keyCode === 'S'.charCodeAt(0) && e.ctrlKey){                 // view_details.jsxi:706
+					$(':focus').each(function (arg){                               // view_details.jsxi:707
+						return this.blur();                                        // view_details.jsxi:707
 					});
-					_selected.save();                                              // view_details.jsxi:698
+					_selected.save();                                              // view_details.jsxi:708
 					return false;
 				}
 				
-				if (e.keyCode === 'F'.charCodeAt(0) && e.ctrlKey){                 // view_details.jsxi:702
-					UpdateDescription.update(_selected);                           // view_details.jsxi:703
+				if (e.keyCode === 'F'.charCodeAt(0) && e.ctrlKey){                 // view_details.jsxi:712
+					UpdateDescription.update(_selected);                           // view_details.jsxi:713
 					return false;
 				}
 				
-				if (e.keyCode === 'T'.charCodeAt(0) && e.ctrlKey){                 // view_details.jsxi:707
-					_selected.toggle();                                            // view_details.jsxi:708
+				if (e.keyCode === 'T'.charCodeAt(0) && e.ctrlKey){                 // view_details.jsxi:717
+					_selected.toggle();                                            // view_details.jsxi:718
 					return false;
 				}
 				
-				if (e.keyCode === 'B'.charCodeAt(0) && e.ctrlKey && e.shiftKey){   // view_details.jsxi:712
-					$('#selected-car-logo')[0].click();                            // view_details.jsxi:713
+				if (e.keyCode === 'B'.charCodeAt(0) && e.ctrlKey && e.shiftKey){   // view_details.jsxi:722
+					$('#selected-car-logo')[0].click();                            // view_details.jsxi:723
 					return false;
 				}
 				
-				if (e.keyCode === 'U'.charCodeAt(0) && e.ctrlKey && e.shiftKey){   // view_details.jsxi:717
-					if (_selected.parent)                                          // view_details.jsxi:718
-						$('#selected-car-upgrade')[0].click();                     // view_details.jsxi:718
+				if (e.keyCode === 'U'.charCodeAt(0) && e.ctrlKey && e.shiftKey){   // view_details.jsxi:727
+					if (_selected.parent)                                          // view_details.jsxi:728
+						$('#selected-car-upgrade')[0].click();                     // view_details.jsxi:728
 					return false;
 				}
 				
 				if (localStorage.developerMode && e.keyCode === 'E'.charCodeAt(0) && e.ctrlKey && e.shiftKey){
-					_selected.exportDatabase();                                    // view_details.jsxi:723
+					_selected.exportDatabase();                                    // view_details.jsxi:733
 					return false;
 				}
 			});
 		
 		var cmIgnore = false;
 		
-		$('main').on('contextmenu',                                                // view_details.jsxi:730
-			function (){                                                           // view_details.jsxi:731
-				this.querySelector('footer').classList.toggle('active');           // view_details.jsxi:732
-				cmIgnore = true;                                                   // view_details.jsxi:733
+		$('main').on('contextmenu',                                                // view_details.jsxi:740
+			function (){                                                           // view_details.jsxi:741
+				this.querySelector('footer').classList.toggle('active');           // view_details.jsxi:742
+				cmIgnore = true;                                                   // view_details.jsxi:743
 			});
-		$(window).on('click contextmenu',                                          // view_details.jsxi:736
-			(function (e){                                                         // view_details.jsxi:737
-				if (cmIgnore){                                                     // view_details.jsxi:738
-					cmIgnore = false;                                              // view_details.jsxi:739
-				} else if (e.target !== this){                                     // view_details.jsxi:740
-					this.classList.remove('active');                               // view_details.jsxi:741
+		$(window).on('click contextmenu',                                          // view_details.jsxi:746
+			(function (e){                                                         // view_details.jsxi:747
+				if (cmIgnore){                                                     // view_details.jsxi:748
+					cmIgnore = false;                                              // view_details.jsxi:749
+				} else if (e.target !== this){                                     // view_details.jsxi:750
+					this.classList.remove('active');                               // view_details.jsxi:751
 				}
-			}).bind($('main footer')[0]));                                         // view_details.jsxi:743
-		$('#selected-car-open-directory').click(function (){                       // view_details.jsxi:746
-			if (!_selected)                                                        // view_details.jsxi:747
-				return;
-			
-			Shell.openItem(_selected.path);                                        // view_details.jsxi:748
-		});
-		$('#selected-car-showroom').click(function (){                             // view_details.jsxi:751
-			if (!_selected)                                                        // view_details.jsxi:752
-				return;
-			
-			AcShowroom.start(_selected);                                           // view_details.jsxi:753
-		});
-		$('#selected-car-showroom-select').click(function (){                      // view_details.jsxi:756
+			}).bind($('main footer')[0]));                                         // view_details.jsxi:753
+		$('#selected-car-open-directory').click(function (){                       // view_details.jsxi:756
 			if (!_selected)                                                        // view_details.jsxi:757
 				return;
 			
-			AcShowroom.select(_selected);                                          // view_details.jsxi:758
+			Shell.openItem(_selected.path);                                        // view_details.jsxi:758
 		});
-		$('#selected-car-practice').click(function (){                             // view_details.jsxi:761
+		$('#selected-car-showroom').click(function (){                             // view_details.jsxi:761
 			if (!_selected)                                                        // view_details.jsxi:762
 				return;
 			
-			AcPractice.start(_selected);                                           // view_details.jsxi:763
+			AcShowroom.start(_selected);                                           // view_details.jsxi:763
 		});
-		$('#selected-car-practice-select').click(function (){                      // view_details.jsxi:766
+		$('#selected-car-showroom-select').click(function (){                      // view_details.jsxi:766
 			if (!_selected)                                                        // view_details.jsxi:767
 				return;
 			
-			AcPractice.select(_selected);                                          // view_details.jsxi:768
+			AcShowroom.select(_selected);                                          // view_details.jsxi:768
 		});
-		$('#selected-car-reload').click(function (){                               // view_details.jsxi:771
+		$('#selected-car-practice').click(function (){                             // view_details.jsxi:771
 			if (!_selected)                                                        // view_details.jsxi:772
 				return;
 			
-			if (_selected.changed){                                                // view_details.jsxi:774
-				new Dialog('Reload',                                               // view_details.jsxi:775
+			AcPractice.start(_selected);                                           // view_details.jsxi:773
+		});
+		$('#selected-car-practice-select').click(function (){                      // view_details.jsxi:776
+			if (!_selected)                                                        // view_details.jsxi:777
+				return;
+			
+			AcPractice.select(_selected);                                          // view_details.jsxi:778
+		});
+		$('#selected-car-reload').click(function (){                               // view_details.jsxi:781
+			if (!_selected)                                                        // view_details.jsxi:782
+				return;
+			
+			if (_selected.changed){                                                // view_details.jsxi:784
+				new Dialog('Reload',                                               // view_details.jsxi:785
 					[ 'Your changes will be lost. Are you sure?' ], 
-					reload);                                                       // view_details.jsxi:777
+					reload);                                                       // view_details.jsxi:787
 			} else {
-				reload();                                                          // view_details.jsxi:779
+				reload();                                                          // view_details.jsxi:789
 			}
 			
-			function reload(){                                                     // view_details.jsxi:782
-				if (!_selected)                                                    // view_details.jsxi:783
+			function reload(){                                                     // view_details.jsxi:792
+				if (!_selected)                                                    // view_details.jsxi:793
 					return;
 				
-				_selected.reload();                                                // view_details.jsxi:784
+				_selected.reload();                                                // view_details.jsxi:794
 			}
 		});
-		$('#selected-car-test').click(function (){                                 // view_details.jsxi:788
-			if (!_selected)                                                        // view_details.jsxi:789
+		$('#selected-car-test').click(function (){                                 // view_details.jsxi:798
+			if (!_selected)                                                        // view_details.jsxi:799
 				return;
 			
-			_selected.testAcd();                                                   // view_details.jsxi:790
+			_selected.testAcd();                                                   // view_details.jsxi:800
 		});
-		$('#selected-car-save').click(function (){                                 // view_details.jsxi:794
-			if (!_selected)                                                        // view_details.jsxi:795
+		$('#selected-car-save').click(function (){                                 // view_details.jsxi:804
+			if (!_selected)                                                        // view_details.jsxi:805
 				return;
 			
-			_selected.save();                                                      // view_details.jsxi:796
+			_selected.save();                                                      // view_details.jsxi:806
 		});
-		$('#selected-car-update-data').click(function (){                          // view_details.jsxi:799
-			if (!_selected)                                                        // view_details.jsxi:800
+		$('#selected-car-update-data').click(function (){                          // view_details.jsxi:809
+			if (!_selected)                                                        // view_details.jsxi:810
 				return;
 			
 			var updated = Cars.fromDatabase(_selected.id);
 			
-			if (!updated){                                                         // view_details.jsxi:803
-				return Notification.warn('Error', 'Data is missing.');             // view_details.jsxi:804
+			if (!updated){                                                         // view_details.jsxi:813
+				return Notification.warn('Error', 'Data is missing.');             // view_details.jsxi:814
 			}
 			
 			var fields = [];
 			
-			for (var k in updated)                                                 // view_details.jsxi:808
-				if (updated.hasOwnProperty(k)){                                    // view_details.jsxi:808
+			for (var k in updated)                                                 // view_details.jsxi:818
+				if (updated.hasOwnProperty(k)){                                    // view_details.jsxi:818
 					var v = updated[k];
 					
 					if (JSON.stringify(v) === JSON.stringify(_selected.data[k])){
 						continue;
 					}
 					
-					fields.push({ key: k, value: v });                             // view_details.jsxi:813
+					fields.push({ key: k, value: v });                             // view_details.jsxi:823
 				}
 			
-			if (fields.length === 0){                                              // view_details.jsxi:816
-				return Notification.warn('Error', 'Nothing to update.');           // view_details.jsxi:817
+			if (fields.length === 0){                                              // view_details.jsxi:826
+				return Notification.warn('Error', 'Nothing to update.');           // view_details.jsxi:827
 			}
 			
-			var d = new Dialog('Update Data',                                      // view_details.jsxi:820
+			var d = new Dialog('Update Data',                                      // view_details.jsxi:830
 				[
-					'<h6>Select fields to update</h6>',                            // view_details.jsxi:821
-					fields.map(function (arg){                                     // view_details.jsxi:822
+					'<h6>Select fields to update</h6>',                            // view_details.jsxi:831
+					fields.map(function (arg){                                     // view_details.jsxi:832
 						return '<label><input data-key="' + arg.key + '" type="checkbox" checked>' + (arg.key === 'url' ? 'URL' : arg.key[0].toUpperCase() + arg.key.slice(1).replace(/(?=[A-Z])/g, ' ')) + '</label>';
 					}).join('')
 				], 
-				function (){                                                       // view_details.jsxi:825
-					if (!_selected)                                                // view_details.jsxi:826
+				function (){                                                       // view_details.jsxi:835
+					if (!_selected)                                                // view_details.jsxi:836
 						return;
 					
-					this.content.find(':checked').each(function (arg){             // view_details.jsxi:828
+					this.content.find(':checked').each(function (arg){             // view_details.jsxi:838
 						var k = this.getAttribute('data-key');
 						
-						_selected.changeData(k, updated[k], true);                 // view_details.jsxi:830
+						_selected.changeData(k, updated[k], true);                 // view_details.jsxi:840
 					});
 				});
 		});
-		$('#selected-car-update-description').click(function (){                   // view_details.jsxi:835
-			if (!_selected)                                                        // view_details.jsxi:836
-				return;
-			
-			UpdateDescription.update(_selected);                                   // view_details.jsxi:837
-		});
-		$('#selected-car-update-previews').click(function (){                      // view_details.jsxi:840
-			if (!_selected)                                                        // view_details.jsxi:841
-				return;
-			
-			AcShowroom.shot(_selected);                                            // view_details.jsxi:842
-		});
-		$('#selected-car-update-previews-manual').click(function (){               // view_details.jsxi:845
+		$('#selected-car-update-description').click(function (){                   // view_details.jsxi:845
 			if (!_selected)                                                        // view_details.jsxi:846
 				return;
 			
-			AcShowroom.shot(_selected, true);                                      // view_details.jsxi:847
+			UpdateDescription.update(_selected);                                   // view_details.jsxi:847
 		});
-		$('#selected-car-disable').click(function (){                              // view_details.jsxi:850
+		$('#selected-car-update-previews').click(function (){                      // view_details.jsxi:850
 			if (!_selected)                                                        // view_details.jsxi:851
 				return;
 			
-			_selected.toggle();                                                    // view_details.jsxi:852
+			AcShowroom.shot(_selected);                                            // view_details.jsxi:852
 		});
-		$('#selected-car-additional').on('click contextmenu',                      // view_details.jsxi:855
-			function (e){                                                          // view_details.jsxi:855
-				if (!_selected)                                                    // view_details.jsxi:856
+		$('#selected-car-update-previews-manual').click(function (){               // view_details.jsxi:855
+			if (!_selected)                                                        // view_details.jsxi:856
+				return;
+			
+			AcShowroom.shot(_selected, true);                                      // view_details.jsxi:857
+		});
+		$('#selected-car-disable').click(function (){                              // view_details.jsxi:860
+			if (!_selected)                                                        // view_details.jsxi:861
+				return;
+			
+			_selected.toggle();                                                    // view_details.jsxi:862
+		});
+		$('#selected-car-additional').on('click contextmenu',                      // view_details.jsxi:865
+			function (e){                                                          // view_details.jsxi:865
+				if (!_selected)                                                    // view_details.jsxi:866
 					return;
 				
 				var menu = new gui.Menu();
 				
-				function add(label, fn, to){                                       // view_details.jsxi:860
-					if (to === undefined)                                          // view_details.jsxi:860
-						to = menu;                                                 // view_details.jsxi:860
+				function add(label, fn, to){                                       // view_details.jsxi:870
+					if (to === undefined)                                          // view_details.jsxi:870
+						to = menu;                                                 // view_details.jsxi:870
 				
-					to.append(new gui.MenuItem({                                   // view_details.jsxi:861
-						label: label,                                              // view_details.jsxi:861
-						click: (function (){                                       // view_details.jsxi:861
-							$('main footer').removeClass('active');                // view_details.jsxi:862
+					to.append(new gui.MenuItem({                                   // view_details.jsxi:871
+						label: label,                                              // view_details.jsxi:871
+						click: (function (){                                       // view_details.jsxi:871
+							$('main footer').removeClass('active');                // view_details.jsxi:872
 							
-							if (_selected)                                         // view_details.jsxi:863
-								fn();                                              // view_details.jsxi:863
+							if (_selected)                                         // view_details.jsxi:873
+								fn();                                              // view_details.jsxi:873
 						})
 					}));
 				}
 				
-				add('Update Ambient Shadows',                                      // view_details.jsxi:867
-					function (){                                                   // view_details.jsxi:867
+				add('Update Ambient Shadows',                                      // view_details.jsxi:877
+					function (){                                                   // view_details.jsxi:877
 						try {
 							AcTools.Kn5Render.Utils.Kn5RenderWrapper.UpdateAmbientShadows(_selected.path);
-						} catch (err){                                             // view_details.jsxi:870
-							ErrorHandler.handled('Cannot update shadows.', err);   // view_details.jsxi:871
+						} catch (err){                                             // view_details.jsxi:880
+							ErrorHandler.handled('Cannot update shadows.', err);   // view_details.jsxi:881
 							return;
 						} 
 					});
-				add('Change Body Ambient Shadow Size',                             // view_details.jsxi:876
-					function (){                                                   // view_details.jsxi:876
+				add('Change Body Ambient Shadow Size',                             // view_details.jsxi:886
+					function (){                                                   // view_details.jsxi:886
 						var currentSize = AcTools.Kn5Render.Utils.Kn5RenderWrapper.GetBodyAmbientShadowSize(_selected.path).split(',');
 						
-						var d = new Dialog('Body Ambient Shadow',                  // view_details.jsxi:878
+						var d = new Dialog('Body Ambient Shadow',                  // view_details.jsxi:888
 							[
-								'<h6>Size (in meters)</h6>',                       // view_details.jsxi:879
+								'<h6>Size (in meters)</h6>',                       // view_details.jsxi:889
 								'<label style="display:inline-block;width:160px;line-height:24px">Width: <input id="body-ambient-shadow-width" type="number" step="0.1" min="0.8" max="6.0" style="width: 80px;float: right;margin-right: 20px;"></label>', 
 								'<label style="display:inline-block;width:160px;line-height:24px">Length: <input id="body-ambient-shadow-height" type="number" step="0.1" min="0.8" max="6.0" style="width: 80px;float: right;margin-right: 20px;"></label>'
 							], 
-							function (){                                           // view_details.jsxi:882
+							function (){                                           // view_details.jsxi:892
 								var w = + d.content.find('#body-ambient-shadow-width').val();
 								
-								if (Number.isNaN(w))                               // view_details.jsxi:884
-									w = currentSize[0];                            // view_details.jsxi:884
+								if (Number.isNaN(w))                               // view_details.jsxi:894
+									w = currentSize[0];                            // view_details.jsxi:894
 								
 								var h = + d.content.find('#body-ambient-shadow-height').val();
 								
-								if (Number.isNaN(h))                               // view_details.jsxi:887
-									h = currentSize[1];                            // view_details.jsxi:887
+								if (Number.isNaN(h))                               // view_details.jsxi:897
+									h = currentSize[1];                            // view_details.jsxi:897
 								
 								AcTools.Kn5Render.Utils.Kn5RenderWrapper.SetBodyAmbientShadowSize(_selected.path, w, h);
 							});
@@ -8929,89 +8977,89 @@ var ViewDetails = (function (){                                                 
 						d.content.find('#body-ambient-shadow-width').val(currentSize[0]);
 						d.content.find('#body-ambient-shadow-height').val(currentSize[1]);
 					});
-				add('Fix LR/HR nodes',                                             // view_details.jsxi:896
-					function (){                                                   // view_details.jsxi:896
+				add('Fix LR/HR nodes',                                             // view_details.jsxi:906
+					function (){                                                   // view_details.jsxi:906
 						try {
 							AcTools.Utils.Kn5Fixer.FixLrHrNodes(AcDir.root, _selected.id);
-						} catch (err){                                             // view_details.jsxi:899
-							ErrorHandler.handled('Cannot fix car.', err);          // view_details.jsxi:900
+						} catch (err){                                             // view_details.jsxi:909
+							ErrorHandler.handled('Cannot fix car.', err);          // view_details.jsxi:910
 							return;
 						} 
 					});
-				add('Fix blurred wheels',                                          // view_details.jsxi:905
-					function (){                                                   // view_details.jsxi:905
+				add('Fix blurred wheels',                                          // view_details.jsxi:915
+					function (){                                                   // view_details.jsxi:915
 						try {
 							AcTools.Utils.Kn5Fixer.FixBlurredWheels(AcDir.root, _selected.id);
-						} catch (err){                                             // view_details.jsxi:908
-							ErrorHandler.handled('Cannot fix car.', err);          // view_details.jsxi:909
+						} catch (err){                                             // view_details.jsxi:918
+							ErrorHandler.handled('Cannot fix car.', err);          // view_details.jsxi:919
 							return;
 						} 
 					});
 				
-				if (localStorage.developerMode){                                   // view_details.jsxi:914
+				if (localStorage.developerMode){                                   // view_details.jsxi:924
 					var devMenu = new gui.MenuItem({ label: 'Developer Tools', submenu: new gui.Menu() });
 					
-					menu.append(devMenu);                                          // view_details.jsxi:916
-					devMenu = devMenu.submenu;                                     // view_details.jsxi:917
-					add('Export to database',                                      // view_details.jsxi:919
-						function (){                                               // view_details.jsxi:919
-							_selected.exportDatabase();                            // view_details.jsxi:920
+					menu.append(devMenu);                                          // view_details.jsxi:926
+					devMenu = devMenu.submenu;                                     // view_details.jsxi:927
+					add('Export to database',                                      // view_details.jsxi:929
+						function (){                                               // view_details.jsxi:929
+							_selected.exportDatabase();                            // view_details.jsxi:930
 						}, 
-						devMenu);                                                  // view_details.jsxi:921
-					add('Fix SUSP_XX error',                                       // view_details.jsxi:923
-						function (){                                               // view_details.jsxi:923
+						devMenu);                                                  // view_details.jsxi:931
+					add('Fix SUSP_XX error',                                       // view_details.jsxi:933
+						function (){                                               // view_details.jsxi:933
 							try {
 								AcTools.Utils.Kn5Fixer.FixSuspension(AcDir.root, _selected.id);
-							} catch (err){                                         // view_details.jsxi:926
-								ErrorHandler.handled('Cannot fix car.', err);      // view_details.jsxi:927
+							} catch (err){                                         // view_details.jsxi:936
+								ErrorHandler.handled('Cannot fix car.', err);      // view_details.jsxi:937
 								return;
 							} 
 						}, 
-						devMenu);                                                  // view_details.jsxi:930
-					add('Unpack KN5',                                              // view_details.jsxi:932
-						function (){                                               // view_details.jsxi:932
+						devMenu);                                                  // view_details.jsxi:940
+					add('Unpack KN5',                                              // view_details.jsxi:942
+						function (){                                               // view_details.jsxi:942
 							try {
 								var kn5 = AcTools.Kn5File.Kn5.FromFile(AcTools.Utils.FileUtils.GetMainCarFile(AcDir.root, _selected.id));
 								
 								var dest = _selected.path + '/unpacked';
 								
-								if (fs.existsSync(dest))                           // view_details.jsxi:936
-									AcTools.Utils.FileUtils.Recycle(dest);         // view_details.jsxi:936
+								if (fs.existsSync(dest))                           // view_details.jsxi:946
+									AcTools.Utils.FileUtils.Recycle(dest);         // view_details.jsxi:946
 								
-								kn5.ExportDirectory(dest, false);                  // view_details.jsxi:937
+								kn5.ExportDirectory(dest, false);                  // view_details.jsxi:947
 								
-								if (kn5.RootNode != null){                         // view_details.jsxi:938
+								if (kn5.RootNode != null){                         // view_details.jsxi:948
 									kn5.Export(AcTools.Kn5File.Kn5.ExportType.Collada, dest + '/model.dae');
 								}
 								
-								Shell.openItem(dest);                              // view_details.jsxi:941
-							} catch (err){                                         // view_details.jsxi:942
-								ErrorHandler.handled('Failed.', err);              // view_details.jsxi:943
+								Shell.openItem(dest);                              // view_details.jsxi:951
+							} catch (err){                                         // view_details.jsxi:952
+								ErrorHandler.handled('Failed.', err);              // view_details.jsxi:953
 							} 
 						}, 
-						devMenu);                                                  // view_details.jsxi:945
+						devMenu);                                                  // view_details.jsxi:955
 					
-					if (fs.existsSync(_selected.path + '/unpacked'))               // view_details.jsxi:947
-						add('Repack KN5',                                          // view_details.jsxi:947
-							function (){                                           // view_details.jsxi:947
+					if (fs.existsSync(_selected.path + '/unpacked'))               // view_details.jsxi:957
+						add('Repack KN5',                                          // view_details.jsxi:957
+							function (){                                           // view_details.jsxi:957
 								try {
 									var kn5 = AcTools.Kn5File.Kn5.FromDirectory(_selected.path + '/unpacked', false);
 									
 									var dest = AcTools.Utils.FileUtils.GetMainCarFile(AcDir.root, _selected.id);
 									
-									if (fs.existsSync(dest))                       // view_details.jsxi:951
-										AcTools.Utils.FileUtils.Recycle(dest);     // view_details.jsxi:951
+									if (fs.existsSync(dest))                       // view_details.jsxi:961
+										AcTools.Utils.FileUtils.Recycle(dest);     // view_details.jsxi:961
 									
-									kn5.Save(dest, false);                         // view_details.jsxi:952
-								} catch (err){                                     // view_details.jsxi:953
-									ErrorHandler.handled('Failed.', err);          // view_details.jsxi:954
+									kn5.Save(dest, false);                         // view_details.jsxi:962
+								} catch (err){                                     // view_details.jsxi:963
+									ErrorHandler.handled('Failed.', err);          // view_details.jsxi:964
 								} 
 							}, 
-							devMenu);                                              // view_details.jsxi:956
+							devMenu);                                              // view_details.jsxi:966
 					
-					if (fs.existsSync(_selected.path + '/data.acd'))               // view_details.jsxi:958
-						add('Unpack data',                                         // view_details.jsxi:958
-							function (){                                           // view_details.jsxi:958
+					if (fs.existsSync(_selected.path + '/data.acd'))               // view_details.jsxi:968
+						add('Unpack data',                                         // view_details.jsxi:968
+							function (){                                           // view_details.jsxi:968
 								try {
 									var source = _selected.path + '/data.acd';
 									
@@ -9019,21 +9067,21 @@ var ViewDetails = (function (){                                                 
 									
 									var dest = _selected.path + '/data';
 									
-									if (fs.existsSync(dest))                       // view_details.jsxi:963
-										AcTools.Utils.FileUtils.Recycle(dest);     // view_details.jsxi:963
+									if (fs.existsSync(dest))                       // view_details.jsxi:973
+										AcTools.Utils.FileUtils.Recycle(dest);     // view_details.jsxi:973
 									
-									acd.ExportDirectory(dest);                     // view_details.jsxi:964
-									Shell.openItem(dest);                          // view_details.jsxi:965
-									AcTools.Utils.FileUtils.Recycle(source);       // view_details.jsxi:966
-								} catch (err){                                     // view_details.jsxi:967
-									ErrorHandler.handled('Failed.', err);          // view_details.jsxi:968
+									acd.ExportDirectory(dest);                     // view_details.jsxi:974
+									Shell.openItem(dest);                          // view_details.jsxi:975
+									AcTools.Utils.FileUtils.Recycle(source);       // view_details.jsxi:976
+								} catch (err){                                     // view_details.jsxi:977
+									ErrorHandler.handled('Failed.', err);          // view_details.jsxi:978
 								} 
 							}, 
-							devMenu);                                              // view_details.jsxi:970
+							devMenu);                                              // view_details.jsxi:980
 					
-					if (fs.existsSync(_selected.path + '/data'))                   // view_details.jsxi:972
-						add('Pack data',                                           // view_details.jsxi:972
-							function (){                                           // view_details.jsxi:972
+					if (fs.existsSync(_selected.path + '/data'))                   // view_details.jsxi:982
+						add('Pack data',                                           // view_details.jsxi:982
+							function (){                                           // view_details.jsxi:982
 								try {
 									var source = _selected.path + '/data';
 									
@@ -9041,36 +9089,36 @@ var ViewDetails = (function (){                                                 
 									
 									var dest = _selected.path + '/data.acd';
 									
-									if (fs.existsSync(dest))                       // view_details.jsxi:977
-										AcTools.Utils.FileUtils.Recycle(dest);     // view_details.jsxi:977
+									if (fs.existsSync(dest))                       // view_details.jsxi:987
+										AcTools.Utils.FileUtils.Recycle(dest);     // view_details.jsxi:987
 									
-									acd.Save(dest);                                // view_details.jsxi:978
-									AcTools.Utils.FileUtils.Recycle(source);       // view_details.jsxi:979
-								} catch (err){                                     // view_details.jsxi:980
-									ErrorHandler.handled('Failed.', err);          // view_details.jsxi:981
+									acd.Save(dest);                                // view_details.jsxi:988
+									AcTools.Utils.FileUtils.Recycle(source);       // view_details.jsxi:989
+								} catch (err){                                     // view_details.jsxi:990
+									ErrorHandler.handled('Failed.', err);          // view_details.jsxi:991
 								} 
 							}, 
-							devMenu);                                              // view_details.jsxi:983
+							devMenu);                                              // view_details.jsxi:993
 				}
 				
-				add('Delete car',                                                  // view_details.jsxi:986
-					function (){                                                   // view_details.jsxi:986
-						new Dialog('Delete ' + _selected.displayName,              // view_details.jsxi:987
+				add('Delete car',                                                  // view_details.jsxi:996
+					function (){                                                   // view_details.jsxi:996
+						new Dialog('Delete ' + _selected.displayName,              // view_details.jsxi:997
 							'Folder will be removed to the Recycle Bin. Are you sure?', 
-							function (arg){                                        // view_details.jsxi:987
-								if (!_selected)                                    // view_details.jsxi:988
+							function (arg){                                        // view_details.jsxi:997
+								if (!_selected)                                    // view_details.jsxi:998
 									return;
 								
-								Cars.remove(_selected);                            // view_details.jsxi:989
+								Cars.remove(_selected);                            // view_details.jsxi:999
 							});
 					});
-				menu.popup(e.clientX, e.clientY);                                  // view_details.jsxi:993
+				menu.popup(e.clientX, e.clientY);                                  // view_details.jsxi:1003
 				return false;
 			});
 	}
 	
-	(function (){                                                                  // view_details.jsxi:998
-		$(init);                                                                   // view_details.jsxi:999
+	(function (){                                                                  // view_details.jsxi:1008
+		$(init);                                                                   // view_details.jsxi:1009
 	})();
 	return ViewDetails;
 })();
@@ -9921,9 +9969,9 @@ var ViewSettings = (function (){                                                
 				'<h6>Resize</h6>',                                                 // view_settings.jsxi:131
 				'<label><input id="apt-resize" type="checkbox">Change size to default 1024×575 (Recommended)</label>', 
 				'<h6>Camera</h6>',                                                 // view_settings.jsxi:134
-				'<label style="display:inline-block;width:160px;line-height:24px">Camera Position: <input id="apt-camera-position" pattern="(-?\d(.\d*)?)\s*,\s*{2}(-?\d(.\d*)?)" style="width: 80px;float: right;margin-right: 20px;"></label>', 
-				'<label style="display:inline-block;width:160px;line-height:24px">Look At: <input id="apt-camera-look-at" pattern="(-?\d(.\d*)?)\s*,\s*{2}(-?\d(.\d*)?)" style="width: 80px;float: right;margin-right: 20px;"></label>', 
-				'<label style="display:inline-block;width:160px;line-height:24px">FOV: <input id="apt-camera-fov" type="number" step="0.1" style="width: 80px;float: right;margin-right: 20px;"></label>'
+				'<label style="display:block;width:320px;line-height:24px;clear:both">Camera Position: <input id="apt-camera-position" style="width:160px;float:right"></label>', 
+				'<label style="display:block;width:320px;line-height:24px;clear:both">Look At: <input id="apt-camera-look-at" style="width:160px;float:right"></label>', 
+				'<label style="display:block;width:320px;line-height:24px;clear:both">FOV: <input id="apt-camera-fov" type="number" step="0.1" style="width:80px;float:right"></label>'
 			], 
 			save).setButton('Save').addButton('Defaults',                          // view_settings.jsxi:147
 			function (){                                                           // view_settings.jsxi:147
@@ -10004,7 +10052,7 @@ var ViewSettings = (function (){                                                
 				'<h6>Author</h6>',                                                 // view_settings.jsxi:217
 				'x4fab',                                                           // view_settings.jsxi:218
 				'<h6>Support developing</h6>',                                     // view_settings.jsxi:219
-				"<p><a href=\"#\" onclick=\"Shell.openItem('https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=6BXQ7U3KM7KBY&lc=US&item_name=Ascobash&currency_code=USD&bn=PP%2dDonationsBF%3abtn_donateCC_LG%2egif%3aNonHostedw');new Dialog('Thank you for your support, I really appreciate it!', lambda, false)\"><img src=\"img/btn_donate.gif\"></a></p>"
+				"<p><a href=\"#\" onclick=\"Shell.openItem('https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=6BXQ7U3KM7KBY&lc=US&item_name=Ascobash&currency_code=USD&bn=PP%2dDonationsBF%3abtn_donateCC_LG%2egif%3aNonHostedw')\"><img src=\"img/btn_donate.gif\"></a></p>"
 			]).addButton('Check for update',                                       // view_settings.jsxi:224
 			function (){                                                           // view_settings.jsxi:224
 				var b = this.buttons.find('button:last-child').text('Please wait...').attr('disabled', true);

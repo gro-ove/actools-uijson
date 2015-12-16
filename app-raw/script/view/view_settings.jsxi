@@ -132,9 +132,9 @@ static class ViewSettings {
             '<label><input id="apt-resize" type="checkbox">Change size to default 1024×575 (Recommended)</label>'
 
             '<h6>Camera</h6>'
-            '<label style="display:inline-block;width:160px;line-height:24px">Camera Position: <input id="apt-camera-position" pattern="(-?\d(.\d*)?)\s*,\s*{2}(-?\d(.\d*)?)" style="width: 80px;float: right;margin-right: 20px;"></label>'
-            '<label style="display:inline-block;width:160px;line-height:24px">Look At: <input id="apt-camera-look-at" pattern="(-?\d(.\d*)?)\s*,\s*{2}(-?\d(.\d*)?)" style="width: 80px;float: right;margin-right: 20px;"></label>'
-            '<label style="display:inline-block;width:160px;line-height:24px">FOV: <input id="apt-camera-fov" type="number" step="0.1" style="width: 80px;float: right;margin-right: 20px;"></label>'
+            '<label style="display:block;width:320px;line-height:24px;clear:both">Camera Position: <input id="apt-camera-position" style="width:160px;float:right"></label>'
+            '<label style="display:block;width:320px;line-height:24px;clear:both">Look At: <input id="apt-camera-look-at" style="width:160px;float:right"></label>'
+            '<label style="display:block;width:320px;line-height:24px;clear:both">FOV: <input id="apt-camera-fov" type="number" step="0.1" style="width:80px;float:right"></label>'
             // '<label style="display:inline-block;width:160px;line-height:24px" title="Actually, just simulate mouse move">Rotate X: <input id="apt-camera-x" type="number" step="1" style="width: 80px;float: right;margin-right: 20px;"></label>'
             // '<label style="display:inline-block;width:160px;line-height:24px" title="Actually, just simulate mouse move">Rotate Y: <input id="apt-camera-y" type="number" step="1" style="width: 80px;float: right;margin-right: 20px;"></label>'
             // '<label style="display:inline-block;width:160px;line-height:24px">Distance: <input id="apt-camera-distance" type="number" step="0.1" style="width: 80px;float: right;margin-right: 20px;"></label>'

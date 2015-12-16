@@ -31,6 +31,23 @@ Small utility for easy editing *ui_car.json* files. Written using [NW.js](http:/
 * Custom Launcher (with GT-like career mode?)
 
 #### Changelog
+* 0.3.55
+    * Auto-Update Previews mode now works perfectly thanks to @6S.Manu!
+        * Proper fixed position without any input simulation!
+        * You can update one preview at the time
+        * PP filter was adjusted to match new 1.4 look
+        * Manual mode still works old way, maybe it will be useful for some special cars
+        * Stretching & size fixed
+    * Filters improved
+        * Now with numbers: “year>1995”
+        * And specs: “bhp<500”
+        * And combining them: “author:Kunos & (bhp < 200 | weight > 1000)”
+        * Another example: “!ks_ & author:Kunos”
+    * Shortcuts updated:
+        * Ctrl+Alt+A: Update shadows + Update previews
+        * Ctrl+Alt+S: Update previews
+        * Ctrl+Alt+D: Update shadows
+        * Ctrl+Alt+1: Update preview of selected skin only
 * 0.3.53
     * Ambient shadows update fixed
 * 0.3.52
@@ -202,8 +219,8 @@ Small utility for easy editing *ui_car.json* files. Written using [NW.js](http:/
 * DirectX 11 for custom showroom
 
 #### Download
-* [Last (0.3.54)](https://yadi.sk/d/wZ83W2JmkcbAN)
-* [Stable (0.3.49)](http://www.racedepartment.com/downloads/actools-cars-manager.6518/)
+* [Last (0.3.55)](https://yadi.sk/d/NShnapJ9mGxec)
+* [Stable (0.3.55)](http://www.racedepartment.com/downloads/actools-cars-manager.6518/)
 * [Previous](http://www.racedepartment.com/downloads/actools-cars-manager.6518/history) [builds](https://yadi.sk/d/eHr0NCP4hSAfq)
 
 #### Tips
@@ -250,6 +267,6 @@ This feature allows to collect huge database with correct information (descripti
 ![Upgrade Icon Editor](http://i.imgur.com/OXXxR9V.png)
 
 #### Auto-updated Previews & Shadows
-![Porsche 944 Turbo S](http://i.imgur.com/beyRgZz.jpg)
-![Aston Martin Vanquish V12](http://i.imgur.com/UF47Iqc.jpg)
-![Abarth 131](http://i.imgur.com/CBbnfoJ.jpg)
+![Porsche 914/6](http://i.imgur.com/EKRJc2q.jpg)
+![Porsche 944 Turbo S](http://i.imgur.com/64VCjKa.jpg)
+![Porsche 991 Turbo S Cabriolet](http://i.imgur.com/BBh802s.jpg)

@@ -596,6 +596,11 @@ static class ViewDetails {
 
                 menu.append(new gui.MenuItem({ type: 'separator' }));
 
+                menu.append(new gui.MenuItem({ label: 'Update Preview', click: function (){
+                    if (!_selected) return;
+                    AcShowroom.shotOne(_selected, id);
+                } }));
+
                 var autoUpdateLivery = new gui.MenuItem({ label: 'Update Livery', submenu: new gui.Menu() });
                 menu.append(autoUpdateLivery);
                 autoUpdateLivery = autoUpdateLivery.submenu;
@@ -668,7 +673,7 @@ static class ViewDetails {
                 if (!_selected) return;
 
                 if (e.keyCode === 'S'.charCodeAt(0) && e.ctrlKey && e.altKey){
-                    AcShowroom.shot(_selected, true);
+                    AcShowroom.shot(_selected, false);
                     return false;
                 }
 
@@ -682,6 +687,11 @@ static class ViewDetails {
                     return false;
                 }
 
+                if (e.keyCode === '1'.charCodeAt(0) && e.ctrlKey && e.altKey){
+                    AcShowroom.shotOne(_selected, _selected.selectedSkin);
+                    return false;
+                }
+
                 if (e.keyCode === 'A'.charCodeAt(0) && e.ctrlKey && e.altKey){
                     try {
                         AcTools.Kn5Render.Utils.Kn5RenderWrapper.UpdateAmbientShadows(_selected.path);
@@ -689,7 +699,7 @@ static class ViewDetails {
                         ErrorHandler.handled('Cannot update shadows.', err);
                         return;
                     }
-                    AcShowroom.shot(_selected, true);
+                    AcShowroom.shot(_selected, false);
                     return false;
                 }
 

@@ -176,19 +176,26 @@ static class AcShowroom {
             verticalAlign: 'top'
         });
 
+        var list = fs.readdirSync(output).map(lambda arg.slice(0, -4));
         var pos = 0;
         function out(){
             t.find('#button-prev').attr('disabled', pos > 0 ? null : true);
-            t.find('#button-next').attr('disabled', pos < car.skins.length - 1 ? null : true);
-            d.content.find('#current-preview').prop('src', car.skins[pos].preview.cssUrl());
-            d.content.find('#new-preview').prop('src', '%0/%1.bmp'(output, car.skins[pos].id).cssUrl());
+            t.find('#button-next').attr('disabled', pos < list.length - 1 ? null : true);
+            d.content.find('#current-preview').prop('src', car.getSkin(list[pos]).preview.cssUrl());
+            d.content.find('#new-preview').prop('src', '%0/%1.bmp'(output, list[pos]).cssUrl());
         }
 
         out();
     }
 
-    public shot(c, m){
-        var mode = Settings.get('aptMode');
+    public shotOne(car, skin){
+        shot(car, false, skin || car.selectedSkin);
+    }
+
+    public shot(c, m, onlyOneSkin){
+        if (m && onlyOneSkin != null) return;
+
+        var mode = 'default'; // Settings.get('aptMode');
 
         if (mode === 'default'){
             if (c.disabled){
@@ -197,16 +204,15 @@ static class AcShowroom {
             }
 
             var showroom = Settings.get('aptShowroom') || _blackShowroom;
-            var x = -Settings.get('aptCameraX');
-            var y = -Settings.get('aptCameraY');
-            var distance = -Settings.get('aptCameraDistance');
+            var cameraPosition = Settings.get('aptCameraPosition');
+            var cameraLookAt = Settings.get('aptCameraLookAt');
+            var cameraFov = Settings.get('aptCameraFov');
             var filter = Settings.get('aptFilter') || null;
             var disableSweetFx = !!Settings.get('aptDisableSweetFx');
-            var delays = !!Settings.get('aptIncreaseDelays');
 
-            if (Number.isNaN(x)) x = Settings.defaults.aptCameraX;
-            if (Number.isNaN(y)) y = Settings.defaults.aptCameraY;
-            if (Number.isNaN(distance)) distance = Settings.defaults.aptCameraY;
+            if (!/((-?\d(.\d*)?)\s*,\s*){2}(-?\d(.\d*)?)/.test(cameraPosition)) cameraPosition = Settings.defaults.aptCameraPosition;
+            if (!/((-?\d(.\d*)?)\s*,\s*){2}(-?\d(.\d*)?)/.test(cameraLookAt)) cameraLookAt = Settings.defaults.aptCameraLookAt;
+            if (Number.isNaN(cameraFov)) cameraFov = Settings.defaults.aptCameraFov;
 
             showroomTest();
             function showroomTest(){
@@ -240,7 +246,15 @@ static class AcShowroom {
             proceed();
         }
 
+        var upd;
+
         function proceed(){
+            upd = new Dialog('Auto-update Previews', [
+                '<progress indeterminate></progress>'
+            ], function (){
+                CheckUpdate.abort();
+            }, false).setButton(false);
+
             if (mode === 'default'){
                 if (filter === Settings.defaults.aptFilter){
                     AcFilters.installFilter('data/ppfilter.ini', Settings.defaults.aptFilter);
@@ -248,6 +262,7 @@ static class AcShowroom {
                     return;
                 } else if (filter && !AcFilters.exists(filter)){
                     ErrorHandler.handled('Filter “%0” is missing.'(filter));
+                    upd.close();
                     return;
                 }
             }
@@ -259,11 +274,17 @@ static class AcShowroom {
             var output;
             try {
                 if (mode === 'default'){
-                    output = AcTools.Processes.Showroom.Shot(AcDir.root, c.id, showroom, !!m, x, y, distance, filter, disableSweetFx, delays);
+                    if (onlyOneSkin != null){
+                        output = AcTools.Processes.Showroom.ShotOne(AcDir.root, c.id, showroom, onlyOneSkin, cameraPosition, cameraLookAt, cameraFov, filter, disableSweetFx);
+                    } else {
+                        output = AcTools.Processes.Showroom.ShotAll(AcDir.root, c.id, showroom, !!m, cameraPosition, cameraLookAt, cameraFov, filter, disableSweetFx);
+                    }
                 } else {
                     output = AcTools.Kn5Render.Utils.Kn5RenderWrapper.Shot(c.path, mode);
                 }
+                upd.close();
             } catch (err){
+                upd.close();
                 if (!handleError(err, c)){
                     ErrorHandler.handled('Cannot start showroom. Maybe the car is broken.', err);
                 }
