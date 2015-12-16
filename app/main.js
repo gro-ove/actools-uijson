@@ -5954,7 +5954,10 @@ var Settings = new ObjLocalStorage('settings',                                  
 		aptCameraY: 36,                                                            // settings.jsxi:64
 		aptCameraDistance: 5.5,                                                    // settings.jsxi:65
 		aptIncreaseDelays: false,                                                  // settings.jsxi:66
-		aptPngMode: false
+		aptPngMode: false,                                                         // settings.jsxi:67
+		aptCameraPosition: '-2.455, 0.835, 5.072',                                 // settings.jsxi:69
+		aptCameraLookAt: '0.498, 0.855, 0',                                        // settings.jsxi:70
+		aptCameraFov: 30
 	});
 
 /* Class "BadgeEditor" declaration */
@@ -9808,14 +9811,12 @@ var ViewSettings = (function (){                                                
 				s.updatesCheck = updatesCheck;                                     // view_settings.jsxi:25
 				s.updatesSource = updatesSource;                                   // view_settings.jsxi:26
 				s.aptShowroom = aptShowroom;                                       // view_settings.jsxi:28
-				s.aptMode = aptMode;                                               // view_settings.jsxi:29
 				s.aptFilter = aptFilter;                                           // view_settings.jsxi:30
 				s.aptDisableSweetFx = aptDisableSweetFx;                           // view_settings.jsxi:31
 				s.aptResize = aptResize;                                           // view_settings.jsxi:32
-				s.aptCameraX = aptCameraX;                                         // view_settings.jsxi:33
-				s.aptCameraY = aptCameraY;                                         // view_settings.jsxi:34
-				s.aptCameraDistance = aptCameraDistance;                           // view_settings.jsxi:35
-				s.aptIncreaseDelays = aptIncreaseDelays;                           // view_settings.jsxi:36
+				s.aptCameraPosition = aptCameraPosition;                           // view_settings.jsxi:33
+				s.aptCameraLookAt = aptCameraLookAt;                               // view_settings.jsxi:34
+				s.aptCameraFov = aptCameraFov;                                     // view_settings.jsxi:35
 			});
 		}
 		
@@ -9908,10 +9909,6 @@ var ViewSettings = (function (){                                                
 		
 		var apt = d.addTab('Auto-Preview',                                         // view_settings.jsxi:114
 			[
-				'<h6>Mode</h6>',                                                   // view_settings.jsxi:115
-				'<select id="apt-mode">' + AcShowroom.modes.map(function (e){      // view_settings.jsxi:116
-					return '<option value="' + e.id + '">' + e.name + '</option>';
-				}).join('') + '</select>',                                         // view_settings.jsxi:118
 				'<h6>Showroom</h6>',                                               // view_settings.jsxi:120
 				'<select id="apt-showroom"><option value="">Black Showroom (Recommended)</option>' + AcShowroom.list.map(function (e){
 					return '<option value="' + e.id + '">' + (e.data ? e.data.name : e.id) + '</option>';
@@ -9922,182 +9919,154 @@ var ViewSettings = (function (){                                                
 				}).join('') + '</select>',                                         // view_settings.jsxi:128
 				'<label><input id="apt-disable-sweetfx" type="checkbox">Disable SweetFX (Recommended)</label>', 
 				'<h6>Resize</h6>',                                                 // view_settings.jsxi:131
-				'<label><input id="apt-resize" type="checkbox">Change size to default 1024×576 (Recommended)</label>', 
-				'<h6>Camera Position</h6>',                                        // view_settings.jsxi:134
-				'<label style="display:inline-block;width:160px;line-height:24px" title="Actually, just simulate mouse move">Rotate X: <input id="apt-camera-x" type="number" step="1" style="width: 80px;float: right;margin-right: 20px;"></label>', 
-				'<label style="display:inline-block;width:160px;line-height:24px" title="Actually, just simulate mouse move">Rotate Y: <input id="apt-camera-y" type="number" step="1" style="width: 80px;float: right;margin-right: 20px;"></label>', 
-				'<label style="display:inline-block;width:160px;line-height:24px">Distance: <input id="apt-camera-distance" type="number" step="0.1" style="width: 80px;float: right;margin-right: 20px;"></label>', 
-				'<h6>Delays</h6>',                                                 // view_settings.jsxi:139
-				'<label><input id="apt-increase-delays" type="checkbox">Increased delays</label>', 
-				'<h6>PNG Mode</h6>',                                               // view_settings.jsxi:142
-				'<label><input id="apt-png-mode" type="checkbox">Make previews in PNG format (but still save as preview.jpg)</label>'
+				'<label><input id="apt-resize" type="checkbox">Change size to default 1024×575 (Recommended)</label>', 
+				'<h6>Camera</h6>',                                                 // view_settings.jsxi:134
+				'<label style="display:inline-block;width:160px;line-height:24px">Camera Position: <input id="apt-camera-position" pattern="(-?\d(.\d*)?)\s*,\s*{2}(-?\d(.\d*)?)" style="width: 80px;float: right;margin-right: 20px;"></label>', 
+				'<label style="display:inline-block;width:160px;line-height:24px">Look At: <input id="apt-camera-look-at" pattern="(-?\d(.\d*)?)\s*,\s*{2}(-?\d(.\d*)?)" style="width: 80px;float: right;margin-right: 20px;"></label>', 
+				'<label style="display:inline-block;width:160px;line-height:24px">FOV: <input id="apt-camera-fov" type="number" step="0.1" style="width: 80px;float: right;margin-right: 20px;"></label>'
 			], 
-			save).setButton('Save').addButton('Defaults',                          // view_settings.jsxi:144
-			function (){                                                           // view_settings.jsxi:144
+			save).setButton('Save').addButton('Defaults',                          // view_settings.jsxi:147
+			function (){                                                           // view_settings.jsxi:147
 				apt.content.find('#apt-mode')[0].value = (aptMode = Settings.defaults.aptMode);
 				apt.content.toggleClass('apt-nondefmode', aptMode !== 'default');
 				apt.content.find('#apt-showroom')[0].value = (aptShowroom = Settings.defaults.aptShowroom);
 				
-				if (AcFilters.list.length)                                         // view_settings.jsxi:149
+				if (AcFilters.list.length)                                         // view_settings.jsxi:152
 					apt.content.find('#apt-filter')[0].value = (aptFilter = Settings.defaults.aptFilter);
 				
 				apt.content.find('#apt-disable-sweetfx')[0].checked = (aptDisableSweetFx = Settings.defaults.aptDisableSweetFx);
 				apt.content.find('#apt-resize')[0].checked = (aptResize = Settings.defaults.aptResize);
-				apt.content.find('#apt-camera-x')[0].value = (aptCameraX = Settings.defaults.aptCameraX);
-				apt.content.find('#apt-camera-y')[0].value = (aptCameraY = Settings.defaults.aptCameraY);
-				apt.content.find('#apt-camera-distance')[0].value = (aptCameraDistance = Settings.defaults.aptCameraDistance);
-				apt.content.find('#apt-increase-delays')[0].checked = (aptIncreaseDelays = Settings.defaults.aptIncreaseDelays);
-				apt.content.find('#apt-png-mode')[0].checked = (aptPngMode = Settings.defaults.aptPngMode);
+				apt.content.find('#apt-camera-position')[0].value = (aptCameraPosition = Settings.defaults.aptCameraPosition);
+				apt.content.find('#apt-camera-look-at')[0].value = (aptCameraLookAt = Settings.defaults.aptCameraLookAt);
+				apt.content.find('#apt-camera-fov')[0].value = (aptCameraFov = Settings.defaults.aptCameraFov);
 				return false;
-			}).addButton('Cancel');                                                // view_settings.jsxi:158
-		
-		var aptMode = Settings.get('aptMode');
-		
-		apt.content.find('#apt-mode').change(function (arg){                       // view_settings.jsxi:161
-			aptMode = this.value;                                                  // view_settings.jsxi:162
-			apt.content.toggleClass('apt-nondefmode', aptMode !== 'default');      // view_settings.jsxi:163
-		})[0].value = aptMode;                                                     // view_settings.jsxi:164
-		apt.content.toggleClass('apt-nondefmode', aptMode !== 'default');          // view_settings.jsxi:165
+			}).addButton('Cancel');                                                // view_settings.jsxi:161
 		
 		var aptShowroom = Settings.get('aptShowroom');
 		
-		apt.content.find('#apt-showroom').change(function (arg){                   // view_settings.jsxi:168
-			aptShowroom = this.value;                                              // view_settings.jsxi:168
-		})[0].value = aptShowroom;                                                 // view_settings.jsxi:168
+		apt.content.find('#apt-showroom').change(function (arg){                   // view_settings.jsxi:171
+			aptShowroom = this.value;                                              // view_settings.jsxi:171
+		})[0].value = aptShowroom;                                                 // view_settings.jsxi:171
 		
 		var aptFilter = Settings.get('aptFilter');
 		
-		if (AcFilters.list.length){                                                // view_settings.jsxi:171
+		if (AcFilters.list.length){                                                // view_settings.jsxi:174
 			var recFilter = apt.content.find('#apt-filter [value="' + Settings.defaults.aptFilter + '"]')[0];
 			
-			if (recFilter){                                                        // view_settings.jsxi:173
-				recFilter.textContent += ' (Recommended)';                         // view_settings.jsxi:174
+			if (recFilter){                                                        // view_settings.jsxi:176
+				recFilter.textContent += ' (Recommended)';                         // view_settings.jsxi:177
 			} else {
 				$('<option value="' + Settings.defaults.aptFilter + '">' + Settings.defaults.aptFilter + ' (Recommended)</option>').insertAfter(apt.content.find('#apt-filter option:first-child'));
 			}
 			
-			apt.content.find('#apt-filter').change(function (arg){                 // view_settings.jsxi:179
-				aptFilter = this.value;                                            // view_settings.jsxi:179
-			})[0].value = aptFilter;                                               // view_settings.jsxi:179
+			apt.content.find('#apt-filter').change(function (arg){                 // view_settings.jsxi:182
+				aptFilter = this.value;                                            // view_settings.jsxi:182
+			})[0].value = aptFilter;                                               // view_settings.jsxi:182
 		} else {
 			apt.content.find('#apt-filter').attr({ disabled: true, title: 'Filters not found' });
 		}
 		
 		var aptDisableSweetFx = Settings.get('aptDisableSweetFx');
 		
-		apt.content.find('#apt-disable-sweetfx').change(function (arg){            // view_settings.jsxi:188
-			aptDisableSweetFx = this.checked;                                      // view_settings.jsxi:188
-		})[0].checked = aptDisableSweetFx;                                         // view_settings.jsxi:188
+		apt.content.find('#apt-disable-sweetfx').change(function (arg){            // view_settings.jsxi:191
+			aptDisableSweetFx = this.checked;                                      // view_settings.jsxi:191
+		})[0].checked = aptDisableSweetFx;                                         // view_settings.jsxi:191
 		
 		var aptResize = Settings.get('aptResize');
 		
-		apt.content.find('#apt-resize').change(function (arg){                     // view_settings.jsxi:191
-			aptResize = this.checked;                                              // view_settings.jsxi:191
-		})[0].checked = aptResize;                                                 // view_settings.jsxi:191
+		apt.content.find('#apt-resize').change(function (arg){                     // view_settings.jsxi:194
+			aptResize = this.checked;                                              // view_settings.jsxi:194
+		})[0].checked = aptResize;                                                 // view_settings.jsxi:194
 		
-		var aptCameraX = Settings.get('aptCameraX');
+		var aptCameraPosition = Settings.get('aptCameraPosition');
 		
-		apt.content.find('#apt-camera-x').change(function (arg){                   // view_settings.jsxi:194
-			aptCameraX = this.value;                                               // view_settings.jsxi:194
-		})[0].value = aptCameraX;                                                  // view_settings.jsxi:194
+		apt.content.find('#apt-camera-position').change(function (arg){            // view_settings.jsxi:197
+			aptCameraPosition = this.value;                                        // view_settings.jsxi:197
+		})[0].value = aptCameraPosition;                                           // view_settings.jsxi:197
 		
-		var aptCameraY = Settings.get('aptCameraY');
+		var aptCameraLookAt = Settings.get('aptCameraLookAt');
 		
-		apt.content.find('#apt-camera-y').change(function (arg){                   // view_settings.jsxi:197
-			aptCameraY = this.value;                                               // view_settings.jsxi:197
-		})[0].value = aptCameraY;                                                  // view_settings.jsxi:197
+		apt.content.find('#apt-camera-look-at').change(function (arg){             // view_settings.jsxi:200
+			aptCameraLookAt = this.value;                                          // view_settings.jsxi:200
+		})[0].value = aptCameraLookAt;                                             // view_settings.jsxi:200
 		
-		var aptCameraDistance = Settings.get('aptCameraDistance');
+		var aptCameraFov = Settings.get('aptCameraFov');
 		
-		apt.content.find('#apt-camera-distance').change(function (arg){            // view_settings.jsxi:200
-			aptCameraDistance = this.value;                                        // view_settings.jsxi:200
-		})[0].value = aptCameraDistance;                                           // view_settings.jsxi:200
-		
-		var aptIncreaseDelays = Settings.get('aptIncreaseDelays');
-		
-		apt.content.find('#apt-increase-delays').change(function (arg){            // view_settings.jsxi:203
-			aptIncreaseDelays = this.checked;                                      // view_settings.jsxi:203
-		})[0].checked = aptIncreaseDelays;                                         // view_settings.jsxi:203
-		
-		var aptPngMode = Settings.get('aptPngMode');
-		
-		apt.content.find('#apt-png-mode').change(function (arg){                   // view_settings.jsxi:206
-			aptPngMode = this.checked;                                             // view_settings.jsxi:206
-		})[0].checked = aptPngMode;                                                // view_settings.jsxi:206
-		d.addTab('About',                                                          // view_settings.jsxi:209
+		apt.content.find('#apt-camera-fov').change(function (arg){                 // view_settings.jsxi:203
+			aptCameraFov = this.value;                                             // view_settings.jsxi:203
+		})[0].value = aptCameraFov;                                                // view_settings.jsxi:203
+		d.addTab('About',                                                          // view_settings.jsxi:212
 			[
-				'<h6>Version</h6>',                                                // view_settings.jsxi:210
-				'<p id="version">' + gui.App.manifest.version + '</p>',            // view_settings.jsxi:211
-				'<h6>Details</h6>',                                                // view_settings.jsxi:212
+				'<h6>Version</h6>',                                                // view_settings.jsxi:213
+				'<p id="version">' + gui.App.manifest.version + '</p>',            // view_settings.jsxi:214
+				'<h6>Details</h6>',                                                // view_settings.jsxi:215
 				"<p><a href=\"#\" onclick=\"Shell.openItem('https://ascobash.wordpress.com/2015/06/14/actools-uijson/')\">https://ascobash.wordpress.com/…/actools-uijson/</a></p>", 
-				'<h6>Author</h6>',                                                 // view_settings.jsxi:214
-				'x4fab'
-			]).addButton('Feedback',                                               // view_settings.jsxi:216
-			function (){                                                           // view_settings.jsxi:216
-				feedbackForm();                                                    // view_settings.jsxi:217
-				return false;
-			}).addButton('Check for update',                                       // view_settings.jsxi:219
-			function (){                                                           // view_settings.jsxi:219
+				'<h6>Author</h6>',                                                 // view_settings.jsxi:217
+				'x4fab',                                                           // view_settings.jsxi:218
+				'<h6>Support developing</h6>',                                     // view_settings.jsxi:219
+				"<p><a href=\"#\" onclick=\"Shell.openItem('https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=6BXQ7U3KM7KBY&lc=US&item_name=Ascobash&currency_code=USD&bn=PP%2dDonationsBF%3abtn_donateCC_LG%2egif%3aNonHostedw');new Dialog('Thank you for your support, I really appreciate it!', lambda, false)\"><img src=\"img/btn_donate.gif\"></a></p>"
+			]).addButton('Check for update',                                       // view_settings.jsxi:224
+			function (){                                                           // view_settings.jsxi:224
 				var b = this.buttons.find('button:last-child').text('Please wait...').attr('disabled', true);
 				
-				CheckUpdate.check();                                               // view_settings.jsxi:221
-				CheckUpdate.one('check',                                           // view_settings.jsxi:222
-					function (arg){                                                // view_settings.jsxi:222
-						b.text('Check again').attr('disabled', null);              // view_settings.jsxi:223
+				CheckUpdate.check();                                               // view_settings.jsxi:226
+				CheckUpdate.one('check',                                           // view_settings.jsxi:227
+					function (arg){                                                // view_settings.jsxi:227
+						b.text('Check again').attr('disabled', null);              // view_settings.jsxi:228
 						
-						if (arg === 'check:failed'){                               // view_settings.jsxi:224
+						if (arg === 'check:failed'){                               // view_settings.jsxi:229
 							new Dialog('Check For Update', 'Cannot check for update.');
-						} else if (arg !== 'check:done:found'){                    // view_settings.jsxi:226
+						} else if (arg !== 'check:done:found'){                    // view_settings.jsxi:231
 							new Dialog('Check For Update', 'New version not found.');
 						}
 					});
 				return false;
-			}).content.find('#version').click(function (){                         // view_settings.jsxi:231
-			if (++ c > 10 && !localStorage.developerMode){                         // view_settings.jsxi:232
-				new Dialog('Developer Mode Enabled',                               // view_settings.jsxi:233
-					'Don\'t spread it around, ok?',                                // view_settings.jsxi:233
+			}).content.find('#version').click(function (){                         // view_settings.jsxi:236
+			if (++ c > 10 && !localStorage.developerMode){                         // view_settings.jsxi:237
+				new Dialog('Developer Mode Enabled',                               // view_settings.jsxi:238
+					'Don\'t spread it around, ok?',                                // view_settings.jsxi:238
 					function (arg){}, 
 					false);
-				localStorage.developerMode = true;                                 // view_settings.jsxi:234
+				localStorage.developerMode = true;                                 // view_settings.jsxi:239
 			}
 		});
 	}
 	
-	function feedbackForm(){                                                       // view_settings.jsxi:239
-		function sendFeedback(v){                                                  // view_settings.jsxi:240
+	function feedbackForm(){                                                       // view_settings.jsxi:244
+		function sendFeedback(v){                                                  // view_settings.jsxi:245
 			d.buttons.find('button:first-child').text('Please wait...').attr('disabled', true);
-			AppServerRequest.sendFeedback(v,                                       // view_settings.jsxi:243
-				function (arg){                                                    // view_settings.jsxi:243
-					d.close();                                                     // view_settings.jsxi:244
+			AppServerRequest.sendFeedback(v,                                       // view_settings.jsxi:248
+				function (arg){                                                    // view_settings.jsxi:248
+					d.close();                                                     // view_settings.jsxi:249
 					
-					if (arg){                                                      // view_settings.jsxi:245
-						new Dialog('Cannot Send Feedback', 'Sorry about that.');   // view_settings.jsxi:246
+					if (arg){                                                      // view_settings.jsxi:250
+						new Dialog('Cannot Send Feedback', 'Sorry about that.');   // view_settings.jsxi:251
 					} else {
-						_prevFeedback = null;                                      // view_settings.jsxi:248
-						new Dialog('Feedback Sent', 'Thank you.');                 // view_settings.jsxi:249
+						_prevFeedback = null;                                      // view_settings.jsxi:253
+						new Dialog('Feedback Sent', 'Thank you.');                 // view_settings.jsxi:254
 					}
 				});
 		}
 		
-		var d = new Dialog('Feedback',                                             // view_settings.jsxi:254
+		var d = new Dialog('Feedback',                                             // view_settings.jsxi:259
 			'<textarea style="width:350px;height:200px;resize:none" maxlength="5000"\
                 placeholder="If you have any ideas or suggestions please let me know"></textarea>', 
-			function (){                                                           // view_settings.jsxi:255
+			function (){                                                           // view_settings.jsxi:260
 				var v = this.content.find('textarea').val().trim();
 				
-				if (v)                                                             // view_settings.jsxi:257
-					sendFeedback(v);                                               // view_settings.jsxi:257
+				if (v)                                                             // view_settings.jsxi:262
+					sendFeedback(v);                                               // view_settings.jsxi:262
 				return false;
 			}, 
-			false).setButton('Send').addButton('Cancel').closeOnEnter(false);      // view_settings.jsxi:259
+			false).setButton('Send').addButton('Cancel').closeOnEnter(false);      // view_settings.jsxi:264
 		
 		d.content.find('textarea').val(_prevFeedback || '').change(function (arg){
-			return _prevFeedback = this.value;                                     // view_settings.jsxi:260
+			return _prevFeedback = this.value;                                     // view_settings.jsxi:265
 		});
 	}
 	
-	(function (){                                                                  // view_settings.jsxi:263
-		$('#settings-open').click(openDialog);                                     // view_settings.jsxi:264
+	(function (){                                                                  // view_settings.jsxi:268
+		$('#settings-open').click(openDialog);                                     // view_settings.jsxi:269
 	})();
 	return ViewSettings;
 })();
