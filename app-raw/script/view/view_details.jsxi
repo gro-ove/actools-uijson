@@ -967,28 +967,49 @@ static class ViewDetails {
 
                 if (fs.existsSync(_selected.path + '/data.acd')) add('Unpack data', function (){
                     try {
+                        function go(){
+                            acd.ExportDirectory(dest);
+                            Shell.openItem(dest);
+                        }
+
                         var source = _selected.path + '/data.acd';
                         var acd = AcTools.AcdFile.Acd.FromFile(source);
                         var dest = _selected.path + '/data';
-                        if (fs.existsSync(dest)) AcTools.Utils.FileUtils.Recycle(dest);
-                        acd.ExportDirectory(dest);
-                        Shell.openItem(dest);
-                        AcTools.Utils.FileUtils.Recycle(source);
+                        if (fs.existsSync(dest)){
+                            new Dialog('Unpack data.acd', 'Folder “data” already exists and will be moved to Recycle Bin. Are you sure?', lambda {
+                                AcTools.Utils.FileUtils.Recycle(dest);
+                                go();
+                            });
+                        } else go();
                     } catch (err){
                         ErrorHandler.handled('Failed.', err);
                     }
                 }, devMenu);
 
                 if (fs.existsSync(_selected.path + '/data')) add('Pack data', function (){
-                    try {
-                        var source = _selected.path + '/data';
-                        var acd = AcTools.AcdFile.Acd.FromDirectory(source);
-                        var dest = _selected.path + '/data.acd';
-                        if (fs.existsSync(dest)) AcTools.Utils.FileUtils.Recycle(dest);
-                        acd.Save(dest);
-                        AcTools.Utils.FileUtils.Recycle(source);
-                    } catch (err){
-                        ErrorHandler.handled('Failed.', err);
+                    if (_selected.data.author == 'Kunos'){
+                        new Dialog('Warning', 'You\'re going to repack Kunos car. Some of them can\'t be packed 100%-correctly right now, so you could lose access to online mode even if there is no changes. Are you sure?', fn).setWarningColor();
+                    } else fn();
+
+                    function fn(){
+                        try {
+                            function go(){
+                                acd.Save(dest);
+                            }
+
+                            var source = _selected.path + '/data';
+                            var acd = AcTools.AcdFile.Acd.FromDirectory(source);
+                            var dest = _selected.path + '/data.acd';
+                            if (fs.existsSync(dest)){
+                                new Dialog('Pack data', 'File “data.acd” already exists and will be moved to Recycle Bin. Are you sure?', lambda {
+                                    AcTools.Utils.FileUtils.Recycle(dest);
+                                    go();
+                                });
+                            } else go();
+                            // AcTools.Utils.FileUtils.Recycle(source);
+                        } catch (err){
+                            ErrorHandler.handled('Failed.', err);
+                        }
                     }
                 }, devMenu);
             }

@@ -82,6 +82,11 @@ class Dialog {
         return this;
     }
 
+    public setWarningColor(){
+        buttons.find('[data-id="dialog-ok"]').css('-webkit-filter', 'hue-rotate(150deg)');
+        return this;
+    }
+
     public addButton(text, fn){
         fn = fn && fn.bind(this);
         $('<button>' + text + '</button>').appendTo(buttons).click(function (e){

@@ -30,7 +30,47 @@ Small utility for easy editing *ui_car.json* files. Written using [NW.js](http:/
 * Tracks/Showrooms Mode (?)
 * Custom Launcher (with GT-like career mode?)
 
+#### Requirements
+* [.NET Framework 4.5](https://www.microsoft.com/en-US/Download/details.aspx?id=30653)
+* [Visual C++ Redistributable 2013 (x86)](https://www.microsoft.com/en-us/download/details.aspx?id=40784)
+* Some free place (at least ≈0.5GB, just for in case)
+* DirectX 11 for custom showroom
+
+#### Download
+* [Last (0.3.56)](https://yadi.sk/d/04gKWuPMmSdnu)
+* [Stable (0.3.56)](http://www.racedepartment.com/downloads/actools-cars-manager.6518/)
+* [Previous](http://www.racedepartment.com/downloads/actools-cars-manager.6518/history) [builds](https://yadi.sk/d/eHr0NCP4hSAfq)
+
+#### Tips
+* Double click on preview to launch showroom
+* Press RMB to open controls bar or context menus
+* Select found text in built-in browser and press “OK”; hold Ctrl to add selected text instead of replacing
+* Don't forget to save changes (Ctrl+S)
+* In some cases (editing kn5, for example) app removes original files to Trash Bin, so you can easily restore them if something goes wrong.
+    *Warning!* Ctrl+Z in Windows Explorer restores them, so be careful!
+* If you want to rebuild app, please, contact me first: it's written with Js-Ext, and I didn't make any documentation for it
+
+#### Recommendations
+* Use “Various” as the brand name if there is no brand at all
+* Don't forget to use Body/Wheels Ambient Shadows Fixer when shadows is invalid; if results are messed up, fix them in some image editor
+* You can override brand's logos, upgrade icons and stuff
+* If you create new mods, please, add such fields as “author”, “version” and “url”
+    * Better enable “Upload some changes” and then those values eventually will be added in global database
+
+#### Troubleshooting
+* Error “App doesn't have access to this folder”
+    You have to grant access to Assetto Corsa root folder. Overwise app won't be able to edit files, and it's its main purpose! To grand access you can run app as Administrator, but it's a worst way. Much better way is to change Security Properties of the folder. When app get access to game files and nothing else.
+* Error “Cannot get previews. Process exited.”
+    If AC Showroom closes on launch, maybe there is a problem with the car. Open log file and check last lines.
+* Autoupdate doesn't work
+    Please check if app has access to his folder. If you drop carsmgr.exe into something like **C:\Program Files**, disable autoupdate at all (but I don't recommend it).
+
 #### Changelog
+* 0.3.56
+    * Old Auto-Update Previews modes reverted back (optional)
+    * Custom Showroom fixed
+        * Added auto-update for selected skin, very handy
+    * To exit from new Auto-Update Previews mode, press Esc, now app will handle it properly 
 * 0.3.55
     * Auto-Update Previews mode now works perfectly thanks to @6S.Manu!
         * Proper fixed position without any input simulation!
@@ -211,52 +251,6 @@ Small utility for easy editing *ui_car.json* files. Written using [NW.js](http:/
     * Improved skins view (livery.png & stuff)
     * Auto-update skins previews fixed and improved
     * Added manual mode
-
-#### Requirements
-* [.NET Framework 4.5](https://www.microsoft.com/en-US/Download/details.aspx?id=30653)
-* [Visual C++ Redistributable 2013 (x86)](https://www.microsoft.com/en-us/download/details.aspx?id=40784)
-* Some free place (at least ≈0.5GB, just for in case)
-* DirectX 11 for custom showroom
-
-#### Download
-* [Last (0.3.55)](https://yadi.sk/d/NShnapJ9mGxec)
-* [Stable (0.3.55)](http://www.racedepartment.com/downloads/actools-cars-manager.6518/)
-* [Previous](http://www.racedepartment.com/downloads/actools-cars-manager.6518/history) [builds](https://yadi.sk/d/eHr0NCP4hSAfq)
-
-#### Tips
-* Double click on preview to launch showroom
-* Press RMB to open controls bar or context menus
-* Select found text in built-in browser and press “OK”; hold Ctrl to add selected text instead of replacing
-* Don't forget to save changes (Ctrl+S)
-* In some cases (editing kn5, for example) app removes original files to Trash Bin, so you can easily restore them if something goes wrong.
-    *Warning!* Ctrl+Z in Windows Explorer restores them, so be careful!
-* If you want to rebuild app, please, contact me first: it's written with Js-Ext, so, you know, it could be the problem
-
-#### Recommendations
-* Use “Various” as the brand name if there is no brand at all
-* Don't forget to use Body/Wheels Ambient Shadows Fixer when shadows is invalid; if results are messed up, fix them in some image editor
-* You can override brand's logos, upgrade icons and stuff
-* If you create new mods, please, add such fields as “author”, “version” and “url”
-    * Better enable “Upload some changes” and then those values eventually will be added in global database
-
-#### Troubleshooting
-* Error “App doesn't have access to this folder”
-    You have to grant access to Assetto Corsa root folder. Overwise app won't be able to edit files, and it's its main purpose! To grand access you can run app as Administrator, but it's a worst way. Much better way is to change Security Properties of the folder. When app get access to game files and nothing else.
-* Error “Cannot get previews. Process exited.”
-    If AC Showroom closes on launch, maybe there is a problem with the car. Open log file and check last lines.
-* Autoupdate doesn't work
-    Please check if app has access to his folder. If you drop carsmgr.exe into something like **C:\Program Files**, disable autoupdate at all (but I don't recommend it).
-
-#### Data Collection
-This feature allows to collect huge database with correct information (description, tags and etc.) about every car! All you have to do is open Settings, enable option “Upload some changes” (it's disabled by default because of privacy and stuff) and then some of your fixes will be uploaded on server! After that everybody will have access to clean, right and actual information!
-
-#### How to update previews
-* Install [Black Showroom](http://www.racedepartment.com/downloads/studio-black-showroom.4353/)
-* Press RMB and click “Update Previews”
-* Manual mode: set the right camera position and press F8
-* Wait until all skins will be screenshoted
-* Check result and press “Apply” if everything is OK
-    *Warning!* This thing could be pretty buggy. Sometimes you'll have to terminate updating (by press Esc) and try again.
 
 #### Known bugs
 * Auto-update wasn't tested

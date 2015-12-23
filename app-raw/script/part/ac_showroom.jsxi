@@ -1,10 +1,11 @@
 static class AcShowroom {
     public var modes = [
-        { id: 'default', name: 'Regular Showroom (Recommended)' }
-        { id: 'kunos', name: 'Dark Room' }
-        { id: 'seatleon', name: 'Seat Leon Eurocup Style' }
-        { id: 'gt5', name: 'GT5-style' }
-        { id: 'gt6', name: 'GT6-style' }
+        { id: 'default', name: 'Regular Showroom, Fixed Position (Recommended)' }
+        { id: 'default_old', name: 'Regular Showroom, Simulated Rotation (Old)' }
+        { id: 'kunos', name: 'Custom Showroom, Dark Room' }
+        { id: 'gt5', name: 'Custom Showroom, GT5-style' }
+        { id: 'gt6', name: 'Custom Showroom, GT6-style' }
+        { id: 'seatleon', name: 'Custom Showroom, Seat Leon Eurocup Style' }
     ];
 
     var _showrooms = null;
@@ -192,27 +193,42 @@ static class AcShowroom {
         shot(car, false, skin || car.selectedSkin);
     }
 
-    public shot(c, m, onlyOneSkin){
-        if (m && onlyOneSkin != null) return;
+    public shot(c, manualMode, onlyOneSkin){
+        if (manualMode && onlyOneSkin != null) return;
+        manualMode = !!manualMode;
 
-        var mode = 'default'; // Settings.get('aptMode');
+        var mode = Settings.get('aptMode');
+        if (manualMode) mode = 'default_old';
+        if (onlyOneSkin != null) mode = 'default';
 
-        if (mode === 'default'){
+        if (mode === 'default' || mode === 'default_old'){
             if (c.disabled){
                 Notification.warn('No Way', 'Enable car first.');
                 return;
             }
 
             var showroom = Settings.get('aptShowroom') || _blackShowroom;
-            var cameraPosition = Settings.get('aptCameraPosition');
-            var cameraLookAt = Settings.get('aptCameraLookAt');
-            var cameraFov = Settings.get('aptCameraFov');
             var filter = Settings.get('aptFilter') || null;
             var disableSweetFx = !!Settings.get('aptDisableSweetFx');
 
-            if (!/((-?\d(.\d*)?)\s*,\s*){2}(-?\d(.\d*)?)/.test(cameraPosition)) cameraPosition = Settings.defaults.aptCameraPosition;
-            if (!/((-?\d(.\d*)?)\s*,\s*){2}(-?\d(.\d*)?)/.test(cameraLookAt)) cameraLookAt = Settings.defaults.aptCameraLookAt;
-            if (Number.isNaN(cameraFov)) cameraFov = Settings.defaults.aptCameraFov;
+            if (mode === 'default'){
+                var cameraPosition = Settings.get('aptCameraPosition');
+                var cameraLookAt = Settings.get('aptCameraLookAt');
+                var cameraFov = +Settings.get('aptCameraFov');
+
+                if (!/((-?\d(.\d*)?)\s*,\s*){2}(-?\d(.\d*)?)/.test(cameraPosition)) cameraPosition = Settings.defaults.aptCameraPosition;
+                if (!/((-?\d(.\d*)?)\s*,\s*){2}(-?\d(.\d*)?)/.test(cameraLookAt)) cameraLookAt = Settings.defaults.aptCameraLookAt;
+                if (Number.isNaN(cameraFov)) cameraFov = Settings.defaults.aptCameraFov;
+            } else {
+                var cameraX = +Settings.get('aptCameraX');
+                var cameraY = +Settings.get('aptCameraY');
+                var cameraDistance = +Settings.get('aptCameraDistance');
+                var delays = !!Settings.get('aptIncreaseDelays');
+
+                if (Number.isNaN(cameraX)) cameraX = Settings.defaults.aptCameraX;
+                if (Number.isNaN(cameraY)) cameraY = Settings.defaults.aptCameraY;
+                if (Number.isNaN(cameraDistance)) cameraDistance = Settings.defaults.aptCameraDistance;
+            }
 
             showroomTest();
             function showroomTest(){
@@ -255,7 +271,7 @@ static class AcShowroom {
                 CheckUpdate.abort();
             }, false).setButton(false);
 
-            if (mode === 'default'){
+            if (mode === 'default' || mode == 'default_old'){
                 if (filter === Settings.defaults.aptFilter){
                     AcFilters.installFilter('data/ppfilter.ini', Settings.defaults.aptFilter);
                     setTimeout(proceedShot, 500);
@@ -273,11 +289,14 @@ static class AcShowroom {
         function proceedShot(){
             var output;
             try {
-                if (mode === 'default'){
+                if (mode === 'default_old'){
+                    output = AcTools.Processes.Showroom.Shot(AcDir.root, c.id, showroom, manualMode, cameraX, cameraY, cameraDistance, 
+                        filter, disableSweetFx, delays);
+                } else if (mode === 'default'){
                     if (onlyOneSkin != null){
                         output = AcTools.Processes.Showroom.ShotOne(AcDir.root, c.id, showroom, onlyOneSkin, cameraPosition, cameraLookAt, cameraFov, filter, disableSweetFx);
                     } else {
-                        output = AcTools.Processes.Showroom.ShotAll(AcDir.root, c.id, showroom, !!m, cameraPosition, cameraLookAt, cameraFov, filter, disableSweetFx);
+                        output = AcTools.Processes.Showroom.ShotAll(AcDir.root, c.id, showroom, cameraPosition, cameraLookAt, cameraFov, filter, disableSweetFx);
                     }
                 } else {
                     output = AcTools.Kn5Render.Utils.Kn5RenderWrapper.Shot(c.path, mode);

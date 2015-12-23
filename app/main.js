@@ -198,58 +198,62 @@ Dialog.prototype.setButton = function (a, c){                                   
 	}
 	return this;                                                                   // dialog.jsxi:82
 };
-Dialog.prototype.addButton = function (text, fn){                                  // dialog.jsxi:85
+Dialog.prototype.setWarningColor = function (){                                    // dialog.jsxi:85
+	this.buttons.find('[data-id="dialog-ok"]').css('-webkit-filter', 'hue-rotate(150deg)');
+	return this;                                                                   // dialog.jsxi:87
+};
+Dialog.prototype.addButton = function (text, fn){                                  // dialog.jsxi:90
 	var __that = this;
 	
-	fn = fn && fn.bind(this);                                                      // dialog.jsxi:86
+	fn = fn && fn.bind(this);                                                      // dialog.jsxi:91
 	$('<button>' + text + '</button>').appendTo(this.buttons).click(function (e){
-		if (!fn || fn(e) !== false){                                               // dialog.jsxi:88
+		if (!fn || fn(e) !== false){                                               // dialog.jsxi:93
 			__that.close();
 		}
 	});
-	return this;                                                                   // dialog.jsxi:92
+	return this;                                                                   // dialog.jsxi:97
 };
-Dialog.prototype.find = function (a){                                              // dialog.jsxi:95
-	return this.el.find(a);                                                        // dialog.jsxi:96
+Dialog.prototype.find = function (a){                                              // dialog.jsxi:100
+	return this.el.find(a);                                                        // dialog.jsxi:101
 };
-Dialog.prototype.close = function (){                                              // dialog.jsxi:99
+Dialog.prototype.close = function (){                                              // dialog.jsxi:104
 	if (this.__Dialog__endCallback)
 		this.__Dialog__endCallback();
 	
-	this.el.remove();                                                              // dialog.jsxi:101
+	this.el.remove();                                                              // dialog.jsxi:106
 };
-Dialog.prototype.addTab = function (title, content, callback, closeCallback){      // dialog.jsxi:104
+Dialog.prototype.addTab = function (title, content, callback, closeCallback){      // dialog.jsxi:109
 	var __that = this;
 	
 	if (!this.tabs){
 		this.tabs = [ this ];
-		this.header.parent().addClass('tabs').click(function (e){                  // dialog.jsxi:107
+		this.header.parent().addClass('tabs').click(function (e){                  // dialog.jsxi:112
 			if (e.target.tagName === 'H4' && !e.target.classList.contains('active')){
 				__that.el.find('.dialog-header h4.active').removeClass('active');
-				e.target.classList.add('active');                                  // dialog.jsxi:110
+				e.target.classList.add('active');                                  // dialog.jsxi:115
 				
 				var i = Array.prototype.indexOf.call(e.target.parentNode.childNodes, e.target);
 				
 				var l = __that.el.find('.dialog-content')[0];
 				
-				l.parentNode.removeChild(l);                                       // dialog.jsxi:114
+				l.parentNode.removeChild(l);                                       // dialog.jsxi:119
 				
 				var l = __that.el.find('.dialog-buttons')[0];
 				
-				l.parentNode.removeChild(l);                                       // dialog.jsxi:116
-				__that.tabs[i].content.appendTo(__that.el.children());             // dialog.jsxi:117
-				__that.tabs[i].buttons.appendTo(__that.el.children());             // dialog.jsxi:118
+				l.parentNode.removeChild(l);                                       // dialog.jsxi:121
+				__that.tabs[i].content.appendTo(__that.el.children());             // dialog.jsxi:122
+				__that.tabs[i].buttons.appendTo(__that.el.children());             // dialog.jsxi:123
 			}
 		});
 	}
 	
 	var n = new Dialog(title, content, callback, closeCallback);
 	
-	this.tabs.push(n);                                                             // dialog.jsxi:124
-	document.body.removeChild(n.el[0]);                                            // dialog.jsxi:126
-	n.header.appendTo(this.header.addClass('active').parent());                    // dialog.jsxi:127
-	n.close = __bindOnce(this, 'close').bind(this);                                // dialog.jsxi:128
-	return n;                                                                      // dialog.jsxi:130
+	this.tabs.push(n);                                                             // dialog.jsxi:129
+	document.body.removeChild(n.el[0]);                                            // dialog.jsxi:131
+	n.header.appendTo(this.header.addClass('active').parent());                    // dialog.jsxi:132
+	n.close = __bindOnce(this, 'close').bind(this);                                // dialog.jsxi:133
+	return n;                                                                      // dialog.jsxi:135
 };
 
 /* Class "Downloader" declaration */
@@ -1704,46 +1708,56 @@ var AcPractice = (function (){                                                  
 /* Class "AcShowroom" declaration */
 var AcShowroom = (function (){                                                     // ac_showroom.jsxi:1
 	var AcShowroom = function (){}, 
-		_showrooms = null,                                                         // ac_showroom.jsxi:10
-		_blackShowroom = 'studio_black',                                           // ac_showroom.jsxi:12
+		_showrooms = null,                                                         // ac_showroom.jsxi:11
+		_blackShowroom = 'studio_black',                                           // ac_showroom.jsxi:13
 		_blackShowroomUrl = 'http://www.racedepartment.com/downloads/studio-black-showroom.4353/';
 	
 	AcShowroom.modes = [                                                           // ac_showroom.jsxi:2
-		{ id: 'default', name: 'Regular Showroom (Recommended)' },                 // ac_showroom.jsxi:2
-		{ id: 'kunos', name: 'Dark Room' }, 
-		{ id: 'seatleon', name: 'Seat Leon Eurocup Style' }, 
-		{ id: 'gt5', name: 'GT5-style' }, 
-		{ id: 'gt6', name: 'GT6-style' }
+		{                                                                          // ac_showroom.jsxi:2
+			id: 'default',                                                         // ac_showroom.jsxi:2
+			name: 'Regular Showroom, Fixed Position (Recommended)'
+		}, 
+		{
+			id: 'default_old',                                                     // ac_showroom.jsxi:4
+			name: 'Regular Showroom, Simulated Rotation (Old)'
+		}, 
+		{ id: 'kunos', name: 'Custom Showroom, Dark Room' }, 
+		{ id: 'gt5', name: 'Custom Showroom, GT5-style' }, 
+		{ id: 'gt6', name: 'Custom Showroom, GT6-style' }, 
+		{
+			id: 'seatleon',                                                        // ac_showroom.jsxi:8
+			name: 'Custom Showroom, Seat Leon Eurocup Style'
+		}
 	];
-	AcShowroom.load = function (){                                                 // ac_showroom.jsxi:23
-		_showrooms = fs.readdirSync(AcDir.showrooms).map(function (e){             // ac_showroom.jsxi:24
+	AcShowroom.load = function (){                                                 // ac_showroom.jsxi:24
+		_showrooms = fs.readdirSync(AcDir.showrooms).map(function (e){             // ac_showroom.jsxi:25
 			var p = path.join(AcDir.showrooms, e);
 			
 			var d = null;
 			
 			var j = path.join(p, 'ui', 'ui_showroom.json');
 			
-			if (fs.existsSync(j)){                                                 // ac_showroom.jsxi:29
+			if (fs.existsSync(j)){                                                 // ac_showroom.jsxi:30
 				try {
-					d = JSON.parse(fs.readFileSync(j));                            // ac_showroom.jsxi:31
+					d = JSON.parse(fs.readFileSync(j));                            // ac_showroom.jsxi:32
 				} catch (e){} 
 			}
 			return { id: e, data: d, path: p, json: j };
-		}).filter(function (arg){                                                  // ac_showroom.jsxi:41
-			return arg;                                                            // ac_showroom.jsxi:41
+		}).filter(function (arg){                                                  // ac_showroom.jsxi:42
+			return arg;                                                            // ac_showroom.jsxi:42
 		});
 	};
-	AcShowroom.exists = function (id){                                             // ac_showroom.jsxi:44
-		return fs.existsSync(AcDir.showrooms + '/' + id);                          // ac_showroom.jsxi:45
+	AcShowroom.exists = function (id){                                             // ac_showroom.jsxi:45
+		return fs.existsSync(AcDir.showrooms + '/' + id);                          // ac_showroom.jsxi:46
 	};
 	
-	function handleError(err, car){                                                // ac_showroom.jsxi:48
+	function handleError(err, car){                                                // ac_showroom.jsxi:49
 		try {
 			var logFile = fs.readFileSync(AcTools.Utils.FileUtils.GetLogFile()).toString();
 			
 			if (/\bCOULD NOT FIND SUSPENSION OBJECT SUSP_[LR][FR]\b/.test(logFile)){
-				car.addError('kn5-susp_xx-error',                                  // ac_showroom.jsxi:52
-					'Car\'s model doesn\'t have a proper suspension.');            // ac_showroom.jsxi:52
+				car.addError('kn5-susp_xx-error',                                  // ac_showroom.jsxi:53
+					'Car\'s model doesn\'t have a proper suspension.');            // ac_showroom.jsxi:53
 				ErrorHandler.handled('Car\'s model doesn\'t have a proper suspension.');
 				return true;
 			}
@@ -1754,281 +1768,318 @@ var AcShowroom = (function (){                                                  
 			}
 			
 			if (/\\cameraforwardyebis\.cpp \(\d+\): CameraForwardYebis::render\b/.test(logFile)){
-				ErrorHandler.handled('Most likely selected filter is missing.');   // ac_showroom.jsxi:63
+				ErrorHandler.handled('Most likely selected filter is missing.');   // ac_showroom.jsxi:64
 				return true;
 			}
 		} catch (e){} 
 		
-		if (err && err.message === 'Process exited'){                              // ac_showroom.jsxi:68
-			ErrorHandler.handled('Showroom was terminated too soon.');             // ac_showroom.jsxi:69
+		if (err && err.message === 'Process exited'){                              // ac_showroom.jsxi:69
+			ErrorHandler.handled('Showroom was terminated too soon.');             // ac_showroom.jsxi:70
 			return true;
 		}
 		return false;
 	}
 	
-	AcShowroom.start = function (c, s, room){                                      // ac_showroom.jsxi:79
-		if (c.disabled){                                                           // ac_showroom.jsxi:80
-			Notification.warn('No Way', 'Enable car first.');                      // ac_showroom.jsxi:81
+	AcShowroom.start = function (c, s, room){                                      // ac_showroom.jsxi:80
+		if (c.disabled){                                                           // ac_showroom.jsxi:81
+			Notification.warn('No Way', 'Enable car first.');                      // ac_showroom.jsxi:82
 			return;
 		}
 		
-		if (!c)                                                                    // ac_showroom.jsxi:85
+		if (!c)                                                                    // ac_showroom.jsxi:86
 			return;
 		
-		if (c.skins.length === 0){                                                 // ac_showroom.jsxi:87
-			Notification.warn('No Way', 'At least one skin required.');            // ac_showroom.jsxi:88
+		if (c.skins.length === 0){                                                 // ac_showroom.jsxi:88
+			Notification.warn('No Way', 'At least one skin required.');            // ac_showroom.jsxi:89
 			return;
 		}
 		
-		if (s == null){                                                            // ac_showroom.jsxi:92
-			s = c.selectedSkin ? c.selectedSkin.id : c.skins[0].id;                // ac_showroom.jsxi:93
+		if (s == null){                                                            // ac_showroom.jsxi:93
+			s = c.selectedSkin ? c.selectedSkin.id : c.skins[0].id;                // ac_showroom.jsxi:94
 		}
 		
-		room = room || AcShowroom.__AcShowroom_lastShowroom;                       // ac_showroom.jsxi:96
+		room = room || AcShowroom.__AcShowroom_lastShowroom;                       // ac_showroom.jsxi:97
 		
 		var filter = AcShowroom.__AcShowroom_lastShowroomFilter || null;
 		
 		if (!AcShowroom.exists(room)){
-			ErrorHandler.handled('Showroom “' + room + '” is missing.');           // ac_showroom.jsxi:100
+			ErrorHandler.handled('Showroom “' + room + '” is missing.');           // ac_showroom.jsxi:101
 			return;
 		}
 		
-		if (filter && !AcFilters.exists(filter)){                                  // ac_showroom.jsxi:104
-			ErrorHandler.handled('Filter “' + filter + '” is missing.');           // ac_showroom.jsxi:105
+		if (filter && !AcFilters.exists(filter)){                                  // ac_showroom.jsxi:105
+			ErrorHandler.handled('Filter “' + filter + '” is missing.');           // ac_showroom.jsxi:106
 			return;
 		}
 		
-		AcTools;                                                                   // ac_showroom.jsxi:109
+		AcTools;                                                                   // ac_showroom.jsxi:110
 		
 		try {
-			AcTools.Processes.Showroom.Start(AcDir.root, c.id, s, room, filter);   // ac_showroom.jsxi:111
-		} catch (err){                                                             // ac_showroom.jsxi:112
+			AcTools.Processes.Showroom.Start(AcDir.root, c.id, s, room, filter);   // ac_showroom.jsxi:112
+		} catch (err){                                                             // ac_showroom.jsxi:113
 			ErrorHandler.handled('Cannot start showroom. Maybe the car is broken.', err);
 			return;
 		} 
 		
-		handleError(null, c);                                                      // ac_showroom.jsxi:117
+		handleError(null, c);                                                      // ac_showroom.jsxi:118
 	};
-	AcShowroom.select = function (c, s){                                           // ac_showroom.jsxi:120
-		var d = new Dialog('Showroom',                                             // ac_showroom.jsxi:121
+	AcShowroom.select = function (c, s){                                           // ac_showroom.jsxi:121
+		var d = new Dialog('Showroom',                                             // ac_showroom.jsxi:122
 			[
-				'<h6>Select showroom</h6>',                                        // ac_showroom.jsxi:122
+				'<h6>Select showroom</h6>',                                        // ac_showroom.jsxi:123
 				'<select id="showroom-select-showroom">{0}</select>'.format(AcShowroom.list.map(function (e){
 					return '<option value="{0}">{1}</option>'.format(e.id, e.data ? e.data.name : e.id);
-				}).join('')),                                                      // ac_showroom.jsxi:125
-				'<h6>Select filter</h6>',                                          // ac_showroom.jsxi:126
+				}).join('')),                                                      // ac_showroom.jsxi:126
+				'<h6>Select filter</h6>',                                          // ac_showroom.jsxi:127
 				'<select id="showroom-select-filter"><option value="">Don\'t change</option>{0}</select>'.format(AcFilters.list.map(function (e){
 					return '<option value="{0}">{1}</option>'.format(e.id, e.id);
 				}).join(''))
 			], 
-			function (){                                                           // ac_showroom.jsxi:130
+			function (){                                                           // ac_showroom.jsxi:131
 				AcShowroom.start(c, s);
-			}).addButton('Reload List',                                            // ac_showroom.jsxi:132
-			function (){                                                           // ac_showroom.jsxi:132
-				setTimeout(function (){                                            // ac_showroom.jsxi:133
+			}).addButton('Reload List',                                            // ac_showroom.jsxi:133
+			function (){                                                           // ac_showroom.jsxi:133
+				setTimeout(function (){                                            // ac_showroom.jsxi:134
 					AcShowroom.load();
-					AcFilters.load();                                              // ac_showroom.jsxi:135
+					AcFilters.load();                                              // ac_showroom.jsxi:136
 					AcShowroom.select(c, s);
 				});
 			});
 		
 		d.find('#showroom-select-showroom').val(AcShowroom.__AcShowroom_lastShowroom).change(function (){
-			localStorage.lastShowroom = this.value;                                // ac_showroom.jsxi:140
+			localStorage.lastShowroom = this.value;                                // ac_showroom.jsxi:141
 		});
 		d.find('#showroom-select-filter').val(AcShowroom.__AcShowroom_lastShowroomFilter).change(function (){
-			localStorage.lastShowroomFilter = this.value;                          // ac_showroom.jsxi:143
+			localStorage.lastShowroomFilter = this.value;                          // ac_showroom.jsxi:144
 		});
 	};
 	
-	function shotOutputPreview(car, output, callback){                             // ac_showroom.jsxi:147
-		var d = new Dialog('Update Previews',                                      // ac_showroom.jsxi:149
+	function shotOutputPreview(car, output, callback){                             // ac_showroom.jsxi:148
+		var d = new Dialog('Update Previews',                                      // ac_showroom.jsxi:150
 			[
 				'<div class="left"><h6>Current</h6><img id="current-preview"></div>', 
 				'<div class="right"><h6>New</h6><img id="new-preview"></div>'
 			], 
-			function (){                                                           // ac_showroom.jsxi:152
-				callback();                                                        // ac_showroom.jsxi:153
+			function (){                                                           // ac_showroom.jsxi:153
+				callback();                                                        // ac_showroom.jsxi:154
 			}, 
-			false).setButton('Apply').addButton('Cancel');                         // ac_showroom.jsxi:154
+			false).setButton('Apply').addButton('Cancel');                         // ac_showroom.jsxi:155
 		
 		var t = $('<div>' + '<button data-action="prev" id="button-prev" disabled>←</button> ' + '<button data-action="next" id="button-next">→</button>' + '</div>').insertBefore(d.header);
 		
-		t.find('#button-prev').click(function (){                                  // ac_showroom.jsxi:161
-			pos --;                                                                // ac_showroom.jsxi:162
-			out();                                                                 // ac_showroom.jsxi:163
+		t.find('#button-prev').click(function (){                                  // ac_showroom.jsxi:162
+			pos --;                                                                // ac_showroom.jsxi:163
+			out();                                                                 // ac_showroom.jsxi:164
 		});
-		t.find('#button-next').click(function (){                                  // ac_showroom.jsxi:166
-			pos ++;                                                                // ac_showroom.jsxi:167
-			out();                                                                 // ac_showroom.jsxi:168
+		t.find('#button-next').click(function (){                                  // ac_showroom.jsxi:167
+			pos ++;                                                                // ac_showroom.jsxi:168
+			out();                                                                 // ac_showroom.jsxi:169
 		});
 		d.content.css({ maxWidth: 'calc(100vw - 100px)', paddingBottom: '10px' }).find('img').css({ width: '100%', verticalAlign: 'top' });
 		
-		var list = fs.readdirSync(output).map(function (arg){                      // ac_showroom.jsxi:179
-			return arg.slice(0, - 4);                                              // ac_showroom.jsxi:179
+		var list = fs.readdirSync(output).map(function (arg){                      // ac_showroom.jsxi:180
+			return arg.slice(0, - 4);                                              // ac_showroom.jsxi:180
 		});
 		
 		var pos = 0;
 		
-		function out(){                                                            // ac_showroom.jsxi:181
-			t.find('#button-prev').attr('disabled', pos > 0 ? null : true);        // ac_showroom.jsxi:182
+		function out(){                                                            // ac_showroom.jsxi:182
+			t.find('#button-prev').attr('disabled', pos > 0 ? null : true);        // ac_showroom.jsxi:183
 			t.find('#button-next').attr('disabled', pos < list.length - 1 ? null : true);
 			d.content.find('#current-preview').prop('src', car.getSkin(list[pos]).preview.cssUrl());
 			d.content.find('#new-preview').prop('src', (output + '/' + list[pos] + '.bmp').cssUrl());
 		}
 		
-		out();                                                                     // ac_showroom.jsxi:188
+		out();                                                                     // ac_showroom.jsxi:189
 	}
 	
-	AcShowroom.shotOne = function (car, skin){                                     // ac_showroom.jsxi:191
+	AcShowroom.shotOne = function (car, skin){                                     // ac_showroom.jsxi:192
 		AcShowroom.shot(car, false, 
 			skin || car.selectedSkin);
 	};
-	AcShowroom.shot = function (c, m, onlyOneSkin){                                // ac_showroom.jsxi:195
-		if (m && onlyOneSkin != null)                                              // ac_showroom.jsxi:196
+	AcShowroom.shot = function (c, manualMode, onlyOneSkin){                       // ac_showroom.jsxi:196
+		if (manualMode && onlyOneSkin != null)                                     // ac_showroom.jsxi:197
 			return;
 		
-		var mode = 'default';
+		manualMode = !!manualMode;                                                 // ac_showroom.jsxi:198
 		
-		if (mode === 'default'){                                                   // ac_showroom.jsxi:200
-			if (c.disabled){                                                       // ac_showroom.jsxi:201
-				Notification.warn('No Way', 'Enable car first.');                  // ac_showroom.jsxi:202
+		var mode = Settings.get('aptMode');
+		
+		if (manualMode)                                                            // ac_showroom.jsxi:201
+			mode = 'default_old';                                                  // ac_showroom.jsxi:201
+		
+		if (onlyOneSkin != null)                                                   // ac_showroom.jsxi:202
+			mode = 'default';                                                      // ac_showroom.jsxi:202
+		
+		if (mode === 'default' || mode === 'default_old'){                         // ac_showroom.jsxi:204
+			if (c.disabled){                                                       // ac_showroom.jsxi:205
+				Notification.warn('No Way', 'Enable car first.');                  // ac_showroom.jsxi:206
 				return;
 			}
 			
 			var showroom = Settings.get('aptShowroom') || _blackShowroom;
 			
-			var cameraPosition = Settings.get('aptCameraPosition');
-			
-			var cameraLookAt = Settings.get('aptCameraLookAt');
-			
-			var cameraFov = Settings.get('aptCameraFov');
-			
 			var filter = Settings.get('aptFilter') || null;
 			
 			var disableSweetFx = !!Settings.get('aptDisableSweetFx');
 			
-			if (!/((-?\d(.\d*)?)\s*,\s*){2}(-?\d(.\d*)?)/.test(cameraPosition))    // ac_showroom.jsxi:213
-				cameraPosition = Settings.defaults.aptCameraPosition;              // ac_showroom.jsxi:213
+			if (mode === 'default'){                                               // ac_showroom.jsxi:214
+				var cameraPosition = Settings.get('aptCameraPosition');
+				
+				var cameraLookAt = Settings.get('aptCameraLookAt');
+				
+				var cameraFov = + Settings.get('aptCameraFov');
+				
+				if (!/((-?\d(.\d*)?)\s*,\s*){2}(-?\d(.\d*)?)/.test(cameraPosition))
+					cameraPosition = Settings.defaults.aptCameraPosition;          // ac_showroom.jsxi:219
+				
+				if (!/((-?\d(.\d*)?)\s*,\s*){2}(-?\d(.\d*)?)/.test(cameraLookAt))
+					cameraLookAt = Settings.defaults.aptCameraLookAt;              // ac_showroom.jsxi:220
+				
+				if (Number.isNaN(cameraFov))                                       // ac_showroom.jsxi:221
+					cameraFov = Settings.defaults.aptCameraFov;                    // ac_showroom.jsxi:221
+			} else {
+				var cameraX = + Settings.get('aptCameraX');
+				
+				var cameraY = + Settings.get('aptCameraY');
+				
+				var cameraDistance = + Settings.get('aptCameraDistance');
+				
+				var delays = !!Settings.get('aptIncreaseDelays');
+				
+				if (Number.isNaN(cameraX))                                         // ac_showroom.jsxi:228
+					cameraX = Settings.defaults.aptCameraX;                        // ac_showroom.jsxi:228
+				
+				if (Number.isNaN(cameraY))                                         // ac_showroom.jsxi:229
+					cameraY = Settings.defaults.aptCameraY;                        // ac_showroom.jsxi:229
+				
+				if (Number.isNaN(cameraDistance))                                  // ac_showroom.jsxi:230
+					cameraDistance = Settings.defaults.aptCameraDistance;          // ac_showroom.jsxi:230
+			}
 			
-			if (!/((-?\d(.\d*)?)\s*,\s*){2}(-?\d(.\d*)?)/.test(cameraLookAt))      // ac_showroom.jsxi:214
-				cameraLookAt = Settings.defaults.aptCameraLookAt;                  // ac_showroom.jsxi:214
+			showroomTest();                                                        // ac_showroom.jsxi:233
 			
-			if (Number.isNaN(cameraFov))                                           // ac_showroom.jsxi:215
-				cameraFov = Settings.defaults.aptCameraFov;                        // ac_showroom.jsxi:215
-			
-			showroomTest();                                                        // ac_showroom.jsxi:217
-			
-			function showroomTest(){                                               // ac_showroom.jsxi:218
-				function blackShowroomTest(){                                      // ac_showroom.jsxi:219
+			function showroomTest(){                                               // ac_showroom.jsxi:234
+				function blackShowroomTest(){                                      // ac_showroom.jsxi:235
 					return fs.existsSync(AcTools.Utils.FileUtils.GetShowroomFolder(AcDir.root, showroom));
 				}
 				
-				if (showroom == _blackShowroom && !blackShowroomTest()){           // ac_showroom.jsxi:223
-					new Dialog('One More Thing',                                   // ac_showroom.jsxi:224
+				if (showroom == _blackShowroom && !blackShowroomTest()){           // ac_showroom.jsxi:239
+					new Dialog('One More Thing',                                   // ac_showroom.jsxi:240
 						'Please, install <a href="#" onclick="Shell.openItem(\'' + _blackShowroomUrl + '\')">Black Showroom</a> first.', 
-						function (){                                               // ac_showroom.jsxi:226
-							Shell.openItem(_blackShowroomUrl);                     // ac_showroom.jsxi:227
+						function (){                                               // ac_showroom.jsxi:242
+							Shell.openItem(_blackShowroomUrl);                     // ac_showroom.jsxi:243
 							return false;
-						}).setButton('From Here').addButton('Right Here',          // ac_showroom.jsxi:229
-						function (){                                               // ac_showroom.jsxi:229
+						}).setButton('From Here').addButton('Right Here',          // ac_showroom.jsxi:245
+						function (){                                               // ac_showroom.jsxi:245
 							Shell.openItem(AcTools.Utils.FileUtils.GetShowroomsFolder(AcDir.root));
 							return false;
-						}).addButton('Done',                                       // ac_showroom.jsxi:232
-						function (){                                               // ac_showroom.jsxi:232
-							if (blackShowroomTest()){                              // ac_showroom.jsxi:233
-								setTimeout(proceed);                               // ac_showroom.jsxi:234
+						}).addButton('Done',                                       // ac_showroom.jsxi:248
+						function (){                                               // ac_showroom.jsxi:248
+							if (blackShowroomTest()){                              // ac_showroom.jsxi:249
+								setTimeout(proceed);                               // ac_showroom.jsxi:250
 							} else {
-								new Dialog('Black Showroom Installation',          // ac_showroom.jsxi:236
-									'Showroom is still missing. No way.');         // ac_showroom.jsxi:236
+								new Dialog('Black Showroom Installation',          // ac_showroom.jsxi:252
+									'Showroom is still missing. No way.');         // ac_showroom.jsxi:252
 								this.buttons.find('button:last-child').text('Really Done');
 								return false;
 							}
 						});
 				} else {
-					proceed();                                                     // ac_showroom.jsxi:242
+					proceed();                                                     // ac_showroom.jsxi:258
 				}
 			}
 		} else {
-			proceed();                                                             // ac_showroom.jsxi:246
+			proceed();                                                             // ac_showroom.jsxi:262
 		}
 		
 		var upd;
 		
-		function proceed(){                                                        // ac_showroom.jsxi:251
-			upd = new Dialog('Auto-update Previews',                               // ac_showroom.jsxi:252
+		function proceed(){                                                        // ac_showroom.jsxi:267
+			upd = new Dialog('Auto-update Previews',                               // ac_showroom.jsxi:268
 				[ '<progress indeterminate></progress>' ], 
-				function (){                                                       // ac_showroom.jsxi:254
-					CheckUpdate.abort();                                           // ac_showroom.jsxi:255
+				function (){                                                       // ac_showroom.jsxi:270
+					CheckUpdate.abort();                                           // ac_showroom.jsxi:271
 				}, 
-				false).setButton(false);                                           // ac_showroom.jsxi:256
+				false).setButton(false);                                           // ac_showroom.jsxi:272
 			
-			if (mode === 'default'){                                               // ac_showroom.jsxi:258
-				if (filter === Settings.defaults.aptFilter){                       // ac_showroom.jsxi:259
+			if (mode === 'default' || mode == 'default_old'){                      // ac_showroom.jsxi:274
+				if (filter === Settings.defaults.aptFilter){                       // ac_showroom.jsxi:275
 					AcFilters.installFilter('data/ppfilter.ini', Settings.defaults.aptFilter);
-					setTimeout(proceedShot, 500);                                  // ac_showroom.jsxi:261
+					setTimeout(proceedShot, 500);                                  // ac_showroom.jsxi:277
 					return;
-				} else if (filter && !AcFilters.exists(filter)){                   // ac_showroom.jsxi:263
-					ErrorHandler.handled('Filter “' + filter + '” is missing.');   // ac_showroom.jsxi:264
-					upd.close();                                                   // ac_showroom.jsxi:265
+				} else if (filter && !AcFilters.exists(filter)){                   // ac_showroom.jsxi:279
+					ErrorHandler.handled('Filter “' + filter + '” is missing.');   // ac_showroom.jsxi:280
+					upd.close();                                                   // ac_showroom.jsxi:281
 					return;
 				}
 			}
 			
-			proceedShot();                                                         // ac_showroom.jsxi:270
+			proceedShot();                                                         // ac_showroom.jsxi:286
 		}
 		
-		function proceedShot(){                                                    // ac_showroom.jsxi:273
+		function proceedShot(){                                                    // ac_showroom.jsxi:289
 			var output;
 			
 			try {
-				if (mode === 'default'){                                           // ac_showroom.jsxi:276
-					if (onlyOneSkin != null){                                      // ac_showroom.jsxi:277
-						output = AcTools.Processes.Showroom.ShotOne(AcDir.root,    // ac_showroom.jsxi:278
-							c.id,                                                  // ac_showroom.jsxi:278
-							showroom,                                              // ac_showroom.jsxi:278
-							onlyOneSkin,                                           // ac_showroom.jsxi:278
-							cameraPosition,                                        // ac_showroom.jsxi:278
-							cameraLookAt,                                          // ac_showroom.jsxi:278
-							cameraFov,                                             // ac_showroom.jsxi:278
-							filter,                                                // ac_showroom.jsxi:278
-							disableSweetFx);                                       // ac_showroom.jsxi:278
+				if (mode === 'default_old'){                                       // ac_showroom.jsxi:292
+					output = AcTools.Processes.Showroom.Shot(AcDir.root,           // ac_showroom.jsxi:293
+						c.id,                                                      // ac_showroom.jsxi:293
+						showroom,                                                  // ac_showroom.jsxi:293
+						manualMode,                                                // ac_showroom.jsxi:293
+						cameraX,                                                   // ac_showroom.jsxi:293
+						cameraY,                                                   // ac_showroom.jsxi:293
+						cameraDistance,                                            // ac_showroom.jsxi:293
+						filter,                                                    // ac_showroom.jsxi:294
+						disableSweetFx,                                            // ac_showroom.jsxi:294
+						delays);                                                   // ac_showroom.jsxi:294
+				} else if (mode === 'default'){                                    // ac_showroom.jsxi:295
+					if (onlyOneSkin != null){                                      // ac_showroom.jsxi:296
+						output = AcTools.Processes.Showroom.ShotOne(AcDir.root,    // ac_showroom.jsxi:297
+							c.id,                                                  // ac_showroom.jsxi:297
+							showroom,                                              // ac_showroom.jsxi:297
+							onlyOneSkin,                                           // ac_showroom.jsxi:297
+							cameraPosition,                                        // ac_showroom.jsxi:297
+							cameraLookAt,                                          // ac_showroom.jsxi:297
+							cameraFov,                                             // ac_showroom.jsxi:297
+							filter,                                                // ac_showroom.jsxi:297
+							disableSweetFx);                                       // ac_showroom.jsxi:297
 					} else {
-						output = AcTools.Processes.Showroom.ShotAll(AcDir.root,    // ac_showroom.jsxi:280
-							c.id,                                                  // ac_showroom.jsxi:280
-							showroom,                                              // ac_showroom.jsxi:280
-							!!m,                                                   // ac_showroom.jsxi:280
-							cameraPosition,                                        // ac_showroom.jsxi:280
-							cameraLookAt,                                          // ac_showroom.jsxi:280
-							cameraFov,                                             // ac_showroom.jsxi:280
-							filter,                                                // ac_showroom.jsxi:280
-							disableSweetFx);                                       // ac_showroom.jsxi:280
+						output = AcTools.Processes.Showroom.ShotAll(AcDir.root,    // ac_showroom.jsxi:299
+							c.id,                                                  // ac_showroom.jsxi:299
+							showroom,                                              // ac_showroom.jsxi:299
+							cameraPosition,                                        // ac_showroom.jsxi:299
+							cameraLookAt,                                          // ac_showroom.jsxi:299
+							cameraFov,                                             // ac_showroom.jsxi:299
+							filter,                                                // ac_showroom.jsxi:299
+							disableSweetFx);                                       // ac_showroom.jsxi:299
 					}
 				} else {
 					output = AcTools.Kn5Render.Utils.Kn5RenderWrapper.Shot(c.path, mode);
 				}
 				
-				upd.close();                                                       // ac_showroom.jsxi:285
-			} catch (err){                                                         // ac_showroom.jsxi:286
-				upd.close();                                                       // ac_showroom.jsxi:287
+				upd.close();                                                       // ac_showroom.jsxi:304
+			} catch (err){                                                         // ac_showroom.jsxi:305
+				upd.close();                                                       // ac_showroom.jsxi:306
 				
-				if (!handleError(err, c)){                                         // ac_showroom.jsxi:288
+				if (!handleError(err, c)){                                         // ac_showroom.jsxi:307
 					ErrorHandler.handled('Cannot start showroom. Maybe the car is broken.', err);
 				}
 				return;
 			} 
 			
-			shotOutputPreview(c,                                                   // ac_showroom.jsxi:295
-				output,                                                            // ac_showroom.jsxi:295
-				function (){                                                       // ac_showroom.jsxi:295
-					AcTools.Utils.ImageUtils.ApplyPreviews(AcDir.root,             // ac_showroom.jsxi:296
-						c.id,                                                      // ac_showroom.jsxi:296
-						output,                                                    // ac_showroom.jsxi:296
-						Settings.get('aptResize'),                                 // ac_showroom.jsxi:296
-						Settings.get('aptPngMode'));                               // ac_showroom.jsxi:296
-					c.loadSkins();                                                 // ac_showroom.jsxi:297
+			shotOutputPreview(c,                                                   // ac_showroom.jsxi:314
+				output,                                                            // ac_showroom.jsxi:314
+				function (){                                                       // ac_showroom.jsxi:314
+					AcTools.Utils.ImageUtils.ApplyPreviews(AcDir.root,             // ac_showroom.jsxi:315
+						c.id,                                                      // ac_showroom.jsxi:315
+						output,                                                    // ac_showroom.jsxi:315
+						Settings.get('aptResize'),                                 // ac_showroom.jsxi:315
+						Settings.get('aptPngMode'));                               // ac_showroom.jsxi:315
+					c.loadSkins();                                                 // ac_showroom.jsxi:316
 					
 					try {
-						fs.rmdirSync(output);                                      // ac_showroom.jsxi:298
+						fs.rmdirSync(output);                                      // ac_showroom.jsxi:317
 					} catch (e){} 
 				});
 		}
@@ -2037,24 +2088,24 @@ var AcShowroom = (function (){                                                  
 		'list', 
 		{
 			get: (function (){
-				if (!_showrooms){                                                  // ac_showroom.jsxi:16
+				if (!_showrooms){                                                  // ac_showroom.jsxi:17
 					AcShowroom.load();
 				}
-				return _showrooms;                                                 // ac_showroom.jsxi:20
+				return _showrooms;                                                 // ac_showroom.jsxi:21
 			})
 		});
 	Object.defineProperty(AcShowroom,                                              // ac_showroom.jsxi:1
 		'__AcShowroom_lastShowroom', 
 		{
 			get: (function (){
-				return localStorage.lastShowroom || 'showroom';                    // ac_showroom.jsxi:76
+				return localStorage.lastShowroom || 'showroom';                    // ac_showroom.jsxi:77
 			})
 		});
 	Object.defineProperty(AcShowroom,                                              // ac_showroom.jsxi:1
 		'__AcShowroom_lastShowroomFilter', 
 		{
 			get: (function (){
-				return localStorage.lastShowroomFilter || '';                      // ac_showroom.jsxi:77
+				return localStorage.lastShowroomFilter || '';                      // ac_showroom.jsxi:78
 			})
 		});
 	return AcShowroom;
@@ -5989,8 +6040,8 @@ var Settings = new ObjLocalStorage('settings',                                  
 		aptCameraDistance: 5.5,                                                    // settings.jsxi:65
 		aptIncreaseDelays: false,                                                  // settings.jsxi:66
 		aptPngMode: false,                                                         // settings.jsxi:67
-		aptCameraPosition: '-2.459, 0.835, 5.078',                                 // settings.jsxi:69
-		aptCameraLookAt: '0.498, 0.855, 0',                                        // settings.jsxi:70
+		aptCameraPosition: '-2.461, 0.836, 5.08',                                  // settings.jsxi:69
+		aptCameraLookAt: '0.497, 0.853, 0',                                        // settings.jsxi:70
 		aptCameraFov: 30
 	});
 
@@ -9061,64 +9112,89 @@ var ViewDetails = (function (){                                                 
 						add('Unpack data',                                         // view_details.jsxi:968
 							function (){                                           // view_details.jsxi:968
 								try {
+									function go(){                                 // view_details.jsxi:970
+										acd.ExportDirectory(dest);                 // view_details.jsxi:971
+										Shell.openItem(dest);                      // view_details.jsxi:972
+									}
+									
 									var source = _selected.path + '/data.acd';
 									
 									var acd = AcTools.AcdFile.Acd.FromFile(source);
 									
 									var dest = _selected.path + '/data';
 									
-									if (fs.existsSync(dest))                       // view_details.jsxi:973
-										AcTools.Utils.FileUtils.Recycle(dest);     // view_details.jsxi:973
-									
-									acd.ExportDirectory(dest);                     // view_details.jsxi:974
-									Shell.openItem(dest);                          // view_details.jsxi:975
-									AcTools.Utils.FileUtils.Recycle(source);       // view_details.jsxi:976
-								} catch (err){                                     // view_details.jsxi:977
-									ErrorHandler.handled('Failed.', err);          // view_details.jsxi:978
+									if (fs.existsSync(dest)){                      // view_details.jsxi:978
+										new Dialog('Unpack data.acd',              // view_details.jsxi:979
+											'Folder “data” already exists and will be moved to Recycle Bin. Are you sure?', 
+											function (arg){                        // view_details.jsxi:979
+												AcTools.Utils.FileUtils.Recycle(dest);
+												go();                              // view_details.jsxi:981
+											});
+									} else
+										go();                                      // view_details.jsxi:983
+								} catch (err){                                     // view_details.jsxi:984
+									ErrorHandler.handled('Failed.', err);          // view_details.jsxi:985
 								} 
 							}, 
-							devMenu);                                              // view_details.jsxi:980
+							devMenu);                                              // view_details.jsxi:987
 					
-					if (fs.existsSync(_selected.path + '/data'))                   // view_details.jsxi:982
-						add('Pack data',                                           // view_details.jsxi:982
-							function (){                                           // view_details.jsxi:982
-								try {
-									var source = _selected.path + '/data';
-									
-									var acd = AcTools.AcdFile.Acd.FromDirectory(source);
-									
-									var dest = _selected.path + '/data.acd';
-									
-									if (fs.existsSync(dest))                       // view_details.jsxi:987
-										AcTools.Utils.FileUtils.Recycle(dest);     // view_details.jsxi:987
-									
-									acd.Save(dest);                                // view_details.jsxi:988
-									AcTools.Utils.FileUtils.Recycle(source);       // view_details.jsxi:989
-								} catch (err){                                     // view_details.jsxi:990
-									ErrorHandler.handled('Failed.', err);          // view_details.jsxi:991
-								} 
+					if (fs.existsSync(_selected.path + '/data'))                   // view_details.jsxi:989
+						add('Pack data',                                           // view_details.jsxi:989
+							function (){                                           // view_details.jsxi:989
+								if (_selected.data.author == 'Kunos'){             // view_details.jsxi:990
+									new Dialog('Warning',                          // view_details.jsxi:991
+										'You\'re going to repack Kunos car. Some of them can\'t be packed 100%-correctly right now, so you could lose access to online mode even if there is no changes. Are you sure?', 
+										fn).setWarningColor();                     // view_details.jsxi:991
+								} else
+									fn();                                          // view_details.jsxi:992
+								
+								function fn(){                                     // view_details.jsxi:994
+									try {
+										function go(){                             // view_details.jsxi:996
+											acd.Save(dest);                        // view_details.jsxi:997
+										}
+										
+										var source = _selected.path + '/data';
+										
+										var acd = AcTools.AcdFile.Acd.FromDirectory(source);
+										
+										var dest = _selected.path + '/data.acd';
+										
+										if (fs.existsSync(dest)){                  // view_details.jsxi:1003
+											new Dialog('Pack data',                // view_details.jsxi:1004
+												'File “data.acd” already exists and will be moved to Recycle Bin. Are you sure?', 
+												function (arg){                    // view_details.jsxi:1004
+													AcTools.Utils.FileUtils.Recycle(dest);
+													go();                          // view_details.jsxi:1006
+												});
+										} else
+											go();                                  // view_details.jsxi:1008
+									} catch (err){                                 // view_details.jsxi:1010
+										ErrorHandler.handled('Failed.', err);      // view_details.jsxi:1011
+									} 
+								}
 							}, 
-							devMenu);                                              // view_details.jsxi:993
+							devMenu);                                              // view_details.jsxi:1014
 				}
 				
-				add('Delete car',                                                  // view_details.jsxi:996
-					function (){                                                   // view_details.jsxi:996
-						new Dialog('Delete ' + _selected.displayName,              // view_details.jsxi:997
+				add('Delete car',                                                  // view_details.jsxi:1017
+					function (){                                                   // view_details.jsxi:1017
+						new Dialog('Delete ' + _selected.displayName,              // view_details.jsxi:1018
 							'Folder will be removed to the Recycle Bin. Are you sure?', 
-							function (arg){                                        // view_details.jsxi:997
-								if (!_selected)                                    // view_details.jsxi:998
+							function (arg){                                        // view_details.jsxi:1018
+								if (!_selected)                                    // view_details.jsxi:1019
 									return;
 								
-								Cars.remove(_selected);                            // view_details.jsxi:999
+								Cars.remove(_selected);                            // view_details.jsxi:1020
 							});
 					});
-				menu.popup(e.clientX, e.clientY);                                  // view_details.jsxi:1003
+				menu.popup(e.clientX, e.clientY);                                  // view_details.jsxi:1024
 				return false;
 			});
 	}
 	
-	(function (){                                                                  // view_details.jsxi:1008
-		$(init);                                                                   // view_details.jsxi:1009
+	(function (){                                                                  // view_details.jsxi:1029
+		$(init);                                                                   // view_details.jsxi:1030
 	})();
 	return ViewDetails;
 })();
@@ -9859,127 +9935,145 @@ var ViewSettings = (function (){                                                
 				s.updatesCheck = updatesCheck;                                     // view_settings.jsxi:25
 				s.updatesSource = updatesSource;                                   // view_settings.jsxi:26
 				s.aptShowroom = aptShowroom;                                       // view_settings.jsxi:28
+				s.aptMode = aptMode;                                               // view_settings.jsxi:29
 				s.aptFilter = aptFilter;                                           // view_settings.jsxi:30
 				s.aptDisableSweetFx = aptDisableSweetFx;                           // view_settings.jsxi:31
 				s.aptResize = aptResize;                                           // view_settings.jsxi:32
 				s.aptCameraPosition = aptCameraPosition;                           // view_settings.jsxi:33
 				s.aptCameraLookAt = aptCameraLookAt;                               // view_settings.jsxi:34
 				s.aptCameraFov = aptCameraFov;                                     // view_settings.jsxi:35
+				s.aptCameraX = aptCameraX;                                         // view_settings.jsxi:37
+				s.aptCameraY = aptCameraY;                                         // view_settings.jsxi:38
+				s.aptCameraDistance = aptCameraDistance;                           // view_settings.jsxi:39
+				s.aptIncreaseDelays = aptIncreaseDelays;                           // view_settings.jsxi:40
 			});
 		}
 		
-		var d = new Dialog('Settings',                                             // view_settings.jsxi:40
+		var d = new Dialog('Settings',                                             // view_settings.jsxi:44
 				[
-					'<h6>Assetto Corsa Folder</h6>',                               // view_settings.jsxi:41
+					'<h6>Assetto Corsa Folder</h6>',                               // view_settings.jsxi:45
 					'<button id="settings-acdir-select" style="float:right;width:30px">…</button>', 
 					'<input id="settings-acdir" placeholder="…/Assetto Corsa" style="width:calc(100% - 35px)">', 
-					'<h6>Editing</h6>',                                            // view_settings.jsxi:45
+					'<h6>Editing</h6>',                                            // view_settings.jsxi:49
 					'<label><input id="settings-badge-autoupdate" type="checkbox">Update badge with brand</label><br>', 
 					'<label><input id="settings-year-autoupdate" type="checkbox">Add year to name as postfix if missing</label>', 
-					'<h6>Tips</h6>',                                               // view_settings.jsxi:49
+					'<h6>Tips</h6>',                                               // view_settings.jsxi:53
 					'<label><input id="settings-disable-tips" type="checkbox">Disable tips on launch</label>', 
-					'<h6>Database</h6>',                                           // view_settings.jsxi:52
+					'<h6>Database</h6>',                                           // view_settings.jsxi:56
 					'<label><input id="settings-update-database" type="checkbox">Update databases</label><br>', 
 					'<label><input id="settings-upload-data" type="checkbox">Upload some changes</label>', 
-					'<h6>Updates</h6>',                                            // view_settings.jsxi:56
+					'<h6>Updates</h6>',                                            // view_settings.jsxi:60
 					'<label><input id="settings-updates-check" type="checkbox">Check for new versions on launch</label>', 
 					'<select id="settings-updates-source"><option value="stable">Stable</option><option value="last">Beta</option></select>'
 				], 
-				save,                                                              // view_settings.jsxi:62
-				false).setButton('Save').addButton('User Storage',                 // view_settings.jsxi:62
-				function (){                                                       // view_settings.jsxi:62
-					Shell.openItem(DataStorage.getUserContentDir());               // view_settings.jsxi:63
+				save,                                                              // view_settings.jsxi:66
+				false).setButton('Save').addButton('User Storage',                 // view_settings.jsxi:66
+				function (){                                                       // view_settings.jsxi:66
+					Shell.openItem(DataStorage.getUserContentDir());               // view_settings.jsxi:67
 					return false;
-				}).addButton('Cancel'),                                            // view_settings.jsxi:65
-			c = 0;                                                                 // view_settings.jsxi:65
+				}).addButton('Cancel'),                                            // view_settings.jsxi:69
+			c = 0;                                                                 // view_settings.jsxi:69
 		
 		var acdirVal;
 		
-		function acdirChange(){                                                    // view_settings.jsxi:69
-			var err = AcDir.check(acdirVal = d.find('#settings-acdir').val());     // view_settings.jsxi:70
+		function acdirChange(){                                                    // view_settings.jsxi:73
+			var err = AcDir.check(acdirVal = d.find('#settings-acdir').val());     // view_settings.jsxi:74
 			
-			$(this).toggleClass('invalid', !!err).attr('title', err || null);      // view_settings.jsxi:71
+			$(this).toggleClass('invalid', !!err).attr('title', err || null);      // view_settings.jsxi:75
 			
-			if (err){                                                              // view_settings.jsxi:72
-				acdirVal = false;                                                  // view_settings.jsxi:73
+			if (err){                                                              // view_settings.jsxi:76
+				acdirVal = false;                                                  // view_settings.jsxi:77
 			}
 		}
 		
-		d.content.find('#settings-acdir').val(AcDir.root).change(acdirChange);     // view_settings.jsxi:77
-		d.content.find('#settings-acdir-select').click(function (){                // view_settings.jsxi:79
+		d.content.find('#settings-acdir').val(AcDir.root).change(acdirChange);     // view_settings.jsxi:81
+		d.content.find('#settings-acdir-select').click(function (){                // view_settings.jsxi:83
 			$('<input type="file" nwdirectory />').attr({ nwworkingdir: d.content.find('#settings-acdir').val() }).change(function (){
-				d.content.find('#settings-acdir').val(this.value);                 // view_settings.jsxi:83
-				acdirChange();                                                     // view_settings.jsxi:84
-			}).click();                                                            // view_settings.jsxi:85
+				d.content.find('#settings-acdir').val(this.value);                 // view_settings.jsxi:87
+				acdirChange();                                                     // view_settings.jsxi:88
+			}).click();                                                            // view_settings.jsxi:89
 		});
 		
 		var badgeAutoupdate = Settings.get('badgeAutoupdate');
 		
-		d.content.find('#settings-badge-autoupdate').change(function (arg){        // view_settings.jsxi:90
-			badgeAutoupdate = this.checked;                                        // view_settings.jsxi:90
-		})[0].checked = badgeAutoupdate;                                           // view_settings.jsxi:90
+		d.content.find('#settings-badge-autoupdate').change(function (arg){        // view_settings.jsxi:94
+			badgeAutoupdate = this.checked;                                        // view_settings.jsxi:94
+		})[0].checked = badgeAutoupdate;                                           // view_settings.jsxi:94
 		
 		var yearAutoupdate = Settings.get('yearAutoupdate');
 		
-		d.content.find('#settings-year-autoupdate').change(function (arg){         // view_settings.jsxi:93
-			yearAutoupdate = this.checked;                                         // view_settings.jsxi:93
-		})[0].checked = yearAutoupdate;                                            // view_settings.jsxi:93
+		d.content.find('#settings-year-autoupdate').change(function (arg){         // view_settings.jsxi:97
+			yearAutoupdate = this.checked;                                         // view_settings.jsxi:97
+		})[0].checked = yearAutoupdate;                                            // view_settings.jsxi:97
 		
 		var disableTips = Settings.get('disableTips');
 		
-		d.content.find('#settings-disable-tips').change(function (arg){            // view_settings.jsxi:97
-			disableTips = this.checked;                                            // view_settings.jsxi:97
-		})[0].checked = disableTips;                                               // view_settings.jsxi:97
+		d.content.find('#settings-disable-tips').change(function (arg){            // view_settings.jsxi:101
+			disableTips = this.checked;                                            // view_settings.jsxi:101
+		})[0].checked = disableTips;                                               // view_settings.jsxi:101
 		
 		var updateDatabase = Settings.get('updateDatabase');
 		
-		d.content.find('#settings-update-database').change(function (arg){         // view_settings.jsxi:101
-			updateDatabase = this.checked;                                         // view_settings.jsxi:101
-		})[0].checked = updateDatabase;                                            // view_settings.jsxi:101
+		d.content.find('#settings-update-database').change(function (arg){         // view_settings.jsxi:105
+			updateDatabase = this.checked;                                         // view_settings.jsxi:105
+		})[0].checked = updateDatabase;                                            // view_settings.jsxi:105
 		
 		var uploadData = Settings.get('uploadData');
 		
-		d.content.find('#settings-upload-data').change(function (arg){             // view_settings.jsxi:104
-			uploadData = this.checked;                                             // view_settings.jsxi:104
-		})[0].checked = uploadData;                                                // view_settings.jsxi:104
+		d.content.find('#settings-upload-data').change(function (arg){             // view_settings.jsxi:108
+			uploadData = this.checked;                                             // view_settings.jsxi:108
+		})[0].checked = uploadData;                                                // view_settings.jsxi:108
 		
 		var updatesCheck = Settings.get('updatesCheck');
 		
-		d.content.find('#settings-updates-check').change(function (arg){           // view_settings.jsxi:108
-			updatesCheck = this.checked;                                           // view_settings.jsxi:108
-		})[0].checked = updatesCheck;                                              // view_settings.jsxi:108
+		d.content.find('#settings-updates-check').change(function (arg){           // view_settings.jsxi:112
+			updatesCheck = this.checked;                                           // view_settings.jsxi:112
+		})[0].checked = updatesCheck;                                              // view_settings.jsxi:112
 		
 		var updatesSource = Settings.get('updatesSource');
 		
-		d.content.find('#settings-updates-source').change(function (arg){          // view_settings.jsxi:111
-			updatesSource = this.value;                                            // view_settings.jsxi:111
-		})[0].value = updatesSource;                                               // view_settings.jsxi:111
+		d.content.find('#settings-updates-source').change(function (arg){          // view_settings.jsxi:115
+			updatesSource = this.value;                                            // view_settings.jsxi:115
+		})[0].value = updatesSource;                                               // view_settings.jsxi:115
 		
-		var apt = d.addTab('Auto-Preview',                                         // view_settings.jsxi:114
+		var apt = d.addTab('Auto-Preview',                                         // view_settings.jsxi:118
 			[
-				'<h6>Showroom</h6>',                                               // view_settings.jsxi:120
+				'<h6>Mode</h6>',                                                   // view_settings.jsxi:119
+				'<select id="apt-mode">' + AcShowroom.modes.map(function (e){      // view_settings.jsxi:120
+					return '<option value="' + e.id + '">' + e.name + '</option>';
+				}).join('') + '</select>',                                         // view_settings.jsxi:122
+				'<h6>Showroom</h6>',                                               // view_settings.jsxi:124
 				'<select id="apt-showroom"><option value="">Black Showroom (Recommended)</option>' + AcShowroom.list.map(function (e){
 					return '<option value="' + e.id + '">' + (e.data ? e.data.name : e.id) + '</option>';
-				}).join('') + '</select>',                                         // view_settings.jsxi:123
-				'<h6>Filter</h6>',                                                 // view_settings.jsxi:125
+				}).join('') + '</select>',                                         // view_settings.jsxi:127
+				'<h6>Filter</h6>',                                                 // view_settings.jsxi:129
 				'<select id="apt-filter"><option value="">Don\'t change</option>' + AcFilters.list.map(function (e){
-					return '<option value="' + e.id + '">' + e.id + '</option>';   // view_settings.jsxi:127
-				}).join('') + '</select>',                                         // view_settings.jsxi:128
+					return '<option value="' + e.id + '">' + e.id + '</option>';   // view_settings.jsxi:131
+				}).join('') + '</select>',                                         // view_settings.jsxi:132
 				'<label><input id="apt-disable-sweetfx" type="checkbox">Disable SweetFX (Recommended)</label>', 
-				'<h6>Resize</h6>',                                                 // view_settings.jsxi:131
+				'<h6>Resize</h6>',                                                 // view_settings.jsxi:135
 				'<label><input id="apt-resize" type="checkbox">Change size to default 1024×575 (Recommended)</label>', 
-				'<h6>Camera</h6>',                                                 // view_settings.jsxi:134
+				'<h6>Camera</h6>',                                                 // view_settings.jsxi:138
+				'<div class="apt-newmode-c">',                                     // view_settings.jsxi:139
 				'<label style="display:block;width:320px;line-height:24px;clear:both">Camera Position: <input id="apt-camera-position" style="width:160px;float:right"></label>', 
 				'<label style="display:block;width:320px;line-height:24px;clear:both">Look At: <input id="apt-camera-look-at" style="width:160px;float:right"></label>', 
-				'<label style="display:block;width:320px;line-height:24px;clear:both">FOV: <input id="apt-camera-fov" type="number" step="0.1" style="width:80px;float:right"></label>'
+				'<label style="display:block;width:320px;line-height:24px;clear:both">FOV: <input id="apt-camera-fov" type="number" step="0.1" style="width:80px;float:right"></label>', 
+				'</div>',                                                          // view_settings.jsxi:143
+				'<div class="apt-oldmode-c">',                                     // view_settings.jsxi:145
+				'<label style="display:inline-block;width:160px;line-height:24px" title="Actually, just simulate mouse move">Rotate X: <input id="apt-camera-x" type="number" step="1" style="width: 80px;float: right;margin-right: 20px;"></label>', 
+				'<label style="display:inline-block;width:160px;line-height:24px" title="Actually, just simulate mouse move">Rotate Y: <input id="apt-camera-y" type="number" step="1" style="width: 80px;float: right;margin-right: 20px;"></label>', 
+				'<label style="display:inline-block;width:160px;line-height:24px">Distance: <input id="apt-camera-distance" type="number" step="0.1" style="width: 80px;float: right;margin-right: 20px;"></label>', 
+				'<h6>Delays</h6>',                                                 // view_settings.jsxi:149
+				'<label><input id="apt-increase-delays" type="checkbox">Increased delays</label>', 
+				'</div>'
 			], 
-			save).setButton('Save').addButton('Defaults',                          // view_settings.jsxi:147
-			function (){                                                           // view_settings.jsxi:147
+			save).setButton('Save').addButton('Defaults',                          // view_settings.jsxi:155
+			function (){                                                           // view_settings.jsxi:155
 				apt.content.find('#apt-mode')[0].value = (aptMode = Settings.defaults.aptMode);
-				apt.content.toggleClass('apt-nondefmode', aptMode !== 'default');
+				modeVisibility();                                                  // view_settings.jsxi:157
 				apt.content.find('#apt-showroom')[0].value = (aptShowroom = Settings.defaults.aptShowroom);
 				
-				if (AcFilters.list.length)                                         // view_settings.jsxi:152
+				if (AcFilters.list.length)                                         // view_settings.jsxi:160
 					apt.content.find('#apt-filter')[0].value = (aptFilter = Settings.defaults.aptFilter);
 				
 				apt.content.find('#apt-disable-sweetfx')[0].checked = (aptDisableSweetFx = Settings.defaults.aptDisableSweetFx);
@@ -9987,134 +10081,177 @@ var ViewSettings = (function (){                                                
 				apt.content.find('#apt-camera-position')[0].value = (aptCameraPosition = Settings.defaults.aptCameraPosition);
 				apt.content.find('#apt-camera-look-at')[0].value = (aptCameraLookAt = Settings.defaults.aptCameraLookAt);
 				apt.content.find('#apt-camera-fov')[0].value = (aptCameraFov = Settings.defaults.aptCameraFov);
+				apt.content.find('#apt-camera-x')[0].value = (aptCameraX = Settings.defaults.aptCameraX);
+				apt.content.find('#apt-camera-y')[0].value = (aptCameraY = Settings.defaults.aptCameraY);
+				apt.content.find('#apt-camera-distance')[0].value = (aptCameraDistance = Settings.defaults.aptCameraDistance);
+				apt.content.find('#apt-increase-delays')[0].checked = (aptIncreaseDelays = Settings.defaults.aptIncreaseDelays);
 				return false;
-			}).addButton('Cancel');                                                // view_settings.jsxi:161
+			}).addButton('Cancel');                                                // view_settings.jsxi:174
+		
+		function modeVisibility(){                                                 // view_settings.jsxi:176
+			apt.content.toggleClass('apt-customshowroommode',                      // view_settings.jsxi:177
+				aptMode !== 'default' && aptMode !== 'default_old');               // view_settings.jsxi:177
+			apt.content.toggleClass('apt-newmode', aptMode === 'default');         // view_settings.jsxi:178
+			apt.content.toggleClass('apt-oldmode', aptMode === 'default_old');     // view_settings.jsxi:179
+		}
+		
+		var aptMode = Settings.get('aptMode');
+		
+		apt.content.find('#apt-mode').change(function (arg){                       // view_settings.jsxi:183
+			aptMode = this.value;                                                  // view_settings.jsxi:184
+			modeVisibility();                                                      // view_settings.jsxi:185
+		})[0].value = aptMode;                                                     // view_settings.jsxi:186
+		modeVisibility();                                                          // view_settings.jsxi:187
 		
 		var aptShowroom = Settings.get('aptShowroom');
 		
-		apt.content.find('#apt-showroom').change(function (arg){                   // view_settings.jsxi:171
-			aptShowroom = this.value;                                              // view_settings.jsxi:171
-		})[0].value = aptShowroom;                                                 // view_settings.jsxi:171
+		apt.content.find('#apt-showroom').change(function (arg){                   // view_settings.jsxi:190
+			aptShowroom = this.value;                                              // view_settings.jsxi:190
+		})[0].value = aptShowroom;                                                 // view_settings.jsxi:190
 		
 		var aptFilter = Settings.get('aptFilter');
 		
-		if (AcFilters.list.length){                                                // view_settings.jsxi:174
+		if (AcFilters.list.length){                                                // view_settings.jsxi:193
 			var recFilter = apt.content.find('#apt-filter [value="' + Settings.defaults.aptFilter + '"]')[0];
 			
-			if (recFilter){                                                        // view_settings.jsxi:176
-				recFilter.textContent += ' (Recommended)';                         // view_settings.jsxi:177
+			if (recFilter){                                                        // view_settings.jsxi:195
+				recFilter.textContent += ' (Recommended)';                         // view_settings.jsxi:196
 			} else {
 				$('<option value="' + Settings.defaults.aptFilter + '">' + Settings.defaults.aptFilter + ' (Recommended)</option>').insertAfter(apt.content.find('#apt-filter option:first-child'));
 			}
 			
-			apt.content.find('#apt-filter').change(function (arg){                 // view_settings.jsxi:182
-				aptFilter = this.value;                                            // view_settings.jsxi:182
-			})[0].value = aptFilter;                                               // view_settings.jsxi:182
+			apt.content.find('#apt-filter').change(function (arg){                 // view_settings.jsxi:201
+				aptFilter = this.value;                                            // view_settings.jsxi:201
+			})[0].value = aptFilter;                                               // view_settings.jsxi:201
 		} else {
 			apt.content.find('#apt-filter').attr({ disabled: true, title: 'Filters not found' });
 		}
 		
 		var aptDisableSweetFx = Settings.get('aptDisableSweetFx');
 		
-		apt.content.find('#apt-disable-sweetfx').change(function (arg){            // view_settings.jsxi:191
-			aptDisableSweetFx = this.checked;                                      // view_settings.jsxi:191
-		})[0].checked = aptDisableSweetFx;                                         // view_settings.jsxi:191
+		apt.content.find('#apt-disable-sweetfx').change(function (arg){            // view_settings.jsxi:210
+			aptDisableSweetFx = this.checked;                                      // view_settings.jsxi:210
+		})[0].checked = aptDisableSweetFx;                                         // view_settings.jsxi:210
 		
 		var aptResize = Settings.get('aptResize');
 		
-		apt.content.find('#apt-resize').change(function (arg){                     // view_settings.jsxi:194
-			aptResize = this.checked;                                              // view_settings.jsxi:194
-		})[0].checked = aptResize;                                                 // view_settings.jsxi:194
+		apt.content.find('#apt-resize').change(function (arg){                     // view_settings.jsxi:213
+			aptResize = this.checked;                                              // view_settings.jsxi:213
+		})[0].checked = aptResize;                                                 // view_settings.jsxi:213
 		
 		var aptCameraPosition = Settings.get('aptCameraPosition');
 		
-		apt.content.find('#apt-camera-position').change(function (arg){            // view_settings.jsxi:197
-			aptCameraPosition = this.value;                                        // view_settings.jsxi:197
-		})[0].value = aptCameraPosition;                                           // view_settings.jsxi:197
+		apt.content.find('#apt-camera-position').change(function (arg){            // view_settings.jsxi:216
+			aptCameraPosition = this.value;                                        // view_settings.jsxi:216
+		})[0].value = aptCameraPosition;                                           // view_settings.jsxi:216
 		
 		var aptCameraLookAt = Settings.get('aptCameraLookAt');
 		
-		apt.content.find('#apt-camera-look-at').change(function (arg){             // view_settings.jsxi:200
-			aptCameraLookAt = this.value;                                          // view_settings.jsxi:200
-		})[0].value = aptCameraLookAt;                                             // view_settings.jsxi:200
+		apt.content.find('#apt-camera-look-at').change(function (arg){             // view_settings.jsxi:219
+			aptCameraLookAt = this.value;                                          // view_settings.jsxi:219
+		})[0].value = aptCameraLookAt;                                             // view_settings.jsxi:219
 		
 		var aptCameraFov = Settings.get('aptCameraFov');
 		
-		apt.content.find('#apt-camera-fov').change(function (arg){                 // view_settings.jsxi:203
-			aptCameraFov = this.value;                                             // view_settings.jsxi:203
-		})[0].value = aptCameraFov;                                                // view_settings.jsxi:203
-		d.addTab('About',                                                          // view_settings.jsxi:212
+		apt.content.find('#apt-camera-fov').change(function (arg){                 // view_settings.jsxi:222
+			aptCameraFov = this.value;                                             // view_settings.jsxi:222
+		})[0].value = aptCameraFov;                                                // view_settings.jsxi:222
+		
+		var aptCameraX = Settings.get('aptCameraX');
+		
+		apt.content.find('#apt-camera-x').change(function (arg){                   // view_settings.jsxi:225
+			aptCameraX = this.value;                                               // view_settings.jsxi:225
+		})[0].value = aptCameraX;                                                  // view_settings.jsxi:225
+		
+		var aptCameraY = Settings.get('aptCameraY');
+		
+		apt.content.find('#apt-camera-y').change(function (arg){                   // view_settings.jsxi:228
+			aptCameraY = this.value;                                               // view_settings.jsxi:228
+		})[0].value = aptCameraY;                                                  // view_settings.jsxi:228
+		
+		var aptCameraDistance = Settings.get('aptCameraDistance');
+		
+		apt.content.find('#apt-camera-distance').change(function (arg){            // view_settings.jsxi:231
+			aptCameraDistance = this.value;                                        // view_settings.jsxi:231
+		})[0].value = aptCameraDistance;                                           // view_settings.jsxi:231
+		
+		var aptIncreaseDelays = Settings.get('aptIncreaseDelays');
+		
+		apt.content.find('#apt-increase-delays').change(function (arg){            // view_settings.jsxi:235
+			aptIncreaseDelays = this.checked;                                      // view_settings.jsxi:235
+		})[0].checked = aptIncreaseDelays;                                         // view_settings.jsxi:235
+		d.addTab('About',                                                          // view_settings.jsxi:241
 			[
-				'<h6>Version</h6>',                                                // view_settings.jsxi:213
-				'<p id="version">' + gui.App.manifest.version + '</p>',            // view_settings.jsxi:214
-				'<h6>Details</h6>',                                                // view_settings.jsxi:215
+				'<h6>Version</h6>',                                                // view_settings.jsxi:242
+				'<p id="version">' + gui.App.manifest.version + '</p>',            // view_settings.jsxi:243
+				'<h6>Details</h6>',                                                // view_settings.jsxi:244
 				"<p><a href=\"#\" onclick=\"Shell.openItem('https://ascobash.wordpress.com/2015/06/14/actools-uijson/')\">https://ascobash.wordpress.com/…/actools-uijson/</a></p>", 
-				'<h6>Author</h6>',                                                 // view_settings.jsxi:217
-				'x4fab',                                                           // view_settings.jsxi:218
-				'<h6>Support developing</h6>',                                     // view_settings.jsxi:219
+				'<h6>Author</h6>',                                                 // view_settings.jsxi:246
+				'x4fab',                                                           // view_settings.jsxi:247
+				'<h6>Support developing</h6>',                                     // view_settings.jsxi:248
 				"<p><a href=\"#\" onclick=\"Shell.openItem('https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=6BXQ7U3KM7KBY&lc=US&item_name=Ascobash&currency_code=USD&bn=PP%2dDonationsBF%3abtn_donateCC_LG%2egif%3aNonHostedw')\"><img src=\"img/btn_donate.gif\"></a></p>"
-			]).addButton('Check for update',                                       // view_settings.jsxi:224
-			function (){                                                           // view_settings.jsxi:224
+			]).addButton('Check for update',                                       // view_settings.jsxi:253
+			function (){                                                           // view_settings.jsxi:253
 				var b = this.buttons.find('button:last-child').text('Please wait...').attr('disabled', true);
 				
-				CheckUpdate.check();                                               // view_settings.jsxi:226
-				CheckUpdate.one('check',                                           // view_settings.jsxi:227
-					function (arg){                                                // view_settings.jsxi:227
-						b.text('Check again').attr('disabled', null);              // view_settings.jsxi:228
+				CheckUpdate.check();                                               // view_settings.jsxi:255
+				CheckUpdate.one('check',                                           // view_settings.jsxi:256
+					function (arg){                                                // view_settings.jsxi:256
+						b.text('Check again').attr('disabled', null);              // view_settings.jsxi:257
 						
-						if (arg === 'check:failed'){                               // view_settings.jsxi:229
+						if (arg === 'check:failed'){                               // view_settings.jsxi:258
 							new Dialog('Check For Update', 'Cannot check for update.');
-						} else if (arg !== 'check:done:found'){                    // view_settings.jsxi:231
+						} else if (arg !== 'check:done:found'){                    // view_settings.jsxi:260
 							new Dialog('Check For Update', 'New version not found.');
 						}
 					});
 				return false;
-			}).content.find('#version').click(function (){                         // view_settings.jsxi:236
-			if (++ c > 10 && !localStorage.developerMode){                         // view_settings.jsxi:237
-				new Dialog('Developer Mode Enabled',                               // view_settings.jsxi:238
-					'Don\'t spread it around, ok?',                                // view_settings.jsxi:238
+			}).content.find('#version').click(function (){                         // view_settings.jsxi:265
+			if (++ c > 10 && !localStorage.developerMode){                         // view_settings.jsxi:266
+				new Dialog('Developer Mode Enabled',                               // view_settings.jsxi:267
+					'Don\'t spread it around, ok?',                                // view_settings.jsxi:267
 					function (arg){}, 
 					false);
-				localStorage.developerMode = true;                                 // view_settings.jsxi:239
+				localStorage.developerMode = true;                                 // view_settings.jsxi:268
 			}
 		});
 	}
 	
-	function feedbackForm(){                                                       // view_settings.jsxi:244
-		function sendFeedback(v){                                                  // view_settings.jsxi:245
+	function feedbackForm(){                                                       // view_settings.jsxi:273
+		function sendFeedback(v){                                                  // view_settings.jsxi:274
 			d.buttons.find('button:first-child').text('Please wait...').attr('disabled', true);
-			AppServerRequest.sendFeedback(v,                                       // view_settings.jsxi:248
-				function (arg){                                                    // view_settings.jsxi:248
-					d.close();                                                     // view_settings.jsxi:249
+			AppServerRequest.sendFeedback(v,                                       // view_settings.jsxi:277
+				function (arg){                                                    // view_settings.jsxi:277
+					d.close();                                                     // view_settings.jsxi:278
 					
-					if (arg){                                                      // view_settings.jsxi:250
-						new Dialog('Cannot Send Feedback', 'Sorry about that.');   // view_settings.jsxi:251
+					if (arg){                                                      // view_settings.jsxi:279
+						new Dialog('Cannot Send Feedback', 'Sorry about that.');   // view_settings.jsxi:280
 					} else {
-						_prevFeedback = null;                                      // view_settings.jsxi:253
-						new Dialog('Feedback Sent', 'Thank you.');                 // view_settings.jsxi:254
+						_prevFeedback = null;                                      // view_settings.jsxi:282
+						new Dialog('Feedback Sent', 'Thank you.');                 // view_settings.jsxi:283
 					}
 				});
 		}
 		
-		var d = new Dialog('Feedback',                                             // view_settings.jsxi:259
+		var d = new Dialog('Feedback',                                             // view_settings.jsxi:288
 			'<textarea style="width:350px;height:200px;resize:none" maxlength="5000"\
                 placeholder="If you have any ideas or suggestions please let me know"></textarea>', 
-			function (){                                                           // view_settings.jsxi:260
+			function (){                                                           // view_settings.jsxi:289
 				var v = this.content.find('textarea').val().trim();
 				
-				if (v)                                                             // view_settings.jsxi:262
-					sendFeedback(v);                                               // view_settings.jsxi:262
+				if (v)                                                             // view_settings.jsxi:291
+					sendFeedback(v);                                               // view_settings.jsxi:291
 				return false;
 			}, 
-			false).setButton('Send').addButton('Cancel').closeOnEnter(false);      // view_settings.jsxi:264
+			false).setButton('Send').addButton('Cancel').closeOnEnter(false);      // view_settings.jsxi:293
 		
 		d.content.find('textarea').val(_prevFeedback || '').change(function (arg){
-			return _prevFeedback = this.value;                                     // view_settings.jsxi:265
+			return _prevFeedback = this.value;                                     // view_settings.jsxi:294
 		});
 	}
 	
-	(function (){                                                                  // view_settings.jsxi:268
-		$('#settings-open').click(openDialog);                                     // view_settings.jsxi:269
+	(function (){                                                                  // view_settings.jsxi:297
+		$('#settings-open').click(openDialog);                                     // view_settings.jsxi:298
 	})();
 	return ViewSettings;
 })();
