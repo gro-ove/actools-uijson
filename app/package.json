@@ -2,7 +2,7 @@
     "main": "main.html",
     "name": "AcTools Cars Manager",
     "description": "Fixes ui_car.json",
-    "version": "0.3.56",
+    "version": "0.3.59",
     "window": {
         "title": "AcTools Cars Manager",
         "icon": "icon.png",

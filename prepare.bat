@@ -14,7 +14,7 @@ rem mklink /h app\native\AcToolsKn5Render.dll "D:\Applications\AcTools\AcToolsKn
 rem /C/Windows/Microsoft.NET/Framework/v4.0.30319/csc /t:library /out:app\native\Wrapper.dll app-raw\data\wrapper.cs /r:app\native\AcTools.dll /r:app\native\AcToolsKn5Render.dll
 
 copy "D:\Applications\AcTools\AcTools.dll" app\native\AcTools.dll >nul 
-copy "D:\Development\GitHub\actools\AcToolsKn5Render\bin\Release\AcTools.Kn5Render.dll" app\native\AcTools.Kn5Render.dll >nul 
+rem copy "D:\Development\GitHub\actools\AcToolsKn5Render\bin\Release\AcTools.Kn5Render.dll" app\native\AcTools.Kn5Render.dll >nul 
 
 type app-raw\style\*.less > app-raw\style.less 2>nul 
 call lessc --no-ie-compat --strict-math=on --clean-css="--s0 --advanced" app-raw\style.less app\main.css

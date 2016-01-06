@@ -37,7 +37,7 @@ Small utility for easy editing *ui_car.json* files. Written using [NW.js](http:/
 * DirectX 11 for custom showroom
 
 #### Download
-* [Last (0.3.56)](https://yadi.sk/d/04gKWuPMmSdnu)
+* [Last (0.3.59)](https://yadi.sk/d/lbIilckKmT9Sb)
 * [Stable (0.3.56)](http://www.racedepartment.com/downloads/actools-cars-manager.6518/)
 * [Previous](http://www.racedepartment.com/downloads/actools-cars-manager.6518/history) [builds](https://yadi.sk/d/eHr0NCP4hSAfq)
 
@@ -66,6 +66,14 @@ Small utility for easy editing *ui_car.json* files. Written using [NW.js](http:/
     Please check if app has access to his folder. If you drop carsmgr.exe into something like **C:\Program Files**, disable autoupdate at all (but I don't recommend it).
 
 #### Changelog
+* 0.3.58
+    * Updated custom showroom
+        * Memory consumption fixed
+        * Camera controls improved
+* 0.3.57
+    * New shortcuts:
+        * Ctrl+C: Copy selected car's location to clipboard
+        * Ctrl+Shift+C: Copy selected car's id to clipboard
 * 0.3.56
     * Old Auto-Update Previews modes reverted back (optional)
     * Custom Showroom fixed

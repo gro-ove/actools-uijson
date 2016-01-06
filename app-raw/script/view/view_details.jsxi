@@ -672,6 +672,18 @@ static class ViewDetails {
             .on('keydown', function (e){
                 if (!_selected) return;
 
+                if (e.target.tagName !== 'INPUT' && e.target.tagName !== 'TEXTAREA' && e.target.contentEditable === 'inherit'){
+                    if (e.keyCode === 'C'.charCodeAt(0) && e.ctrlKey && !e.altKey && !e.shiftKey){
+                        gui.Clipboard.get().set(_selected.path, 'text');
+                        return false;
+                    }
+
+                    if (e.keyCode === 'C'.charCodeAt(0) && e.ctrlKey && !e.altKey && e.shiftKey){
+                        gui.Clipboard.get().set(_selected.id, 'text');
+                        return false;
+                    }
+                }
+
                 if (e.keyCode === 'S'.charCodeAt(0) && e.ctrlKey && e.altKey){
                     AcShowroom.shot(_selected, false);
                     return false;
